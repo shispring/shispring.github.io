@@ -145,7 +145,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2021/11/05/myTest/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2021/11/05/hexo_env/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -159,7 +159,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/11/05/myTest/" class="post-title-link" itemprop="url">hexo建站</a>
+            <a href="/2021/11/05/hexo_env/" class="post-title-link" itemprop="url">hexo建站</a>
         </h2>
 
         <div class="post-meta">
@@ -170,7 +170,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2021-11-05 14:25:10 / Modified: 14:41:25" itemprop="dateCreated datePublished" datetime="2021-11-05T14:25:10+08:00">2021-11-05</time>
+              <time title="Created: 2021-11-05 14:25:10 / Modified: 19:24:28" itemprop="dateCreated datePublished" datetime="2021-11-05T14:25:10+08:00">2021-11-05</time>
             </span>
 
           
@@ -184,13 +184,21 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="一、nodejs"><a href="#一、nodejs" class="headerlink" title="一、nodejs"></a>一、nodejs</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#node.js下载 （官网https://nodejs.org/en/）</span><br><span class="line">1. wget https://nodejs.org/dist/v12.18.3/node-v12.18.3.pkg</span><br></pre></td></tr></table></figure>
+          <h2 id="一、nodejs-安装"><a href="#一、nodejs-安装" class="headerlink" title="一、nodejs 安装"></a>一、nodejs 安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">官网: https://nodejs.org/en/</span><br></pre></td></tr></table></figure>
 
-<h2 id="二、hexo"><a href="#二、hexo" class="headerlink" title="二、hexo"></a>二、hexo</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#hexo安装 （官网https://hexo.io/zh-cn/）</span><br><span class="line">1. mkdir blog</span><br><span class="line">2. npm install hexo-cli -g</span><br><span class="line">    #升级命令 npm update hexo-cli -g</span><br><span class="line">3. hexo init blog  #初始化博客</span><br><span class="line">4. cd blog</span><br><span class="line">5. npm install</span><br><span class="line">6. hexo server</span><br></pre></td></tr></table></figure>
+<h2 id="二、hexo安装"><a href="#二、hexo安装" class="headerlink" title="二、hexo安装"></a>二、hexo安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">官网：https://hexo.io/zh-cn/</span><br><span class="line">1. npm install hexo-cli -g</span><br><span class="line">2. hexo init hexo  #初始化博客</span><br><span class="line">3. cd hexo</span><br><span class="line">4. hexo server   #启动服务</span><br><span class="line"></span><br><span class="line">#升级命令：</span><br><span class="line">npm update hexo-cli -g</span><br></pre></td></tr></table></figure>
 
-<h2 id="三、生成文档"><a href="#三、生成文档" class="headerlink" title="三、生成文档"></a>三、生成文档</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cd blog</span><br><span class="line">#新建文章</span><br><span class="line">hexo n myTest  # hexo new myTest</span><br><span class="line">#生成</span><br><span class="line">hexo g # hexo generate</span><br><span class="line">#启动服务预览</span><br><span class="line">hexo s</span><br><span class="line">#部署</span><br><span class="line">hexo d   #hexo deploy</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="三、生成文档"><a href="#三、生成文档" class="headerlink" title="三、生成文档"></a>三、生成文档</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1. cd hexo</span><br><span class="line">2. hexo n myTest  # 建文章,同命令：hexo new myTest</span><br><span class="line">3. hexo g         #生成，同命令：hexo generate</span><br><span class="line">4. hexo s         #启动服务，可预览</span><br><span class="line"></span><br><span class="line">5. hexo d          #部署,需要配置github，hexo deploy</span><br></pre></td></tr></table></figure>
 
-<h2 id="四、部署到github"><a href="#四、部署到github" class="headerlink" title="四、部署到github"></a>四、部署到github</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#</span><br><span class="line">github新建香蜜github.io</span><br><span class="line">vim _config.yaml</span><br><span class="line"></span><br><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: https://github.com/shispring/github.io.git</span><br><span class="line">  branch: master</span><br><span class="line"></span><br><span class="line">npm install hexo-deployer-git --save</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
+<h2 id="四、部署到github"><a href="#四、部署到github" class="headerlink" title="四、部署到github"></a>四、部署到github</h2><ul>
+<li>部署文档：<a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment">https://hexo.io/docs/one-command-deployment</a></li>
+<li>github新建项目：shispring.github.io</li>
+<li>编辑配置文件：vim hexo/_config.yaml<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: git@github.com:shispring/shispring.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure></li>
+<li>npm install hexo-deployer-git –save</li>
+<li>hexo g</li>
+<li>hexo d</li>
+</ul>
+<h2 id="五、更换主题"><a href="#五、更换主题" class="headerlink" title="五、更换主题"></a>五、更换主题</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">详情请查看：</span><br><span class="line">https://github.com/theme-next/hexo-theme-next</span><br></pre></td></tr></table></figure>
 
 
 
