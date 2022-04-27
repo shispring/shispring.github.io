@@ -242,7 +242,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2022-04-27 16:43:25 / Modified: 16:44:51" itemprop="dateCreated datePublished" datetime="2022-04-27T16:43:25+08:00">2022-04-27</time>
+              <time title="Created: 2022-04-27 16:43:25 / Modified: 17:11:30" itemprop="dateCreated datePublished" datetime="2022-04-27T16:43:25+08:00">2022-04-27</time>
             </span>
 
           
@@ -256,7 +256,24 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="注意事项"><a href="#注意事项" class="headerlink" title="== 注意事项"></a>== 注意事项</h2><p>关于引用类型，有两个比较特殊的规定：<br>    切片之间不允许比较。切片只能与nil值比较。<br>    map之间不允许比较。map只能与nil值比较。</p>
+          <h2 id="go基本类型"><a href="#go基本类型" class="headerlink" title="go基本类型"></a>go基本类型</h2><ol>
+<li>基本类型：<ul>
+<li> 整型（int/uint/int8/uint8/int16/uint16/int32/uint32/int64/uint64/byte/rune等）</li>
+<li> 浮点数（float32/float64）</li>
+<li> 复数类型（complex64/complex128）</li>
+<li> 字符串（string）</li>
+</ul>
+</li>
+<li>复合类型（又叫聚合类型）：数组和结构体类型。</li>
+<li>引用类型：切片（slice）、map、channel、指针。</li>
+<li>接口类型：如error。</li>
+</ol>
+<h2 id="比较"><a href="#比较" class="headerlink" title="== 比较"></a>== 比较</h2><p><strong>==操作最重要的一个前提是：两个操作数类型必须相同！类型必须相同！类型必须相同!</strong></p>
+<p>关于引用类型，有两个比较特殊的规定：</p>
+<ul>
+<li>切片之间不允许比较。切片只能与nil值比较。</li>
+<li>map之间不允许比较。map只能与nil值比较。</li>
+</ul>
 
       
     </div>
