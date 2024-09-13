@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>linux节点网络相关命令 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="了解节点网络拓扑的几种工具和方法：1. ip 命令ip 命令是一个功能强大的网络工具，通常用于查看和管理网络接口、路由表、策略路由和隧道。  查看网络接口和IP地址： 1ip addr show  查看路由表： 1ip route show  查看邻居（ARP 表）： 1ip neigh show  2. netstat 或 ss 命令netstat 和 ss 命令用于显示网络连接、路由表、接口统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux节点网络相关命令">
+<meta property="og:url" content="http://example.com/2024/08/23/linux%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="了解节点网络拓扑的几种工具和方法：1. ip 命令ip 命令是一个功能强大的网络工具，通常用于查看和管理网络接口、路由表、策略路由和隧道。  查看网络接口和IP地址： 1ip addr show  查看路由表： 1ip route show  查看邻居（ARP 表）： 1ip neigh show  2. netstat 或 ss 命令netstat 和 ss 命令用于显示网络连接、路由表、接口统">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-08-23T11:08:18.000Z">
+<meta property="article:modified_time" content="2024-09-13T13:53:43.459Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-linux节点网络相关命令" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/08/23/linux%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/" class="article-date">
+  <time class="dt-published" datetime="2024-08-23T11:08:18.000Z" itemprop="datePublished">2024-08-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      linux节点网络相关命令
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="了解节点网络拓扑的几种工具和方法："><a href="#了解节点网络拓扑的几种工具和方法：" class="headerlink" title="了解节点网络拓扑的几种工具和方法："></a>了解节点网络拓扑的几种工具和方法：</h2><h3 id="1-ip-命令"><a href="#1-ip-命令" class="headerlink" title="1. ip 命令"></a>1. <strong><code>ip</code> 命令</strong></h3><p><code>ip</code> 命令是一个功能强大的网络工具，通常用于查看和管理网络接口、路由表、策略路由和隧道。</p>
+<ul>
+<li><p><strong>查看网络接口和IP地址：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看邻居（ARP 表）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip neigh show</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-netstat-或-ss-命令"><a href="#2-netstat-或-ss-命令" class="headerlink" title="2. netstat 或 ss 命令"></a>2. <strong><code>netstat</code> 或 <code>ss</code> 命令</strong></h3><p><code>netstat</code> 和 <code>ss</code> 命令用于显示网络连接、路由表、接口统计信息和多播成员信息。</p>
+<ul>
+<li><p><strong>查看所有网络连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">netstat -tuln</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ss -tuln</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">netstat -rn</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ip route show</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="3-nmap"><a href="#3-nmap" class="headerlink" title="3. nmap"></a>3. <strong><code>nmap</code></strong></h3><p><code>nmap</code> 是一个强大的网络扫描工具，通常用于网络发现和安全审计。它可以扫描网络并获取有关局域网中其他设备的信息。</p>
+<ul>
+<li><p><strong>扫描整个子网中的活跃设备：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>获取详细的主机和服务信息：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A 192.168.1.1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="4-traceroute"><a href="#4-traceroute" class="headerlink" title="4. traceroute"></a>4. <strong><code>traceroute</code></strong></h3><p><code>traceroute</code> 命令用于跟踪数据包在网络中的路径，帮助识别网络路径和延迟情况。</p>
+<ul>
+<li><strong>跟踪到目标主机的路由：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute example.com</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="5-arp-scan"><a href="#5-arp-scan" class="headerlink" title="5. arp-scan"></a>5. <strong><code>arp-scan</code></strong></h3><p><code>arp-scan</code> 是一个网络发现工具，用于快速扫描局域网中的设备。</p>
+<ul>
+<li><strong>扫描整个子网中的设备：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arp-scan -l</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="6-ifconfig-和-route"><a href="#6-ifconfig-和-route" class="headerlink" title="6. ifconfig 和 route"></a>6. <strong><code>ifconfig</code> 和 <code>route</code></strong></h3><p>虽然已经被 <code>ip</code> 命令取代，但在某些旧系统上依然可以使用。</p>
+<ul>
+<li><p><strong>查看网络接口：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">route -n</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="7-ethtool"><a href="#7-ethtool" class="headerlink" title="7. ethtool"></a>7. <strong><code>ethtool</code></strong></h3><p><code>ethtool</code> 用于查询和设置以太网设备参数，可以获取接口的详细信息。</p>
+<ul>
+<li><strong>查看网卡详细信息：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ethtool eth0</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="8-nmcli"><a href="#8-nmcli" class="headerlink" title="8. nmcli"></a>8. <strong><code>nmcli</code></strong></h3><p><code>nmcli</code> 是 NetworkManager 提供的命令行工具，用于查看和管理网络连接。</p>
+<ul>
+<li><p><strong>查看所有网络连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看设备状态：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli device status</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="9-bmon"><a href="#9-bmon" class="headerlink" title="9. bmon"></a>9. <strong><code>bmon</code></strong></h3><p><code>bmon</code> 是一个带有图形界面的带宽监控和诊断工具，用于实时监控网络流量。</p>
+<ul>
+<li><strong>启动 <code>bmon</code> 监控网络流量：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bmon</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="10-iptraf-ng"><a href="#10-iptraf-ng" class="headerlink" title="10. iptraf-ng"></a>10. <strong><code>iptraf-ng</code></strong></h3><p><code>iptraf-ng</code> 是一个基于终端的实时网络监控工具，能够监控网络流量和连接。</p>
+<ul>
+<li><strong>启动 <code>iptraf-ng</code> 监控：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptraf-ng</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/08/23/linux%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/" data-id="cm10s4j3s000b0mug6b0d355r" data-title="linux节点网络相关命令" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/08/28/linux%E5%AE%89%E8%A3%85%E5%A4%9A%E7%89%88%E6%9C%ACgo%E7%8E%AF%E5%A2%83/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          linux安装多版本go环境
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/08/22/linux-%E5%AE%89%E8%A3%85-glances/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">linux 安装 glances</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/web/" style="font-size: 10px;">web</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">August 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">October 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/09/13/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/09/k8s-service-account-demo/">k8s service account demo</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/04/k8s-cordon-drain-taint/">k8s cordon drain taint</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/30/http%E7%8A%B6%E6%80%81%E7%A0%81/">http状态码</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/">Anolis OS 8安装中文字符集</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
