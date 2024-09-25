@@ -170,7 +170,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2024-09-25 21:24:04 / Modified: 21:24:59" itemprop="dateCreated datePublished" datetime="2024-09-25T21:24:04+08:00">2024-09-25</time>
+              <time title="Created: 2024-09-25 21:24:04 / Modified: 21:32:20" itemprop="dateCreated datePublished" datetime="2024-09-25T21:24:04+08:00">2024-09-25</time>
             </span>
 
           
@@ -185,6 +185,8 @@
 
       
           <p>使用 Kubebuilder 开发 Kubernetes Operator 时，<code>kubebuilder init</code> 和 <code>kubebuilder create api</code> 命令的参数配置可以帮助您设置和管理 Operator 的基本结构。以下是相关的参数及其含义，以及 Operator 开发的基本流程：</p>
+<h3 id="安装kubebuilder"><a href="#安装kubebuilder" class="headerlink" title="安装kubebuilder"></a>安装kubebuilder</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(go env GOOS)/$(go env GOARCH)</span><br><span class="line">chmod +x kubebuilder &amp;&amp; mv kubebuilder /usr/local/bin/</span><br></pre></td></tr></table></figure>
+
 <h3 id="1-kubebuilder-init-命令参数"><a href="#1-kubebuilder-init-命令参数" class="headerlink" title="1. kubebuilder init 命令参数"></a>1. <code>kubebuilder init</code> 命令参数</h3><ul>
 <li>**<code>--domain</code>**：指定 CRD 的域名，通常使用组织或项目的域名，确保 CRD 名称唯一。</li>
 <li>**<code>--repo</code>**：指定 Go 模块的路径，通常是 GitHub 上的路径，用于代码组织。</li>

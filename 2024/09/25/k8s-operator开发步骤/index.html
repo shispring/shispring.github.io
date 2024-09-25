@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="使用 Kubebuilder 开发 Kubernetes Operator 时，kubebuilder init 和 kubebuilder create api 命令的参数配置可以帮助您设置和管理 Operator 的基本结构。以下是相关的参数及其含义，以及 Operator 开发的基本流程： 1. kubebuilder init 命令参数 **--domain**：指定 CRD 的域名，通常">
+  <meta name="description" content="使用 Kubebuilder 开发 Kubernetes Operator 时，kubebuilder init 和 kubebuilder create api 命令的参数配置可以帮助您设置和管理 Operator 的基本结构。以下是相关的参数及其含义，以及 Operator 开发的基本流程： 安装kubebuilder12curl -L -o kubebuilder https:&#x2F;&#x2F;go.ku">
 <meta property="og:type" content="article">
 <meta property="og:title" content="k8s operator开发步骤">
 <meta property="og:url" content="https://shispring.github.io/2024/09/25/k8s-operator%E5%BC%80%E5%8F%91%E6%AD%A5%E9%AA%A4/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="使用 Kubebuilder 开发 Kubernetes Operator 时，kubebuilder init 和 kubebuilder create api 命令的参数配置可以帮助您设置和管理 Operator 的基本结构。以下是相关的参数及其含义，以及 Operator 开发的基本流程： 1. kubebuilder init 命令参数 **--domain**：指定 CRD 的域名，通常">
+<meta property="og:description" content="使用 Kubebuilder 开发 Kubernetes Operator 时，kubebuilder init 和 kubebuilder create api 命令的参数配置可以帮助您设置和管理 Operator 的基本结构。以下是相关的参数及其含义，以及 Operator 开发的基本流程： 安装kubebuilder12curl -L -o kubebuilder https:&#x2F;&#x2F;go.ku">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2024-09-25T13:24:04.000Z">
-<meta property="article:modified_time" content="2024-09-25T13:24:59.799Z">
+<meta property="article:modified_time" content="2024-09-25T13:32:20.990Z">
 <meta property="article:author" content="shijianpeng">
 <meta name="twitter:card" content="summary">
 
@@ -174,7 +174,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2024-09-25 21:24:04 / Modified: 21:24:59" itemprop="dateCreated datePublished" datetime="2024-09-25T21:24:04+08:00">2024-09-25</time>
+              <time title="Created: 2024-09-25 21:24:04 / Modified: 21:32:20" itemprop="dateCreated datePublished" datetime="2024-09-25T21:24:04+08:00">2024-09-25</time>
             </span>
 
           
@@ -189,6 +189,8 @@
 
       
         <p>使用 Kubebuilder 开发 Kubernetes Operator 时，<code>kubebuilder init</code> 和 <code>kubebuilder create api</code> 命令的参数配置可以帮助您设置和管理 Operator 的基本结构。以下是相关的参数及其含义，以及 Operator 开发的基本流程：</p>
+<h3 id="安装kubebuilder"><a href="#安装kubebuilder" class="headerlink" title="安装kubebuilder"></a>安装kubebuilder</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(go env GOOS)/$(go env GOARCH)</span><br><span class="line">chmod +x kubebuilder &amp;&amp; mv kubebuilder /usr/local/bin/</span><br></pre></td></tr></table></figure>
+
 <h3 id="1-kubebuilder-init-命令参数"><a href="#1-kubebuilder-init-命令参数" class="headerlink" title="1. kubebuilder init 命令参数"></a>1. <code>kubebuilder init</code> 命令参数</h3><ul>
 <li>**<code>--domain</code>**：指定 CRD 的域名，通常使用组织或项目的域名，确保 CRD 名称唯一。</li>
 <li>**<code>--repo</code>**：指定 Go 模块的路径，通常是 GitHub 上的路径，用于代码组织。</li>
@@ -314,7 +316,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-kubebuilder-init-%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">1. kubebuilder init 命令参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-kubebuilder-create-api-%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">2. kubebuilder create api 命令参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%BC%80%E5%8F%91-Operator-%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">3. 开发 Operator 的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85kubebuilder"><span class="nav-number">1.</span> <span class="nav-text">安装kubebuilder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-kubebuilder-init-%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">1. kubebuilder init 命令参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-kubebuilder-create-api-%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">2. kubebuilder create api 命令参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%BC%80%E5%8F%91-Operator-%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">3. 开发 Operator 的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
