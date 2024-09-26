@@ -145,6 +145,69 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/26/Debian%E7%B3%BB%E7%BB%9F%E6%9B%B4%E6%96%B0%E5%AE%89%E8%A3%85%E6%BA%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="shijianpeng">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/09/26/Debian%E7%B3%BB%E7%BB%9F%E6%9B%B4%E6%96%B0%E5%AE%89%E8%A3%85%E6%BA%90/" class="post-title-link" itemprop="url">Debian系统更新安装源</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2024-09-26 11:53:16 / Modified: 11:55:12" itemprop="dateCreated datePublished" datetime="2024-09-26T11:53:16+08:00">2024-09-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="查看系统版本"><a href="#查看系统版本" class="headerlink" title="查看系统版本"></a>查看系统版本</h2><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#注意查看系统的版本</span><br><span class="line">cat /etc/os-release</span><br><span class="line"><span class="variable constant_">PRETTY_NAME</span>=<span class="string">&quot;Debian GNU/Linux 11 (bullseye)&quot;</span></span><br><span class="line"><span class="variable constant_">NAME</span>=<span class="string">&quot;Debian GNU/Linux&quot;</span></span><br><span class="line"><span class="variable constant_">VERSION_ID</span>=<span class="string">&quot;11&quot;</span></span><br><span class="line"><span class="variable constant_">VERSION</span>=<span class="string">&quot;11 (bullseye)&quot;</span></span><br><span class="line"><span class="variable constant_">VERSION_CODENAME</span>=bullseye</span><br></pre></td></tr></table></figure>
+
+<h2 id="变更apt源"><a href="#变更apt源" class="headerlink" title="变更apt源"></a>变更apt源</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 11版本</span></span><br><span class="line"><span class="comment">#https://developer.aliyun.com/mirror/debian?spm=a2c6h.13651102.0.0.4bc81b11TwGuai</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF &gt; /etc/apt/sources.list</span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bullseye main non-free contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bullseye main non-free contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian-security/ bullseye-security main</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian-security/ bullseye-security main</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bullseye-updates main non-free contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bullseye-updates main non-free contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#12版本</span></span><br><span class="line"><span class="comment">#https://wph.im/272.html</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF &gt; /etc/apt/sources.list</span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian-security/ bookworm-security main</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian-security/ bookworm-security main</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#执行更新</span></span><br><span class="line">apt update &amp;&amp; apt upgrade</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装软件"><a href="#安装软件" class="headerlink" title="安装软件"></a>安装软件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装top、ps、pstree、ping、ss</span></span><br><span class="line">apt-get install -y  ethtool htop net-tools telnet inetutils-ping procps psmisc iproute2</span><br><span class="line"></span><br><span class="line"><span class="comment">#ss 命令</span></span><br><span class="line">ss -tlp</span><br><span class="line">ss -t -a </span><br><span class="line">ss -lp | grep 3306</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/25/k8s-operator%E5%BC%80%E5%8F%91%E6%AD%A5%E9%AA%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -891,80 +954,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/08/22/%E4%BD%BF%E7%94%A8github%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%AE%89%E8%A3%85pyenv/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="shijianpeng">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/08/22/%E4%BD%BF%E7%94%A8github%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%AE%89%E8%A3%85pyenv/" class="post-title-link" itemprop="url">使用github镜像加速安装pyenv</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2024-08-22 19:24:08" itemprop="dateCreated datePublished" datetime="2024-08-22T19:24:08+08:00">2024-08-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-09-13 21:53:43" itemprop="dateModified" datetime="2024-09-13T21:53:43+08:00">2024-09-13</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="使用github镜像加速安装pyenv"><a href="#使用github镜像加速安装pyenv" class="headerlink" title="使用github镜像加速安装pyenv"></a>使用github镜像加速安装pyenv</h1><h2 id="安装pyenv脚本"><a href="#安装pyenv脚本" class="headerlink" title="安装pyenv脚本"></a>安装pyenv脚本</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env bash</span><br><span class="line"></span><br><span class="line">set -e</span><br><span class="line">[ -n &quot;$PYENV_DEBUG&quot; ] &amp;&amp; set -x</span><br><span class="line"></span><br><span class="line">if [ -z &quot;$PYENV_ROOT&quot; ]; then</span><br><span class="line">  export PYENV_ROOT=&quot;$&#123;HOME&#125;/.pyenv&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">colorize() &#123;</span><br><span class="line">  if [ -t 1 ]; then printf &quot;\e[%sm%s\e[m&quot; &quot;$1&quot; &quot;$2&quot;</span><br><span class="line">  else echo -n &quot;$2&quot;</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># Checks for `.pyenv` file, and suggests to remove it for installing</span><br><span class="line">if [ -d &quot;$&#123;PYENV_ROOT&#125;&quot; ]; then</span><br><span class="line">  &#123; echo</span><br><span class="line">    colorize 1 &quot;WARNING&quot;</span><br><span class="line">    echo &quot;: Can not proceed with installation. Kindly remove the &#x27;$&#123;PYENV_ROOT&#125;&#x27; directory first.&quot;</span><br><span class="line">    echo</span><br><span class="line">  &#125; &gt;&amp;2</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">failed_checkout() &#123;</span><br><span class="line">  echo &quot;Failed to git clone $1&quot;</span><br><span class="line">  exit -1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">checkout() &#123;</span><br><span class="line">  [ -d &quot;$2&quot; ] || git -c advice.detachedHead=0 clone --branch &quot;$3&quot; --depth 1 &quot;$1&quot; &quot;$2&quot; || failed_checkout &quot;$1&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if ! command -v git 1&gt;/dev/null 2&gt;&amp;1; then</span><br><span class="line">  echo &quot;pyenv: Git is not installed, can&#x27;t continue.&quot; &gt;&amp;2</span><br><span class="line">  exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ -n &quot;$&#123;USE_GIT_URI&#125;&quot; ]; then</span><br><span class="line">  GITHUB=&quot;git://github.com&quot;</span><br><span class="line">else</span><br><span class="line">  GITHUB=&quot;https://kkgithub.com&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv.git&quot;            &quot;$&#123;PYENV_ROOT&#125;&quot;                           &quot;$&#123;PYENV_GIT_TAG:-master&#125;&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-doctor.git&quot;     &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-doctor&quot;      &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-installer.git&quot;  &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-installer&quot;   &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-update.git&quot;     &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-update&quot;      &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-virtualenv.git&quot; &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-virtualenv&quot;  &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-which-ext.git&quot;  &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-which-ext&quot;   &quot;master&quot;</span><br><span class="line"></span><br><span class="line">if ! command -v pyenv 1&gt;/dev/null; then</span><br><span class="line">  &#123; echo</span><br><span class="line">    colorize 1 &quot;WARNING&quot;</span><br><span class="line">    echo &quot;: seems you still have not added &#x27;pyenv&#x27; to the load path.&quot;</span><br><span class="line">    echo</span><br><span class="line">  &#125; &gt;&amp;2</span><br><span class="line"></span><br><span class="line">  &#123; # Without args, `init` commands print installation help</span><br><span class="line">    &quot;$&#123;PYENV_ROOT&#125;/bin/pyenv&quot; init || true</span><br><span class="line">    &quot;$&#123;PYENV_ROOT&#125;/bin/pyenv&quot; virtualenv-init || true</span><br><span class="line">  &#125; &gt;&amp;2</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="设置环境变量"><a href="#设置环境变量" class="headerlink" title="设置环境变量"></a>设置环境变量</h2><ul>
-<li>vim .bash_profile<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export PYENV_ROOT=&quot;$HOME/.pyenv&quot;</span><br><span class="line">command -v pyenv &gt;/dev/null || export PATH=&quot;$PYENV_ROOT/bin:$PATH&quot;</span><br><span class="line">eval &quot;$(pyenv init -)&quot;</span><br></pre></td></tr></table></figure></li>
-<li>source .bash_profile</li>
-</ul>
-<h2 id="安装tips"><a href="#安装tips" class="headerlink" title="安装tips"></a>安装tips</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#方式一：因为pyenv会自动到github上下载，速度超慢，因此推荐第二种方式</span><br><span class="line">$ pyenv install 3.12.2 -v  #-v 以日志模式显示安装过程</span><br><span class="line"></span><br><span class="line">#方式二：使用curl或者wget下载到~/.pyenv/cache下，然后再用pyenv安装。软件源可以用自己熟悉的镜像源</span><br><span class="line">$ cd ~/.pyenv</span><br><span class="line">$ sudo mkdir cache</span><br><span class="line">$ sudo wget -c https://mirrors.huaweicloud.com/python/3.12.2/Python-3.12.2.tar.xz -P  ~/.pyenv/cache/</span><br><span class="line">$ pyenv install 3.12.2 -v</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#查看所有可用的Python版本</span><br><span class="line">pyenv install --list</span><br><span class="line"></span><br><span class="line">#列出本地可用的Python版本</span><br><span class="line">pyenv versions</span><br><span class="line"></span><br><span class="line">#生效范围不同，当前shell可用</span><br><span class="line">pyenv shell 3.12.2</span><br><span class="line">#当前目录</span><br><span class="line">pyenv local 3.12.2</span><br><span class="line">#全局</span><br><span class="line">pyenv global 3.12.2</span><br><span class="line"></span><br><span class="line">#查看当前Python版本</span><br><span class="line">python --version</span><br><span class="line"></span><br><span class="line">#删除指定Python版本</span><br><span class="line">pyenv uninstall 3.12.2</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1034,7 +1023,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-count">16</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
