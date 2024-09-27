@@ -141,6 +141,147 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/08/23/linux%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/08/23/linux%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">linux节点网络相关命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-08-23 19:08:18" itemprop="dateCreated datePublished" datetime="2024-08-23T19:08:18+08:00">2024-08-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-09-13 21:53:43" itemprop="dateModified" datetime="2024-09-13T21:53:43+08:00">2024-09-13</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>899</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="了解节点网络拓扑的几种工具和方法："><a href="#了解节点网络拓扑的几种工具和方法：" class="headerlink" title="了解节点网络拓扑的几种工具和方法："></a>了解节点网络拓扑的几种工具和方法：</h2><h3 id="1-ip-命令"><a href="#1-ip-命令" class="headerlink" title="1. ip 命令"></a>1. <strong><code>ip</code> 命令</strong></h3><p><code>ip</code> 命令是一个功能强大的网络工具，通常用于查看和管理网络接口、路由表、策略路由和隧道。</p>
+<ul>
+<li><p><strong>查看网络接口和IP地址：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看邻居（ARP 表）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip neigh show</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-netstat-或-ss-命令"><a href="#2-netstat-或-ss-命令" class="headerlink" title="2. netstat 或 ss 命令"></a>2. <strong><code>netstat</code> 或 <code>ss</code> 命令</strong></h3><p><code>netstat</code> 和 <code>ss</code> 命令用于显示网络连接、路由表、接口统计信息和多播成员信息。</p>
+<ul>
+<li><p><strong>查看所有网络连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">netstat -tuln</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ss -tuln</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">netstat -rn</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ip route show</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="3-nmap"><a href="#3-nmap" class="headerlink" title="3. nmap"></a>3. <strong><code>nmap</code></strong></h3><p><code>nmap</code> 是一个强大的网络扫描工具，通常用于网络发现和安全审计。它可以扫描网络并获取有关局域网中其他设备的信息。</p>
+<ul>
+<li><p><strong>扫描整个子网中的活跃设备：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>获取详细的主机和服务信息：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A 192.168.1.1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="4-traceroute"><a href="#4-traceroute" class="headerlink" title="4. traceroute"></a>4. <strong><code>traceroute</code></strong></h3><p><code>traceroute</code> 命令用于跟踪数据包在网络中的路径，帮助识别网络路径和延迟情况。</p>
+<ul>
+<li><strong>跟踪到目标主机的路由：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute example.com</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="5-arp-scan"><a href="#5-arp-scan" class="headerlink" title="5. arp-scan"></a>5. <strong><code>arp-scan</code></strong></h3><p><code>arp-scan</code> 是一个网络发现工具，用于快速扫描局域网中的设备。</p>
+<ul>
+<li><strong>扫描整个子网中的设备：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arp-scan -l</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="6-ifconfig-和-route"><a href="#6-ifconfig-和-route" class="headerlink" title="6. ifconfig 和 route"></a>6. <strong><code>ifconfig</code> 和 <code>route</code></strong></h3><p>虽然已经被 <code>ip</code> 命令取代，但在某些旧系统上依然可以使用。</p>
+<ul>
+<li><p><strong>查看网络接口：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">route -n</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="7-ethtool"><a href="#7-ethtool" class="headerlink" title="7. ethtool"></a>7. <strong><code>ethtool</code></strong></h3><p><code>ethtool</code> 用于查询和设置以太网设备参数，可以获取接口的详细信息。</p>
+<ul>
+<li><strong>查看网卡详细信息：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ethtool eth0</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="8-nmcli"><a href="#8-nmcli" class="headerlink" title="8. nmcli"></a>8. <strong><code>nmcli</code></strong></h3><p><code>nmcli</code> 是 NetworkManager 提供的命令行工具，用于查看和管理网络连接。</p>
+<ul>
+<li><p><strong>查看所有网络连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看设备状态：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli device status</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="9-bmon"><a href="#9-bmon" class="headerlink" title="9. bmon"></a>9. <strong><code>bmon</code></strong></h3><p><code>bmon</code> 是一个带有图形界面的带宽监控和诊断工具，用于实时监控网络流量。</p>
+<ul>
+<li><strong>启动 <code>bmon</code> 监控网络流量：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bmon</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="10-iptraf-ng"><a href="#10-iptraf-ng" class="headerlink" title="10. iptraf-ng"></a>10. <strong><code>iptraf-ng</code></strong></h3><p><code>iptraf-ng</code> 是一个基于终端的实时网络监控工具，能够监控网络流量和连接。</p>
+<ul>
+<li><strong>启动 <code>iptraf-ng</code> 监控：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptraf-ng</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/08/22/linux-%E5%AE%89%E8%A3%85-glances/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -816,7 +957,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-count">18</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
