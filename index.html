@@ -166,7 +166,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2024-09-27 20:58:00 / Modified: 20:59:02" itemprop="dateCreated datePublished" datetime="2024-09-27T20:58:00+08:00">2024-09-27</time>
+              <time title="Created: 2024-09-27 20:58:00 / Modified: 21:11:09" itemprop="dateCreated datePublished" datetime="2024-09-27T20:58:00+08:00">2024-09-27</time>
             </span>
 
           <br>
@@ -175,7 +175,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>636</span>
+              <span>706</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
@@ -204,7 +204,7 @@
 <ul>
 <li>docker-compose启动</li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#vim docker-compose.yaml</span></span><br><span class="line"></span><br><span class="line">version: <span class="string">&#x27;3&#x27;</span></span><br><span class="line">services:</span><br><span class="line">  swagger_ui:</span><br><span class="line">    image: <span class="string">&#x27;swaggerapi/swagger-ui&#x27;</span></span><br><span class="line">    restart: always</span><br><span class="line">    container_name: swagger-ui</span><br><span class="line">    volumes:</span><br><span class="line">      - ./k8s-swagger.json:/k8s-swagger.json</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&#x27;:8080&#x27;</span></span><br><span class="line">    environment:</span><br><span class="line">      SWAGGER_JSON: /k8s-swagger.json</span><br><span class="line">      </span><br><span class="line"> </span><br><span class="line"><span class="comment">#启动</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml up -d </span><br><span class="line"><span class="comment">#查看服务    </span></span><br><span class="line">docker-compose -f ./docker-compose.yaml ps</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#vim docker-compose.yaml</span></span><br><span class="line"></span><br><span class="line">version: <span class="string">&quot;3&quot;</span></span><br><span class="line">services:</span><br><span class="line">  document:</span><br><span class="line">    environment:</span><br><span class="line">      - SWAGGER_JSON=/k8s-swagger.json</span><br><span class="line">    image: swaggerapi/swagger-ui</span><br><span class="line">    volumes:</span><br><span class="line">      - ./k8s-swagger.json:/k8s-swagger.json</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;8899:8080&quot;</span></span><br><span class="line">  editor:</span><br><span class="line">    image: swaggerapi/swagger-editor</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;9988:8080&quot;</span></span><br><span class="line">      </span><br><span class="line"> </span><br><span class="line"><span class="comment">#启动</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml up -d </span><br><span class="line"><span class="comment">#查看服务    </span></span><br><span class="line">docker-compose -f ./docker-compose.yaml ps</span><br><span class="line"><span class="comment">#停止服务</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml ps</span><br></pre></td></tr></table></figure>
 
       
     </div>
