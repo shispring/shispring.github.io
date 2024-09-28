@@ -28,7 +28,7 @@
 <meta property="og:description" content="cordon: 标记节点不可调度 如果一个node被标记为cordon，新创建的pod不会被调度到此node上，已经调度上去的不会被移走。  drain: 驱逐节点上的pod drain包含两种状态：cordon不可被调度，evicted驱逐当前节点所以pod  taint:设置节点的污点 污点的格式: key&#x3D;value:effect key和value是污点的标签，可以自行拟定 ef">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2024-09-04T11:30:18.000Z">
-<meta property="article:modified_time" content="2024-09-28T05:41:11.682Z">
+<meta property="article:modified_time" content="2024-09-28T05:47:23.560Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -176,7 +176,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-09-28 13:41:11" itemprop="dateModified" datetime="2024-09-28T13:41:11+08:00">2024-09-28</time>
+                <time title="Modified: 2024-09-28 13:47:23" itemprop="dateModified" datetime="2024-09-28T13:47:23+08:00">2024-09-28</time>
               </span>
 
           <br>
@@ -185,7 +185,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>1k</span>
+              <span>1.1k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
@@ -215,7 +215,7 @@
 <li>key和value是污点的标签，可以自行拟定</li>
 <li>effect描述污点的作用,effect支持如下三个选项:<br>PreferNoSchedule：尽量避免把pod调度到具有该污点的node上，除非没有其他节点可调度<br>NoSchedule:：不会把pod调度到具有该污点的node上，但不会影响当前node已存在的pod<br>NoExecute：不会把pod调度到具有该污点的node上，同时还会驱逐node上已存在的pod</li>
 </ul>
-<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置node不可调度</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">kubectl  describe node &lt;NODE&gt; | grep Unschedulable</span><br><span class="line"></span><br><span class="line"><span class="comment">#drain停机维护</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line">kubectl drain &lt;NODE&gt; --ignore-daemonsets --delete-local-data --force --grace-period=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#uncordon恢复节点可调度</span></span><br><span class="line">kubectl uncordon &lt;NODE&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置污点,指定标签为dedicated=special-user,策略为NoSchedule</span></span><br><span class="line">kubectl taint nodes node2 dedicated=special-user:NoSchedule</span><br><span class="line"><span class="comment">#移除key为dedicated的NoSchedule污点</span></span><br><span class="line">kubectl taint nodes node2 dedicated:NoSchedule-</span><br><span class="line"><span class="comment">#移除key为dedicated的所有污点</span></span><br><span class="line">kubectl taint nodes node2 dedicated-</span><br><span class="line"><span class="comment">#设置node2污点,策略为NoExecute</span></span><br><span class="line">kubectl taint nodes node2 dedicated=special-user:NoExecute</span><br><span class="line"><span class="comment">#注意一点,不要混淆节点不可调度,节点上存在污点节点仍然是可以调度的,只要pod中存在容忍即可调度到node2节点</span></span><br></pre></td></tr></table></figure>
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置node不可调度</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">kubectl  describe node &lt;NODE&gt; | grep Unschedulable</span><br><span class="line"></span><br><span class="line"><span class="comment">#drain停机维护</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line">kubectl drain &lt;NODE&gt; --ignore-daemonsets --delete-local-data --force --grace-period=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#uncordon恢复节点可调度</span></span><br><span class="line">kubectl uncordon &lt;NODE&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置污点,指定标签为dedicated=special-user,策略为NoSchedule</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated=special-user:NoSchedule</span><br><span class="line"><span class="comment">#移除key为dedicated的NoSchedule污点</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated:NoSchedule-</span><br><span class="line"><span class="comment">#移除key为dedicated的所有污点</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated-</span><br><span class="line"><span class="comment">#设置&lt;NODE&gt;污点,策略为NoExecute</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated=special-user:NoExecute</span><br><span class="line"><span class="comment">#注意一点,不要混淆节点不可调度,节点上存在污点节点仍然是可以调度的,只要pod中存在容忍即可调度到&lt;NODE&gt;节点</span></span><br></pre></td></tr></table></figure>
 
     </div>
 
