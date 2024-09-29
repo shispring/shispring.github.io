@@ -251,7 +251,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2024-09-29 12:15:44 / Modified: 12:18:10" itemprop="dateCreated datePublished" datetime="2024-09-29T12:15:44+08:00">2024-09-29</time>
+              <time title="Created: 2024-09-29 12:15:44 / Modified: 13:02:23" itemprop="dateCreated datePublished" datetime="2024-09-29T12:15:44+08:00">2024-09-29</time>
             </span>
 
           <br>
@@ -281,7 +281,7 @@
       
           <h3 id="查看api方法："><a href="#查看api方法：" class="headerlink" title="查看api方法："></a>查看api方法：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw /</span><br><span class="line">kubectl get --raw /apis/apps/v1 | jq .resources[].name</span><br><span class="line"></span><br><span class="line">或者开启apiserver</span><br><span class="line">kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">curl http://127.0.0.1:8080/apis/batch/v1</span><br></pre></td></tr></table></figure>
 
-<h3 id="api结构及原理"><a href="#api结构及原理" class="headerlink" title="api结构及原理"></a>api结构及原理</h3><p><img src="/assets/17275834346055.jpg"><br><img src="/assets/17275834447687.jpg"></p>
+<h3 id="api结构及原理"><a href="#api结构及原理" class="headerlink" title="api结构及原理"></a>api结构及原理</h3><p><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/55.jpg?raw=true"><br><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/87.jpg?raw=true"></p>
 
       
     </div>
