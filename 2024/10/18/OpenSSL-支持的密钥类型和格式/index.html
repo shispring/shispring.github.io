@@ -20,15 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="https://shispring.github.io/categories/go/index.html">
+  <meta name="description" content="OpenSSL 支持的密钥类型及格式对比表 下面详细列出了 OpenSSL 支持的 密钥类型 及 格式，并结合典型应用场景帮助你选择合适的组合。  密钥类型对比  密钥类型	算法描述	典型应用场景	命令示例RSA	基于大整数分解，经典公钥加密算法	TLS&#x2F;SSL 证书、HTTPS、SSH	openssl genrsa -out rsa_key.pem 2048ECC	椭圆曲线密码学（高效">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenSSL 支持的密钥类型和格式">
+<meta property="og:url" content="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="OpenSSL 支持的密钥类型及格式对比表 下面详细列出了 OpenSSL 支持的 密钥类型 及 格式，并结合典型应用场景帮助你选择合适的组合。  密钥类型对比  密钥类型	算法描述	典型应用场景	命令示例RSA	基于大整数分解，经典公钥加密算法	TLS&#x2F;SSL 证书、HTTPS、SSH	openssl genrsa -out rsa_key.pem 2048ECC	椭圆曲线密码学（高效">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-10-18T06:36:12.000Z">
+<meta property="article:modified_time" content="2024-10-18T06:39:45.931Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/categories/go/">
+<link rel="canonical" href="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/">
 
 
 <script id="page-configurations">
@@ -36,12 +40,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>分类: go | Hexo</title>
+  <title>OpenSSL 支持的密钥类型和格式 | Hexo</title>
   
 
 
@@ -150,51 +154,141 @@
         <div class="content-wrap">
           
 
-          <div class="content category">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">go
-          <small>分类</small>
-        </h2>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenSSL 支持的密钥类型和格式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-18 14:36:12 / 修改时间：14:39:45" itemprop="dateCreated datePublished" datetime="2024-10-18T14:36:12+08:00">2024-10-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openssl/" itemprop="url" rel="index"><span itemprop="name">openssl</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2022</span>
+        <p>OpenSSL 支持的密钥类型及格式对比表</p>
+<p>下面详细列出了 OpenSSL 支持的 密钥类型 及 格式，并结合典型应用场景帮助你选择合适的组合。</p>
+<ol>
+<li>密钥类型对比</li>
+</ol>
+<p>密钥类型	算法描述	典型应用场景	命令示例<br>RSA	基于大整数分解，经典公钥加密算法	TLS&#x2F;SSL 证书、HTTPS、SSH	openssl genrsa -out rsa_key.pem 2048<br>ECC	椭圆曲线密码学（高效、短密钥）	IoT、移动设备、TLS、区块链	openssl ecparam -genkey -name prime256v1 -out ec_key.pem<br>DSA	数字签名算法（基于离散对数，较老）	数字签名（如 DNSSEC）	openssl dsaparam -genkey 2048 -out dsa_key.pem<br>DH	Diffie-Hellman 算法，用于密钥交换	VPN、IPsec 加密通道	openssl dhparam -out dh_key.pem 2048<br>ED25519	高性能椭圆曲线签名算法（无需参数生成）	SSH、TLS 1.3、敏捷签名应用	openssl genpkey -algorithm ED25519 -out ed25519_key.pem<br>X25519	专用于密钥交换的椭圆曲线算法（现代加密协议）	ECDH 密钥交换、TLS 1.3	openssl genpkey -algorithm X25519 -out x25519_key.pem<br>GOST	俄罗斯国家标准算法（对称&#x2F;非对称加密）	使用 GOST 的应用、数字签名	需要 OpenSSL GOST 扩展<br>SM2	中国国家标准（基于 ECC）	国密应用（如商用加密与签名）	openssl genpkey -algorithm SM2 -out sm2_key.pem</p>
+<ol start="2">
+<li>密钥格式对比</li>
+</ol>
+<p>格式	描述	适用场景	加密支持	命令示例<br>PEM	文本格式（Base64 编码），以 —–BEGIN 开头	TLS&#x2F;SSL 证书、私钥存储	支持加密	openssl rsa -in rsa_key.pem -outform PEM -out private_key.pem<br>DER	二进制格式，适合嵌入式系统和低级传输	嵌入式系统、低级传输	不支持加密	openssl rsa -in rsa_key.pem -outform DER -out private_key.der<br>PKCS#8	标准化私钥格式，支持多种算法（如 RSA、ECC）	服务器端密钥存储	支持加密	openssl pkcs8 -topk8 -in ec_key.pem -out pkcs8_key.pem<br>PKCS#12	二进制打包格式，包含私钥和证书链（.p12&#x2F;.pfx）	客户端证书、VPN、S&#x2F;MIME	全文件加密	openssl pkcs12 -export -out cert.p12 -inkey ec_key.pem -in cert.pem<br>OpenSSH	专用于 SSH 的密钥格式	SSH 登录和密钥交换	支持加密	ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519<br>JWK	JSON Web Key 格式，用于 Web 应用的密钥管理	OAuth2、JWT 加密	支持加密	使用专用工具或库生成</p>
+<ol start="3">
+<li>常见应用场景及推荐组合</li>
+</ol>
+<p>场景	推荐密钥类型	推荐格式	命令示例<br>Web 服务器（Nginx&#x2F;Apache）	RSA 或 ECC	PEM、PKCS#8	openssl pkcs8 -topk8 -in rsa_key.pem -out server_key.pem<br>IoT 设备	ECC（prime256v1）	PKCS#8	openssl ecparam -genkey -name prime256v1 -out ec_key.pem<br>VPN 客户端证书	RSA 或 ECC	PKCS#12	openssl pkcs12 -export -out vpn_cert.p12 -inkey ec_key.pem -in cert.pem<br>SSH 登录	ED25519 或 RSA	OpenSSH	ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519<br>TLS 1.3 密钥交换	X25519	PKCS#8	openssl genpkey -algorithm X25519 -out x25519_key.pem<br>国密应用（SM2 签名）	SM2	PKCS#8	openssl genpkey -algorithm SM2 -out sm2_key.pem</p>
+<ol start="4">
+<li><p>实现案例</p>
+</li>
+<li><p>生成 RSA 密钥并转换为 PKCS#8</p>
+</li>
+</ol>
+<p>openssl genrsa -out rsa_key.pem 2048<br>openssl pkcs8 -topk8 -in rsa_key.pem -out pkcs8_key.pem -nocrypt</p>
+<ol start="2">
+<li>生成 ECC 私钥并打包为 PKCS#12</li>
+</ol>
+<p>openssl ecparam -name prime256v1 -genkey -out ec_key.pem<br>openssl req -new -x509 -key ec_key.pem -out cert.pem -days 365<br>openssl pkcs12 -export -out cert.p12 -inkey ec_key.pem -in cert.pem</p>
+<ol start="3">
+<li>生成 ED25519 密钥用于 SSH 登录</li>
+</ol>
+<p>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</p>
+<ol start="5">
+<li><p>总结与建议</p>
+<p> •	RSA：适合兼容性要求高的应用（如 Web 服务器）。<br> •	ECC：更高效，适合资源受限设备和现代应用。<br> •	ED25519：轻量级且高性能，适合 SSH 和敏捷加密协议。<br> •	SM2：适用于国密标准要求的应用。</p>
+</li>
+</ol>
+<p>根据应用需求选择适当的密钥类型和格式，既能保证系统安全，又能提高效率与兼容性。</p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2022-04-27T16:43:25+08:00"
-              content="2022-04-27">
-          04-27
-        </time>
-      </div>
+      <footer class="post-footer">
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2022/04/27/go-tips/" itemprop="url">
-            <span itemprop="name">go tips</span>
-          </a>
-      </div>
+        
 
-    </header>
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/10/18/openssl%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94/" rel="prev" title="openssl加密方案对比">
+      <i class="fa fa-chevron-left"></i> openssl加密方案对比
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
   </article>
-
-    </div>
-  </div>
   
   
-  
-
   
 
 
