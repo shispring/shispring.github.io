@@ -20,19 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="1. 节点 NotReady 的原因 Kubelet 失败：  Kubelet 进程未启动或崩溃，导致节点无法向 API 服务器报告其状态。   网络问题：  节点与控制平面之间的网络连接不畅，无法与 API 服务器通信。   资源不足：  节点上的 CPU、内存、磁盘等资源耗尽，导致无法正常调度 Pod 或处理请求。   Docker 或容器运行时问题：  容器运行时（如 Docker、cont">
+  <meta name="description" content="openssl ecparam vs. openssl genrsa 的区别  1.1 openssl ecparam 命令 •	生成椭圆曲线（EC）密钥。 •	使用命令：  openssl ecparam -name prime256v1 -genkey -out ec_private_key.pem •	prime256v1 是一种常用的椭圆曲线（也称为 secp256r1）。 •	优势：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="k8s node not ready 排查">
-<meta property="og:url" content="https://shispring.github.io/2024/09/26/k8s-node-not-ready-%E6%8E%92%E6%9F%A5/index.html">
+<meta property="og:title" content="openssl加密方案对比">
+<meta property="og:url" content="https://shispring.github.io/2024/10/18/openssl%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1. 节点 NotReady 的原因 Kubelet 失败：  Kubelet 进程未启动或崩溃，导致节点无法向 API 服务器报告其状态。   网络问题：  节点与控制平面之间的网络连接不畅，无法与 API 服务器通信。   资源不足：  节点上的 CPU、内存、磁盘等资源耗尽，导致无法正常调度 Pod 或处理请求。   Docker 或容器运行时问题：  容器运行时（如 Docker、cont">
+<meta property="og:description" content="openssl ecparam vs. openssl genrsa 的区别  1.1 openssl ecparam 命令 •	生成椭圆曲线（EC）密钥。 •	使用命令：  openssl ecparam -name prime256v1 -genkey -out ec_private_key.pem •	prime256v1 是一种常用的椭圆曲线（也称为 secp256r1）。 •	优势：">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-09-26T08:14:12.000Z">
-<meta property="article:modified_time" content="2024-09-29T06:45:02.999Z">
+<meta property="article:published_time" content="2024-10-18T06:27:38.000Z">
+<meta property="article:modified_time" content="2024-10-18T06:28:24.683Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2024/09/26/k8s-node-not-ready-%E6%8E%92%E6%9F%A5/">
+<link rel="canonical" href="https://shispring.github.io/2024/10/18/openssl%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94/">
 
 
 <script id="page-configurations">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>k8s node not ready 排查 | Hexo</title>
+  <title>openssl加密方案对比 | Hexo</title>
   
 
 
@@ -161,7 +161,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/26/k8s-node-not-ready-%E6%8E%92%E6%9F%A5/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/openssl%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -174,7 +174,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          k8s node not ready 排查
+          openssl加密方案对比
         </h1>
 
         <div class="post-meta">
@@ -183,23 +183,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2024-09-26 16:14:12" itemprop="dateCreated datePublished" datetime="2024-09-26T16:14:12+08:00">2024-09-26</time>
+              <time title="创建时间：2024-10-18 14:27:38 / 修改时间：14:28:24" itemprop="dateCreated datePublished" datetime="2024-10-18T14:27:38+08:00">2024-10-18</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-29 14:45:02" itemprop="dateModified" datetime="2024-09-29T14:45:02+08:00">2024-09-29</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                  <a href="/categories/openssl/" itemprop="url" rel="index"><span itemprop="name">openssl</span></a>
                 </span>
             </span>
 
@@ -216,14 +210,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.6k</span>
+              <span>1.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -235,87 +229,75 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="1-节点-NotReady-的原因"><a href="#1-节点-NotReady-的原因" class="headerlink" title="1. 节点 NotReady 的原因"></a>1. 节点 NotReady 的原因</h3><ol>
-<li><p><strong>Kubelet 失败</strong>：</p>
-<ul>
-<li>Kubelet 进程未启动或崩溃，导致节点无法向 API 服务器报告其状态。</li>
-</ul>
-</li>
-<li><p><strong>网络问题</strong>：</p>
-<ul>
-<li>节点与控制平面之间的网络连接不畅，无法与 API 服务器通信。</li>
-</ul>
-</li>
-<li><p><strong>资源不足</strong>：</p>
-<ul>
-<li>节点上的 CPU、内存、磁盘等资源耗尽，导致无法正常调度 Pod 或处理请求。</li>
-</ul>
-</li>
-<li><p><strong>Docker 或容器运行时问题</strong>：</p>
-<ul>
-<li>容器运行时（如 Docker、containerd）故障，无法启动或管理 Pod。</li>
-</ul>
-</li>
-<li><p><strong>节点条件不满足</strong>：</p>
-<ul>
-<li>节点可能因为 DiskPressure、MemoryPressure 或 PIDPressure 等条件被标记为 NotReady。</li>
-</ul>
-</li>
-<li><p><strong>防火墙或安全组配置</strong>：</p>
-<ul>
-<li>网络策略、iptables 或云平台的安全组阻止了与控制平面的通信。</li>
-</ul>
-</li>
+        <ol>
+<li>openssl ecparam vs. openssl genrsa 的区别</li>
 </ol>
-<h3 id="2-补救措施"><a href="#2-补救措施" class="headerlink" title="2. 补救措施"></a>2. 补救措施</h3><p>如果节点长时间处于 NotReady 状态，可以采取以下措施：</p>
+<p>1.1 openssl ecparam 命令</p>
+<pre><code>•	生成椭圆曲线（EC）密钥。
+•	使用命令：
+</code></pre>
+<p>openssl ecparam -name prime256v1 -genkey -out ec_private_key.pem</p>
+<pre><code>•	prime256v1 是一种常用的椭圆曲线（也称为 secp256r1）。
+•	优势：
+•	在相同安全性水平下，密钥长度较短，计算效率高。
+•	适用于 IoT、移动设备 或资源受限的环境。
+•	更高的密钥交换和签名速度（如 ECDSA 签名和 ECDH 密钥交换）。
+</code></pre>
+<p>1.2 openssl genrsa 命令</p>
+<pre><code>•	生成 RSA 密钥。
+•	使用命令：
+</code></pre>
+<p>openssl genrsa -out rsa_private_key.pem 2048</p>
+<pre><code>•	常用 RSA 密钥长度为 2048 或 4096 位。
+•	优势：
+•	兼容性高，广泛用于 TLS/SSL 证书、SSH 密钥 等领域。
+•	在签名验证速度上较快（但密钥生成和加密速度较慢）。
+</code></pre>
+<p>1.3 两者的比较与选择</p>
+<p>比较项	EC 密钥	RSA 密钥<br>算法类型	椭圆曲线（ECC）	大整数分解（RSA）<br>密钥长度	256 位 ECC 密钥 ≈ 3072 位 RSA 密钥	通常 2048 或 4096 位<br>计算效率	更快的密钥交换和签名（适合 IoT）	签名验证较快，适用于传统系统<br>兼容性	新系统支持较好，部分老系统不支持	被广泛支持（SSL&#x2F;TLS 等）<br>适用场景	IoT、移动设备、现代加密系统	Web 服务器、证书系统、SSH</p>
+<pre><code>•	RSA 密钥：适用于兼容性要求高的系统。
+•	ECC 密钥：适用于性能敏感的场景或资源受限设备。
+</code></pre>
+<ol start="2">
+<li>PKCS#8 与 PKCS#12 的区别</li>
+</ol>
+<p>2.1 PKCS#8 格式</p>
+<pre><code>•	PKCS#8 是一种 标准化的私钥存储格式，支持 RSA、EC、DSA 等多种算法。
+•	可以使用 PEM（文本格式） 或 DER（二进制格式） 表示。
+•	私钥加密：通过 -topk8 选项将私钥加密存储。
+</code></pre>
+<p>生成 PKCS#8 格式的私钥：</p>
+<p>openssl ecparam -genkey -name prime256v1 | openssl pkcs8 -topk8 -out ec_private_key.pem</p>
+<pre><code>•	场景：
+•	服务器端存储私钥，如 TLS/SSL 配置。
+•	密钥易于传输（PEM 格式）和安全存储（支持加密）。
+</code></pre>
+<p>2.2 PKCS#12 格式</p>
+<pre><code>•	PKCS#12 是一种 打包密钥和证书的格式，常用于客户端场景。
+•	包含 私钥、证书、CA 证书链，文件扩展名通常为 .p12 或 .pfx。
+•	密码保护整个文件，用于安全传输和存储。
+</code></pre>
+<p>生成 PKCS#12 文件：</p>
+<p>openssl pkcs12 -export -out cert.p12 -inkey ec_private_key.pem -in cert.pem -certfile ca.pem</p>
+<pre><code>•	场景：
+•	客户端证书存储和管理，如 VPN 客户端、S/MIME 邮件加密。
+•	Windows 系统和浏览器使用 PFX 文件导入密钥和证书。
+</code></pre>
+<p>2.3 PKCS#8 和 PKCS#12 的选择</p>
+<p>比较项	PKCS#8	PKCS#12<br>内容	仅存储私钥	包含私钥、证书和 CA 证书链<br>文件格式	PEM 或 DER	二进制格式（.p12 &#x2F; .pfx）<br>加密支持	可加密私钥	使用密码保护整个文件<br>适用场景	服务器端（如 Nginx、Apache）	客户端证书管理、VPN、S&#x2F;MIME<br>平台支持	Linux 服务器系统	Windows、浏览器、VPN 客户端</p>
+<pre><code>•	PKCS#8：用于服务器端密钥存储，如 Web 服务器的 TLS/SSL 配置。
+•	PKCS#12：用于打包和传输客户端证书，适合 Windows 和浏览器场景。
+</code></pre>
+<ol start="3">
+<li><p>总结与建议</p>
 <ol>
-<li><p><strong>检查 Kubelet 日志</strong>：</p>
-<ul>
-<li>查看 Kubelet 日志，了解其是否正常启动，是否有错误信息。</li>
-<li>使用命令：<code>journalctl -u kubelet</code> 或 <code>kubectl logs -n kube-system &lt;kubelet-pod-name&gt;</code>。</li>
-<li>Kubelet 通常是以 daemonset 的形式运行在每个节点上。要查看集群中 Kubelet Pod 的列表，可以使用以下命令：kubectl get pods -n kube-system -l k8s-app&#x3D;kubelet。</li>
-</ul>
-</li>
-<li><p><strong>检查资源状态</strong>：</p>
-<ul>
-<li>使用命令 <code>kubectl describe node &lt;node-name&gt;</code> 查看节点状态和条件，确定是否由于资源压力导致 NotReady。</li>
-</ul>
-</li>
-<li><p><strong>重启 Kubelet</strong>：</p>
-<ul>
-<li>如果 Kubelet 出现问题，尝试重启该服务：<code>sudo systemctl restart kubelet</code>。</li>
-</ul>
-</li>
-<li><p><strong>检查网络连接</strong>：</p>
-<ul>
-<li>确认节点与 API 服务器的网络连接正常，使用 <code>ping</code> 或 <code>curl</code> 测试连接。</li>
-</ul>
-</li>
-<li><p><strong>清理资源</strong>：</p>
-<ul>
-<li>如果是资源不足，考虑清理不必要的 Pod，或增加节点的资源（CPU、内存）。</li>
-</ul>
-</li>
-<li><p><strong>检查防火墙和安全组</strong>：</p>
-<ul>
-<li>确保防火墙规则或安全组配置允许节点与控制平面之间的通信。</li>
-</ul>
-</li>
-<li><p><strong>驱动更新或重新安装</strong>：</p>
-<ul>
-<li>检查 Docker 或容器运行时的版本和配置，如果存在问题，考虑更新或重新安装。</li>
-</ul>
-</li>
-<li><p><strong>使用 cordon 和 drain</strong>：</p>
-<ul>
-<li>如果节点不能恢复，使用 <code>kubectl cordon &lt;node-name&gt;</code> 阻止新的 Pod 调度到该节点，使用 <code>kubectl drain &lt;node-name&gt;</code> 将现有 Pod 移走，进行故障排查或维护。</li>
-<li>cordon命令目的：将节点标记为不可调度，防止新的 Pod 被调度到该节点上。</li>
-<li>drain命令目的：迁移节点上的所有 Pod，除了 DaemonSet 管理的 Pod。kubectl drain <node-name> –ignore-daemonsets –delete-emptydir-data</li>
-</ul>
+<li>   选择密钥类型：<br> •	ECC 密钥：更适合现代加密系统和资源受限环境（如 IoT）。<br> •	RSA 密钥：兼容性广泛，适合大多数现有系统。</li>
+<li>   选择密钥格式：<br> •	PKCS#8：用于服务器端存储和配置私钥（如 Nginx 和 Apache）。<br> •	PKCS#12：用于客户端证书管理和传输（如 VPN、S&#x2F;MIME 邮件）。</li>
+<li>   推荐组合：<br> •	服务器端：ECC 密钥 + PKCS#8 格式。<br> •	客户端：ECC&#x2F;RSA 密钥 + PKCS#12 格式，用于打包证书和私钥。</li>
+</ol>
 </li>
 </ol>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>节点状态为 NotReady 的原因可能涉及 Kubelet、资源、网络等多方面的问题。通过检查日志、资源状态和网络连接等方式，可以快速定位问题并采取相应的补救措施，确保集群的健康和可用性。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">kubectl get ds -n kube-system</span><br><span class="line">kubectl get pods -n kube-system -l k8s-app=kubelet</span><br><span class="line"></span><br><span class="line">kubectl describe node &lt;node-name&gt;  -n kube-system | grep -A 10 Conditions</span><br><span class="line">kubectl describe node &lt;node-name&gt;  -n kube-system | grep -A 10 Events</span><br><span class="line">kubectl describe pod &lt;kubelet-pod-name&gt; -n kube-system | grep Events -A  10</span><br><span class="line"></span><br><span class="line">kubectl cordon node01</span><br><span class="line">kubectl drain node01 --ignore-daemonsets --delete-emptydir-data</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>根据你的具体需求和场景，选择适当的算法和格式能够提升系统的性能和兼容性。</p>
 
     </div>
 
@@ -331,13 +313,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/09/26/Debian%E7%B3%BB%E7%BB%9F%E6%9B%B4%E6%96%B0%E5%AE%89%E8%A3%85%E6%BA%90/" rel="prev" title="Debian系统更新安装源">
-      <i class="fa fa-chevron-left"></i> Debian系统更新安装源
+    <a href="/2024/10/18/CA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6/" rel="prev" title="CA签发证书">
+      <i class="fa fa-chevron-left"></i> CA签发证书
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/09/27/nice-blog/" rel="next" title="优秀资源">
-      优秀资源 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -396,7 +375,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%8A%82%E7%82%B9-NotReady-%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.</span> <span class="nav-text">1. 节点 NotReady 的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%A1%A5%E6%95%91%E6%8E%AA%E6%96%BD"><span class="nav-number">2.</span> <span class="nav-text">2. 补救措施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

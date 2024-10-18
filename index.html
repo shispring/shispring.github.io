@@ -156,6 +156,156 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/openssl%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/18/openssl%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94/" class="post-title-link" itemprop="url">openssl加密方案对比</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-18 14:27:38 / 修改时间：14:28:24" itemprop="dateCreated datePublished" datetime="2024-10-18T14:27:38+08:00">2024-10-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openssl/" itemprop="url" rel="index"><span itemprop="name">openssl</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <ol>
+<li>openssl ecparam vs. openssl genrsa 的区别</li>
+</ol>
+<p>1.1 openssl ecparam 命令</p>
+<pre><code>•	生成椭圆曲线（EC）密钥。
+•	使用命令：
+</code></pre>
+<p>openssl ecparam -name prime256v1 -genkey -out ec_private_key.pem</p>
+<pre><code>•	prime256v1 是一种常用的椭圆曲线（也称为 secp256r1）。
+•	优势：
+•	在相同安全性水平下，密钥长度较短，计算效率高。
+•	适用于 IoT、移动设备 或资源受限的环境。
+•	更高的密钥交换和签名速度（如 ECDSA 签名和 ECDH 密钥交换）。
+</code></pre>
+<p>1.2 openssl genrsa 命令</p>
+<pre><code>•	生成 RSA 密钥。
+•	使用命令：
+</code></pre>
+<p>openssl genrsa -out rsa_private_key.pem 2048</p>
+<pre><code>•	常用 RSA 密钥长度为 2048 或 4096 位。
+•	优势：
+•	兼容性高，广泛用于 TLS/SSL 证书、SSH 密钥 等领域。
+•	在签名验证速度上较快（但密钥生成和加密速度较慢）。
+</code></pre>
+<p>1.3 两者的比较与选择</p>
+<p>比较项	EC 密钥	RSA 密钥<br>算法类型	椭圆曲线（ECC）	大整数分解（RSA）<br>密钥长度	256 位 ECC 密钥 ≈ 3072 位 RSA 密钥	通常 2048 或 4096 位<br>计算效率	更快的密钥交换和签名（适合 IoT）	签名验证较快，适用于传统系统<br>兼容性	新系统支持较好，部分老系统不支持	被广泛支持（SSL&#x2F;TLS 等）<br>适用场景	IoT、移动设备、现代加密系统	Web 服务器、证书系统、SSH</p>
+<pre><code>•	RSA 密钥：适用于兼容性要求高的系统。
+•	ECC 密钥：适用于性能敏感的场景或资源受限设备。
+</code></pre>
+<ol start="2">
+<li>PKCS#8 与 PKCS#12 的区别</li>
+</ol>
+<p>2.1 PKCS#8 格式</p>
+<pre><code>•	PKCS#8 是一种 标准化的私钥存储格式，支持 RSA、EC、DSA 等多种算法。
+•	可以使用 PEM（文本格式） 或 DER（二进制格式） 表示。
+•	私钥加密：通过 -topk8 选项将私钥加密存储。
+</code></pre>
+<p>生成 PKCS#8 格式的私钥：</p>
+<p>openssl ecparam -genkey -name prime256v1 | openssl pkcs8 -topk8 -out ec_private_key.pem</p>
+<pre><code>•	场景：
+•	服务器端存储私钥，如 TLS/SSL 配置。
+•	密钥易于传输（PEM 格式）和安全存储（支持加密）。
+</code></pre>
+<p>2.2 PKCS#12 格式</p>
+<pre><code>•	PKCS#12 是一种 打包密钥和证书的格式，常用于客户端场景。
+•	包含 私钥、证书、CA 证书链，文件扩展名通常为 .p12 或 .pfx。
+•	密码保护整个文件，用于安全传输和存储。
+</code></pre>
+<p>生成 PKCS#12 文件：</p>
+<p>openssl pkcs12 -export -out cert.p12 -inkey ec_private_key.pem -in cert.pem -certfile ca.pem</p>
+<pre><code>•	场景：
+•	客户端证书存储和管理，如 VPN 客户端、S/MIME 邮件加密。
+•	Windows 系统和浏览器使用 PFX 文件导入密钥和证书。
+</code></pre>
+<p>2.3 PKCS#8 和 PKCS#12 的选择</p>
+<p>比较项	PKCS#8	PKCS#12<br>内容	仅存储私钥	包含私钥、证书和 CA 证书链<br>文件格式	PEM 或 DER	二进制格式（.p12 &#x2F; .pfx）<br>加密支持	可加密私钥	使用密码保护整个文件<br>适用场景	服务器端（如 Nginx、Apache）	客户端证书管理、VPN、S&#x2F;MIME<br>平台支持	Linux 服务器系统	Windows、浏览器、VPN 客户端</p>
+<pre><code>•	PKCS#8：用于服务器端密钥存储，如 Web 服务器的 TLS/SSL 配置。
+•	PKCS#12：用于打包和传输客户端证书，适合 Windows 和浏览器场景。
+</code></pre>
+<ol start="3">
+<li><p>总结与建议</p>
+<ol>
+<li>   选择密钥类型：<br> •	ECC 密钥：更适合现代加密系统和资源受限环境（如 IoT）。<br> •	RSA 密钥：兼容性广泛，适合大多数现有系统。</li>
+<li>   选择密钥格式：<br> •	PKCS#8：用于服务器端存储和配置私钥（如 Nginx 和 Apache）。<br> •	PKCS#12：用于客户端证书管理和传输（如 VPN、S&#x2F;MIME 邮件）。</li>
+<li>   推荐组合：<br> •	服务器端：ECC 密钥 + PKCS#8 格式。<br> •	客户端：ECC&#x2F;RSA 密钥 + PKCS#12 格式，用于打包证书和私钥。</li>
+</ol>
+</li>
+</ol>
+<p>根据你的具体需求和场景，选择适当的算法和格式能够提升系统的性能和兼容性。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/CA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1333,112 +1483,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/27/swagger%E9%83%A8%E7%BD%B2k8s-open-api/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/09/27/swagger%E9%83%A8%E7%BD%B2k8s-open-api/" class="post-title-link" itemprop="url">swagger部署k8s open api</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-09-27 20:58:00" itemprop="dateCreated datePublished" datetime="2024-09-27T20:58:00+08:00">2024-09-27</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-29 14:47:01" itemprop="dateModified" datetime="2024-09-29T14:47:01+08:00">2024-09-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/server/" itemprop="url" rel="index"><span itemprop="name">server</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>708</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="一、导出k8s-API配置"><a href="#一、导出k8s-API配置" class="headerlink" title="一、导出k8s API配置"></a>一、导出k8s API配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#临时启动服务</span></span><br><span class="line">kubectl proxy --port=8082</span><br><span class="line"><span class="comment">#导出配置</span></span><br><span class="line">curl http://localhost:8082/openapi/v2 &gt; k8s-swagger.json</span><br></pre></td></tr></table></figure>
-
-<h3 id="二、启动服务"><a href="#二、启动服务" class="headerlink" title="二、启动服务"></a>二、启动服务</h3><ul>
-<li>docker启动</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 8999:8080 \</span><br><span class="line">    -e SWAGGER_JSON=/k8s-swagger.json \</span><br><span class="line">    -v $(<span class="built_in">pwd</span>)/k8s-swagger.json:/k8s-swagger.json \</span><br><span class="line">    swaggerapi/swagger-ui</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>docker-compose启动</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#vim docker-compose.yaml</span></span><br><span class="line"></span><br><span class="line">version: <span class="string">&quot;3&quot;</span></span><br><span class="line">services:</span><br><span class="line">  document:</span><br><span class="line">    environment:</span><br><span class="line">      - SWAGGER_JSON=/k8s-swagger.json</span><br><span class="line">    image: swaggerapi/swagger-ui</span><br><span class="line">    volumes:</span><br><span class="line">      - ./k8s-swagger.json:/k8s-swagger.json</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;8899:8080&quot;</span></span><br><span class="line">  editor:</span><br><span class="line">    image: swaggerapi/swagger-editor</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;9988:8080&quot;</span></span><br><span class="line">      </span><br><span class="line"> </span><br><span class="line"><span class="comment">#启动</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml up -d </span><br><span class="line"><span class="comment">#查看服务    </span></span><br><span class="line">docker-compose -f ./docker-compose.yaml ps</span><br><span class="line"><span class="comment">#停止服务</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml down</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1506,14 +1554,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-count">31</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -1559,12 +1607,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">43k</span>
+    <span title="站点总字数">45k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">39 分钟</span>
+    <span title="站点阅读时长">41 分钟</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
