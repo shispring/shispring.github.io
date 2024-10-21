@@ -20,23 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="抽象概括 谁 是否可以对  什么东西 进行  怎么样 的访问操作。  RBAC模型12345User（用户）：每个用户都有唯一的UID识别，并被授予不同的角色Role（角色）：不同角色具有不同的权限Permission（权限）：访问权限用户-角色映射：用户和角色之间的映射关系角色-权限映射：角色和权限之间的映射  RBAC API 对象： Role ClusterRole RoleBinding">
+  <meta name="description" content="在 Kubernetes 中配置基于 CPU 利用率的 Horizontal Pod Autoscaler (HPA) 策略时，扩展的 Pod 数量根据以下公式计算： HPA 计算扩展 Pod 数量的公式：1desiredReplicas &#x3D; ceil[currentReplicas * (currentMetricValue &#x2F; targetMetricValue)]  具体来说：  curre">
 <meta property="og:type" content="article">
-<meta property="og:title" content="k8s RBAC解释">
-<meta property="og:url" content="https://shispring.github.io/2024/09/29/k8s-RBAC%E8%A7%A3%E9%87%8A/index.html">
+<meta property="og:title" content="hpa pod计算">
+<meta property="og:url" content="https://shispring.github.io/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="抽象概括 谁 是否可以对  什么东西 进行  怎么样 的访问操作。  RBAC模型12345User（用户）：每个用户都有唯一的UID识别，并被授予不同的角色Role（角色）：不同角色具有不同的权限Permission（权限）：访问权限用户-角色映射：用户和角色之间的映射关系角色-权限映射：角色和权限之间的映射  RBAC API 对象： Role ClusterRole RoleBinding">
+<meta property="og:description" content="在 Kubernetes 中配置基于 CPU 利用率的 Horizontal Pod Autoscaler (HPA) 策略时，扩展的 Pod 数量根据以下公式计算： HPA 计算扩展 Pod 数量的公式：1desiredReplicas &#x3D; ceil[currentReplicas * (currentMetricValue &#x2F; targetMetricValue)]  具体来说：  curre">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://raw.githubusercontent.com/shispring/shispring.github.io/refs/heads/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/91.jpg">
-<meta property="og:image" content="https://raw.githubusercontent.com/shispring/shispring.github.io/refs/heads/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/05.jpg">
-<meta property="article:published_time" content="2024-09-29T04:24:01.000Z">
-<meta property="article:modified_time" content="2024-09-29T06:36:53.420Z">
+<meta property="article:published_time" content="2024-10-21T09:10:38.000Z">
+<meta property="article:modified_time" content="2024-10-21T09:12:39.400Z">
 <meta property="article:author" content="shispring">
-<meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/shispring/shispring.github.io/refs/heads/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/91.jpg">
 
-<link rel="canonical" href="https://shispring.github.io/2024/09/29/k8s-RBAC%E8%A7%A3%E9%87%8A/">
+<link rel="canonical" href="https://shispring.github.io/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/">
 
 
 <script id="page-configurations">
@@ -49,7 +45,7 @@
   };
 </script>
 
-  <title>k8s RBAC解释 | Hexo</title>
+  <title>hpa pod计算 | Hexo</title>
   
 
 
@@ -165,7 +161,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/29/k8s-RBAC%E8%A7%A3%E9%87%8A/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -178,7 +174,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          k8s RBAC解释
+          hpa pod计算
         </h1>
 
         <div class="post-meta">
@@ -189,7 +185,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-09-29 12:24:01 / 修改时间：14:36:53" itemprop="dateCreated datePublished" datetime="2024-09-29T12:24:01+08:00">2024-09-29</time>
+              <time title="创建时间：2024-10-21 17:10:38 / 修改时间：17:12:39" itemprop="dateCreated datePublished" datetime="2024-10-21T17:10:38+08:00">2024-10-21</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -214,7 +210,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>201</span>
+              <span>957</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -233,19 +229,32 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="抽象概括"><a href="#抽象概括" class="headerlink" title="抽象概括"></a>抽象概括</h3><ul>
-<li><strong>谁</strong> 是否可以对  <strong>什么东西</strong> 进行  <strong>怎么样</strong> 的访问操作。</li>
-</ul>
-<h3 id="RBAC模型"><a href="#RBAC模型" class="headerlink" title="RBAC模型"></a>RBAC模型</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">User（用户）：每个用户都有唯一的UID识别，并被授予不同的角色</span><br><span class="line">Role（角色）：不同角色具有不同的权限</span><br><span class="line">Permission（权限）：访问权限</span><br><span class="line">用户-角色映射：用户和角色之间的映射关系</span><br><span class="line">角色-权限映射：角色和权限之间的映射</span><br></pre></td></tr></table></figure>
+        <p>在 Kubernetes 中配置基于 CPU 利用率的 Horizontal Pod Autoscaler (HPA) 策略时，扩展的 Pod 数量根据以下公式计算：</p>
+<h3 id="HPA-计算扩展-Pod-数量的公式："><a href="#HPA-计算扩展-Pod-数量的公式：" class="headerlink" title="HPA 计算扩展 Pod 数量的公式："></a>HPA 计算扩展 Pod 数量的公式：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desiredReplicas = ceil[currentReplicas * (currentMetricValue / targetMetricValue)]</span><br></pre></td></tr></table></figure>
 
-<h3 id="RBAC-API-对象："><a href="#RBAC-API-对象：" class="headerlink" title="RBAC API 对象："></a>RBAC API 对象：</h3><ul>
-<li><em>Role</em></li>
-<li><em>ClusterRole</em></li>
-<li><em>RoleBinding</em></li>
-<li><em>ClusterRoleBinding</em>。</li>
+<p>具体来说：</p>
+<ol>
+<li><strong>currentReplicas</strong>：当前正在运行的 Pod 数量。</li>
+<li><strong>currentMetricValue</strong>：当前的 CPU 使用率，通常是所有 Pod 的 CPU 使用情况的平均值（例如 75%）。</li>
+<li><strong>targetMetricValue</strong>：你在 HPA 配置中指定的目标 CPU 利用率（例如 65%）。</li>
+</ol>
+<h3 id="例子："><a href="#例子：" class="headerlink" title="例子："></a>例子：</h3><p>假设：</p>
+<ul>
+<li>当前有 <strong>4 个 Pod</strong>。</li>
+<li>目标 CPU 利用率为 **65%**。</li>
+<li>当前的平均 CPU 利用率为 **80%**。</li>
 </ul>
-<p><img src="https://raw.githubusercontent.com/shispring/shispring.github.io/refs/heads/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/91.jpg"></p>
-<p><img src="https://raw.githubusercontent.com/shispring/shispring.github.io/refs/heads/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/05.jpg"></p>
+<p>计算公式为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desiredReplicas = ceil[4 * (80 / 65)] = ceil[4 * 1.23] = ceil[4.92] = 5</span><br></pre></td></tr></table></figure>
+<p>因此，HPA 将扩展至 <strong>5 个 Pod</strong>，以保证 CPU 利用率降到你设置的目标值附近。</p>
+<h3 id="扩展和缩容过程："><a href="#扩展和缩容过程：" class="headerlink" title="扩展和缩容过程："></a>扩展和缩容过程：</h3><ul>
+<li><strong>扩展</strong>：当当前的 CPU 使用率高于目标值时，HPA 会增加 Pod 数量。</li>
+<li><strong>缩容</strong>：如果当前的 CPU 使用率低于目标值，HPA 会减少 Pod 数量，但缩容通常有冷却时间，避免频繁调整。</li>
+</ul>
+<h3 id="配置示例："><a href="#配置示例：" class="headerlink" title="配置示例："></a>配置示例：</h3><p>在 HPA 配置文件中，设置 <code>targetCPUUtilizationPercentage</code>，例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">autoscaling/v2</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">HorizontalPodAutoscaler</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-hpa</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">scaleTargetRef:</span></span><br><span class="line">    <span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">my-deployment</span></span><br><span class="line">  <span class="attr">minReplicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">maxReplicas:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">metrics:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">Resource</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">cpu</span></span><br><span class="line">      <span class="attr">target:</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">Utilization</span></span><br><span class="line">        <span class="attr">averageUtilization:</span> <span class="number">65</span>  <span class="comment"># 目标 CPU 利用率</span></span><br></pre></td></tr></table></figure>
+<p>此配置将基于 CPU 利用率，动态调整 Pod 数量，使整体利用率保持在 65% 附近。</p>
+<p>这种机制确保集群资源得到充分利用，同时避免单个 Pod 过载或资源浪费。</p>
 
     </div>
 
@@ -254,10 +263,6 @@
     
 
       <footer class="post-footer">
-          
-          <div class="post-tags">
-              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
-          </div>
 
         
 
@@ -265,13 +270,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/09/29/k8s-api-server%E6%8E%A5%E5%8F%A3%E4%BA%A4%E4%BA%92/" rel="prev" title="k8s api server接口交互">
-      <i class="fa fa-chevron-left"></i> k8s api server接口交互
+    <a href="/2024/10/21/nmap%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/" rel="prev" title="nmap常用命令解析">
+      <i class="fa fa-chevron-left"></i> nmap常用命令解析
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/09/30/k8s-apiserver-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%A4%E8%AF%81%E6%96%B9%E5%BC%8F/" rel="next" title="k8s apiserver 客户端认证方式">
-      k8s apiserver 客户端认证方式 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -330,7 +332,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E6%A6%82%E6%8B%AC"><span class="nav-number">1.</span> <span class="nav-text">抽象概括</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RBAC%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">RBAC模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RBAC-API-%E5%AF%B9%E8%B1%A1%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">RBAC API 对象：</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#HPA-%E8%AE%A1%E7%AE%97%E6%89%A9%E5%B1%95-Pod-%E6%95%B0%E9%87%8F%E7%9A%84%E5%85%AC%E5%BC%8F%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">HPA 计算扩展 Pod 数量的公式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">例子：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E5%92%8C%E7%BC%A9%E5%AE%B9%E8%BF%87%E7%A8%8B%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">扩展和缩容过程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">配置示例：</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
