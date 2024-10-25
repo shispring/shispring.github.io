@@ -1,0 +1,1454 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Anolis OS 8安装中文字符集</title>
+    <url>/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/</url>
+    <content><![CDATA[<h2 id="1-查看当前系统字符集"><a href="#1-查看当前系统字符集" class="headerlink" title="1 查看当前系统字符集"></a>1 查看当前系统字符集</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#查看环境字符集</span></span><br><span class="line">locale</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看平台所有字符集</span></span><br><span class="line">locale -a</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$LANG</span></span><br><span class="line">en_US.UTF-8</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-安装字符集"><a href="#2-安装字符集" class="headerlink" title="2 安装字符集"></a>2 安装字符集</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#安装字符集</span></span><br><span class="line">yum install -y glibc-common</span><br><span class="line">yum install -y langpacks-zh_CN</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改/etc/locale.conf文件</span></span><br><span class="line"><span class="built_in">cat</span> /etc/locale.conf</span><br><span class="line">en_US.UTF-8</span><br><span class="line"></span><br><span class="line">sed -i <span class="string">&#x27;s#^LANG=.*#LANG=&quot;zh_CN.utf8&quot;#&#x27;</span> /etc/locale.conf</span><br><span class="line"></span><br><span class="line"><span class="built_in">source</span> /etc/locale.conf</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看新的字符集</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$LANG</span></span><br><span class="line">zh_CN.UTF-8</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Debian系统更新安装源</title>
+    <url>/2024/09/26/Debian%E7%B3%BB%E7%BB%9F%E6%9B%B4%E6%96%B0%E5%AE%89%E8%A3%85%E6%BA%90/</url>
+    <content><![CDATA[<h2 id="查看系统版本"><a href="#查看系统版本" class="headerlink" title="查看系统版本"></a>查看系统版本</h2><figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line">#注意查看系统的版本</span><br><span class="line">cat /etc/os-release</span><br><span class="line"><span class="variable constant_">PRETTY_NAME</span>=<span class="string">&quot;Debian GNU/Linux 11 (bullseye)&quot;</span></span><br><span class="line"><span class="variable constant_">NAME</span>=<span class="string">&quot;Debian GNU/Linux&quot;</span></span><br><span class="line"><span class="variable constant_">VERSION_ID</span>=<span class="string">&quot;11&quot;</span></span><br><span class="line"><span class="variable constant_">VERSION</span>=<span class="string">&quot;11 (bullseye)&quot;</span></span><br><span class="line"><span class="variable constant_">VERSION_CODENAME</span>=bullseye</span><br></pre></td></tr></table></figure>
+
+<h2 id="变更apt源"><a href="#变更apt源" class="headerlink" title="变更apt源"></a>变更apt源</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 11版本</span></span><br><span class="line"><span class="comment">#https://developer.aliyun.com/mirror/debian?spm=a2c6h.13651102.0.0.4bc81b11TwGuai</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF &gt; /etc/apt/sources.list</span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bullseye main non-free contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bullseye main non-free contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian-security/ bullseye-security main</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian-security/ bullseye-security main</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bullseye-updates main non-free contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bullseye-updates main non-free contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#12版本</span></span><br><span class="line"><span class="comment">#https://wph.im/272.html</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF &gt; /etc/apt/sources.list</span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian-security/ bookworm-security main</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian-security/ bookworm-security main</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">deb https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">deb-src https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#执行更新</span></span><br><span class="line">apt update &amp;&amp; apt upgrade</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装软件"><a href="#安装软件" class="headerlink" title="安装软件"></a>安装软件</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#安装top、ps、pstree、ping、ss</span></span><br><span class="line">apt-get install -y  ethtool htop net-tools telnet inetutils-ping procps psmisc iproute2</span><br><span class="line"></span><br><span class="line"><span class="comment">#ss 命令</span></span><br><span class="line">ss -tlp</span><br><span class="line">ss -t -a </span><br><span class="line">ss -lp | grep 3306</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>go tips</title>
+    <url>/2022/04/27/go-tips/</url>
+    <content><![CDATA[<h2 id="go基本类型"><a href="#go基本类型" class="headerlink" title="go基本类型"></a>go基本类型</h2><ol>
+<li>基本类型：<ul>
+<li>整型（int&#x2F;uint&#x2F;int8&#x2F;uint8&#x2F;int16&#x2F;uint16&#x2F;int32&#x2F;uint32&#x2F;int64&#x2F;uint64&#x2F;byte&#x2F;rune等）</li>
+<li>浮点数（float32&#x2F;float64）</li>
+<li>复数类型（complex64&#x2F;complex128）</li>
+<li>字符串（string）</li>
+</ul>
+</li>
+<li>复合类型（又叫聚合类型）：数组和结构体类型。</li>
+<li>引用类型：切片（slice）、map、channel、指针。</li>
+<li>接口类型：如error。</li>
+</ol>
+<h2 id="比较"><a href="#比较" class="headerlink" title="&#x3D;&#x3D; 比较"></a>&#x3D;&#x3D; 比较</h2><p><strong>&#x3D;&#x3D;操作最重要的一个前提是：两个操作数类型必须相同！类型必须相同！类型必须相同!</strong></p>
+<p>关于引用类型，有两个比较特殊的规定：</p>
+<ul>
+<li>切片之间不允许比较。切片只能与nil值比较。</li>
+<li>map之间不允许比较。map只能与nil值比较。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>go</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>hexo建站</title>
+    <url>/2021/11/05/hexo_env/</url>
+    <content><![CDATA[<h2 id="一、nodejs-安装"><a href="#一、nodejs-安装" class="headerlink" title="一、nodejs 安装"></a>一、nodejs 安装</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">官网: https://nodejs.org/en/</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、hexo安装"><a href="#二、hexo安装" class="headerlink" title="二、hexo安装"></a>二、hexo安装</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">官网：https://hexo.io/zh-cn/</span><br><span class="line">1. npm install hexo-cli -g</span><br><span class="line">2. hexo init hexo  #初始化博客</span><br><span class="line">3. cd hexo</span><br><span class="line">4. hexo server   #启动服务</span><br><span class="line"></span><br><span class="line">#升级命令：</span><br><span class="line">npm update hexo-cli -g</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、生成文档"><a href="#三、生成文档" class="headerlink" title="三、生成文档"></a>三、生成文档</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. cd hexo</span><br><span class="line">2. hexo n myTest  # 建文章,同命令：hexo new myTest</span><br><span class="line">3. hexo g         #生成，同命令：hexo generate</span><br><span class="line">4. hexo s         #启动服务，可预览</span><br><span class="line"></span><br><span class="line">5. hexo d          #部署,需要配置github，hexo deploy</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、部署到github"><a href="#四、部署到github" class="headerlink" title="四、部署到github"></a>四、部署到github</h2><ul>
+<li>部署文档：<a href="https://hexo.io/docs/one-command-deployment">https://hexo.io/docs/one-command-deployment</a></li>
+<li>github新建项目：shispring.github.io</li>
+<li>编辑配置文件：vim hexo&#x2F;_config.yaml<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: git@github.com:shispring/shispring.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure></li>
+<li>npm install hexo-deployer-git –save</li>
+<li>hexo g</li>
+<li>hexo d</li>
+</ul>
+<h2 id="五、更换主题"><a href="#五、更换主题" class="headerlink" title="五、更换主题"></a>五、更换主题</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">详情请查看：</span><br><span class="line">https://github.com/theme-next/hexo-theme-next</span><br></pre></td></tr></table></figure>
+
+
+
+]]></content>
+      <tags>
+        <tag>web</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>http状态码</title>
+    <url>/2024/08/30/http%E7%8A%B6%E6%80%81%E7%A0%81/</url>
+    <content><![CDATA[<h2 id="HTTP状态码总结"><a href="#HTTP状态码总结" class="headerlink" title="HTTP状态码总结"></a>HTTP状态码总结</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">100：继续 客户端应当继续发送请求。客户端应当继续发送请求的剩余部分，或者如果请求已经完成，忽略这个响应。</span><br><span class="line"></span><br><span class="line">101： 转换协议 在发送完这个响应最后的空行后，服务器将会切换到在Upgrade 消息头中定义的那些协议。只有在切换新的协议更有好处的时候才应该采取类似措施。</span><br><span class="line"></span><br><span class="line">102：继续处理 由WebDAV（RFC 2518）扩展的状态码，代表处理将被继续执行。</span><br><span class="line"></span><br><span class="line">200：请求成功 处理方式：获得响应的内容，进行处理</span><br><span class="line"></span><br><span class="line">201：请求完成，结果是创建了新资源。新创建资源的URI可在响应的实体中得到 处理方式：爬虫中不会遇到</span><br><span class="line"></span><br><span class="line">202：请求被接受，但处理尚未完成 处理方式：阻塞等待</span><br><span class="line"></span><br><span class="line">204：服务器端已经实现了请求，但是没有返回新的信 息。如果客户是用户代理，则无须为此更新自身的文档视图。 处理方式：丢弃</span><br><span class="line"></span><br><span class="line">300：该状态码不被HTTP/1.0的应用程序直接使用， 只是作为3XX类型回应的默认解释。存在多个可用的被请求资源。 处理方式：若程序中能够处理，则进行进一步处理，如果程序中不能处理，则丢弃</span><br><span class="line"></span><br><span class="line">301：请求到的资源都会分配一个永久的URL，这样就可以在将来通过该URL来访问此资源 处理方式：重定向到分配的URL</span><br><span class="line"></span><br><span class="line">302：请求到的资源在一个不同的URL处临时保存 处理方式：重定向到临时的URL</span><br><span class="line"></span><br><span class="line">304：请求的资源未更新 处理方式：丢弃</span><br><span class="line"></span><br><span class="line">400：非法请求 处理方式：丢弃</span><br><span class="line"></span><br><span class="line">401：未授权 处理方式：丢弃</span><br><span class="line"></span><br><span class="line">403：禁止 处理方式：丢弃</span><br><span class="line"></span><br><span class="line">404：没有找到 处理方式：丢弃</span><br><span class="line"></span><br><span class="line">500：服务器内部错误 服务器遇到了一个未曾预料的状况，导致了它无法完成对请求的处理。一般来说，这个问题都会在服务器端的源代码出现错误时出现。</span><br><span class="line"></span><br><span class="line">501：服务器无法识别 服务器不支持当前请求所需要的某个功能。当服务器无法识别请求的方法，并且无法支持其对任何资源的请求。</span><br><span class="line"></span><br><span class="line">502：错误网关 作为网关或者代理工作的服务器尝试执行请求时，从上游服务器接收到无效的响应。</span><br><span class="line"></span><br><span class="line">503：服务出错 由于临时的服务器维护或者过载，服务器当前无法处理请求。这个状况是临时的，并且将在一段时间以后恢复。</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>server</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s cordon drain taint</title>
+    <url>/2024/09/04/k8s-cordon-drain-taint/</url>
+    <content><![CDATA[<h3 id="cordon-标记节点不可调度"><a href="#cordon-标记节点不可调度" class="headerlink" title="cordon: 标记节点不可调度"></a>cordon: 标记节点不可调度</h3><ul>
+<li>如果一个node被标记为cordon，新创建的pod不会被调度到此node上，已经调度上去的不会被移走。</li>
+</ul>
+<h3 id="drain-驱逐节点上的pod"><a href="#drain-驱逐节点上的pod" class="headerlink" title="drain: 驱逐节点上的pod"></a>drain: 驱逐节点上的pod</h3><ul>
+<li>drain包含两种状态：cordon不可被调度，evicted驱逐当前节点所以pod</li>
+</ul>
+<h3 id="taint-设置节点的污点"><a href="#taint-设置节点的污点" class="headerlink" title="taint:设置节点的污点"></a>taint:设置节点的污点</h3><ul>
+<li>污点的格式: key&#x3D;value:effect</li>
+<li>key和value是污点的标签，可以自行拟定</li>
+<li>effect描述污点的作用,effect支持如下三个选项:<br>PreferNoSchedule：尽量避免把pod调度到具有该污点的node上，除非没有其他节点可调度<br>NoSchedule:：不会把pod调度到具有该污点的node上，但不会影响当前node已存在的pod<br>NoExecute：不会把pod调度到具有该污点的node上，同时还会驱逐node上已存在的pod</li>
+</ul>
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#设置node不可调度</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">kubectl  describe node &lt;NODE&gt; | grep Unschedulable</span><br><span class="line"></span><br><span class="line"><span class="comment">#drain停机维护</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line">kubectl drain &lt;NODE&gt; --ignore-daemonsets --delete-local-data --force --grace-period=0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">kubectl drain node-1 --grace-period=60 --<span class="built_in">timeout</span>=10m --ignore-daemonsets --delete-local-data</span><br><span class="line">参数说明：</span><br><span class="line"></span><br><span class="line">•	--grace-period=60：每个 Pod 有 60 秒的优雅关闭时间。</span><br><span class="line">•	--<span class="built_in">timeout</span>=10m：整个驱逐操作最多等待 10 分钟。</span><br><span class="line">•	--ignore-daemonsets：忽略 DaemonSet 管理的 Pod，不会尝试驱逐它们。</span><br><span class="line">•	--delete-local-data：强制删除使用本地存储的数据，即使 Pod 使用了本地卷。</span><br><span class="line"></span><br><span class="line"><span class="comment">#uncordon恢复节点可调度</span></span><br><span class="line">kubectl uncordon &lt;NODE&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置污点,指定标签为dedicated=special-user,策略为NoSchedule</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated=special-user:NoSchedule</span><br><span class="line"><span class="comment">#移除key为dedicated的NoSchedule污点</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated:NoSchedule-</span><br><span class="line"><span class="comment">#移除key为dedicated的所有污点</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated-</span><br><span class="line"><span class="comment">#设置&lt;NODE&gt;污点,策略为NoExecute</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated=special-user:NoExecute</span><br><span class="line"><span class="comment">#注意一点,不要混淆节点不可调度,节点上存在污点节点仍然是可以调度的,只要pod中存在容忍即可调度到&lt;NODE&gt;节点</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s node not ready 排查</title>
+    <url>/2024/09/26/k8s-node-not-ready-%E6%8E%92%E6%9F%A5/</url>
+    <content><![CDATA[<h3 id="1-节点-NotReady-的原因"><a href="#1-节点-NotReady-的原因" class="headerlink" title="1. 节点 NotReady 的原因"></a>1. 节点 NotReady 的原因</h3><ol>
+<li><p><strong>Kubelet 失败</strong>：</p>
+<ul>
+<li>Kubelet 进程未启动或崩溃，导致节点无法向 API 服务器报告其状态。</li>
+</ul>
+</li>
+<li><p><strong>网络问题</strong>：</p>
+<ul>
+<li>节点与控制平面之间的网络连接不畅，无法与 API 服务器通信。</li>
+</ul>
+</li>
+<li><p><strong>资源不足</strong>：</p>
+<ul>
+<li>节点上的 CPU、内存、磁盘等资源耗尽，导致无法正常调度 Pod 或处理请求。</li>
+</ul>
+</li>
+<li><p><strong>Docker 或容器运行时问题</strong>：</p>
+<ul>
+<li>容器运行时（如 Docker、containerd）故障，无法启动或管理 Pod。</li>
+</ul>
+</li>
+<li><p><strong>节点条件不满足</strong>：</p>
+<ul>
+<li>节点可能因为 DiskPressure、MemoryPressure 或 PIDPressure 等条件被标记为 NotReady。</li>
+</ul>
+</li>
+<li><p><strong>防火墙或安全组配置</strong>：</p>
+<ul>
+<li>网络策略、iptables 或云平台的安全组阻止了与控制平面的通信。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-补救措施"><a href="#2-补救措施" class="headerlink" title="2. 补救措施"></a>2. 补救措施</h3><p>如果节点长时间处于 NotReady 状态，可以采取以下措施：</p>
+<ol>
+<li><p><strong>检查 Kubelet 日志</strong>：</p>
+<ul>
+<li>查看 Kubelet 日志，了解其是否正常启动，是否有错误信息。</li>
+<li>使用命令：<code>journalctl -u kubelet</code> 或 <code>kubectl logs -n kube-system &lt;kubelet-pod-name&gt;</code>。</li>
+<li>Kubelet 通常是以 daemonset 的形式运行在每个节点上。要查看集群中 Kubelet Pod 的列表，可以使用以下命令：kubectl get pods -n kube-system -l k8s-app&#x3D;kubelet。</li>
+</ul>
+</li>
+<li><p><strong>检查资源状态</strong>：</p>
+<ul>
+<li>使用命令 <code>kubectl describe node &lt;node-name&gt;</code> 查看节点状态和条件，确定是否由于资源压力导致 NotReady。</li>
+</ul>
+</li>
+<li><p><strong>重启 Kubelet</strong>：</p>
+<ul>
+<li>如果 Kubelet 出现问题，尝试重启该服务：<code>sudo systemctl restart kubelet</code>。</li>
+</ul>
+</li>
+<li><p><strong>检查网络连接</strong>：</p>
+<ul>
+<li>确认节点与 API 服务器的网络连接正常，使用 <code>ping</code> 或 <code>curl</code> 测试连接。</li>
+</ul>
+</li>
+<li><p><strong>清理资源</strong>：</p>
+<ul>
+<li>如果是资源不足，考虑清理不必要的 Pod，或增加节点的资源（CPU、内存）。</li>
+</ul>
+</li>
+<li><p><strong>检查防火墙和安全组</strong>：</p>
+<ul>
+<li>确保防火墙规则或安全组配置允许节点与控制平面之间的通信。</li>
+</ul>
+</li>
+<li><p><strong>驱动更新或重新安装</strong>：</p>
+<ul>
+<li>检查 Docker 或容器运行时的版本和配置，如果存在问题，考虑更新或重新安装。</li>
+</ul>
+</li>
+<li><p><strong>使用 cordon 和 drain</strong>：</p>
+<ul>
+<li>如果节点不能恢复，使用 <code>kubectl cordon &lt;node-name&gt;</code> 阻止新的 Pod 调度到该节点，使用 <code>kubectl drain &lt;node-name&gt;</code> 将现有 Pod 移走，进行故障排查或维护。</li>
+<li>cordon命令目的：将节点标记为不可调度，防止新的 Pod 被调度到该节点上。</li>
+<li>drain命令目的：迁移节点上的所有 Pod，除了 DaemonSet 管理的 Pod。kubectl drain <node-name> –ignore-daemonsets –delete-emptydir-data</li>
+</ul>
+</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>节点状态为 NotReady 的原因可能涉及 Kubelet、资源、网络等多方面的问题。通过检查日志、资源状态和网络连接等方式，可以快速定位问题并采取相应的补救措施，确保集群的健康和可用性。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kubectl get ds -n kube-system</span><br><span class="line">kubectl get pods -n kube-system -l k8s-app=kubelet</span><br><span class="line"></span><br><span class="line">kubectl describe node &lt;node-name&gt;  -n kube-system | grep -A 10 Conditions</span><br><span class="line">kubectl describe node &lt;node-name&gt;  -n kube-system | grep -A 10 Events</span><br><span class="line">kubectl describe pod &lt;kubelet-pod-name&gt; -n kube-system | grep Events -A  10</span><br><span class="line"></span><br><span class="line">kubectl cordon node01</span><br><span class="line">kubectl drain node01 --ignore-daemonsets --delete-emptydir-data</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s operator开发步骤</title>
+    <url>/2024/09/25/k8s-operator%E5%BC%80%E5%8F%91%E6%AD%A5%E9%AA%A4/</url>
+    <content><![CDATA[<h3 id="安装kubebuilder"><a href="#安装kubebuilder" class="headerlink" title="安装kubebuilder"></a>安装kubebuilder</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -L -o kubebuilder &lt;https://go.kubebuilder.io/dl/latest/$&gt;(go env GOOS)/$(go env GOARCH)</span><br><span class="line">chmod +x kubebuilder &amp;&amp; mv kubebuilder /usr/local/bin/</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-创建脚手架工程"><a href="#1-创建脚手架工程" class="headerlink" title="1. 创建脚手架工程"></a><strong>1. 创建脚手架工程</strong></h3><ul>
+<li><code>kubebuilder init --domain edas.io</code><figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line">kubebuilder init 命令参数:</span><br><span class="line">-domain：指定 <span class="variable constant_">CRD</span> 的域名，通常使用组织或项目的域名，确保 <span class="variable constant_">CRD</span> 名称唯一。</span><br><span class="line">-repo：指定 <span class="title class_">Go</span> 模块的路径，通常是 <span class="title class_">GitHub</span> 上的路径，用于代码组织。</span><br><span class="line">-version：指定使用的 <span class="title class_">Kubernetes</span> <span class="variable constant_">API</span> 版本，默认为 v1。</span><br><span class="line">-make-symlinks：创建指向 <span class="variable constant_">API</span> 和 <span class="title class_">Controller</span> 代码的符号链接，便于管理。</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-创建-API"><a href="#2-创建-API" class="headerlink" title="2. 创建 API"></a><strong>2. 创建 API</strong></h3><ul>
+<li><code>kubebuilder create api --group apps --version v1alpha1 --kind Application</code></li>
+</ul>
+<figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line">kubebuilder create api 命令参数:</span><br><span class="line">-group：指定 <span class="variable constant_">API</span> 组名，用于区分不同的资源。</span><br><span class="line">-version：指定 <span class="variable constant_">API</span> 版本，通常为 v1 或其他。</span><br><span class="line">-kind：指定自定义资源的类型名称，通常采用大写驼峰命名法。</span><br><span class="line">-resource：是否创建 <span class="variable constant_">CRD</span> 资源，默认为是。</span><br><span class="line">-controller：是否创建控制器，默认为是。</span><br><span class="line">-controller：可以不添加任何参数，系统会提示输入基本配置。</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-定义-CRD"><a href="#3-定义-CRD" class="headerlink" title="3. 定义 CRD"></a><strong>3. 定义 CRD</strong></h3><ul>
+<li><code>make manifests</code> 命令生成 CRD 文件，便于在集群中应用。</li>
+</ul>
+<h3 id="4-编写-Controller-逻辑"><a href="#4-编写-Controller-逻辑" class="headerlink" title="4. 编写 Controller 逻辑"></a><strong>4. 编写 Controller 逻辑</strong></h3><ul>
+<li>编辑生成的控制器代码，添加业务逻辑，处理自定义资源的增、删、改、查等操作。</li>
+</ul>
+<h3 id="5-构建和部署-Operator"><a href="#5-构建和部署-Operator" class="headerlink" title="5.构建和部署 Operator"></a><strong>5.构建和部署 Operator</strong></h3><figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line">make docker-build # 构建镜像</span><br><span class="line">make docker-push # 推送镜像</span><br><span class="line">make deploy：安装controller到k8s （make undeploy：删除controller）</span><br><span class="line"></span><br><span class="line">#或者：</span><br><span class="line">#安装<span class="variable constant_">CRD</span>到k8s，可以先手动安装（make uninstall：删除<span class="variable constant_">CRD</span>）</span><br><span class="line">make install </span><br><span class="line"></span><br><span class="line">kubectl get crd</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-测试和验证："><a href="#6-测试和验证：" class="headerlink" title="6.测试和验证："></a><strong>6.测试和验证</strong>：</h3><figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line"># 启动controller</span><br><span class="line">make run</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-卸载CRD："><a href="#7-卸载CRD：" class="headerlink" title="7.卸载CRD："></a><strong>7.卸载CRD</strong>：</h3><figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line"># 卸载crd</span><br><span class="line">make uninstall</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>开发流程包括项目初始化、API 创建、控制器实现、生成 CRD、构建和部署，最后进行测试和验证。<br>参考文档：<br><a href="https://podsbook.com/posts/kubernetes/operator">https://podsbook.com/posts/kubernetes/operator</a><br><a href="https://www.rushui.net/posts/kubebuilder-demo-simple">https://www.rushui.net/posts/kubebuilder-demo-simple</a></p>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s service account demo</title>
+    <url>/2024/09/09/k8s-service-account-demo/</url>
+    <content><![CDATA[<p>在 Kubernetes 中使用 Service Account（SA）时，可以通过配置自定义的 Service Account 来实现对集群资源的访问权限。下面是一个创建 Service Account 并配置其访问集群资源的案例。</p>
+<h3 id="步骤-1：创建-Service-Account"><a href="#步骤-1：创建-Service-Account" class="headerlink" title="步骤 1：创建 Service Account"></a>步骤 1：创建 Service Account</h3><p>首先，创建一个 Service Account。例如，命名为 <code>custom-sa</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl create serviceaccount custom-sa</span><br></pre></td></tr></table></figure>
+
+<p>这将会在当前命名空间中创建一个名为 <code>custom-sa</code> 的 Service Account。在 Kubernetes 1.24 及之后的版本中，Service Account 不再默认生成 Secret。为 Service Account 手动创建 Secret：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">custom-sa-secret</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/service-account.name:</span> <span class="string">&quot;custom-sa&quot;</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">kubernetes.io/service-account-token</span></span><br></pre></td></tr></table></figure>
+<p>然后应用该 YAML 文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f custom-sa-secret.yaml</span><br></pre></td></tr></table></figure>
+<p>确认 Secret 被绑定： 使用以下命令查看 Service Account 是否绑定了 Secret：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl describe sa custom-sa</span><br></pre></td></tr></table></figure>
+<p>确认 secrets 部分列出了 custom-sa-secret。</p>
+<h3 id="步骤-2：创建-Role-或-ClusterRole"><a href="#步骤-2：创建-Role-或-ClusterRole" class="headerlink" title="步骤 2：创建 Role 或 ClusterRole"></a>步骤 2：创建 Role 或 ClusterRole</h3><p><strong>Role</strong> 用于定义在指定命名空间中的权限，而 <strong>ClusterRole</strong> 用于集群范围的权限。根据需要，你可以创建一个 <code>Role</code> 或 <code>ClusterRole</code>。</p>
+<h4 id="创建-Role（针对某一命名空间的权限）："><a href="#创建-Role（针对某一命名空间的权限）：" class="headerlink" title="创建 Role（针对某一命名空间的权限）："></a>创建 Role（针对某一命名空间的权限）：</h4><p>假设你想为该 Service Account 赋予在某个命名空间中读取 Pods 的权限，你可以这样创建一个 <code>Role</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">pod-reader</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">apiGroups:</span> [<span class="string">&quot;&quot;</span>]  <span class="comment"># &quot;&quot; 代表 core API group</span></span><br><span class="line">  <span class="attr">resources:</span> [<span class="string">&quot;pods&quot;</span>]</span><br><span class="line">  <span class="attr">verbs:</span> [<span class="string">&quot;get&quot;</span>, <span class="string">&quot;watch&quot;</span>, <span class="string">&quot;list&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>保存为 <code>role.yaml</code> 文件后，执行以下命令来应用：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f role.yaml</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建-ClusterRole（全集群范围的权限）："><a href="#创建-ClusterRole（全集群范围的权限）：" class="headerlink" title="创建 ClusterRole（全集群范围的权限）："></a>创建 ClusterRole（全集群范围的权限）：</h4><p>如果你想授予集群范围的权限，可以创建一个 <code>ClusterRole</code>。例如，授予读取集群中所有命名空间下 Pods 的权限：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">cluster-pod-reader</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">apiGroups:</span> [<span class="string">&quot;&quot;</span>]</span><br><span class="line">  <span class="attr">resources:</span> [<span class="string">&quot;pods&quot;</span>]</span><br><span class="line">  <span class="attr">verbs:</span> [<span class="string">&quot;get&quot;</span>, <span class="string">&quot;watch&quot;</span>, <span class="string">&quot;list&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>保存为 <code>clusterrole.yaml</code>，然后执行以下命令来应用：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f clusterrole.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤-3：绑定-Role-或-ClusterRole-到-Service-Account"><a href="#步骤-3：绑定-Role-或-ClusterRole-到-Service-Account" class="headerlink" title="步骤 3：绑定 Role 或 ClusterRole 到 Service Account"></a>步骤 3：绑定 Role 或 ClusterRole 到 Service Account</h3><p>为了使 Service Account 具有访问权限，必须将其与 <code>Role</code> 或 <code>ClusterRole</code> 绑定。</p>
+<h4 id="绑定-Role："><a href="#绑定-Role：" class="headerlink" title="绑定 Role："></a>绑定 Role：</h4><p>如果你创建了 <code>Role</code>，使用以下 <code>RoleBinding</code> 将 <code>custom-sa</code> 与 <code>Role</code> 绑定：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">read-pods-binding</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">custom-sa</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">pod-reader</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br></pre></td></tr></table></figure>
+
+<p>应用：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f rolebinding.yaml</span><br></pre></td></tr></table></figure>
+
+<h4 id="绑定-ClusterRole："><a href="#绑定-ClusterRole：" class="headerlink" title="绑定 ClusterRole："></a>绑定 ClusterRole：</h4><p>如果你使用的是 <code>ClusterRole</code>，可以通过 <code>ClusterRoleBinding</code> 进行绑定：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">read-pods-cluster-binding</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">custom-sa</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">cluster-pod-reader</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br></pre></td></tr></table></figure>
+
+<p>应用：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f clusterrolebinding.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤-4：创建-Kubeconfig-文件"><a href="#步骤-4：创建-Kubeconfig-文件" class="headerlink" title="步骤 4：创建 Kubeconfig 文件"></a>步骤 4：创建 Kubeconfig 文件</h3><p>为了使这个 Service Account 能够通过 kubeconfig 文件访问集群，需要以下步骤：</p>
+<ol>
+<li>获取 Service Account 的 token：</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">TOKEN=$(kubectl get secret custom-sa-secret -o jsonpath=<span class="string">&#x27;&#123;.data.token&#125;&#x27;</span> | <span class="built_in">base64</span> --decode)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>获取集群的 CA 证书：</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">CA_CERT=$(kubectl get secret custom-sa-secret -o jsonpath=<span class="string">&#x27;&#123;.data.ca\.crt&#125;&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>获取集群的 API server 地址：</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SERVER=$(kubectl config view --minify -o jsonpath=<span class="string">&#x27;&#123;.clusters[0].cluster.server&#125;&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>创建 kubeconfig 文件：</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> &lt;&lt;<span class="string">EOF &gt; custom-sa.kubeconfig</span></span><br><span class="line"><span class="string">apiVersion: v1</span></span><br><span class="line"><span class="string">kind: Config</span></span><br><span class="line"><span class="string">clusters:</span></span><br><span class="line"><span class="string">- cluster:</span></span><br><span class="line"><span class="string">    certificate-authority-data: $&#123;CA_CERT&#125;</span></span><br><span class="line"><span class="string">    server: $&#123;SERVER&#125;</span></span><br><span class="line"><span class="string">  name: kubernetes</span></span><br><span class="line"><span class="string">contexts:</span></span><br><span class="line"><span class="string">- context:</span></span><br><span class="line"><span class="string">    cluster: kubernetes</span></span><br><span class="line"><span class="string">    user: custom-sa</span></span><br><span class="line"><span class="string">  name: custom-sa-context</span></span><br><span class="line"><span class="string">current-context: custom-sa-context</span></span><br><span class="line"><span class="string">users:</span></span><br><span class="line"><span class="string">- name: custom-sa</span></span><br><span class="line"><span class="string">  user:</span></span><br><span class="line"><span class="string">    token: $&#123;TOKEN&#125;</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl --kubeconfig=./custom-sa.kubeconfig get sa -n kube-system</span><br></pre></td></tr></table></figure>
+
+<h3 id="ClusterRole-与-Role-的区别"><a href="#ClusterRole-与-Role-的区别" class="headerlink" title="ClusterRole 与 Role 的区别"></a>ClusterRole 与 Role 的区别</h3><ul>
+<li><strong>Role</strong>：仅限于某个命名空间，不能跨命名空间生效。它用于授予某个命名空间内资源的权限。</li>
+<li><strong>ClusterRole</strong>：在整个集群范围内生效，可以跨命名空间访问资源。它用于管理集群级别的资源或多个命名空间的资源。</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ol>
+<li>创建一个 <code>Service Account</code>。</li>
+<li>创建一个 <code>Role</code> 或 <code>ClusterRole</code>，根据需求分配权限。</li>
+<li>将 <code>Service Account</code> 通过 <code>RoleBinding</code> 或 <code>ClusterRoleBinding</code> 绑定到 <code>Role</code> 或 <code>ClusterRole</code>。</li>
+<li>使用 <code>Service Account</code> 的 token 配置 kubeconfig 文件，使其可以访问集群。</li>
+</ol>
+<p>通过这个过程，你可以为不同的应用程序或用户创建不同权限的账户，确保安全的资源访问控制。</p>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>krew &amp;&amp; kubecm</title>
+    <url>/2024/09/25/krew-kubecm/</url>
+    <content><![CDATA[<h2 id="一、安装kubectl"><a href="#一、安装kubectl" class="headerlink" title="一、安装kubectl"></a>一、安装kubectl</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#设置yum源</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">[kubernetes]</span></span><br><span class="line"><span class="string">name=Kubernetes</span></span><br><span class="line"><span class="string">baseurl=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.28/rpm/</span></span><br><span class="line"><span class="string">enabled=1</span></span><br><span class="line"><span class="string">gpgcheck=1</span></span><br><span class="line"><span class="string">gpgkey=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.28/rpm/repodata/repomd.xml.key</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">yum clean all &amp;&amp; yum makecache</span><br><span class="line"></span><br><span class="line">yum --showduplicate list kubectl</span><br><span class="line"></span><br><span class="line">yum install -y kubectl-1.28.12</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、安装krew"><a href="#二、安装krew" class="headerlink" title="二、安装krew"></a>二、安装krew</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#https://www.voidking.com/dev-kubectl-krew/</span></span><br><span class="line"><span class="comment">#https://github.com/kubernetes-sigs/krew/releases</span></span><br><span class="line"><span class="comment">#下载</span></span><br><span class="line">wget https://github.com/kubernetes-sigs/krew/releases/download/v0.4.4/krew-linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment">#解压</span></span><br><span class="line">tar zxvf krew-linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装</span></span><br><span class="line">./krew-linux_amd64 install krew</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置环境变量.bash_profile</span></span><br><span class="line"><span class="built_in">alias</span> k=<span class="string">&#x27;kubectl &#x27;</span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="string">&quot;<span class="variable">$&#123;KREW_ROOT:-<span class="variable">$HOME</span>/.krew&#125;</span>/bin:<span class="variable">$PATH</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="三、krew相关命令"><a href="#三、krew相关命令" class="headerlink" title="三、krew相关命令"></a>三、krew相关命令</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl krew -h</span><br><span class="line">kubectl krew version</span><br><span class="line"></span><br><span class="line">kubectl krew search</span><br><span class="line"></span><br><span class="line">kubectl krew install xxx</span><br><span class="line"></span><br><span class="line">kubectl xxx -h</span><br><span class="line"></span><br><span class="line">kubectl krew list</span><br><span class="line"></span><br><span class="line"><span class="comment">#除了使用krew安装kubectl插件之外，还有另外一个更加直接的办法安装kubectl插件：下载插件的二进制文件，和kubectl文件放到一起</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#卸载</span></span><br><span class="line">kubectl krew uninstall</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、安装kubecm"><a href="#四、安装kubecm" class="headerlink" title="四、安装kubecm"></a>四、安装kubecm</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#KubeCm 是一个多集群 KubeConfig 访问凭证管理工具，支持展示、切换、添加、删除 KubeConfig 访问凭证到$HOME/.kube/config文件中，方便多集群管理场景。</span></span><br><span class="line"><span class="comment">#https://kubecm.cloud/#/en-us/install</span></span><br><span class="line">kubectl krew install kc</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置环境变量.bash_profile</span></span><br><span class="line"><span class="built_in">alias</span> kc=<span class="string">&#x27;kubectl kc&#x27;</span></span><br><span class="line"><span class="built_in">alias</span> kc=<span class="string">&#x27;kubectl kc&#x27;</span></span><br><span class="line"><span class="built_in">alias</span> ks=<span class="string">&#x27;kubectl kc switch &#x27;</span></span><br><span class="line"></span><br><span class="line">kc add -f test-shbt</span><br><span class="line"></span><br><span class="line">kc add -cf test-shbt.conf --context-name test-shbt</span><br><span class="line"></span><br><span class="line">kc list</span><br><span class="line"></span><br><span class="line">kc rename</span><br><span class="line"></span><br><span class="line">kc delete </span><br><span class="line"></span><br><span class="line">kc add -cf test-bjmd.conf --context-name  test-bjmd</span><br><span class="line"></span><br><span class="line">kc switch</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux 安装 glances</title>
+    <url>/2024/08/22/linux-%E5%AE%89%E8%A3%85-glances/</url>
+    <content><![CDATA[<h2 id="linux-安装-glances"><a href="#linux-安装-glances" class="headerlink" title="linux 安装 glances"></a>linux 安装 glances</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yum install ncurses-devel -y</span><br><span class="line"></span><br><span class="line">#安装3.8以上的python环境</span><br><span class="line">pyenv install 3.12.2</span><br><span class="line"></span><br><span class="line">#验证安装模块</span><br><span class="line">python -c &quot;import curses; print(&#x27;curses module installed successfully&#x27;)&quot;</span><br><span class="line"></span><br><span class="line"># 安装需求包</span><br><span class="line">pip install fastapi</span><br><span class="line">pip install uvicorn</span><br><span class="line">pip install jinja2</span><br><span class="line"></span><br><span class="line">#安装glances</span><br><span class="line">pip install --upgrade glances</span><br><span class="line"></span><br><span class="line">#查看安装位置</span><br><span class="line">whereis glances</span><br><span class="line"></span><br><span class="line">#配置环境变量(vim .bashrc)</span><br><span class="line">alias glances=&#x27;/root/.pyenv/shims/glances  &#x27;</span><br><span class="line"></span><br><span class="line">#启动</span><br><span class="line">glances</span><br><span class="line">#网页查看</span><br><span class="line">glances -w</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux下go环境部署</title>
+    <url>/2022/04/27/linux%E4%B8%8Bgo%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/</url>
+    <content><![CDATA[<h2 id="下载配置"><a href="#下载配置" class="headerlink" title="下载配置"></a>下载配置</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="built_in">mkdir</span> go &amp;&amp; <span class="built_in">cd</span> go</span><br><span class="line"></span><br><span class="line">wget https://golang.org/dl/go1.17.1.linux-amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用root账号配置全局环境</span></span><br><span class="line"><span class="built_in">sudo</span> tar -zxf  go1.17.1.linux-amd64.tar.gz -C /usr/local/</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置环境变量"><a href="#配置环境变量" class="headerlink" title="配置环境变量"></a>配置环境变量</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">sudo</span> vim  /etc/profile </span><br><span class="line"><span class="comment"># 末尾加如下一行</span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/usr/local/go/bin</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使之生效</span></span><br><span class="line">$ <span class="built_in">sudo</span> <span class="built_in">source</span> /etc/profile</span><br><span class="line"></span><br><span class="line">$ go version</span><br><span class="line">go version go1.17.1 linux/amd64</span><br><span class="line"></span><br><span class="line">$ go <span class="built_in">env</span> -w GO111MODULE=on </span><br><span class="line">$ go <span class="built_in">env</span> -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct</span><br></pre></td></tr></table></figure>
+
+<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">mkdir</span> hello &amp;&amp; <span class="built_in">cd</span> hello</span><br><span class="line">$ go mod init example/hello</span><br><span class="line">$ vim hello.go</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;Hello, World!&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ go run .</span><br><span class="line">Hello, World!</span><br></pre></td></tr></table></figure>
+
+<h2 id="引用外包方式"><a href="#引用外包方式" class="headerlink" title="引用外包方式"></a>引用外包方式</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ go get [rsc.io/quote](http://rsc.io/quote)  </span><br><span class="line">$ vim hello.go</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;rsc.io/quote&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(quote.Go())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Add new module requirements and sums.</span></span><br><span class="line">$ go mod tidy</span><br><span class="line">$ go run .</span><br><span class="line">Don<span class="string">&#x27;t communicate by sharing memory, share memory by communicating.</span></span><br><span class="line"><span class="string">Hello, World!</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux安装多版本go环境</title>
+    <url>/2024/08/28/linux%E5%AE%89%E8%A3%85%E5%A4%9A%E7%89%88%E6%9C%ACgo%E7%8E%AF%E5%A2%83/</url>
+    <content><![CDATA[<h2 id="gvm安装多版本go环境"><a href="#gvm安装多版本go环境" class="headerlink" title="gvm安装多版本go环境"></a>gvm安装多版本go环境</h2><ul>
+<li>参考地址：<a href="https://github.com/moovweb/gvm">https://github.com/moovweb/gvm</a></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#执行shell安装gvm</span></span><br><span class="line">bash &lt; &lt;(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看所有可安装go版本</span></span><br><span class="line">gvm listall</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装高版本go环境顺序</span></span><br><span class="line">gvm install go1.4 -B</span><br><span class="line">gvm use go1.4</span><br><span class="line"><span class="built_in">export</span> GOROOT_BOOTSTRAP=<span class="variable">$GOROOT</span></span><br><span class="line">gvm install go1.17.13</span><br><span class="line">gvm use go1.17.13</span><br><span class="line"><span class="built_in">export</span> GOROOT_BOOTSTRAP=<span class="variable">$GOROOT</span></span><br><span class="line">gvm install go1.20</span><br><span class="line">gvm use go1.20 --default</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看安装的go版本</span></span><br><span class="line">gvm list</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看环境变量</span></span><br><span class="line">go <span class="built_in">env</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="go-module与vendor"><a href="#go-module与vendor" class="headerlink" title="go module与vendor"></a>go module与vendor</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#引入新的包时，强制启用Go Modules模式</span></span><br><span class="line">go <span class="built_in">env</span> -w GO111MODULE=<span class="string">&quot;on&quot;</span> GOFLAGS=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#项目自带vendor目录，强制 Go 使用 vendor 目录中的依赖包,而不是从网络上下载依赖。这在项目中已经存在 vendor 目录的情况下非常有用，因为它可以避免重新下载依赖，节省时间和带宽</span></span><br><span class="line">go <span class="built_in">env</span> -w GO111MODULE=<span class="string">&quot;auto&quot;</span> GOFLAGS=<span class="string">&quot;-mod=vendor&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置代理</span></span><br><span class="line">go <span class="built_in">env</span> -w GOPROXY=<span class="string">&quot;https://goproxy.cn,https://goproxy.io,direct&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#新项目初始化模块</span></span><br><span class="line">go mod init</span><br><span class="line"><span class="comment">#确认依赖关系</span></span><br><span class="line">go mod verify</span><br><span class="line"><span class="comment">#解释为什么需要包和模块</span></span><br><span class="line">go mod why</span><br><span class="line"><span class="comment">#下载模块到本地缓存</span></span><br><span class="line">go mod download</span><br><span class="line"><span class="comment">#把模块之间的依赖图显示出来</span></span><br><span class="line">go mod graph</span><br><span class="line"><span class="comment">#增加缺失的包，移除没用的包</span></span><br><span class="line">go mod tidy</span><br><span class="line"><span class="comment">#把依赖拷贝到vendor目录下,更新依赖包</span></span><br><span class="line">go mod vendor</span><br><span class="line"></span><br><span class="line"><span class="comment">#部署和发布：</span></span><br><span class="line"><span class="comment">#在部署时，如果希望避免依赖在网络上的可用性（例如，因防火墙或网络问题），建议使用 vendor 目录。#将最终的二进制文件和 vendor 目录（如果使用）一起部署。</span></span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
+  <entry>
+    <title>linux节点网络相关命令</title>
+    <url>/2024/08/23/linux%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<h2 id="了解节点网络拓扑的几种工具和方法："><a href="#了解节点网络拓扑的几种工具和方法：" class="headerlink" title="了解节点网络拓扑的几种工具和方法："></a>了解节点网络拓扑的几种工具和方法：</h2><h3 id="1-ip-命令"><a href="#1-ip-命令" class="headerlink" title="1. ip 命令"></a>1. <strong><code>ip</code> 命令</strong></h3><p><code>ip</code> 命令是一个功能强大的网络工具，通常用于查看和管理网络接口、路由表、策略路由和隧道。</p>
+<ul>
+<li><p><strong>查看网络接口和IP地址：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip addr show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip route show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看邻居（ARP 表）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip neigh show</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-netstat-或-ss-命令"><a href="#2-netstat-或-ss-命令" class="headerlink" title="2. netstat 或 ss 命令"></a>2. <strong><code>netstat</code> 或 <code>ss</code> 命令</strong></h3><p><code>netstat</code> 和 <code>ss</code> 命令用于显示网络连接、路由表、接口统计信息和多播成员信息。</p>
+<ul>
+<li><p><strong>查看所有网络连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">netstat -tuln</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ss -tuln</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">netstat -rn</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ip route show</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="3-nmap"><a href="#3-nmap" class="headerlink" title="3. nmap"></a>3. <strong><code>nmap</code></strong></h3><p><code>nmap</code> 是一个强大的网络扫描工具，通常用于网络发现和安全审计。它可以扫描网络并获取有关局域网中其他设备的信息。</p>
+<ul>
+<li><p><strong>扫描整个子网中的活跃设备：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>获取详细的主机和服务信息：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -A 192.168.1.1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="4-traceroute"><a href="#4-traceroute" class="headerlink" title="4. traceroute"></a>4. <strong><code>traceroute</code></strong></h3><p><code>traceroute</code> 命令用于跟踪数据包在网络中的路径，帮助识别网络路径和延迟情况。</p>
+<ul>
+<li><strong>跟踪到目标主机的路由：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">traceroute example.com</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="5-arp-scan"><a href="#5-arp-scan" class="headerlink" title="5. arp-scan"></a>5. <strong><code>arp-scan</code></strong></h3><p><code>arp-scan</code> 是一个网络发现工具，用于快速扫描局域网中的设备。</p>
+<ul>
+<li><strong>扫描整个子网中的设备：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">arp-scan -l</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="6-ifconfig-和-route"><a href="#6-ifconfig-和-route" class="headerlink" title="6. ifconfig 和 route"></a>6. <strong><code>ifconfig</code> 和 <code>route</code></strong></h3><p>虽然已经被 <code>ip</code> 命令取代，但在某些旧系统上依然可以使用。</p>
+<ul>
+<li><p><strong>查看网络接口：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">route -n</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="7-ethtool"><a href="#7-ethtool" class="headerlink" title="7. ethtool"></a>7. <strong><code>ethtool</code></strong></h3><p><code>ethtool</code> 用于查询和设置以太网设备参数，可以获取接口的详细信息。</p>
+<ul>
+<li><strong>查看网卡详细信息：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ethtool eth0</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="8-nmcli"><a href="#8-nmcli" class="headerlink" title="8. nmcli"></a>8. <strong><code>nmcli</code></strong></h3><p><code>nmcli</code> 是 NetworkManager 提供的命令行工具，用于查看和管理网络连接。</p>
+<ul>
+<li><p><strong>查看所有网络连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看设备状态：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmcli device status</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="9-bmon"><a href="#9-bmon" class="headerlink" title="9. bmon"></a>9. <strong><code>bmon</code></strong></h3><p><code>bmon</code> 是一个带有图形界面的带宽监控和诊断工具，用于实时监控网络流量。</p>
+<ul>
+<li><strong>启动 <code>bmon</code> 监控网络流量：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bmon</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="10-iptraf-ng"><a href="#10-iptraf-ng" class="headerlink" title="10. iptraf-ng"></a>10. <strong><code>iptraf-ng</code></strong></h3><p><code>iptraf-ng</code> 是一个基于终端的实时网络监控工具，能够监控网络流量和连接。</p>
+<ul>
+<li><strong>启动 <code>iptraf-ng</code> 监控：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptraf-ng</span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
+    <title>shell根据输入月份，遍历当月日期</title>
+    <url>/2022/10/31/shell-date-%E6%89%93%E5%8D%B0%E6%9C%88%E6%97%A5%E6%9C%9F/</url>
+    <content><![CDATA[<h2 id="shell脚本详情"><a href="#shell脚本详情" class="headerlink" title="shell脚本详情"></a>shell脚本详情</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">echo &quot;年月格式：2022年5月，则输入2022-05&quot;</span><br><span class="line">read -p &quot;请输入年月份：&quot; VAR</span><br><span class="line"></span><br><span class="line">#VAR=&quot;2022-06&quot;</span><br><span class="line"></span><br><span class="line">#当月第一天</span><br><span class="line">firstDay=`date  -d &quot;$&#123;VAR&#125;-01&quot; +%Y-%m-%d`</span><br><span class="line">#当月最后一天</span><br><span class="line">lastDay=`date  -d &quot;+1month -1day $&#123;VAR&#125;-01&quot;  +%Y-%m-%d`</span><br><span class="line"></span><br><span class="line">#使用数组存储每一天</span><br><span class="line">array_date=()</span><br><span class="line"></span><br><span class="line">#遍历月分的每一天</span><br><span class="line">firstDayTimestamp=`date -d &quot;$firstDay&quot; +%s`</span><br><span class="line">lastDayTimestamp=`date -d &quot;$lastDay&quot; +%s`</span><br><span class="line"></span><br><span class="line">for((currentTimestamp=$firstDayTimestamp; currentTimestamp &lt;= lastDayTimestamp; ));</span><br><span class="line">do</span><br><span class="line">    currentDay=`date -d@$currentTimestamp +%Y-%m-%d`</span><br><span class="line">    array_date[$&#123;#array_date[@]&#125;]=$currentDay</span><br><span class="line">    currentTimestamp=`expr $currentTimestamp + 86400`</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo $&#123;#array_date[*]&#125;</span><br><span class="line">echo $&#123;array_date[*]&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>xorm应用测试</title>
+    <url>/2023/08/09/xorm-test/</url>
+    <content><![CDATA[<h2 id="xorm包应用测试"><a href="#xorm包应用测试" class="headerlink" title="xorm包应用测试"></a>xorm包应用测试</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	_ &quot;github.com/go-sql-driver/mysql&quot;</span><br><span class="line">	&quot;log&quot;</span><br><span class="line">	&quot;xorm.io/xorm&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">type XormTest struct &#123;</span><br><span class="line">	Id        int64  `json:&quot;id&quot; xorm:&quot;autoincr pk&quot;`     </span><br><span class="line">	Username  string `json:&quot;username&quot;`                  //用户名</span><br><span class="line">	CreatedAt string `json:&quot;created_at&quot; xorm:&quot;created&quot;` //创建时间</span><br><span class="line">	UpdatedAt string `json:&quot;updated_at&quot; xorm:&quot;updated&quot;` //更新时间</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var engine *xorm.Engine</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	//mysql -h localhost -uroot -p  -P 3306 --default-character-set=utf8 -A</span><br><span class="line">	var err error</span><br><span class="line">	engine, err = xorm.NewEngine(&quot;mysql&quot;, &quot;root:xxx@tcp(127.0.0.1:3306)/yago_test?charset=utf8&quot;)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s, _ := engine.IsTableEmpty(&quot;xorm_test&quot;)</span><br><span class="line">	fmt.Println(s)</span><br><span class="line"></span><br><span class="line">	//查询</span><br><span class="line">	//selectElement(&quot;zhangsan&quot;)</span><br><span class="line">	//使用sql查询</span><br><span class="line">	queryElement()</span><br><span class="line">	//执行sql命令</span><br><span class="line">	updateBySql()</span><br><span class="line">	//插入</span><br><span class="line">	//insertElement()</span><br><span class="line">	//修改</span><br><span class="line">	//updateElement()</span><br><span class="line">	//删除</span><br><span class="line">	//deleteElement()</span><br><span class="line">	//事务</span><br><span class="line">	//transTest()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func updateBySql() &#123;</span><br><span class="line">	sql := &quot;update xorm_test set username=? where id=?&quot;</span><br><span class="line">	updateRes, err := engine.Exec(sql, &quot;wangwu&quot;, 9)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(&quot;RowNumber ==&gt; &quot;, updateRes)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func queryElement() &#123;</span><br><span class="line">	sql := &quot;select * from xorm_test where id = 8;&quot;</span><br><span class="line">	results, _ := engine.QueryString(sql)</span><br><span class="line">	fmt.Println(results)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func updateElement() &#123;</span><br><span class="line">	user := XormTest&#123;</span><br><span class="line">		Username: &quot;jpshi&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	if _, err := engine.Where(&quot;username = &#x27;wangwu&#x27;&quot;).Update(&amp;user); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func deleteElement() &#123;</span><br><span class="line">	rowNumber, err := engine.ID(2).Delete(new(XormTest))</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(&quot;RowNumber ==&gt; &quot;, rowNumber)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func transTest() &#123;</span><br><span class="line">	session := engine.NewSession()</span><br><span class="line">	defer session.Close()</span><br><span class="line">	// 开启事务</span><br><span class="line">	if err := session.Begin(); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	// 插入User</span><br><span class="line">	if _, err := session.Insert(XormTest&#123;</span><br><span class="line">		Username: &quot;zhangsan&quot;,</span><br><span class="line">	&#125;); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	// 更新User</span><br><span class="line">	if _, err := session.Where(&quot;id = &#x27;7&#x27;&quot;).Update(XormTest&#123;</span><br><span class="line">		Username: &quot;lisi&quot;,</span><br><span class="line">	&#125;); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	// 提交事务</span><br><span class="line">	session.Commit()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func insertElement() () &#123;</span><br><span class="line">	user := XormTest&#123;</span><br><span class="line">		Username: &quot;^_^&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	rowNumber, err := engine.Insert(&amp;user) // rowNumber 受影响的行数</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(&quot;RowNumber ==&gt; &quot;, rowNumber)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func selectElement(name string)  &#123;</span><br><span class="line">	users := make([]*XormTest, 0)</span><br><span class="line">	err := engine.Where(&quot;username regexp ? &quot;,name).Find(&amp;users)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	for _, v := range users &#123;</span><br><span class="line">		fmt.Printf(&quot;%v\n&quot;, v)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+  </entry>
+  <entry>
+    <title>使用github镜像加速安装pyenv</title>
+    <url>/2024/08/22/%E4%BD%BF%E7%94%A8github%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%AE%89%E8%A3%85pyenv/</url>
+    <content><![CDATA[<h1 id="使用github镜像加速安装pyenv"><a href="#使用github镜像加速安装pyenv" class="headerlink" title="使用github镜像加速安装pyenv"></a>使用github镜像加速安装pyenv</h1><h2 id="安装pyenv脚本"><a href="#安装pyenv脚本" class="headerlink" title="安装pyenv脚本"></a>安装pyenv脚本</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/usr/bin/env bash</span><br><span class="line"></span><br><span class="line">set -e</span><br><span class="line">[ -n &quot;$PYENV_DEBUG&quot; ] &amp;&amp; set -x</span><br><span class="line"></span><br><span class="line">if [ -z &quot;$PYENV_ROOT&quot; ]; then</span><br><span class="line">  export PYENV_ROOT=&quot;$&#123;HOME&#125;/.pyenv&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">colorize() &#123;</span><br><span class="line">  if [ -t 1 ]; then printf &quot;\e[%sm%s\e[m&quot; &quot;$1&quot; &quot;$2&quot;</span><br><span class="line">  else echo -n &quot;$2&quot;</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># Checks for `.pyenv` file, and suggests to remove it for installing</span><br><span class="line">if [ -d &quot;$&#123;PYENV_ROOT&#125;&quot; ]; then</span><br><span class="line">  &#123; echo</span><br><span class="line">    colorize 1 &quot;WARNING&quot;</span><br><span class="line">    echo &quot;: Can not proceed with installation. Kindly remove the &#x27;$&#123;PYENV_ROOT&#125;&#x27; directory first.&quot;</span><br><span class="line">    echo</span><br><span class="line">  &#125; &gt;&amp;2</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">failed_checkout() &#123;</span><br><span class="line">  echo &quot;Failed to git clone $1&quot;</span><br><span class="line">  exit -1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">checkout() &#123;</span><br><span class="line">  [ -d &quot;$2&quot; ] || git -c advice.detachedHead=0 clone --branch &quot;$3&quot; --depth 1 &quot;$1&quot; &quot;$2&quot; || failed_checkout &quot;$1&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if ! command -v git 1&gt;/dev/null 2&gt;&amp;1; then</span><br><span class="line">  echo &quot;pyenv: Git is not installed, can&#x27;t continue.&quot; &gt;&amp;2</span><br><span class="line">  exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ -n &quot;$&#123;USE_GIT_URI&#125;&quot; ]; then</span><br><span class="line">  GITHUB=&quot;git://github.com&quot;</span><br><span class="line">else</span><br><span class="line">  GITHUB=&quot;https://kkgithub.com&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv.git&quot;            &quot;$&#123;PYENV_ROOT&#125;&quot;                           &quot;$&#123;PYENV_GIT_TAG:-master&#125;&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-doctor.git&quot;     &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-doctor&quot;      &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-installer.git&quot;  &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-installer&quot;   &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-update.git&quot;     &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-update&quot;      &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-virtualenv.git&quot; &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-virtualenv&quot;  &quot;master&quot;</span><br><span class="line">checkout &quot;$&#123;GITHUB&#125;/pyenv/pyenv-which-ext.git&quot;  &quot;$&#123;PYENV_ROOT&#125;/plugins/pyenv-which-ext&quot;   &quot;master&quot;</span><br><span class="line"></span><br><span class="line">if ! command -v pyenv 1&gt;/dev/null; then</span><br><span class="line">  &#123; echo</span><br><span class="line">    colorize 1 &quot;WARNING&quot;</span><br><span class="line">    echo &quot;: seems you still have not added &#x27;pyenv&#x27; to the load path.&quot;</span><br><span class="line">    echo</span><br><span class="line">  &#125; &gt;&amp;2</span><br><span class="line"></span><br><span class="line">  &#123; # Without args, `init` commands print installation help</span><br><span class="line">    &quot;$&#123;PYENV_ROOT&#125;/bin/pyenv&quot; init || true</span><br><span class="line">    &quot;$&#123;PYENV_ROOT&#125;/bin/pyenv&quot; virtualenv-init || true</span><br><span class="line">  &#125; &gt;&amp;2</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="设置环境变量"><a href="#设置环境变量" class="headerlink" title="设置环境变量"></a>设置环境变量</h2><ul>
+<li>vim .bash_profile<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export PYENV_ROOT=&quot;$HOME/.pyenv&quot;</span><br><span class="line">command -v pyenv &gt;/dev/null || export PATH=&quot;$PYENV_ROOT/bin:$PATH&quot;</span><br><span class="line">eval &quot;$(pyenv init -)&quot;</span><br></pre></td></tr></table></figure></li>
+<li>source .bash_profile</li>
+</ul>
+<h2 id="安装tips"><a href="#安装tips" class="headerlink" title="安装tips"></a>安装tips</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#方式一：因为pyenv会自动到github上下载，速度超慢，因此推荐第二种方式</span><br><span class="line">$ pyenv install 3.12.2 -v  #-v 以日志模式显示安装过程</span><br><span class="line"></span><br><span class="line">#方式二：使用curl或者wget下载到~/.pyenv/cache下，然后再用pyenv安装。软件源可以用自己熟悉的镜像源</span><br><span class="line">$ cd ~/.pyenv</span><br><span class="line">$ sudo mkdir cache</span><br><span class="line">$ sudo wget -c https://mirrors.huaweicloud.com/python/3.12.2/Python-3.12.2.tar.xz -P  ~/.pyenv/cache/</span><br><span class="line">$ pyenv install 3.12.2 -v</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#查看所有可用的Python版本</span><br><span class="line">pyenv install --list</span><br><span class="line"></span><br><span class="line">#列出本地可用的Python版本</span><br><span class="line">pyenv versions</span><br><span class="line"></span><br><span class="line">#生效范围不同，当前shell可用</span><br><span class="line">pyenv shell 3.12.2</span><br><span class="line">#当前目录</span><br><span class="line">pyenv local 3.12.2</span><br><span class="line">#全局</span><br><span class="line">pyenv global 3.12.2</span><br><span class="line"></span><br><span class="line">#查看当前Python版本</span><br><span class="line">python --version</span><br><span class="line"></span><br><span class="line">#删除指定Python版本</span><br><span class="line">pyenv uninstall 3.12.2</span><br></pre></td></tr></table></figure>
+
+]]></content>
+  </entry>
+  <entry>
+    <title>vscode配置tips</title>
+    <url>/2024/09/27/vscode%E9%85%8D%E7%BD%AEtips/</url>
+    <content><![CDATA[<h3 id="配置文件差异"><a href="#配置文件差异" class="headerlink" title="配置文件差异"></a>配置文件差异</h3><p>远程开发时切换go版本，影响go tools安装。注意配置settings.json里的go root、path路径</p>
+<ol>
+<li>.vscode-server&#x2F;data&#x2F;Machine&#x2F;settings.json</li>
+</ol>
+<figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line">这个配置文件包含了 <span class="title class_">VSCode</span> 服务器的全局设置，这些设置会影响所有打开的工作区。</span><br><span class="line">它通常不由用户直接编辑，而是由 <span class="title class_">VSCode</span> 根据用户在 <span class="variable constant_">UI</span> 中的操作自动管理。</span><br><span class="line">这些设置包括了对所有工作区都有效的配置，比如插件的启用、禁用状态等。</span><br><span class="line"></span><br><span class="line">#远程开发机路径：~<span class="regexp">/.vscode-server/</span>data/<span class="title class_">Machine</span>/settings.<span class="property">json</span></span><br><span class="line"><span class="string">&quot;go.goroot&quot;</span>: <span class="string">&quot;~/.gvm/gos/go1.23.0&quot;</span>,</span><br><span class="line"><span class="string">&quot;go.gopath&quot;</span>: <span class="string">&quot;~/.gvm/pkgsets/go1.23.0/global&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>.vscode&#x2F;settings.json</li>
+</ol>
+<figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line">这个文件是特定于项目的，只影响当前项目的配置。</span><br><span class="line">用户可以在这个文件中自定义设置，比如自定义任务、调试配置、文件关联等。</span><br><span class="line">这些设置在工作区打开时会被应用，并且会覆盖 .<span class="property">vscode</span>-server/data/<span class="title class_">Machine</span>/settings.<span class="property">json</span> 中的同名设置。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="mac下快捷命令"><a href="#mac下快捷命令" class="headerlink" title="mac下快捷命令"></a>mac下快捷命令</h3><ul>
+<li>打开终端：ctrl + &#96;</li>
+<li>跳到具体行：ctrl + g</li>
+<li>打开所有配置面板：cmd + ,</li>
+<li>显示命令行面板：cmd + shift + p</li>
+</ul>
+]]></content>
+      <categories>
+        <category>IDE</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>龙蜥安装docker</title>
+    <url>/2024/09/27/%E9%BE%99%E8%9C%A5%E5%AE%89%E8%A3%85docker/</url>
+    <content><![CDATA[<h3 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#使用root用户</span></span><br><span class="line">yum install -y yum-utils device-mapper-persistent-data lvm2</span><br><span class="line"></span><br><span class="line">yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看可以安装的版本</span></span><br><span class="line">yum list docker-ce --showduplicates | <span class="built_in">sort</span> -r</span><br><span class="line"></span><br><span class="line">yum install -y docker-ce</span><br><span class="line"></span><br><span class="line">docker version</span><br><span class="line"></span><br><span class="line"><span class="comment">#启动docker</span></span><br><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置docker镜像源"><a href="#配置docker镜像源" class="headerlink" title="配置docker镜像源"></a>配置docker镜像源</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#配置docker镜像源</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /etc/docker  </span><br><span class="line"><span class="comment">#创建添加/更新 daemon.josn文件</span></span><br><span class="line"><span class="built_in">touch</span> /etc/docker/daemon.json            </span><br><span class="line"><span class="comment">#更换腾讯镜像源                         </span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF &gt; /etc/docker/daemon.json</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">    &quot;registry-mirrors&quot;: [</span></span><br><span class="line"><span class="string">	&quot;https://dockerproxy.com&quot;,</span></span><br><span class="line"><span class="string">        &quot;https://fw92oidw.mirror.aliyuncs.com&quot;</span></span><br><span class="line"><span class="string">    ]</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#由于更新了daemon.json文件 需要重新加载daemon.json</span></span><br><span class="line">systemctl daemon-reload   </span><br><span class="line"><span class="comment">#重新启动docker</span></span><br><span class="line">systemctl restart docker  </span><br><span class="line"><span class="comment">#查看docker运行状态</span></span><br><span class="line">docker info  </span><br></pre></td></tr></table></figure>
+
+<h3 id="安装docker-compose"><a href="#安装docker-compose" class="headerlink" title="安装docker-compose"></a>安装docker-compose</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">安装Docker-compose</span><br><span class="line">Docker-compose 要求docker的内核版本高于所对应的docker最低版本 。</span><br><span class="line">1.查看当前docker的内核版本</span><br><span class="line">docker version</span><br><span class="line">2.进入docker-compose的github官方release页面</span><br><span class="line">https://github.com/docker/compose/releases</span><br><span class="line">3.下载docker-compose-Linux-x86_64</span><br><span class="line">wget https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64</span><br><span class="line">4.上传并移动到到 /usr/local/bin 目录下，然后重命名为 docker-compose</span><br><span class="line">mv docker-compose-linux-x86_64 /usr/local/bin/docker-compose</span><br><span class="line">5.赋予 docker-compose 文件root权限</span><br><span class="line">chmod +x /usr/local/bin/docker-compose</span><br><span class="line">6.查看 docker-compose 版本</span><br><span class="line">docker-compose version</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>swagger部署k8s open api</title>
+    <url>/2024/09/27/swagger%E9%83%A8%E7%BD%B2k8s-open-api/</url>
+    <content><![CDATA[<h3 id="一、导出k8s-API配置"><a href="#一、导出k8s-API配置" class="headerlink" title="一、导出k8s API配置"></a>一、导出k8s API配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#临时启动服务</span></span><br><span class="line">kubectl proxy --port=8082</span><br><span class="line"><span class="comment">#导出配置</span></span><br><span class="line">curl http://localhost:8082/openapi/v2 &gt; k8s-swagger.json</span><br></pre></td></tr></table></figure>
+
+<h3 id="二、启动服务"><a href="#二、启动服务" class="headerlink" title="二、启动服务"></a>二、启动服务</h3><ul>
+<li>docker启动</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run -d -p 8999:8080 \</span><br><span class="line">    -e SWAGGER_JSON=/k8s-swagger.json \</span><br><span class="line">    -v $(<span class="built_in">pwd</span>)/k8s-swagger.json:/k8s-swagger.json \</span><br><span class="line">    swaggerapi/swagger-ui</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>docker-compose启动</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#vim docker-compose.yaml</span></span><br><span class="line"></span><br><span class="line">version: <span class="string">&quot;3&quot;</span></span><br><span class="line">services:</span><br><span class="line">  document:</span><br><span class="line">    environment:</span><br><span class="line">      - SWAGGER_JSON=/k8s-swagger.json</span><br><span class="line">    image: swaggerapi/swagger-ui</span><br><span class="line">    volumes:</span><br><span class="line">      - ./k8s-swagger.json:/k8s-swagger.json</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;8899:8080&quot;</span></span><br><span class="line">  editor:</span><br><span class="line">    image: swaggerapi/swagger-editor</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;9988:8080&quot;</span></span><br><span class="line">      </span><br><span class="line"> </span><br><span class="line"><span class="comment">#启动</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml up -d </span><br><span class="line"><span class="comment">#查看服务    </span></span><br><span class="line">docker-compose -f ./docker-compose.yaml ps</span><br><span class="line"><span class="comment">#停止服务</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml down</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+        <category>server</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>jq常见用法</title>
+    <url>/2024/09/29/jq%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/</url>
+    <content><![CDATA[<p><code>jq</code> 是一个非常强大的命令行 JSON 处理工具，它可以帮助您快速地查询、过滤、映射和转换 JSON 数据。</p>
+<ol>
+<li><p><strong>查看特定字段</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.fieldName&#x27;</span><br></pre></td></tr></table></figure>
+<p> 替换 <code>fieldName</code> 为您想要查询的字段名。</p>
+</li>
+<li><p><strong>查看数组中的特定元素</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.fieldName[0]&#x27;  # 获取数组的第一个元素</span><br><span class="line">jq &#x27;.fieldName[-1]&#x27; # 获取数组的最后一个元素</span><br><span class="line">jq &#x27;.fieldName[]&#x27;   # 遍历数组的所有元素</span><br></pre></td></tr></table></figure>
+<p> 数组索引从 0 开始。</p>
+</li>
+<li><p><strong>过滤数组元素</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.fieldName[] | select(.condition)&#x27;</span><br></pre></td></tr></table></figure>
+<p> 替换 <code>condition</code> 为过滤条件，例如 <code>.name == &quot;desiredName&quot;</code>。</p>
+</li>
+<li><p><strong>获取嵌套字段</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.parentFieldName[].childFieldName&#x27;</span><br></pre></td></tr></table></figure>
+<p> 如果 <code>parentFieldName</code> 是一个数组，这将获取每个元素的 <code>childFieldName</code> 字段。</p>
+</li>
+<li><p><strong>获取多个字段</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;&#123;field1, field2&#125;&#x27;</span><br></pre></td></tr></table></figure>
+<p> 这将创建一个包含 <code>field1</code> 和 <code>field2</code> 的对象。</p>
+</li>
+<li><p><strong>提取键值对</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;to_entries[] | &#123;key, value&#125;&#x27;</span><br></pre></td></tr></table></figure>
+<p> 将 JSON 对象转换为键值对数组。</p>
+</li>
+<li><p><strong>合并多个字段</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.fieldName as $item ireduce . as $acc + &#123;($item): $item&#125; &#x27;</span><br></pre></td></tr></table></figure>
+<p> 这将合并多个字段到一个对象中。</p>
+</li>
+<li><p><strong>格式化输出</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.&#x27;  # 默认输出</span><br><span class="line">jq &#x27;.pretty&#x27;  # 格式化输出</span><br><span class="line">jq &#x27;.compact&#x27;  # 压缩输出</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>条件表达式</strong>：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;if .condition then &quot;true&quot; else &quot;false&quot; end&#x27;</span><br></pre></td></tr></table></figure>
+<p> 使用条件表达式来输出不同的结果。</p>
+</li>
+<li><p><strong>数组操作</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.arrayField + [newItem]&#x27;  # 添加新元素到数组</span><br><span class="line">jq &#x27;.arrayField - [index]&#x27;    # 从数组中删除元素</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>统计数组元素数量</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.arrayField | length&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>排序数组</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.arrayField | sort&#x27;  # 默认升序排序</span><br><span class="line">jq &#x27;.arrayField | sort_by(-&amp;value)&#x27;  # 降序排序</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>搜索和替换</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.arrayField[] | select(.field == &quot;value&quot;) | .field = &quot;newValue&quot;&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>从 JSON 字符串中解析</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.fromJSON&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>将 JSON 对象转换为数组</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;to_entries[] | .value&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>使用管道</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kubectl get pods --output=json | jq &#x27;.items[] | .metadata.name&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>这将获取所有 pod 的名称。</p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>k8s api server接口交互</title>
+    <url>/2024/09/29/k8s-api-server%E6%8E%A5%E5%8F%A3%E4%BA%A4%E4%BA%92/</url>
+    <content><![CDATA[<h3 id="查看api方法："><a href="#查看api方法：" class="headerlink" title="查看api方法："></a>查看api方法：</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw /</span><br><span class="line">kubectl get --raw /apis/apps/v1 | jq .resources[].name</span><br><span class="line"></span><br><span class="line">或者开启apiserver</span><br><span class="line">kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">curl http://127.0.0.1:8080/apis/batch/v1</span><br></pre></td></tr></table></figure>
+
+<h3 id="api结构及原理"><a href="#api结构及原理" class="headerlink" title="api结构及原理"></a>api结构及原理</h3><p><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/55.jpg?raw=true"><br><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/87.jpg?raw=true"></p>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s RBAC解释</title>
+    <url>/2024/09/29/k8s-RBAC%E8%A7%A3%E9%87%8A/</url>
+    <content><![CDATA[<h3 id="抽象概括"><a href="#抽象概括" class="headerlink" title="抽象概括"></a>抽象概括</h3><ul>
+<li><strong>谁</strong> 是否可以对  <strong>什么东西</strong> 进行  <strong>怎么样</strong> 的访问操作。</li>
+</ul>
+<h3 id="RBAC模型"><a href="#RBAC模型" class="headerlink" title="RBAC模型"></a>RBAC模型</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">User（用户）：每个用户都有唯一的UID识别，并被授予不同的角色</span><br><span class="line">Role（角色）：不同角色具有不同的权限</span><br><span class="line">Permission（权限）：访问权限</span><br><span class="line">用户-角色映射：用户和角色之间的映射关系</span><br><span class="line">角色-权限映射：角色和权限之间的映射</span><br></pre></td></tr></table></figure>
+
+<h3 id="RBAC-API-对象："><a href="#RBAC-API-对象：" class="headerlink" title="RBAC API 对象："></a>RBAC API 对象：</h3><ul>
+<li><em>Role</em></li>
+<li><em>ClusterRole</em></li>
+<li><em>RoleBinding</em></li>
+<li><em>ClusterRoleBinding</em>。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/shispring/shispring.github.io/refs/heads/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/91.jpg"></p>
+<p><img src="https://raw.githubusercontent.com/shispring/shispring.github.io/refs/heads/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/05.jpg"></p>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>优秀资源</title>
+    <url>/2024/09/27/nice-blog/</url>
+    <content><![CDATA[<h2 id="博客类"><a href="#博客类" class="headerlink" title="博客类"></a>博客类</h2><figure class="highlight jsx"><table><tr><td class="code"><pre><span class="line"><span class="attr">https</span>:<span class="comment">//docker.nsddd.top/</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="github"><a href="#github" class="headerlink" title="github"></a>github</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/zq2599/blog_demos</span><br><span class="line"></span><br><span class="line">#kubebuilder实践</span><br><span class="line">https://github.com/chenzongshu/Kubernetes/blob/master/kubebuilder/kubebuilder%E4%BB%8B%E7%BB%8D.md</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#好的知识总结</span><br><span class="line">https://github.com/mykubernetes/kubernetes/blob/master/curl%E8%AE%BF%E9%97%AEapi.md</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#client-go教程</span><br><span class="line">https://github.com/owenliang/k8s-client-go/tree/master</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#Kubernetes 官方的示例控制器项目，展示了如何使用 client-go 和 Informers。</span><br><span class="line">https://github.com/kubernetes/sample-controller</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#一个流行的 Kubernetes Controller，用于管理 TLS 证书，代码质量高，设计优秀。</span><br><span class="line">https://github.com/cert-manager/cert-manager</span><br><span class="line"></span><br><span class="line">#正则表达式（反选:负向先行断言）</span><br><span class="line">https://www.cnblogs.com/JourneyOfFlower/p/15039751.html</span><br><span class="line"></span><br><span class="line">#https双向验证</span><br><span class="line">https://help.aliyun.com/zh/api-gateway/traditional-api-gateway/user-guide/mutual-tls-authentication</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>nice-resources</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s apiserver 客户端认证方式</title>
+    <url>/2024/09/30/k8s-apiserver-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%A4%E8%AF%81%E6%96%B9%E5%BC%8F/</url>
+    <content><![CDATA[<p>apiserver有三种级别的客户端认证方式<br>1、HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式<br>2、HTTP Token认证：通过一个Token来识别合法用户<br>3、HTTP Base认证：通过用户名+密码的认证方式  </p>
+<h1 id="HTTP-Token认证：通过一个Token来识别合法用户"><a href="#HTTP-Token认证：通过一个Token来识别合法用户" class="headerlink" title="HTTP Token认证：通过一个Token来识别合法用户"></a>HTTP Token认证：通过一个Token来识别合法用户</h1><p>1、创建可以访问api的用户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 创建账号</span><br><span class="line">kubectl create serviceaccount curl-admin -n kube-system</span><br><span class="line"></span><br><span class="line"># 角色绑定</span><br><span class="line">kubectl create clusterrolebinding curl-admin --clusterrole=cluster-admin --serviceaccount=kube-system:curl-admin</span><br><span class="line"></span><br><span class="line"># 创建secret</span><br><span class="line">在 Kubernetes v1.25 及以后的版本中，创建 ServiceAccount 时不会自动生成关联的 Secret。你需要手动创建一个 Secret 并将其与 ServiceAccount 关联。</span><br><span class="line"></span><br><span class="line">kubectl apply -f - &lt;&lt;EOF</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Secret</span><br><span class="line">metadata:</span><br><span class="line">  name: curl-admin</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  annotations:</span><br><span class="line">    kubernetes.io/service-account.name: &quot;curl-admin&quot;</span><br><span class="line">type: kubernetes.io/service-account-token</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看TOKEN</span><br><span class="line">kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk &#x27;/curl-admin/&#123;print $1&#125;&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>2、设置环境变量</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、获取TOKEN信息</span><br><span class="line"># kubectl describe secrets $(kubectl get secrets -n kube-system |grep admin |cut -f1 -d &#x27; &#x27;) -n kube-system |grep -E &#x27;^token&#x27; |cut -f2 -d&#x27;:&#x27;|tr -d &#x27;  &#x27;|tr -d &#x27; &#x27;</span><br><span class="line"></span><br><span class="line">2、定义TOKEN环境变量</span><br><span class="line"># TOKEN=$(kubectl describe secrets $(kubectl get secrets -n kube-system |grep admin |cut -f1 -d &#x27; &#x27;) -n kube-system |grep -E &#x27;^token&#x27; |cut -f2 -d&#x27;:&#x27;|tr -d &#x27;  &#x27;|tr -d &#x27; &#x27;)</span><br><span class="line"></span><br><span class="line">3、获取api-server地址，注意过滤集群信息</span><br><span class="line"># 单个集群</span><br><span class="line">kubectl config view |grep server|cut -f 2- -d &quot;:&quot; | tr -d &quot; &quot;</span><br><span class="line"></span><br><span class="line">#多个集群时</span><br><span class="line"># kubectl config view -o jsonpath=&#x27;&#123;&quot;Cluster name\tServer\n&quot;&#125;&#123;range .clusters[*]&#125;&#123;.name&#125;&#123;&quot;\t&quot;&#125;&#123;.cluster.server&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;</span><br><span class="line"></span><br><span class="line"># kubectl config view -o jsonpath=&#x27;&#123;range .clusters[*]&#125;&#123;.name&#125;&#123;&quot;\t&quot;&#125;&#123;.cluster.server&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27; | grep &quot;test-cluster-xxx&quot; | awk &#x27;&#123;print $2&#125;&#x27;</span><br><span class="line"></span><br><span class="line">4、设置api-server地址环境变量</span><br><span class="line">#单个集群</span><br><span class="line"># APISERVER=$(kubectl config view |grep server|cut -f 2- -d &quot;:&quot; | tr -d &quot; &quot;)</span><br><span class="line"></span><br><span class="line">#多个集群</span><br><span class="line"># APISERVER=$(kubectl config view -o jsonpath=&#x27;&#123;range .clusters[*]&#125;&#123;.name&#125;&#123;&quot;\t&quot;&#125;&#123;.cluster.server&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27; | grep &quot;jpshi&quot; | awk &#x27;&#123;print $2&#125;&#x27;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>3、通过TOKEN方式访问api-server</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># curl -H &quot;Authorization: Bearer $TOKEN&quot; $APISERVER/api  --insecure</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;kind&quot;: &quot;APIVersions&quot;,</span><br><span class="line">  &quot;versions&quot;: [</span><br><span class="line">    &quot;v1&quot;</span><br><span class="line">  ],</span><br><span class="line">  &quot;serverAddressByClientCIDRs&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;clientCIDR&quot;: &quot;0.0.0.0/0&quot;,</span><br><span class="line">      &quot;serverAddress&quot;: &quot;192.168.0.130:6443&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># pod外访问</span><br><span class="line"># curl -H &quot;Authorization: Bearer $TOKEN&quot; $APISERVER  --insecure</span><br><span class="line">&#123;</span><br><span class="line">  &quot;paths&quot;: [</span><br><span class="line">    &quot;/api&quot;,</span><br><span class="line">    &quot;/api/v1&quot;,</span><br><span class="line">    &quot;/apis&quot;,</span><br><span class="line">    &quot;/apis/&quot;,</span><br><span class="line">    &quot;/apis/admissionregistration.k8s.io&quot;,</span><br><span class="line">    &quot;/apis/admissionregistration.k8s.io/v1beta1&quot;,</span><br><span class="line">    &quot;/apis/apiextensions.k8s.io&quot;,</span><br><span class="line">    &quot;/apis/apiextensions.k8s.io/v1beta1&quot;,</span><br><span class="line"> 	......</span><br><span class="line">    &quot;/version&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># pod内访问</span><br><span class="line">$ TOKEN=$(cat /run/secrets/kubernetes.io/serviceaccount/token)</span><br><span class="line">$ CACERT=/run/secrets/kubernetes.io/serviceaccount/ca.crt</span><br><span class="line">$ curl --cacert $CACERT --header &quot;Authorization: Bearer $TOKEN&quot;  https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT/api</span><br><span class="line">&#123;</span><br><span class="line">  &quot;kind&quot;: &quot;APIVersions&quot;,</span><br><span class="line">  &quot;versions&quot;: [</span><br><span class="line">    &quot;v1&quot;</span><br><span class="line">  ],</span><br><span class="line">  &quot;serverAddressByClientCIDRs&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;clientCIDR&quot;: &quot;0.0.0.0/0&quot;,</span><br><span class="line">      &quot;serverAddress&quot;: &quot;10.0.1.149:443&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>DNS缓存时间TTL</title>
+    <url>/2024/10/12/DNS%E7%BC%93%E5%AD%98%E6%97%B6%E9%97%B4TTL/</url>
+    <content><![CDATA[<p>在计算机网络中，<strong>DNS（域名系统）缓存</strong>用于加速域名解析过程，减少重复查询，提高访问速度。<strong>本地 DNS 缓存时间</strong>主要取决于以下几个因素：</p>
+<ol>
+<li><strong>DNS 记录的 TTL（生存时间）</strong>：<ul>
+<li><strong>TTL（Time-To-Live）</strong> 是 DNS 记录中指定的一个时间值，表示该记录在缓存中可以存储的最长时间。TTL 的单位通常是秒。</li>
+<li>例如，TTL 为 <code>3600</code> 秒（即 1 小时），表示该 DNS 记录在缓存中有效期为 1 小时。</li>
+</ul>
+</li>
+<li><strong>本地 DNS 解析器的缓存策略</strong>：<ul>
+<li>不同操作系统和 DNS 解析器（如 <code>systemd-resolved</code>、<code>dnsmasq</code>、<code>nscd</code> 等）可能有自己的缓存策略，可能会设置最小或最大 TTL 值，以确保缓存的灵活性和安全性。</li>
+</ul>
+</li>
+</ol>
+<h2 id="1-本地-DNS-缓存时间的常见范围"><a href="#1-本地-DNS-缓存时间的常见范围" class="headerlink" title="1. 本地 DNS 缓存时间的常见范围"></a><strong>1. 本地 DNS 缓存时间的常见范围</strong></h2><ul>
+<li><strong>短 TTL</strong>：如 30 秒至 5 分钟，适用于频繁更新的记录。</li>
+<li><strong>中等 TTL</strong>：如 5 分钟至 1 小时，适用于大多数动态变化的记录。</li>
+<li><strong>长 TTL</strong>：如 1 小时至 24 小时，适用于较为稳定的记录。</li>
+</ul>
+<h2 id="2-如何查看和配置本地-DNS-缓存时间"><a href="#2-如何查看和配置本地-DNS-缓存时间" class="headerlink" title="2. 如何查看和配置本地 DNS 缓存时间"></a><strong>2. 如何查看和配置本地 DNS 缓存时间</strong></h2><p>不同操作系统和 DNS 解析器有不同的方法来查看和配置本地 DNS 缓存时间。以下是常见操作系统和解析器的具体步骤：</p>
+<h3 id="a-Linux-系统"><a href="#a-Linux-系统" class="headerlink" title="a. Linux 系统"></a><strong>a. Linux 系统</strong></h3><p><strong>查看 DNS 缓存内容和 TTL：</strong></p>
+<ul>
+<li>具体方法取决于所使用的 DNS 缓存服务。</li>
+</ul>
+<ol>
+<li><p>**使用 <code>systemd-resolved</code>**：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#systemctl start systemd-resolved</span></span><br><span class="line">systemd-resolve --statistics</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查看缓存统计信息。</li>
+</ul>
+</li>
+<li><p><strong>使用 <code>nscd</code>（Name Service Cache Daemon）</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#yum install -y nscd</span></span><br><span class="line">nscd -g</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查看缓存信息。</li>
+</ul>
+</li>
+<li><p>**使用 <code>dnsmasq</code>**：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">systemctl status dnsmasq</span><br><span class="line">dnsmasq --<span class="built_in">test</span>  <span class="comment"># 检查配置</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>清除 DNS 缓存：</strong></p>
+<ol>
+<li><p><strong>systemd-resolved</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>nscd</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart nscd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>dnsmasq</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart dnsmasq</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>配置 DNS 客户端缓存策略：</strong></p>
+<ol>
+<li><p><strong>systemd-resolved</strong>：</p>
+<ul>
+<li>配置文件位于 <code>/etc/systemd/resolved.conf</code>。</li>
+<li>可设置 <code>Cache</code> 相关参数，但通常遵循 DNS 记录的 TTL。</li>
+</ul>
+</li>
+<li><p><strong>nscd</strong>：</p>
+<ul>
+<li>配置文件位于 <code>/etc/nscd.conf</code>。</li>
+<li>可设置 <code>positive-time-to-live</code> 和 <code>negative-time-to-live</code>。</li>
+</ul>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/nscd.conf</span><br></pre></td></tr></table></figure>
+<p> 示例配置：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">enable-cache hosts yes</span><br><span class="line">positive-time-to-live hosts 3600</span><br><span class="line">negative-time-to-live hosts 20</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>dnsmasq</strong>：</p>
+<ul>
+<li>配置文件位于 <code>/etc/dnsmasq.conf</code>。</li>
+<li>可设置 <code>min-cache-ttl</code> 和 <code>max-cache-ttl</code>。</li>
+</ul>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/dnsmasq.conf</span><br></pre></td></tr></table></figure>
+<p> 示例配置：</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">min-cache-ttl=60</span><br><span class="line">max-cache-ttl=3600</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="3-确认-DNS-缓存时间"><a href="#3-确认-DNS-缓存时间" class="headerlink" title="3. 确认 DNS 缓存时间"></a><strong>3. 确认 DNS 缓存时间</strong></h2><p><strong>查看特定 DNS 记录的 TTL：</strong></p>
+<p>使用 <code>dig</code> 命令可以查看 DNS 记录的 TTL 值。<br>在 Anolis OS 8 上安装 dig 命令通常通过安装 bind-utils 包来实现<br>yum install bind-utils -y </p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dig example.com</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">example.com.     3600    IN      A       93.184.216.34</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>上述输出中，<code>3600</code> 表示该 DNS 记录的 TTL 为 3600 秒（1 小时）。</li>
+</ul>
+<p><strong>综合判断缓存时间：</strong></p>
+<ul>
+<li>本地 DNS 缓存时间通常不会超过 DNS 记录本身的 TTL。</li>
+<li>某些解析器可能会调整实际缓存时间，如设置最小 TTL 或最大 TTL。</li>
+</ul>
+<h2 id="4-实际案例演示"><a href="#4-实际案例演示" class="headerlink" title="4. 实际案例演示"></a><strong>4. 实际案例演示</strong></h2><p>以下是一个在 Linux 系统上使用 <code>systemd-resolved</code> 配置和查看 DNS 缓存时间的示例：</p>
+<p><strong>查看当前 DNS 缓存统计：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">systemd-resolve --statistics</span><br></pre></td></tr></table></figure>
+
+<p>输出示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Global</span><br><span class="line">         LLMNR setting: yes</span><br><span class="line">  MulticastDNS setting: no</span><br><span class="line">    DNSOverTLS setting: no</span><br><span class="line">        DNSSEC setting: no</span><br><span class="line">      DNSSEC supported: no</span><br><span class="line"></span><br><span class="line">Per-Link Statistics</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>清除 DNS 缓存：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看某个域名的 TTL：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dig example.com +nocmd +noall +answer</span><br></pre></td></tr></table></figure>
+
+<p>输出示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example.com.     3600    IN      A       93.184.216.34</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-最佳实践"><a href="#5-最佳实践" class="headerlink" title="5. 最佳实践"></a><strong>5. 最佳实践</strong></h2><ol>
+<li><strong>合理设置 DNS 记录的 TTL</strong>：<ul>
+<li>根据应用需求和域名更新频率，合理设置 TTL。较低的 TTL 适用于频繁变动的记录，较高的 TTL 则适用于稳定的记录。</li>
+</ul>
+</li>
+<li><strong>优化本地 DNS 解析器的缓存策略</strong>：<ul>
+<li>根据网络环境和应用需求，调整本地解析器的最小和最大缓存时间，平衡缓存效率与更新灵活性。</li>
+</ul>
+</li>
+<li><strong>定期清理 DNS 缓存</strong>：<ul>
+<li>在进行 DNS 变更后，及时清理本地 DNS 缓存，确保新配置生效。</li>
+</ul>
+</li>
+<li><strong>监控 DNS 解析性能</strong>：<ul>
+<li>使用监控工具（如 Prometheus、Grafana）监控 DNS 解析的性能和缓存命中率，优化 DNS 配置。</li>
+</ul>
+</li>
+<li><strong>使用可靠的 DNS 解析器</strong>：<ul>
+<li>选择性能稳定、支持高级功能（如 DNSSEC、负载均衡）的 DNS 解析器，提升网络稳定性和安全性。</li>
+</ul>
+</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>Pod状态及原因</title>
+    <url>/2024/10/14/Pod%E7%8A%B6%E6%80%81%E5%8F%8A%E5%8E%9F%E5%9B%A0/</url>
+    <content><![CDATA[<p>以下是 Kubernetes <strong>Pod 各种状态</strong>及其<strong>原因分析</strong>的详细总结：</p>
+<hr>
+<h3 id="1-Pending"><a href="#1-Pending" class="headerlink" title="1. Pending"></a><strong>1. Pending</strong></h3><p><strong>解释</strong>：Pod 被成功创建，但其中的一个或多个容器尚未启动。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>没有足够的资源（CPU、内存）调度到合适的节点。  </li>
+<li>存在节点污点，Pod 无法容忍（Taints and Tolerations）。  </li>
+<li>镜像下载缓慢或失败（如网络问题或镜像仓库不可用）。  </li>
+<li>存在 PVC（Persistent Volume Claim）绑定问题。</li>
+</ul>
+<hr>
+<h3 id="2-Running"><a href="#2-Running" class="headerlink" title="2. Running"></a><strong>2. Running</strong></h3><p><strong>解释</strong>：Pod 中的所有容器已启动并正在运行。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>一切正常，Pod 正在按预期工作。  </li>
+<li>若部分容器不断重启，则可能与健康检查失败有关（检查 Liveness 和 Readiness Probes）。</li>
+</ul>
+<hr>
+<h3 id="3-CrashLoopBackOff"><a href="#3-CrashLoopBackOff" class="headerlink" title="3. CrashLoopBackOff"></a><strong>3. CrashLoopBackOff</strong></h3><p><strong>解释</strong>：容器在启动后不断崩溃，Kubelet 正在尝试重启它。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>应用程序的错误配置或依赖缺失导致容器崩溃。  </li>
+<li>容器中的应用程序无法正确初始化（可能因为端口占用或数据库连接失败）。  </li>
+<li>Liveness Probe 检查失败导致 Kubelet 不断重启容器。</li>
+</ul>
+<hr>
+<h3 id="4-ImagePullBackOff"><a href="#4-ImagePullBackOff" class="headerlink" title="4. ImagePullBackOff"></a><strong>4. ImagePullBackOff</strong></h3><p><strong>解释</strong>：Kubernetes 无法拉取容器镜像，正在等待重试。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>镜像名或版本标记（tag）错误。  </li>
+<li>镜像仓库不可访问（网络问题或仓库服务中断）。  </li>
+<li>私有镜像仓库的认证失败（未正确配置 Secret）。</li>
+</ul>
+<hr>
+<h3 id="5-ErrImagePull"><a href="#5-ErrImagePull" class="headerlink" title="5. ErrImagePull"></a><strong>5. ErrImagePull</strong></h3><p><strong>解释</strong>：尝试拉取镜像时发生错误。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>镜像不存在于指定的仓库中。  </li>
+<li>镜像仓库地址错误或不可访问。  </li>
+<li>网络问题导致拉取失败。</li>
+</ul>
+<hr>
+<h3 id="6-ErrImageNeverPull"><a href="#6-ErrImageNeverPull" class="headerlink" title="6. ErrImageNeverPull"></a><strong>6. ErrImageNeverPull</strong></h3><p><strong>解释</strong>：镜像策略被设置为 <code>ImagePullPolicy: Never</code>，但镜像在本地不存在。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>配置错误导致 Kubernetes 无法从本地找到镜像。  </li>
+<li>需要将拉取策略设置为 <code>IfNotPresent</code> 或 <code>Always</code>。</li>
+</ul>
+<hr>
+<h3 id="7-Completed"><a href="#7-Completed" class="headerlink" title="7. Completed"></a><strong>7. Completed</strong></h3><p><strong>解释</strong>：Pod 中的所有容器正常终止，且没有重启策略（适用于 <strong>Job</strong> 和 <strong>CronJob</strong>）。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>容器执行的任务已完成，Pod 正常退出。  </li>
+<li>Job 或 CronJob 工作负载按计划执行结束。</li>
+</ul>
+<hr>
+<h3 id="8-Terminating"><a href="#8-Terminating" class="headerlink" title="8. Terminating"></a><strong>8. Terminating</strong></h3><p><strong>解释</strong>：Pod 正在终止，但未在规定时间内结束。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>Pod 中的进程未响应 SIGTERM 信号。  </li>
+<li>容器内进程未正确设置退出钩子（如未处理 terminationGracePeriodSeconds）。  </li>
+<li>挂载的 Volume 无法及时卸载。</li>
+</ul>
+<hr>
+<h3 id="9-Unknown"><a href="#9-Unknown" class="headerlink" title="9. Unknown"></a><strong>9. Unknown</strong></h3><p><strong>解释</strong>：Pod 的状态无法从 API 服务器获取。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>节点可能与 API 服务器失去连接（网络问题或节点崩溃）。  </li>
+<li>etcd 数据库不稳定，导致状态获取失败。</li>
+</ul>
+<hr>
+<h3 id="10-Failed"><a href="#10-Failed" class="headerlink" title="10. Failed"></a><strong>10. Failed</strong></h3><p><strong>解释</strong>：Pod 中的所有容器都已终止，并且至少有一个容器以非 0 状态码退出。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>容器内的应用程序发生崩溃。  </li>
+<li>必要的依赖服务（如数据库或 API）不可用。  </li>
+<li>Liveness Probe 检查失败后被 Kubernetes 终止。</li>
+</ul>
+<hr>
+<h3 id="11-NodeAffinity-PodAffinity-Unsatisfied"><a href="#11-NodeAffinity-PodAffinity-Unsatisfied" class="headerlink" title="11. NodeAffinity&#x2F;PodAffinity Unsatisfied"></a><strong>11. NodeAffinity&#x2F;PodAffinity Unsatisfied</strong></h3><p><strong>解释</strong>：由于节点亲和性或 Pod 亲和性规则，Pod 无法被调度到任何节点上。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>设置了严格的 NodeAffinity 或 PodAffinity，无法匹配任何可用节点。  </li>
+<li>调度策略配置不当。</li>
+</ul>
+<hr>
+<h3 id="12-OOMKilled-Out-of-Memory-Killed"><a href="#12-OOMKilled-Out-of-Memory-Killed" class="headerlink" title="12. OOMKilled (Out of Memory Killed)"></a><strong>12. OOMKilled (Out of Memory Killed)</strong></h3><p><strong>解释</strong>：由于容器超出分配的内存限制，被操作系统的 OOM（Out Of Memory）杀死。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>容器请求的内存不足以满足其应用的需求。  </li>
+<li>负载过高导致内存泄漏或突发增长。  </li>
+<li>需要调整 <code>requests.memory</code> 和 <code>limits.memory</code>。</li>
+</ul>
+<hr>
+<h3 id="13-Evicted"><a href="#13-Evicted" class="headerlink" title="13. Evicted"></a><strong>13. Evicted</strong></h3><p><strong>解释</strong>：由于节点资源不足，Pod 被驱逐（Eviction）。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>节点内存、CPU 等资源不足。  </li>
+<li>节点磁盘压力高导致驱逐。  </li>
+<li>调度策略驱逐低优先级 Pod 以释放资源。</li>
+</ul>
+<hr>
+<h3 id="14-ContainerCreating"><a href="#14-ContainerCreating" class="headerlink" title="14. ContainerCreating"></a><strong>14. ContainerCreating</strong></h3><p><strong>解释</strong>：Pod 的容器正在创建中，但尚未启动。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>拉取镜像耗时较长。  </li>
+<li>卷（Volume）未能及时挂载。  </li>
+<li>网络插件问题导致容器未能启动。</li>
+</ul>
+<hr>
+<h3 id="15-NotReady"><a href="#15-NotReady" class="headerlink" title="15. NotReady"></a><strong>15. NotReady</strong></h3><p><strong>解释</strong>：Pod 尚未准备好接受流量（Readiness Probe 失败）。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>容器内的服务未能正常启动。  </li>
+<li>Readiness Probe 配置不当或探测路径错误。  </li>
+<li>依赖的外部服务未启动或不可访问。</li>
+</ul>
+<hr>
+<h3 id="16-Waiting"><a href="#16-Waiting" class="headerlink" title="16. Waiting"></a><strong>16. Waiting</strong></h3><p><strong>解释</strong>：容器由于某些原因正在等待，并未真正运行。<br><strong>可能原因</strong>：</p>
+<ul>
+<li>等待 Volume 挂载或镜像拉取完成。  </li>
+<li>等待依赖资源（如 ConfigMap 或 Secret）。  </li>
+<li>等待调度器将其分配到节点上。</li>
+</ul>
+<hr>
+<h2 id="总结与最佳实践"><a href="#总结与最佳实践" class="headerlink" title="总结与最佳实践"></a><strong>总结与最佳实践</strong></h2><ul>
+<li><strong>监控和告警</strong>：使用监控工具（如 Prometheus 和 Grafana）实时监控 Pod 状态，及时发现问题。  </li>
+<li><strong>日志分析</strong>：查看 Pod 和容器的日志来分析具体原因（<code>kubectl logs &lt;pod-name&gt;</code>）。  </li>
+<li><strong>资源规划</strong>：合理设置 Pod 的资源请求和限制（requests&#x2F;limits），避免 OOM 和驱逐问题。  </li>
+<li><strong>健康检查配置</strong>：配置合适的 Liveness 和 Readiness Probe，确保 Pod 正常运行和流量切换。  </li>
+<li><strong>滚动升级策略</strong>：使用 Deployment 的滚动升级策略（RollingUpdate），避免大规模 Pod 重启。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s operator 开发事项</title>
+    <url>/2024/10/15/k8s-operator-%E5%BC%80%E5%8F%91%E4%BA%8B%E9%A1%B9/</url>
+    <content><![CDATA[<h2 id="Kubernetes-相关-API-包介绍"><a href="#Kubernetes-相关-API-包介绍" class="headerlink" title="Kubernetes 相关 API 包介绍"></a><strong>Kubernetes 相关 API 包介绍</strong></h2><h3 id="1-k8s-io-apimachinery-pkg-apis-meta-v1"><a href="#1-k8s-io-apimachinery-pkg-apis-meta-v1" class="headerlink" title="1. k8s.io&#x2F;apimachinery&#x2F;pkg&#x2F;apis&#x2F;meta&#x2F;v1"></a>1. <strong>k8s.io&#x2F;apimachinery&#x2F;pkg&#x2F;apis&#x2F;meta&#x2F;v1</strong></h3><ul>
+<li><strong>功能</strong>：提供处理 Kubernetes 元数据的类型和函数。</li>
+<li><strong>常用场景</strong>：<ul>
+<li>创建、更新、删除 Kubernetes 资源时所需的元数据类型（如 <code>ObjectMeta</code>）。</li>
+<li>时间戳、Label 选择器等辅助类型。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-k8s-io-api"><a href="#2-k8s-io-api" class="headerlink" title="2. k8s.io&#x2F;api"></a>2. <strong>k8s.io&#x2F;api</strong></h3><ul>
+<li><strong>用途</strong>：定义 Kubernetes 各个 API 资源的 Go 语言结构体，按 API 组分类。</li>
+<li><strong>关键模块</strong>：<ul>
+<li><strong>core&#x2F;v1</strong>：核心资源（Pods、Services、ConfigMaps、Secrets）。</li>
+<li><strong>apps&#x2F;v1</strong>：管理工作负载（Deployments、StatefulSets、DaemonSets）。</li>
+<li><strong>batch&#x2F;v1</strong>：任务调度相关资源（Jobs、CronJobs）。</li>
+<li><strong>networking&#x2F;v1</strong>：网络资源（Ingress、NetworkPolicy）。</li>
+<li><strong>autoscaling&#x2F;v1、v2</strong>：自动扩缩容（HorizontalPodAutoscaler）。</li>
+<li><strong>rbac&#x2F;v1</strong>：访问控制（Role、ClusterRole、RoleBinding）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-k8s-io-client-go"><a href="#3-k8s-io-client-go" class="headerlink" title="3. k8s.io&#x2F;client-go"></a>3. <strong>k8s.io&#x2F;client-go</strong></h3><h4 id="k8s-io-client-go-kubernetes"><a href="#k8s-io-client-go-kubernetes" class="headerlink" title="k8s.io&#x2F;client-go&#x2F;kubernetes"></a><strong>k8s.io&#x2F;client-go&#x2F;kubernetes</strong></h4><ul>
+<li><strong>功能</strong>：提供便捷的 API 接口用于管理和操作 Kubernetes 资源。<ul>
+<li>封装与 Kubernetes API 的交互，支持资源 CRUD 操作。</li>
+<li>支持身份认证和上下文管理。</li>
+<li>提供事件、日志和资源监控支持。</li>
+</ul>
+</li>
+</ul>
+<h4 id="k8s-io-client-go-tools"><a href="#k8s-io-client-go-tools" class="headerlink" title="k8s.io&#x2F;client-go&#x2F;tools"></a><strong>k8s.io&#x2F;client-go&#x2F;tools</strong></h4><ul>
+<li><strong>工具包</strong>：简化开发的辅助工具。<ul>
+<li><strong>cache</strong>：Informer 缓存机制，提高 API 性能。</li>
+<li><strong>clientcmd</strong>：解析 kubeconfig 文件，支持多集群配置。</li>
+<li><strong>record</strong>：记录事件到 Kubernetes 系统。</li>
+<li><strong>leaderelection</strong>：实现分布式系统中的领导选举。</li>
+</ul>
+</li>
+</ul>
+<h4 id="k8s-io-client-go-util"><a href="#k8s-io-client-go-util" class="headerlink" title="k8s.io&#x2F;client-go&#x2F;util"></a><strong>k8s.io&#x2F;client-go&#x2F;util</strong></h4><ul>
+<li><strong>实用工具</strong>：<ul>
+<li><strong>retry</strong>：实现指数退避的重试机制，处理临时错误。</li>
+<li><strong>wait</strong>：等待某个条件满足的机制。</li>
+<li><strong>homedir</strong>：获取用户主目录的路径，方便查找 kubeconfig。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="Kubernetes-Operator-开发最佳实践"><a href="#Kubernetes-Operator-开发最佳实践" class="headerlink" title="Kubernetes Operator 开发最佳实践"></a><strong>Kubernetes Operator 开发最佳实践</strong></h2><h3 id="1-使用-Informers-和-Listers"><a href="#1-使用-Informers-和-Listers" class="headerlink" title="1. 使用 Informers 和 Listers"></a>1. <strong>使用 Informers 和 Listers</strong></h3><ul>
+<li><strong>原因</strong>：减少与 API 服务器的直接交互，避免请求限额问题。</li>
+<li><strong>做法</strong>：使用 Informers 缓存资源状态，提升性能。</li>
+</ul>
+<h3 id="2-实现幂等的-Reconcile-方法"><a href="#2-实现幂等的-Reconcile-方法" class="headerlink" title="2. 实现幂等的 Reconcile 方法"></a>2. <strong>实现幂等的 Reconcile 方法</strong></h3><ul>
+<li><strong>原因</strong>：Reconcile 方法可能被多次调用，确保其幂等性避免状态不一致。</li>
+<li><strong>实践</strong>：<ul>
+<li>获取当前资源状态，与期望状态对比并更新。</li>
+<li>避免在 Reconcile 中执行随机任务或不可重复操作。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-错误处理和重试机制"><a href="#3-错误处理和重试机制" class="headerlink" title="3. 错误处理和重试机制"></a>3. <strong>错误处理和重试机制</strong></h3><ul>
+<li><strong>原因</strong>：应对 API 服务器不可用或资源冲突。</li>
+<li><strong>做法</strong>：<ul>
+<li>使用 <code>retry.RetryOnConflict</code> 处理资源冲突。</li>
+<li>记录不可恢复的错误，触发告警或采取补救措施。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-使用-Finalizers-进行资源清理"><a href="#4-使用-Finalizers-进行资源清理" class="headerlink" title="4. 使用 Finalizers 进行资源清理"></a>4. <strong>使用 Finalizers 进行资源清理</strong></h3><ul>
+<li><strong>作用</strong>：确保删除自定义资源前完成必要的清理（如删除外部资源）。</li>
+</ul>
+<h3 id="5-遵循最小权限原则-RBAC"><a href="#5-遵循最小权限原则-RBAC" class="headerlink" title="5. 遵循最小权限原则 (RBAC)"></a>5. <strong>遵循最小权限原则 (RBAC)</strong></h3><ul>
+<li><strong>原因</strong>：减少安全风险，避免权限滥用。</li>
+<li><strong>做法</strong>：<ul>
+<li>仅授予必要的权限。</li>
+<li>定期审查 RBAC 配置。</li>
+</ul>
+</li>
+</ul>
+<h3 id="6-使用-Context-管理请求"><a href="#6-使用-Context-管理请求" class="headerlink" title="6. 使用 Context 管理请求"></a>6. <strong>使用 Context 管理请求</strong></h3><ul>
+<li><strong>原因</strong>：确保请求超时和取消逻辑的一致性。</li>
+</ul>
+<h3 id="7-日志记录与监控"><a href="#7-日志记录与监控" class="headerlink" title="7. 日志记录与监控"></a>7. <strong>日志记录与监控</strong></h3><ul>
+<li><strong>做法</strong>：<ul>
+<li>使用结构化日志（如 <code>logr</code>）。</li>
+<li>集成 Prometheus 暴露监控指标。</li>
+</ul>
+</li>
+</ul>
+<h3 id="8-全面的测试覆盖"><a href="#8-全面的测试覆盖" class="headerlink" title="8. 全面的测试覆盖"></a>8. <strong>全面的测试覆盖</strong></h3><ul>
+<li><strong>单元测试</strong>：测试 Reconcile 的逻辑和处理流程。</li>
+<li><strong>集成测试</strong>：使用 <code>envtest</code> 模拟 Kubernetes 环境。</li>
+<li><strong>端到端测试</strong>：在实际集群上验证控制器行为。</li>
+</ul>
+<hr>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>ingress-nginx开启旧版本TLS</title>
+    <url>/2024/10/16/ingress-nginx%E5%BC%80%E5%90%AF%E6%97%A7%E7%89%88%E6%9C%ACTLS/</url>
+    <content><![CDATA[<h2 id="1-创建工作负载"><a href="#1-创建工作负载" class="headerlink" title="1.创建工作负载"></a>1.创建工作负载</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#创建一个deployment型的工作负载，端口使用nginx默认的80</span></span><br><span class="line">kubectl create deployment nginx-demo --image=swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nginx:1.27.0 --port=80</span><br><span class="line"></span><br><span class="line"><span class="comment">#暴露服务端口</span></span><br><span class="line">kubectl expose deployment nginx-demo --port=80 --<span class="built_in">type</span>=ClusterIP</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建一个ingress规则</span></span><br><span class="line">kubectl create ingress nginx-demo --class=nginx --rule=<span class="string">&quot;test.qihoo.net/*=nginx-demo:80&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#获取ingress pod ip</span></span><br><span class="line"><span class="comment">#kubectl get pods -o=jsonpath=&#x27;&#123;@&#125;&#x27; | jq</span></span><br><span class="line">kubectl get pod -n ingress-nginx -o jsonpath=<span class="string">&quot;&#123;.items[*][&#x27;.status.hostIP&#x27;]&#125;&quot;</span></span><br><span class="line">11.33.162.177</span><br><span class="line"></span><br><span class="line"><span class="comment">#配置host，保证请求经过ingress，</span></span><br><span class="line"><span class="built_in">cat</span> /etc/hosts</span><br><span class="line">11.33.162.177 test.qihoo.net</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-查看TLS支持版本"><a href="#2-查看TLS支持版本" class="headerlink" title="2.查看TLS支持版本"></a>2.查看TLS支持版本</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#请求后端服务</span></span><br><span class="line">curl -v http://test.qihoo.net</span><br><span class="line"></span><br><span class="line"><span class="comment">#使用nmap或者openssl请求</span></span><br><span class="line">nmap --script ssl-enum-ciphers -p 443 test.qihoo.net</span><br><span class="line">nmap --script ssl-enum-ciphers -p 443 11.33.162.177</span><br><span class="line"></span><br><span class="line"><span class="comment">#或者</span></span><br><span class="line">openssl s_client -connect test.qihoo.net:443 -tls1_1</span><br><span class="line">openssl s_client -connect test.qihoo.net:443 -tls1_2</span><br><span class="line">openssl s_client -connect test.qihoo.net:443 -tls1_3</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-编辑ingress-nginx-configmap配置"><a href="#3-编辑ingress-nginx-configmap配置" class="headerlink" title="3.编辑ingress-nginx configmap配置"></a>3.编辑ingress-nginx configmap配置</h2><ul>
+<li><p>获取ingress-nginx的configmap，编辑配置</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取ingress-nginx 的configmap，编辑配置</span></span><br><span class="line">kubectl get cm -n ingress-nginx</span><br><span class="line">NAME                       DATA   AGE</span><br><span class="line">ingress-nginx-controller   3      47d</span><br><span class="line">kube-root-ca.crt           1      47d</span><br><span class="line">nginx-template             1      47d</span><br><span class="line"></span><br><span class="line">kubectl edit cm ingress-nginx-controller -n ingress-nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#data配置添加以下内容：</span></span><br><span class="line">ssl-ciphers: ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:@SECLEVEL=0</span><br><span class="line">ssl-protocols: TLSv1 TLSv1.1 TLSv1.2 TLSv1.3</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="4-再次请求查看支持的TLS版本"><a href="#4-再次请求查看支持的TLS版本" class="headerlink" title="4.再次请求查看支持的TLS版本"></a>4.再次请求查看支持的TLS版本</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --script ssl-enum-ciphers -p 443 11.33.162.177</span><br><span class="line">或者</span><br><span class="line">nmap --script ssl-enum-ciphers -p 443 test.qihoo.net</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5.参考文档"></a>5.参考文档</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/</span><br><span class="line"></span><br><span class="line">https://stackoverflow.com/questions/59371313/kubernetes-nginx-ingress-controller-activate-tlsv1-1</span><br><span class="line"></span><br><span class="line">https://help.aliyun.com/zh/ack/ack-managed-and-ack-dedicated/user-guide/nginx-ingress-faq</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>CA签发证书</title>
+    <url>/2024/10/18/CA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6/</url>
+    <content><![CDATA[<p>CA（Certificate Authority），翻译过来就叫作证书颁发机构。用于实现数字证书的管理，包括证书颁发、吊销、续期等。PKI（Registration Authority ），翻译过来叫作注册机构，负责接收请求并验证实体的身份，然后指示 CA 为其颁发或撤销证书。CA和PKI的关系：PKI 是一个更大的框架或系统，而 CA 是 PKI 中的一个核心组件。</p>
+<h2 id="1、安装openSSL"><a href="#1、安装openSSL" class="headerlink" title="1、安装openSSL"></a>1、安装openSSL</h2><h2 id="2、创建目录"><a href="#2、创建目录" class="headerlink" title="2、创建目录"></a>2、创建目录</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ls</span> /etc/pki/CA</span><br><span class="line"><span class="built_in">mkdir</span> /etc/pki/CA</span><br><span class="line"><span class="built_in">mkdir</span> /etc/pki/CA/&#123;certs,crl,newcerts,private,csr&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#certs目录：用于统一存放CA签发的证书</span></span><br><span class="line"><span class="comment">#crl目录：用于存放一个证书吊销文件，这个文件的内容记录了吊销证书的信息</span></span><br><span class="line"><span class="comment">#newcerts目录：这个目录存放的是刚创建的证书</span></span><br><span class="line"><span class="comment">#private：存放的是CA的私钥文件</span></span><br><span class="line"><span class="comment">#csr:单独给客户的证书请求文件创建了一个目录，用于保存客户端传输过来的CSR文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意这个文件初始时一定要为空，不然后期没法颁发证书</span></span><br><span class="line"><span class="built_in">touch</span>  /etc/pki/CA/index.txt</span><br><span class="line"><span class="built_in">echo</span> 01 &gt; /etc/pki/CA/serial</span><br><span class="line"></span><br><span class="line"><span class="comment">#文件说明：</span></span><br><span class="line"><span class="comment">#index.txt文件: 是OpenSSL用来跟踪哪些证书已经被签署的数据库。对于一个新的CA，index.txt应该是一个空文件，如果这个文件非空，签发证书的时候会失败。</span></span><br><span class="line"><span class="comment">#serial文件：存放颁发证书的编号的文件，每当签发新证书时，OpenSSL会读取这个文件中的值作为其序列号，并增加该值以供下次使用，所以需要给他赋初值。</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3、编辑配置文件"><a href="#3、编辑配置文件" class="headerlink" title="3、编辑配置文件"></a>3、编辑配置文件</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#通过 openssl version -d 来查找OpenSSL的相关文件</span></span><br><span class="line">openssl version -d</span><br><span class="line"><span class="built_in">ls</span> /etc/pki/tls</span><br><span class="line"></span><br><span class="line"><span class="built_in">mv</span> /etc/pki/tls/openssl.cnf /etc/pki/tls/openssl.cnf.back</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>vim &#x2F;etc&#x2F;pki&#x2F;tls&#x2F;openssl.cnf</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># [ ca ]指定默认的 CA 配置区段，因为可能会存在多个 CA 配置区段，用于不同的目的或者不同的证书策略</span></span><br><span class="line">[ ca ]</span><br><span class="line"><span class="comment"># 定义默认的CA设置部分名称</span></span><br><span class="line">default_ca = CA_default</span><br><span class="line"></span><br><span class="line"><span class="comment"># [ CA_default ] 定义了关于证书颁发机构(CA)的默认设置和相关文件路径。</span></span><br><span class="line">[ CA_default ]</span><br><span class="line"><span class="comment"># 定义CA的主目录。</span></span><br><span class="line"><span class="built_in">dir</span> = /etc/pki/CA</span><br><span class="line"><span class="comment"># 已签发的证书的存储位置</span></span><br><span class="line">certs = <span class="variable">$dir</span>/certs</span><br><span class="line"><span class="comment"># 新证书的默认存放位置</span></span><br><span class="line">new_certs_dir = <span class="variable">$dir</span>/newcerts</span><br><span class="line"><span class="comment">#  用于存储证书签发信息的数据库文件的位置</span></span><br><span class="line">database = <span class="variable">$dir</span>/index.txt</span><br><span class="line"><span class="comment"># CA的证书位置</span></span><br><span class="line">certificate = <span class="variable">$dir</span>/certs/cacert.pem</span><br><span class="line"><span class="comment"># CA的私钥位置</span></span><br><span class="line">private_key = <span class="variable">$dir</span>/private/cakey.key</span><br><span class="line"><span class="comment"># 存储当前证书序列号的文件位置</span></span><br><span class="line">serial = <span class="variable">$dir</span>/serial</span><br><span class="line"><span class="comment"># 默认证书有效期</span></span><br><span class="line">default_days = 3650</span><br><span class="line"><span class="comment"># 默认使用的消息摘要算</span></span><br><span class="line">default_md = sha256</span><br><span class="line"><span class="comment"># 决定是否保留从证书请求(CSR)中传入的Distinguished Name(DN)的顺序</span></span><br><span class="line">preserve = no</span><br><span class="line">default_crl_days = 7</span><br><span class="line"></span><br><span class="line"><span class="comment"># 策略定义，确保以下部分存在</span></span><br><span class="line">policy = policy_match</span><br><span class="line"></span><br><span class="line">[ policy_match ]</span><br><span class="line">countryName            = match</span><br><span class="line">stateOrProvinceName    = optional</span><br><span class="line">organizationName       = match</span><br><span class="line">organizationalUnitName = optional</span><br><span class="line">commonName             = supplied</span><br><span class="line">emailAddress           = optional</span><br><span class="line"></span><br><span class="line"><span class="comment"># [ req ]定义了与生成证书请求文件（也称为Certificate Signing Request，简称CSR）相关的默认设置</span></span><br><span class="line">[ req ]</span><br><span class="line"><span class="comment"># 生成新私钥时使用的默认位数</span></span><br><span class="line">default_bits = 2048</span><br><span class="line"><span class="comment"># 是否在创建证书请求时提示用户输入详细信息</span></span><br><span class="line"><span class="comment"># no表示使用 openssl req 命令创建新的CSR或证书时，将不会被提示输入任何DN字段，会使用 [ dn ] 部分提供的默认值。</span></span><br><span class="line">prompt = no</span><br><span class="line"><span class="comment"># 用于证书请求的默认消息摘要算法</span></span><br><span class="line">default_md = sha256</span><br><span class="line"><span class="comment"># 告诉OpenSSL使用配置文件中的[ dn ]部分作为CSR的默认字段值</span></span><br><span class="line">distinguished_name = dn</span><br><span class="line"></span><br><span class="line"><span class="comment"># [ dn ] 定义了默认的Distinguished Name（可分辨名称）属性和它们的值</span></span><br><span class="line"><span class="comment"># C：国家 ST：省 L：市 O：通常是一个公司或机构的全名 OU：组织内部的一个特定部门或单位</span></span><br><span class="line"><span class="comment"># CN：在 SSL/TLS 证书的上下文中通常表示证书意图保护的域名emailAddress：邮箱</span></span><br><span class="line">[ dn ]</span><br><span class="line">C = CN</span><br><span class="line">ST = BeiJing</span><br><span class="line">L = BeiJing</span><br><span class="line">O = xxx</span><br><span class="line">OU = xxx docker</span><br><span class="line">emailAddress = xxx@yyy.cn</span><br><span class="line">CN = yyy.cn</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="4、自签名证书生成"><a href="#4、自签名证书生成" class="headerlink" title="4、自签名证书生成"></a>4、自签名证书生成</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#先生成私钥</span></span><br><span class="line">openssl genpkey -algorithm RSA -out /etc/pki/CA/private/cakey.key</span><br><span class="line"></span><br><span class="line"><span class="comment">#根据生成得私钥创建一个新的根证书,使用这个证书来签署其它得证书</span></span><br><span class="line">openssl req -key /etc/pki/CA/private/cakey.key -new -x509 -days 7300 -out /etc/pki/CA/certs/cacert.pem</span><br><span class="line"></span><br><span class="line">tree /etc/pki/CA</span><br></pre></td></tr></table></figure>
+
+<h2 id="5、CA颁发证书"><a href="#5、CA颁发证书" class="headerlink" title="5、CA颁发证书"></a>5、CA颁发证书</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#先创建一个目录存放相关文件</span></span><br><span class="line"><span class="built_in">cd</span> &amp;&amp; <span class="built_in">mkdir</span> tom &amp;&amp; <span class="built_in">cd</span> tom</span><br><span class="line"></span><br><span class="line"><span class="comment">#一步到位生成私钥和CSR</span></span><br><span class="line">openssl req -new -keyout tom.key -out tom_req.csr -nodes</span><br><span class="line"><span class="comment">#生成私钥的时候会要求输入一个密码，不输入的话可能会提示error，可以通过 -nodes 参数来不输入密码</span></span><br><span class="line"><span class="comment">#一步到位生成私钥和CSR，-keyout clientkey.pem 选项生成一个新的私钥，然后根据生成的私钥创建证书请求文件</span></span><br><span class="line"><span class="comment">#在CA上生成的CSR，配置文件里面指定了请求者的标识信息（如：组织、位置、国家、域名等，所以这里没有提示输出</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#拷贝到csr路径</span></span><br><span class="line"><span class="built_in">cp</span> ./tom_req.csr /etc/pki/CA/csr/</span><br><span class="line"></span><br><span class="line"><span class="comment">#CA签发证书，通过 -bath参数实现签署证书时自动确认，如果初始化CA环境的时候，index.txt这个数据库文件不为空，那么此时签署证书不会成功，也不会有任何错误提示。</span></span><br><span class="line">openssl ca -batch -<span class="keyword">in</span> /etc/pki/CA/csr/tom_req.csr -out /etc/pki/CA/certs/tom.pem</span><br><span class="line"></span><br><span class="line">tree /etc/pki/CA</span><br><span class="line">/etc/pki/CA</span><br><span class="line">├── certs</span><br><span class="line">│   ├── cacert.pem</span><br><span class="line">│   ├── tom1.pem</span><br><span class="line">│   └── tom.pem</span><br><span class="line">├── crl</span><br><span class="line">│   └── crl.pem</span><br><span class="line">├── csr</span><br><span class="line">│   └── tom_req.csr</span><br><span class="line">├── index.txt</span><br><span class="line">├── index.txt.attr</span><br><span class="line">├── index.txt.attr.old</span><br><span class="line">├── index.txt.old</span><br><span class="line">├── newcerts</span><br><span class="line">│   ├── 01.pem</span><br><span class="line">├── private</span><br><span class="line">│   └── cakey.key</span><br><span class="line">├── serial</span><br><span class="line">└── serial.old</span><br><span class="line"></span><br><span class="line"><span class="comment">#idnex.txt文件用于存储CA签发的所有证书，一行代表一个证书。</span></span><br><span class="line"><span class="comment">#该文件包含了index.txt文件的一些属性，unique_subject = yes表示在index.txt数据库中的每个主题应该是唯一的，即不允许有两个具有相同主题的证书</span></span><br><span class="line"><span class="comment">#index.txt.old存放上一个证书的数据库信息</span></span><br><span class="line"><span class="comment">#serial.old该文件存放上一个证书的编号信息</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查阅证书内容</span></span><br><span class="line">openssl req -noout -text -<span class="keyword">in</span> /etc/pki/CA/certs/tom.pem</span><br></pre></td></tr></table></figure>
+
+<h2 id="6、注销证书"><a href="#6、注销证书" class="headerlink" title="6、注销证书"></a>6、注销证书</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#吊销证书</span></span><br><span class="line">openssl ca -revoke /etc/pki/CA/certs/tom.pem</span><br><span class="line"><span class="comment">#吊销后，需要重新生成 CRL 文件：</span></span><br><span class="line">openssl ca -gencrl -out /etc/pki/CA/crl/crl.pem</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">openssl crl -<span class="keyword">in</span> /etc/pki/CA/crl/crl.pem -text -noout</span><br><span class="line"></span><br><span class="line">openssl verify -crl_check -CAfile /etc/pki/CA/certs/cacert.pem -CRLfile /etc/pki/CA/crl/crl.pem /etc/pki/CA/certs/tom.pem</span><br><span class="line"><span class="comment">#说明</span></span><br><span class="line">•	-crl_check：启用 CRL 检查。</span><br><span class="line">•	-CAfile：指定 CA 根证书。</span><br><span class="line">•	-CRLfile：指定 CRL 文件。</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见后缀"><a href="#常见后缀" class="headerlink" title="常见后缀"></a>常见后缀</h2><ul>
+<li>.key：一般私钥就以 .key 结尾</li>
+<li>.pem：新生成的证书一般以 .pem 结尾。pem是 Privacy Enhanced Mail 的缩写，是一种文件格式，可以包含任何类型的证书或密钥。这种格式的文件类容是BASE64编码显示的，并在开始和结束时由”—–BEGIN…”和”—–END…”标记包围</li>
+<li>.csr：证书请求文件使用csr结尾，csr是Certificate Signing Request的缩写</li>
+<li>.crl：这是CA用于列出已被撤销的证书的文件常用的后缀，是Certificate Revocation List的缩写</li>
+</ul>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>OpenSSL 支持的密钥类型和格式</title>
+    <url>/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/</url>
+    <content><![CDATA[<p><strong>OpenSSL 密钥类型与格式对比表</strong></p>
+<p><strong>1. 密钥类型对比</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>密钥类型</strong></th>
+<th><strong>算法描述</strong></th>
+<th><strong>典型应用场景</strong></th>
+<th><strong>生成命令示例</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>RSA</strong></td>
+<td>基于大整数分解，常见的非对称加密算法</td>
+<td>HTTPS、TLS&#x2F;SSL 证书、SSH、公钥加密</td>
+<td>openssl genrsa -out rsa_key.pem 2048</td>
+</tr>
+<tr>
+<td><strong>ECC</strong></td>
+<td>椭圆曲线密码学，短密钥更高效</td>
+<td>IoT、移动设备、TLS 1.3</td>
+<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
+</tr>
+<tr>
+<td><strong>DSA</strong></td>
+<td>基于离散对数的数字签名算法</td>
+<td>数字签名（DNSSEC 等）</td>
+<td>openssl dsaparam -genkey 2048 -out dsa_key.pem</td>
+</tr>
+<tr>
+<td><strong>DH</strong></td>
+<td>Diffie-Hellman 算法，用于密钥交换</td>
+<td>VPN、IPsec 加密通道</td>
+<td>openssl dhparam -out dh_key.pem 2048</td>
+</tr>
+<tr>
+<td><strong>ED25519</strong></td>
+<td>高效的椭圆曲线签名算法（无须参数生成）</td>
+<td>SSH、TLS 1.3、轻量级签名</td>
+<td>openssl genpkey -algorithm ED25519 -out ed25519_key.pem</td>
+</tr>
+<tr>
+<td><strong>X25519</strong></td>
+<td>专用于密钥交换的现代椭圆曲线算法</td>
+<td>TLS 1.3 密钥交换、ECDH</td>
+<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
+</tr>
+<tr>
+<td><strong>GOST</strong></td>
+<td>俄罗斯国家标准算法</td>
+<td>加密通信和签名（如 GOST SSL 证书）</td>
+<td>需 GOST 扩展支持</td>
+</tr>
+<tr>
+<td><strong>SM2</strong></td>
+<td>中国国家标准（基于 ECC）</td>
+<td>国密协议（如银行和政府应用）</td>
+<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
+</tr>
+</tbody></table>
+<p><strong>2. 密钥格式对比</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>格式</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>典型应用场景</strong></th>
+<th><strong>加密支持</strong></th>
+<th><strong>转换命令示例</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>PEM</strong></td>
+<td>Base64 编码，文本格式，以 —–BEGIN 开头</td>
+<td>TLS&#x2F;SSL 证书、服务器私钥存储</td>
+<td>支持</td>
+<td>openssl rsa -in rsa_key.pem -out private_key.pem -outform PEM</td>
+</tr>
+<tr>
+<td><strong>DER</strong></td>
+<td>二进制格式，适合嵌入式系统</td>
+<td>嵌入式系统、低级通信传输</td>
+<td>不支持</td>
+<td>openssl rsa -in rsa_key.pem -out private_key.der -outform DER</td>
+</tr>
+<tr>
+<td><strong>PKCS#8</strong></td>
+<td>私钥标准格式，支持多种算法（如 RSA、ECC）</td>
+<td>服务器密钥存储、跨平台交换</td>
+<td>支持</td>
+<td>openssl pkcs8 -topk8 -in rsa_key.pem -out pkcs8_key.pem</td>
+</tr>
+<tr>
+<td><strong>PKCS#12</strong></td>
+<td>包含证书链和私钥的打包格式（.p12&#x2F;.pfx）</td>
+<td>客户端证书、VPN、S&#x2F;MIME</td>
+<td>支持</td>
+<td>openssl pkcs12 -export -out cert.p12 -inkey ec_key.pem -in cert.pem</td>
+</tr>
+<tr>
+<td><strong>OpenSSH</strong></td>
+<td>专用于 SSH 的密钥格式</td>
+<td>SSH 登录和密钥交换</td>
+<td>支持</td>
+<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
+</tr>
+<tr>
+<td><strong>JWK</strong></td>
+<td>JSON Web Key，用于 Web 应用密钥存储和传输</td>
+<td>OAuth2、JWT 加密</td>
+<td>支持</td>
+<td>使用专用库生成</td>
+</tr>
+</tbody></table>
+<p><strong>3. 应用场景推荐</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>场景</strong></th>
+<th><strong>推荐密钥类型</strong></th>
+<th><strong>推荐格式</strong></th>
+<th><strong>命令示例</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Web 服务器（Nginx&#x2F;Apache）</strong></td>
+<td>RSA 或 ECC</td>
+<td>PEM、PKCS#8</td>
+<td>openssl pkcs8 -topk8 -in rsa_key.pem -out server_key.pem</td>
+</tr>
+<tr>
+<td><strong>IoT 设备和移动端</strong></td>
+<td>ECC（prime256v1）</td>
+<td>PKCS#8</td>
+<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
+</tr>
+<tr>
+<td><strong>VPN 客户端证书</strong></td>
+<td>RSA 或 ECC</td>
+<td>PKCS#12</td>
+<td>openssl pkcs12 -export -out vpn_cert.p12 -inkey ec_key.pem -in cert.pem</td>
+</tr>
+<tr>
+<td><strong>SSH 登录</strong></td>
+<td>ED25519 或 RSA</td>
+<td>OpenSSH</td>
+<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
+</tr>
+<tr>
+<td><strong>TLS 1.3 密钥交换</strong></td>
+<td>X25519</td>
+<td>PKCS#8</td>
+<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
+</tr>
+<tr>
+<td><strong>国密应用（SM2 签名）</strong></td>
+<td>SM2</td>
+<td>PKCS#8</td>
+<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
+</tr>
+</tbody></table>
+<p><strong>4. 实现案例</strong></p>
+<p><strong>1. 生成 RSA 密钥并转换为 PKCS#8 格式</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">openssl genrsa -out rsa_key.pem 2048</span><br><span class="line"></span><br><span class="line">openssl pkcs8 -topk8 -<span class="keyword">in</span> rsa_key.pem -out rsa_key_pkcs8.pem -nocrypt</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 生成 ECC 私钥并打包为 PKCS#12</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">openssl ecparam -genkey -name prime256v1 -out ec_key.pem</span><br><span class="line"></span><br><span class="line">openssl req -new -x509 -key ec_key.pem -out ec_cert.pem -days 365</span><br><span class="line"></span><br><span class="line">openssl pkcs12 -<span class="built_in">export</span> -out ec_cert.p12 -inkey ec_key.pem -<span class="keyword">in</span> ec_cert.pem</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 生成 ED25519 密钥用于 SSH</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519</span><br></pre></td></tr></table></figure>
+
+<p><strong>5. 总结与建议</strong></p>
+<p>•	<strong>RSA</strong>：经典且兼容性好，适合 Web 服务器和通用加密应用。</p>
+<p>•	<strong>ECC</strong>：更高效、密钥短，适用于 IoT 和现代 TLS。</p>
+<p>•	<strong>ED25519&#x2F;X25519</strong>：轻量级和高性能，推荐用于 SSH 和 TLS 1.3。</p>
+<p>•	<strong>SM2&#x2F;GOST</strong>：满足特定国家或行业的加密标准。</p>
+<p>•	<strong>PKCS#8 与 PKCS#12</strong>：PKCS#8 适合服务器端私钥存储，PKCS#12 常用于客户端证书传输。</p>
+<p>选择合适的密钥类型与格式可以在 <strong>安全性、性能、兼容性</strong> 之间取得良好的平衡。</p>
+]]></content>
+      <categories>
+        <category>openssl</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>nmap常用命令解析</title>
+    <url>/2024/10/21/nmap%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<h2 id="一、常见用法及命令"><a href="#一、常见用法及命令" class="headerlink" title="一、常见用法及命令"></a><strong>一、常见用法及命令</strong></h2><ol>
+<li>   <strong>扫描主机是否在线</strong>（Ping 扫描）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：检查 192.168.1.0&#x2F;24 网段内哪些主机在线。</li>
+<li><strong>解释</strong>：-sn 参数禁用端口扫描，只进行主机发现。</li>
+</ul>
+<ol start="2">
+<li>   <strong>端口扫描</strong>（默认 TCP 扫描）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：扫描主机常用端口（1-1024），检查哪些端口开放。</li>
+<li><strong>默认行为</strong>：使用 TCP 连接进行扫描。</li>
+</ul>
+<ol start="3">
+<li>   <strong>扫描指定端口范围</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -p 22-80 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：扫描 192.168.1.1 上 22 到 80 端口的状态。</li>
+</ul>
+<ol start="4">
+<li>   <strong>服务与版本检测</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -sV 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：检测开放端口上运行的服务及版本信息。</li>
+<li><strong>解释</strong>：-sV 参数用于版本探测。</li>
+</ul>
+<ol start="5">
+<li>   <strong>操作系统识别</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -O 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：分析目标主机的操作系统类型及版本。</li>
+<li><strong>解释</strong>：-O 参数用于启用操作系统检测。</li>
+</ul>
+<ol start="6">
+<li>   <strong>检测网络中的所有设备</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24 -oG - | grep Up</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：列出 192.168.1.0&#x2F;24 网段内在线的设备。</li>
+</ul>
+<ol start="7">
+<li>   <strong>UDP 扫描</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -sU -p 53,123 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：检测目标主机上的 UDP 端口，如 DNS（53）和 NTP（123）。</li>
+<li><strong>解释</strong>：-sU 启用 UDP 扫描。</li>
+</ul>
+<p><strong>Nmap 脚本：针对 IP 进行一系列扫描</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用方法：./nmap_scan.sh &lt;IP地址&gt;</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="string">&quot;<span class="variable">$1</span>&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;请提供目标 IP 地址作为参数。&quot;</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;示例： ./nmap_scan.sh 192.168.1.1&quot;</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">TARGET_IP=<span class="variable">$1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;正在探测目标主机是否在线...&quot;</span></span><br><span class="line">nmap -sn <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;执行端口扫描...&quot;</span></span><br><span class="line">nmap -p 1-1000 <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;检测服务版本...&quot;</span></span><br><span class="line">nmap -sV <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;检测操作系统类型...&quot;</span></span><br><span class="line">nmap -O <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;扫描完成！&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、Nmap-的-NSE-脚本功能及-SSL-TLS-扫描用法"><a href="#二、Nmap-的-NSE-脚本功能及-SSL-TLS-扫描用法" class="headerlink" title="二、Nmap 的 NSE 脚本功能及 SSL&#x2F;TLS 扫描用法"></a><strong>二、Nmap 的 NSE 脚本功能及 SSL&#x2F;TLS 扫描用法</strong></h2><p>Nmap 支持通过 <strong>NSE（Nmap Scripting Engine）脚本</strong> 执行更复杂的扫描任务，例如检测 <strong>TLS&#x2F;SSL 版本、加密算法的强度</strong>、服务漏洞扫描等。这些脚本可以帮助用户深入分析网络安全情况，尤其是检测服务的 SSL&#x2F;TLS 配置是否符合最佳实践。</p>
+<p><strong>TLS&#x2F;SSL 检测的常见命令</strong></p>
+<p><strong>1. 使用 ssl-enum-ciphers 检测支持的 TLS 版本及加密算法</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --script ssl-enum-ciphers -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：列出目标主机（example.com）在 443 端口上启用的 TLS 版本（如 TLS 1.0&#x2F;1.2&#x2F;1.3），以及支持的加密套件和密钥交换算法。</p>
+<p>•	<strong>使用场景</strong>：验证服务器是否启用了弱 TLS 版本（如 TLS 1.0&#x2F;1.1）或不安全的加密算法。</p>
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">PORT    STATE SERVICE</span><br><span class="line">443/tcp open  https</span><br><span class="line">| ssl-enum-ciphers:</span><br><span class="line">|   TLSv1.2:</span><br><span class="line">|     ciphers:</span><br><span class="line">|       TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 - strong</span><br><span class="line">|     compressors: NONE</span><br><span class="line">|_  least strength: strong</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 检测证书信息（ssl-cert 脚本）</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --script ssl-cert -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：显示目标服务器 SSL 证书的详细信息，包括：</p>
+<p>•	证书的有效期、颁发机构（CA）。</p>
+<p>•	证书链中是否有不信任的证书。</p>
+<p>•	<strong>使用场景</strong>：检查证书是否即将到期，或是否使用了自签名证书。</p>
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">PORT    STATE SERVICE</span><br><span class="line">443/tcp open  https</span><br><span class="line">| ssl-cert: Subject: commonName=example.com</span><br><span class="line">| Issuer: commonName=Let<span class="string">&#x27;s Encrypt Authority</span></span><br><span class="line"><span class="string">| Public Key type: RSA</span></span><br><span class="line"><span class="string">| Public Key bits: 2048</span></span><br><span class="line"><span class="string">| Signature Algorithm: sha256WithRSAEncryption</span></span><br><span class="line"><span class="string">| Not valid before: 2024-01-01T00:00:00</span></span><br><span class="line"><span class="string">|_Not valid after: 2024-04-01T00:00:00</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 检查是否支持心脏滴血漏洞（Heartbleed - ssl-heartbleed）</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --script ssl-heartbleed -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：检测目标服务器是否存在 <strong>Heartbleed 漏洞</strong>（CVE-2014-0160）。</p>
+<p>•	<strong>使用场景</strong>：验证服务器是否使用了存在此漏洞的 OpenSSL 版本。</p>
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">PORT    STATE SERVICE</span><br><span class="line">443/tcp open  https</span><br><span class="line">| ssl-heartbleed:</span><br><span class="line">|   VULNERABLE:</span><br><span class="line">|   The Heartbleed Bug is a serious vulnerability <span class="keyword">in</span> the popular OpenSSL cryptographic software library.</span><br><span class="line">|_  See: http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160</span><br></pre></td></tr></table></figure>
+
+<p><strong>其他常用 SSL&#x2F;TLS 相关 NSE 脚本</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>脚本名</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ssl-cert</td>
+<td>获取并显示服务器的 SSL 证书详细信息。</td>
+</tr>
+<tr>
+<td>ssl-enum-ciphers</td>
+<td>列出所有启用的 TLS 版本及加密套件。</td>
+</tr>
+<tr>
+<td>ssl-heartbleed</td>
+<td>检查服务器是否存在 Heartbleed 漏洞。</td>
+</tr>
+<tr>
+<td>ssl-poodle</td>
+<td>检查是否存在 POODLE 漏洞（针对 SSL 3.0）。</td>
+</tr>
+<tr>
+<td>ssl-dh-params</td>
+<td>检测 Diffie-Hellman 参数的强度，检查是否易受 Logjam 攻击。</td>
+</tr>
+</tbody></table>
+<p><strong>NSE 脚本的其他用法</strong></p>
+<ol>
+<li>   <strong>扫描所有常见 SSL&#x2F;TLS 相关漏洞：</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --script ssl-* -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：一次性运行所有与 SSL 相关的脚本，检测各种安全问题。</p>
+<ol start="2">
+<li>   <strong>组合多个脚本扫描：</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --script <span class="string">&quot;ssl-cert,ssl-enum-ciphers&quot;</span> -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：同时执行多个特定脚本，节省时间。</p>
+<p><strong>总结与学习建议</strong></p>
+<ol>
+<li><p>   ssl-enum-ciphers <strong>和</strong> ssl-cert 是日常检测 SSL&#x2F;TLS 配置的必备工具，可帮助管理员发现不安全的协议或证书问题。</p>
+</li>
+<li><p>   使用 NSE 脚本时，需要了解网络环境的具体需求，选择适合的脚本组合。</p>
+</li>
+<li><p>   <strong>学习路径</strong>：</p>
+</li>
+</ol>
+<p>•	先熟悉基础的 Nmap 端口扫描命令。</p>
+<p>•	探索 NSE 脚本的使用，逐步了解 TLS&#x2F;SSL 配置。</p>
+<p>•	定期检查官方文档和社区，了解最新的安全漏洞和 Nmap 新增脚本。</p>
+<p>通过以上命令与脚本，Nmap 能够帮助你快速分析 TLS&#x2F;SSL 配置是否存在问题，为网络安全提供重要保障。</p>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>hpa pod计算</title>
+    <url>/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/</url>
+    <content><![CDATA[<p>在 Kubernetes 中配置基于 CPU 利用率的 Horizontal Pod Autoscaler (HPA) 策略时，扩展的 Pod 数量根据以下公式计算：</p>
+<h3 id="HPA-计算扩展-Pod-数量的公式："><a href="#HPA-计算扩展-Pod-数量的公式：" class="headerlink" title="HPA 计算扩展 Pod 数量的公式："></a>HPA 计算扩展 Pod 数量的公式：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">desiredReplicas = ceil[currentReplicas * (currentMetricValue / targetMetricValue)]</span><br></pre></td></tr></table></figure>
+
+<p>具体来说：</p>
+<ol>
+<li><strong>currentReplicas</strong>：当前正在运行的 Pod 数量。</li>
+<li><strong>currentMetricValue</strong>：当前的 CPU 使用率，通常是所有 Pod 的 CPU 使用情况的平均值（例如 75%）。</li>
+<li><strong>targetMetricValue</strong>：你在 HPA 配置中指定的目标 CPU 利用率（例如 65%）。</li>
+</ol>
+<h3 id="例子："><a href="#例子：" class="headerlink" title="例子："></a>例子：</h3><p>假设：</p>
+<ul>
+<li>当前有 <strong>4 个 Pod</strong>。</li>
+<li>目标 CPU 利用率为 **65%**。</li>
+<li>当前的平均 CPU 利用率为 **80%**。</li>
+</ul>
+<p>计算公式为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">desiredReplicas = ceil[4 * (80 / 65)] = ceil[4 * 1.23] = ceil[4.92] = 5</span><br></pre></td></tr></table></figure>
+<p>因此，HPA 将扩展至 <strong>5 个 Pod</strong>，以保证 CPU 利用率降到你设置的目标值附近。</p>
+<h3 id="扩展和缩容过程："><a href="#扩展和缩容过程：" class="headerlink" title="扩展和缩容过程："></a>扩展和缩容过程：</h3><ul>
+<li><strong>扩展</strong>：当当前的 CPU 使用率高于目标值时，HPA 会增加 Pod 数量。</li>
+<li><strong>缩容</strong>：如果当前的 CPU 使用率低于目标值，HPA 会减少 Pod 数量，但缩容通常有冷却时间，避免频繁调整。</li>
+</ul>
+<h3 id="配置示例："><a href="#配置示例：" class="headerlink" title="配置示例："></a>配置示例：</h3><p>在 HPA 配置文件中，设置 <code>targetCPUUtilizationPercentage</code>，例如：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">autoscaling/v2</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">HorizontalPodAutoscaler</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-hpa</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">scaleTargetRef:</span></span><br><span class="line">    <span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">my-deployment</span></span><br><span class="line">  <span class="attr">minReplicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">maxReplicas:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">metrics:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">Resource</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">cpu</span></span><br><span class="line">      <span class="attr">target:</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">Utilization</span></span><br><span class="line">        <span class="attr">averageUtilization:</span> <span class="number">65</span>  <span class="comment"># 目标 CPU 利用率</span></span><br></pre></td></tr></table></figure>
+<p>此配置将基于 CPU 利用率，动态调整 Pod 数量，使整体利用率保持在 65% 附近。</p>
+<p>这种机制确保集群资源得到充分利用，同时避免单个 Pod 过载或资源浪费。</p>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux 工具</title>
+    <url>/2024/10/24/linux-%E5%B7%A5%E5%85%B7/</url>
+    <content><![CDATA[<h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><ul>
+<li>yq</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#https://github.com/mikefarah/yq/releases</span></span><br><span class="line">wget https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line">tar vxf yq_linux_amd64.tar.gz ./</span><br><span class="line"><span class="built_in">mv</span> ./yq_linux_amd64 /usr/local/bin/yq</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
+</search>
