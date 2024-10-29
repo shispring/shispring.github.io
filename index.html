@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-10-29 13:59:10 / 修改时间：13:59:48" itemprop="dateCreated datePublished" datetime="2024-10-29T13:59:10+08:00">2024-10-29</time>
+              <time title="创建时间：2024-10-29 13:59:10 / 修改时间：14:13:27" itemprop="dateCreated datePublished" datetime="2024-10-29T13:59:10+08:00">2024-10-29</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -227,14 +227,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.4k</span>
+              <span>3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -265,13 +265,13 @@
 <li>**<code>value</code>**：新的值。</li>
 </ul>
 <hr>
-<h3 id="2-添加多个新字段（add）"><a href="#2-添加多个新字段（add）" class="headerlink" title="2. 添加多个新字段（add）"></a><strong>2. 添加多个新字段（<code>add</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;, &quot;value&quot;: &quot;ECDHE-RSA-AES128-GCM-SHA256&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/hsts&quot;, &quot;value&quot;: &quot;max-age=31536000&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-添加多个新字段（add）"><a href="#2-添加多个新字段（add）" class="headerlink" title="2. 添加多个新字段（add）"></a><strong>2. 添加多个新字段（<code>add</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1 TLSv1.1 TLSv1.2 TLSv1.3&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;, &quot;value&quot;: &quot;ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:@SECLEVEL=0&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
 <ul>
 <li>**<code>op: &quot;add&quot;</code>**：为 ConfigMap 增加新的键值对。</li>
 <li>多个字段用数组表示，每个 JSON Patch 操作为一个对象。</li>
 </ul>
 <hr>
-<h3 id="3-删除多个字段（remove）"><a href="#3-删除多个字段（remove）" class="headerlink" title="3. 删除多个字段（remove）"></a><strong>3. 删除多个字段（<code>remove</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/hsts&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-删除多个字段（remove）"><a href="#3-删除多个字段（remove）" class="headerlink" title="3. 删除多个字段（remove）"></a><strong>3. 删除多个字段（<code>remove</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
 <ul>
 <li>**<code>op: &quot;remove&quot;</code>**：删除指定字段。</li>
 <li>如果字段不存在，会报错，可以先用 <code>kubectl get</code> 检查字段。</li>
@@ -1878,12 +1878,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">52k</span>
+    <span title="站点总字数">53k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">47 分钟</span>
+    <span title="站点阅读时长">48 分钟</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
