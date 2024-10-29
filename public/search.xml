@@ -1451,4 +1451,62 @@
 
 ]]></content>
   </entry>
+  <entry>
+    <title>k8s patch 用法</title>
+    <url>/2024/10/29/k8s-patch-%E7%94%A8%E6%B3%95/</url>
+    <content><![CDATA[<p><code>kubectl patch</code> 的 <code>--type=&#39;json&#39;</code> 方式是一种非常灵活的 JSON Patch 操作，可以实现 <strong>添加、删除、更新多个字段</strong> 的功能。以下是具体的操作方式和案例：</p>
+<hr>
+<h3 id="JSON-Patch-的基本结构"><a href="#JSON-Patch-的基本结构" class="headerlink" title="JSON Patch 的基本结构"></a><strong>JSON Patch 的基本结构</strong></h3><p>JSON Patch 遵循 <a href="https://tools.ietf.org/html/rfc6902">RFC 6902</a> 标准。常用操作有：  </p>
+<ul>
+<li>**<code>add</code>**：向指定路径添加新字段。</li>
+<li>**<code>remove</code>**：删除指定路径的字段。</li>
+<li>**<code>replace</code>**：更新已有字段的值。</li>
+<li>**<code>copy</code>**：复制一个字段到另一个位置。</li>
+<li>**<code>move</code>**：移动字段。</li>
+<li>**<code>test</code>**：用于断言字段是否存在，常用于保证安全更新。</li>
+</ul>
+<hr>
+<h3 id="1-更新已有字段的值（replace）"><a href="#1-更新已有字段的值（replace）" class="headerlink" title="1. 更新已有字段的值（replace）"></a><strong>1. 更新已有字段的值（<code>replace</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[&#123;&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1.2 TLSv1.3&quot;&#125;]&#x27;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>**<code>op: &quot;replace&quot;</code>**：替换现有字段值。</li>
+<li>**<code>path: &quot;/data/ssl-protocols&quot;</code>**：要更新的字段路径。</li>
+<li>**<code>value</code>**：新的值。</li>
+</ul>
+<hr>
+<h3 id="2-添加多个新字段（add）"><a href="#2-添加多个新字段（add）" class="headerlink" title="2. 添加多个新字段（add）"></a><strong>2. 添加多个新字段（<code>add</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;, &quot;value&quot;: &quot;ECDHE-RSA-AES128-GCM-SHA256&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/hsts&quot;, &quot;value&quot;: &quot;max-age=31536000&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>**<code>op: &quot;add&quot;</code>**：为 ConfigMap 增加新的键值对。</li>
+<li>多个字段用数组表示，每个 JSON Patch 操作为一个对象。</li>
+</ul>
+<hr>
+<h3 id="3-删除多个字段（remove）"><a href="#3-删除多个字段（remove）" class="headerlink" title="3. 删除多个字段（remove）"></a><strong>3. 删除多个字段（<code>remove</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/hsts&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>**<code>op: &quot;remove&quot;</code>**：删除指定字段。</li>
+<li>如果字段不存在，会报错，可以先用 <code>kubectl get</code> 检查字段。</li>
+</ul>
+<hr>
+<h3 id="4-复制字段（copy）"><a href="#4-复制字段（copy）" class="headerlink" title="4. 复制字段（copy）"></a><strong>4. 复制字段（<code>copy</code>）</strong></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[&#123;&quot;op&quot;: &quot;copy&quot;, &quot;from&quot;: &quot;/data/ssl-protocols&quot;, &quot;path&quot;: &quot;/data/backup-ssl-protocols&quot;&#125;]&#x27;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>**<code>op: &quot;copy&quot;</code>**：从 <code>/data/ssl-protocols</code> 复制值到 <code>/data/backup-ssl-protocols</code>。</li>
+</ul>
+<hr>
+<h3 id="5-条件测试字段（test）并更新"><a href="#5-条件测试字段（test）并更新" class="headerlink" title="5. 条件测试字段（test）并更新"></a><strong>5. 条件测试字段（<code>test</code>）并更新</strong></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;test&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1 TLSv1.2&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1.2 TLSv1.3&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>**<code>op: &quot;test&quot;</code>**：检查 <code>ssl-protocols</code> 的值是否匹配。如果不匹配，则不会执行替换操作。</li>
+</ul>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><p>使用 <code>--type=&#39;json&#39;</code> 进行 PATCH 操作非常灵活，特别适合批量修改配置。  </p>
+<ul>
+<li>**<code>add</code>**：新增字段。</li>
+<li>**<code>replace</code>**：更新现有字段。</li>
+<li>**<code>remove</code>**：删除不需要的字段。</li>
+<li>**<code>copy</code> 和 <code>move</code>**：在 JSON 中重构结构。</li>
+<li>**<code>test</code>**：用于确保一致性，避免不正确的更新。</li>
+</ul>
+<p>这些操作特别适合集群自动化运维和精细化的配置变更。</p>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
 </search>
