@@ -692,8 +692,13 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;to_entries[] | .value&#x27;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p><strong>使用管道</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kubectl get pods --output=json | jq &#x27;.items[] | .metadata.name&#x27;</span><br></pre></td></tr></table></figure>
-
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kubectl get pods --output=json | jq &#x27;.items[] | .metadata.name&#x27;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>实践</strong>：</p>
+<pre><code>直接输出为完整的 JSON 格式
+jq &#39;.[] | &#123;address: .address, weight: .weight&#125;&#39; &lt;&lt;&lt; &#39;[&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;,&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;]&#39;
+#输出为表格格式：
+jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;,&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;]&#39; | column -t
+</code></pre>
 <p>这将获取所有 pod 的名称。</p>
 </li>
 </ol>
