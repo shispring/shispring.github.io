@@ -1509,4 +1509,13 @@
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>nginx 模块及配置</title>
+    <url>/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<h2 id="nginx架构及模块"><a href="#nginx架构及模块" class="headerlink" title="nginx架构及模块"></a>nginx架构及模块</h2><p><a href="https://raw.githubusercontent.com/shispring/picgo/master/20241031120448.png">https://raw.githubusercontent.com/shispring/picgo/master/20241031120448.png</a><br><a href="https://raw.githubusercontent.com/shispring/picgo/master/20241031120653.png">https://raw.githubusercontent.com/shispring/picgo/master/20241031120653.png</a></p>
+]]></content>
+      <categories>
+        <category>nginx</category>
+      </categories>
+  </entry>
 </search>
