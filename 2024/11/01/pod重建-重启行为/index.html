@@ -20,20 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="一、nodejs 安装1官网: https:&#x2F;&#x2F;nodejs.org&#x2F;en&#x2F;  二、hexo安装12345678官网：https:&#x2F;&#x2F;hexo.io&#x2F;zh-cn&#x2F;1. npm install hexo-cli -g2. hexo init hexo  #初始化博客3. cd hexo4. hexo server   #启动服务#升级命令：npm update hexo-cli -g  三、生成文档">
+  <meta name="description" content="在Kubernetes中，Deployment的更新行为是有规律的。变更Deployment的某些字段会触发Pod重建或重启，而某些字段的变更则不会影响Pod的运行。以下是详细的总结： 触发Pod重建的行为以下更改会导致Deployment重新创建Pod，即：删除旧Pod并创建新Pod。  更新容器镜像：变更镜像的名称或标签（如从v1到v2）。 资源限制和请求：变更resources.reques">
 <meta property="og:type" content="article">
-<meta property="og:title" content="hexo建站">
-<meta property="og:url" content="https://shispring.github.io/2021/11/05/hexo_env/index.html">
+<meta property="og:title" content="pod重建|重启行为">
+<meta property="og:url" content="https://shispring.github.io/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="一、nodejs 安装1官网: https:&#x2F;&#x2F;nodejs.org&#x2F;en&#x2F;  二、hexo安装12345678官网：https:&#x2F;&#x2F;hexo.io&#x2F;zh-cn&#x2F;1. npm install hexo-cli -g2. hexo init hexo  #初始化博客3. cd hexo4. hexo server   #启动服务#升级命令：npm update hexo-cli -g  三、生成文档">
+<meta property="og:description" content="在Kubernetes中，Deployment的更新行为是有规律的。变更Deployment的某些字段会触发Pod重建或重启，而某些字段的变更则不会影响Pod的运行。以下是详细的总结： 触发Pod重建的行为以下更改会导致Deployment重新创建Pod，即：删除旧Pod并创建新Pod。  更新容器镜像：变更镜像的名称或标签（如从v1到v2）。 资源限制和请求：变更resources.reques">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-11-05T06:25:10.000Z">
-<meta property="article:modified_time" content="2024-09-13T14:32:59.143Z">
+<meta property="article:published_time" content="2024-11-01T09:45:45.000Z">
+<meta property="article:modified_time" content="2024-11-01T09:46:14.393Z">
 <meta property="article:author" content="shispring">
-<meta property="article:tag" content="web">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2021/11/05/hexo_env/">
+<link rel="canonical" href="https://shispring.github.io/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/">
 
 
 <script id="page-configurations">
@@ -46,7 +45,7 @@
   };
 </script>
 
-  <title>hexo建站 | Hexo</title>
+  <title>pod重建|重启行为 | Hexo</title>
   
 
 
@@ -190,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2021/11/05/hexo_env/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -203,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          hexo建站
+          pod重建|重启行为
         </h1>
 
         <div class="post-meta">
@@ -212,16 +211,19 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2021-11-05 14:25:10" itemprop="dateCreated datePublished" datetime="2021-11-05T14:25:10+08:00">2021-11-05</time>
+              <time title="创建时间：2024-11-01 17:45:45 / 修改时间：17:46:14" itemprop="dateCreated datePublished" datetime="2024-11-01T17:45:45+08:00">2024-11-01</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-13 22:32:59" itemprop="dateModified" datetime="2024-09-13T22:32:59+08:00">2024-09-13</time>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
               </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -236,7 +238,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>612</span>
+              <span>1.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -255,24 +257,38 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="一、nodejs-安装"><a href="#一、nodejs-安装" class="headerlink" title="一、nodejs 安装"></a>一、nodejs 安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">官网: https://nodejs.org/en/</span><br></pre></td></tr></table></figure>
+        <p>在Kubernetes中，<code>Deployment</code>的更新行为是有规律的。变更<code>Deployment</code>的某些字段会触发Pod重建或重启，而某些字段的变更则不会影响Pod的运行。以下是详细的总结：</p>
+<h3 id="触发Pod重建的行为"><a href="#触发Pod重建的行为" class="headerlink" title="触发Pod重建的行为"></a>触发Pod重建的行为</h3><p>以下更改会导致<code>Deployment</code>重新创建Pod，即：删除旧Pod并创建新Pod。</p>
+<ol>
+<li><strong>更新容器镜像</strong>：变更镜像的名称或标签（如从<code>v1</code>到<code>v2</code>）。</li>
+<li><strong>资源限制和请求</strong>：变更<code>resources.requests</code>或<code>resources.limits</code>。</li>
+<li><strong>环境变量</strong>：更改容器的环境变量（<code>env</code>字段）。</li>
+<li><strong>亲和性和反亲和性规则</strong>：修改或添加<code>affinity</code>和<code>antiAffinity</code>。</li>
+<li><strong>探针配置</strong>：更新<code>livenessProbe</code>或<code>readinessProbe</code>的配置。</li>
+<li><strong>卷挂载</strong>：改变<code>volumeMounts</code>或<code>volumes</code>字段。</li>
+<li><strong>initContainers</strong>或<strong>sidecar容器</strong>：添加、删除或更新init容器或sidecar容器。</li>
+<li><strong>Pod标签和注解</strong>：修改影响<code>PodSpec</code>中的<code>metadata.labels</code>或<code>metadata.annotations</code>会引发Pod重建。</li>
+<li><strong>端口配置</strong>：修改容器端口的配置。</li>
+</ol>
+<h3 id="触发Pod滚动更新但不完全重建的行为"><a href="#触发Pod滚动更新但不完全重建的行为" class="headerlink" title="触发Pod滚动更新但不完全重建的行为"></a>触发Pod滚动更新但不完全重建的行为</h3><p>一些行为会触发滚动更新，但不会删除所有Pod或引起中断：</p>
+<ol>
+<li><strong>RollingUpdate字段</strong>：变更<code>rollingUpdate</code>策略（如<code>maxUnavailable</code>或<code>maxSurge</code>），不会直接重建Pod，而是影响Pod的更新速率和方式。</li>
+<li>**Horizontal Pod Autoscaler (HPA)**：HPA的更新不会直接导致Pod重建，但可能会根据负载情况动态调整Pod数量。</li>
+</ol>
+<h3 id="不会导致Pod重建或重启的行为"><a href="#不会导致Pod重建或重启的行为" class="headerlink" title="不会导致Pod重建或重启的行为"></a>不会导致Pod重建或重启的行为</h3><p>以下行为仅影响控制层，不会直接对Pod产生重启或重建的影响：</p>
+<ol>
+<li><strong>Deployment注解和标签</strong>：在<code>Deployment</code>级别添加或修改注解和标签，不会影响Pod。</li>
+<li><strong>HPA</strong>的目标值调整（如<code>minReplicas</code>和<code>maxReplicas</code>）：更改不会重建现有Pod，而是动态扩展或缩减。</li>
+<li><strong>服务配置</strong>：更新Service或Ingress的配置不会影响已存在的Pod。</li>
+</ol>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>可以使用以下命令验证某些更改是否触发了Pod重建：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout status deployment &lt;deployment-name&gt;  <span class="comment"># 检查Deployment是否正在进行滚动更新</span></span><br><span class="line">kubectl get replicaset -l &lt;app-label&gt;                <span class="comment"># 查看ReplicaSet状态，观察新旧ReplicaSet</span></span><br><span class="line">kubectl rollout <span class="built_in">history</span> deployment &lt;deployment-name&gt;  <span class="comment"># 查看变更历史</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="二、hexo安装"><a href="#二、hexo安装" class="headerlink" title="二、hexo安装"></a>二、hexo安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">官网：https://hexo.io/zh-cn/</span><br><span class="line">1. npm install hexo-cli -g</span><br><span class="line">2. hexo init hexo  #初始化博客</span><br><span class="line">3. cd hexo</span><br><span class="line">4. hexo server   #启动服务</span><br><span class="line"></span><br><span class="line">#升级命令：</span><br><span class="line">npm update hexo-cli -g</span><br></pre></td></tr></table></figure>
-
-<h2 id="三、生成文档"><a href="#三、生成文档" class="headerlink" title="三、生成文档"></a>三、生成文档</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1. cd hexo</span><br><span class="line">2. hexo n myTest  # 建文章,同命令：hexo new myTest</span><br><span class="line">3. hexo g         #生成，同命令：hexo generate</span><br><span class="line">4. hexo s         #启动服务，可预览</span><br><span class="line"></span><br><span class="line">5. hexo d          #部署,需要配置github，hexo deploy</span><br></pre></td></tr></table></figure>
-
-<h2 id="四、部署到github"><a href="#四、部署到github" class="headerlink" title="四、部署到github"></a>四、部署到github</h2><ul>
-<li>部署文档：<a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment">https://hexo.io/docs/one-command-deployment</a></li>
-<li>github新建项目：shispring.github.io</li>
-<li>编辑配置文件：vim hexo&#x2F;_config.yaml<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: git@github.com:shispring/shispring.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure></li>
-<li>npm install hexo-deployer-git –save</li>
-<li>hexo g</li>
-<li>hexo d</li>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li><strong>会重建Pod</strong>：更新镜像、资源限制、环境变量、亲和性规则、探针、卷挂载、initContainers、Pod标签、端口。</li>
+<li><strong>不会重建Pod</strong>：变更HPA目标值、<code>rollingUpdate</code>策略、<code>Deployment</code>注解和标签、Service或Ingress配置。</li>
 </ul>
-<h2 id="五、更换主题"><a href="#五、更换主题" class="headerlink" title="五、更换主题"></a>五、更换主题</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">详情请查看：</span><br><span class="line">https://github.com/theme-next/hexo-theme-next</span><br></pre></td></tr></table></figure>
-
-
-
+<p>掌握这些更新行为有助于更灵活地管理Pod的生命周期。</p>
 
     </div>
 
@@ -281,21 +297,17 @@
     
 
       <footer class="post-footer">
-          
-          <div class="post-tags">
-              <a href="/tags/web/" rel="tag"><i class="fa fa-tag"></i> web</a>
-          </div>
 
         
 
 
         
     <div class="post-nav">
-      <div class="post-nav-item"></div>
       <div class="post-nav-item">
-    <a href="/2022/04/27/go-tips/" rel="next" title="go tips">
-      go tips <i class="fa fa-chevron-right"></i>
+    <a href="/2024/11/01/ab%E3%80%81wrk%E3%80%81wrk2%E4%BD%BF%E7%94%A8/" rel="prev" title="ab、wrk、wrk2使用">
+      <i class="fa fa-chevron-left"></i> ab、wrk、wrk2使用
     </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -354,7 +366,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81nodejs-%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">一、nodejs 安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81hexo%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">二、hexo安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3"><span class="nav-number">3.</span> <span class="nav-text">三、生成文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%83%A8%E7%BD%B2%E5%88%B0github"><span class="nav-number">4.</span> <span class="nav-text">四、部署到github</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%9B%B4%E6%8D%A2%E4%B8%BB%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">五、更换主题</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91Pod%E9%87%8D%E5%BB%BA%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">1.</span> <span class="nav-text">触发Pod重建的行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91Pod%E6%BB%9A%E5%8A%A8%E6%9B%B4%E6%96%B0%E4%BD%86%E4%B8%8D%E5%AE%8C%E5%85%A8%E9%87%8D%E5%BB%BA%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">2.</span> <span class="nav-text">触发Pod滚动更新但不完全重建的行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E4%BC%9A%E5%AF%BC%E8%87%B4Pod%E9%87%8D%E5%BB%BA%E6%88%96%E9%87%8D%E5%90%AF%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">3.</span> <span class="nav-text">不会导致Pod重建或重启的行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
