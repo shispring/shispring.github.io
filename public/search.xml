@@ -1664,4 +1664,77 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>magick工具使用</title>
+    <url>/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p><code>ImageMagick</code> 是一个强大的工具，用于图像操作和格式转换，支持各种操作如裁剪、旋转、调整大小、格式转换等。下面是一些常用的 <code>magick</code> 命令，以便你快速掌握图片处理及PDF操作技巧。以下命令基于 <code>magick</code> 7.1.1-39 版本：</p>
+<h3 id="1-图像格式转换"><a href="#1-图像格式转换" class="headerlink" title="1. 图像格式转换"></a>1. 图像格式转换</h3><p>将图像从一种格式转换为另一种格式，适用于支持的多种格式（如 PNG、JPEG、GIF、TIFF 等）。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg output.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-调整图像大小"><a href="#2-调整图像大小" class="headerlink" title="2. 调整图像大小"></a>2. 调整图像大小</h3><p>按指定比例或像素大小调整图像大小。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -resize 800x600 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-裁剪图像"><a href="#3-裁剪图像" class="headerlink" title="3. 裁剪图像"></a>3. 裁剪图像</h3><p>裁剪图像为指定大小的区域。例如，裁剪出左上角 200x200 的区域。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -crop 200x200+0+0 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-旋转图像"><a href="#4-旋转图像" class="headerlink" title="4. 旋转图像"></a>4. 旋转图像</h3><p>顺时针旋转图像 90 度。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -rotate 90 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-添加水印"><a href="#5-添加水印" class="headerlink" title="5. 添加水印"></a>5. 添加水印</h3><p>在图像上添加水印文字（位置在右下角）。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -gravity southeast -pointsize 24 -fill white -annotate +10+10 <span class="string">&#x27;Watermark&#x27;</span> output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-调整图像质量"><a href="#6-调整图像质量" class="headerlink" title="6. 调整图像质量"></a>6. 调整图像质量</h3><p>设置图像质量，适用于 JPEG 格式的图片压缩。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -quality 85 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-合并图像（拼接）"><a href="#7-合并图像（拼接）" class="headerlink" title="7. 合并图像（拼接）"></a>7. 合并图像（拼接）</h3><p>水平或垂直拼接多张图像。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick +append image1.jpg image2.jpg horizontal_output.jpg  <span class="comment"># 水平拼接</span></span><br><span class="line">magick -append image1.jpg image2.jpg vertical_output.jpg    <span class="comment"># 垂直拼接</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="8-添加边框"><a href="#8-添加边框" class="headerlink" title="8. 添加边框"></a>8. 添加边框</h3><p>为图像添加边框。例如，添加一个 5 像素的红色边框。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -bordercolor red -border 5x5 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-转换-PDF-为图像"><a href="#9-转换-PDF-为图像" class="headerlink" title="9. 转换 PDF 为图像"></a>9. 转换 PDF 为图像</h3><p>将 PDF 页面转换为 PNG 格式，指定分辨率（如 300 dpi）。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -density 300 input.pdf output.png</span><br></pre></td></tr></table></figure>
+<p>如果需要将 PDF 中的每一页保存为单独的 PNG 图像，可以使用如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -density 300 input.pdf page_%03d.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-转换图像为-PDF"><a href="#10-转换图像为-PDF" class="headerlink" title="10. 转换图像为 PDF"></a>10. 转换图像为 PDF</h3><p>将多张图像合并成一个 PDF 文件。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick image1.jpg image2.jpg output.pdf</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-批量处理文件"><a href="#11-批量处理文件" class="headerlink" title="11. 批量处理文件"></a>11. 批量处理文件</h3><p>一次性对多个文件进行操作，调整大小为 50%：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick mogrify -resize 50% *.jpg</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：<code>mogrify</code> 会直接覆盖原始文件，建议先备份或在不同目录操作。</p>
+</blockquote>
+<h3 id="12-图像格式优化（减小文件大小）"><a href="#12-图像格式优化（减小文件大小）" class="headerlink" title="12. 图像格式优化（减小文件大小）"></a>12. 图像格式优化（减小文件大小）</h3><p>通过移除元数据和设置压缩等级优化图像大小。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -strip -quality 85 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="13-应用模糊效果"><a href="#13-应用模糊效果" class="headerlink" title="13. 应用模糊效果"></a>13. 应用模糊效果</h3><p>对图像应用模糊效果，可以控制模糊程度。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -blur 0x8 output.jpg  <span class="comment"># 0x8 控制模糊半径和 sigma 值</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="14-翻转和镜像"><a href="#14-翻转和镜像" class="headerlink" title="14. 翻转和镜像"></a>14. 翻转和镜像</h3><p>上下翻转或左右镜像图像。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -flip output_flip.jpg        <span class="comment"># 上下翻转</span></span><br><span class="line">magick input.jpg -flop output_flop.jpg        <span class="comment"># 左右镜像</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="15-提取图像信息"><a href="#15-提取图像信息" class="headerlink" title="15. 提取图像信息"></a>15. 提取图像信息</h3><p>查看图像的详细信息，包括尺寸、格式、色彩模式等。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick identify -verbose input.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="16-图像转灰度"><a href="#16-图像转灰度" class="headerlink" title="16. 图像转灰度"></a>16. 图像转灰度</h3><p>将彩色图像转换为灰度。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -colorspace Gray output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="17-添加阴影"><a href="#17-添加阴影" class="headerlink" title="17. 添加阴影"></a>17. 添加阴影</h3><p>为图像添加阴影效果。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -background black -shadow 80x3+5+5 output_with_shadow.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="18-动态GIF操作"><a href="#18-动态GIF操作" class="headerlink" title="18. 动态GIF操作"></a>18. 动态GIF操作</h3><p>创建或分解 GIF 动画。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -delay 20 -loop 0 frame_*.jpg output.gif  <span class="comment"># 创建 GIF，20ms 间隔</span></span><br><span class="line">magick input.gif frame_%03d.png                   <span class="comment"># 将 GIF 分解成多帧 PNG 图像</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="19-将-PDF-分解成多张-PNG（每页一张）"><a href="#19-将-PDF-分解成多张-PNG（每页一张）" class="headerlink" title="19. 将 PDF 分解成多张 PNG（每页一张）"></a>19. 将 PDF 分解成多张 PNG（每页一张）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -density 300 input.pdf output_page_%03d.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="20-从视频中提取帧并生成-GIF"><a href="#20-从视频中提取帧并生成-GIF" class="headerlink" title="20. 从视频中提取帧并生成 GIF"></a>20. 从视频中提取帧并生成 GIF</h3><p>将视频中的帧生成 GIF 动画。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -i input.mp4 -r 10 <span class="string">&#x27;frame_%03d.png&#x27;</span>  <span class="comment"># 使用 FFmpeg 提取帧</span></span><br><span class="line">magick -delay 10 frame_*.png output.gif      <span class="comment"># 使用提取帧生成 GIF</span></span><br></pre></td></tr></table></figure>
+
+<p>这些 <code>magick</code> 用法可以满足大多数日常图片和PDF转换的需求。更多高级用法可以查阅 <a href="https://imagemagick.org/index.php">ImageMagick 官方文档</a> 或 <code>magick</code> 的帮助页面：<code>magick -help</code>。</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
 </search>
