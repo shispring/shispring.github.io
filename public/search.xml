@@ -1668,6 +1668,8 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
     <title>magick工具使用</title>
     <url>/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<p><code>ImageMagick</code> 是一个强大的工具，用于图像操作和格式转换，支持各种操作如裁剪、旋转、调整大小、格式转换等。下面是一些常用的 <code>magick</code> 命令，以便你快速掌握图片处理及PDF操作技巧。以下命令基于 <code>magick</code> 7.1.1-39 版本：</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">brew install imagemagick</span><br><span class="line"></span><br><span class="line">magick -version</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
 <h3 id="1-图像格式转换"><a href="#1-图像格式转换" class="headerlink" title="1. 图像格式转换"></a>1. 图像格式转换</h3><p>将图像从一种格式转换为另一种格式，适用于支持的多种格式（如 PNG、JPEG、GIF、TIFF 等）。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg output.png</span><br></pre></td></tr></table></figure>
 
