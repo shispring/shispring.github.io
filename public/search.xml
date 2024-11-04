@@ -1739,4 +1739,47 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
         <category>tools</category>
       </categories>
   </entry>
+  <entry>
+    <title>火焰图</title>
+    <url>/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/</url>
+    <content><![CDATA[<p>在 Linux 系统上可以通过 <code>perf</code> 工具结合 <code>FlameGraph</code> 进行程序性能分析，特别适用于 CPU 密集型应用。</p>
+<h3 id="1-准备工具"><a href="#1-准备工具" class="headerlink" title="1. 准备工具"></a>1. 准备工具</h3><p>首先，确保系统安装了 <code>perf</code> 和 <code>FlameGraph</code>：</p>
+<h3 id="安装-perf"><a href="#安装-perf" class="headerlink" title="安装 perf"></a>安装 <code>perf</code></h3><p>对于大多数 Linux 发行版，可以通过包管理器安装：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#通过系统包管理器安装 Perl 核心模块：</span></span><br><span class="line"><span class="built_in">sudo</span> yum install -y perf  perf-core </span><br></pre></td></tr></table></figure>
+
+<h3 id="获取-FlameGraph"><a href="#获取-FlameGraph" class="headerlink" title="获取 FlameGraph"></a>获取 <code>FlameGraph</code></h3><p><code>FlameGraph</code> 是一个工具集，可以从 GitHub 上克隆：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br></pre></td></tr></table></figure>
+
+<p>下载完成后，进入 <code>FlameGraph</code> 目录，确保其中有 <code>stackcollapse-perf.pl</code> 和 <code>flamegraph.pl</code> 等脚本。</p>
+<h3 id="2-使用-perf-收集性能数据"><a href="#2-使用-perf-收集性能数据" class="headerlink" title="2. 使用 perf 收集性能数据"></a>2. 使用 <code>perf</code> 收集性能数据</h3><p>假设你想要分析一个进程的 CPU 使用情况。可以先使用 <code>top</code> 或 <code>htop</code> 来获取目标进程的 PID。</p>
+<h3 id="记录目标进程的性能数据"><a href="#记录目标进程的性能数据" class="headerlink" title="记录目标进程的性能数据"></a>记录目标进程的性能数据</h3><p>假设 PID 为 <code>1234</code>，运行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>F 99</code>：每秒采样 99 次，可根据需要调整采样频率。</li>
+<li><code>p 1234</code>：指定要分析的进程 PID。</li>
+<li><code>g</code>：记录调用栈信息。</li>
+<li><code>- sleep 30</code>：采样时间为 30 秒。</li>
+</ul>
+<p>采样完成后会生成一个 <code>perf.data</code> 文件，包含采样数据。</p>
+<h3 id="3-处理-perf-数据"><a href="#3-处理-perf-数据" class="headerlink" title="3. 处理 perf 数据"></a>3. 处理 <code>perf</code> 数据</h3><p>将 <code>perf.data</code> 转换为 FlameGraph 可以使用的堆栈信息：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br></pre></td></tr></table></figure>
+
+<p>这会将 <code>perf.data</code> 文件解析成 <code>out.perf</code>，便于生成火焰图。</p>
+<h3 id="4-生成火焰图"><a href="#4-生成火焰图" class="headerlink" title="4. 生成火焰图"></a>4. 生成火焰图</h3><p>在 <code>FlameGraph</code> 目录下运行以下命令：</p>
+<h3 id="折叠堆栈信息"><a href="#折叠堆栈信息" class="headerlink" title="折叠堆栈信息"></a>折叠堆栈信息</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成火焰图"><a href="#生成火焰图" class="headerlink" title="生成火焰图"></a>生成火焰图</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+
+<p>生成的 <code>flamegraph.svg</code> 文件是一个交互式火焰图，可以通过浏览器打开查看。</p>
+<h3 id="5-分析火焰图"><a href="#5-分析火焰图" class="headerlink" title="5. 分析火焰图"></a>5. 分析火焰图</h3><p>火焰图中各个块的宽度表示 CPU 使用时间，占用时间越多，宽度越大。图层深度表示调用堆栈的深度。可以查看性能热点并根据需要进行优化。</p>
+<h3 id="总结的命令流程"><a href="#总结的命令流程" class="headerlink" title="总结的命令流程"></a>总结的命令流程</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+
+<p>通过上述步骤，你可以生成并查看程序的 CPU 性能火焰图，为性能瓶颈定位和优化提供参考。</p>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
 </search>

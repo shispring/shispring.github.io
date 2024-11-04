@@ -20,23 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="统计连接数1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253#netstatnetstat -ant | awk &#x27;NR &gt; 2 &#123;print $NF&#125;&#x27; | sort | uniq -c | sort -nr">
+  <meta name="description" content="在 Linux 系统上可以通过 perf 工具结合 FlameGraph 进行程序性能分析，特别适用于 CPU 密集型应用。 1. 准备工具首先，确保系统安装了 perf 和 FlameGraph： 安装 perf对于大多数 Linux 发行版，可以通过包管理器安装： 12#通过系统包管理器安装 Perl 核心模块：sudo yum install -y perf  perf-core   获取">
 <meta property="og:type" content="article">
-<meta property="og:title" content="nginx 模块及配置">
-<meta property="og:url" content="https://shispring.github.io/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:title" content="火焰图">
+<meta property="og:url" content="https://shispring.github.io/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="统计连接数1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253#netstatnetstat -ant | awk &#x27;NR &gt; 2 &#123;print $NF&#125;&#x27; | sort | uniq -c | sort -nr">
+<meta property="og:description" content="在 Linux 系统上可以通过 perf 工具结合 FlameGraph 进行程序性能分析，特别适用于 CPU 密集型应用。 1. 准备工具首先，确保系统安装了 perf 和 FlameGraph： 安装 perf对于大多数 Linux 发行版，可以通过包管理器安装： 12#通过系统包管理器安装 Perl 核心模块：sudo yum install -y perf  perf-core   获取">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://raw.githubusercontent.com/shispring/picgo/master/20241031145102.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/shispring/picgo/master/20241031120653.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/shispring/picgo/master/20241031120448.png">
-<meta property="article:published_time" content="2024-10-31T04:05:49.000Z">
-<meta property="article:modified_time" content="2024-10-31T10:28:43.115Z">
+<meta property="article:published_time" content="2024-11-04T02:40:05.000Z">
+<meta property="article:modified_time" content="2024-11-04T02:44:48.629Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/shispring/picgo/master/20241031145102.png">
 
-<link rel="canonical" href="https://shispring.github.io/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/">
+<link rel="canonical" href="https://shispring.github.io/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/">
 
 
 <script id="page-configurations">
@@ -49,7 +45,7 @@
   };
 </script>
 
-  <title>nginx 模块及配置 | Hexo</title>
+  <title>火焰图 | Hexo</title>
   
 
 
@@ -193,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -206,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          nginx 模块及配置
+          火焰图
         </h1>
 
         <div class="post-meta">
@@ -217,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-10-31 12:05:49 / 修改时间：18:28:43" itemprop="dateCreated datePublished" datetime="2024-10-31T12:05:49+08:00">2024-10-31</time>
+              <time title="创建时间：2024-11-04 10:40:05 / 修改时间：10:44:48" itemprop="dateCreated datePublished" datetime="2024-11-04T10:40:05+08:00">2024-11-04</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -225,7 +221,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/nginx/" itemprop="url" rel="index"><span itemprop="name">nginx</span></a>
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
                 </span>
             </span>
 
@@ -242,14 +238,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.2k</span>
+              <span>1.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>1 分钟</span>
             </span>
 
         </div>
@@ -261,11 +257,41 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="统计连接数"><a href="#统计连接数" class="headerlink" title="统计连接数"></a>统计连接数</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#netstat</span><br><span class="line">netstat -ant | awk &#x27;NR &gt; 2 &#123;print $NF&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#ss</span><br><span class="line">ss -tan | awk &#x27;NR &gt; 2 &#123;print $1&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#读取/proc/net/tcp文件</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;print $4&#125;&#x27; | cut -d&#x27;:&#x27; -f2 | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#含义介绍</span><br><span class="line">TCP_ESTABLISHED:1   TCP_SYN_SENT:2</span><br><span class="line">TCP_SYN_RECV:3      TCP_FIN_WAIT1:4</span><br><span class="line">TCP_FIN_WAIT2:5     TCP_TIME_WAIT:6</span><br><span class="line">TCP_CLOSE:7         TCP_CLOSE_WAIT:8</span><br><span class="line">TCP_LAST_ACL:9      TCP_LISTEN:10</span><br><span class="line">TCP_CLOSING:11</span><br><span class="line"></span><br><span class="line">#获取linux服务器上数据</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;</span><br><span class="line">    status=sprintf(&quot;%02X&quot;, strtonum(&quot;0x&quot;$4));</span><br><span class="line">    tcp_states[&quot;01&quot;]=&quot;TCP_ESTABLISHED&quot;;</span><br><span class="line">    tcp_states[&quot;02&quot;]=&quot;TCP_SYN_SENT&quot;;</span><br><span class="line">    tcp_states[&quot;03&quot;]=&quot;TCP_SYN_RECV&quot;;</span><br><span class="line">    tcp_states[&quot;04&quot;]=&quot;TCP_FIN_WAIT1&quot;;</span><br><span class="line">    tcp_states[&quot;05&quot;]=&quot;TCP_FIN_WAIT2&quot;;</span><br><span class="line">    tcp_states[&quot;06&quot;]=&quot;TCP_TIME_WAIT&quot;;</span><br><span class="line">    tcp_states[&quot;07&quot;]=&quot;TCP_CLOSE&quot;;</span><br><span class="line">    tcp_states[&quot;08&quot;]=&quot;TCP_CLOSE_WAIT&quot;;</span><br><span class="line">    tcp_states[&quot;09&quot;]=&quot;TCP_LAST_ACK&quot;;</span><br><span class="line">    tcp_states[&quot;0A&quot;]=&quot;TCP_LISTEN&quot;;</span><br><span class="line">    tcp_states[&quot;0B&quot;]=&quot;TCP_CLOSING&quot;;</span><br><span class="line">    print tcp_states[status];</span><br><span class="line">&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#获取容器上的网络数据</span><br><span class="line">kubectl exec -it &lt;pod-name&gt; -n &lt;namespace&gt; -- sh -c &quot;</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;</span><br><span class="line">    status=\$4;</span><br><span class="line">    tcp_states[\&quot;01\&quot;]=\&quot;TCP_ESTABLISHED\&quot;;</span><br><span class="line">    tcp_states[\&quot;02\&quot;]=\&quot;TCP_SYN_SENT\&quot;;</span><br><span class="line">    tcp_states[\&quot;03\&quot;]=\&quot;TCP_SYN_RECV\&quot;;</span><br><span class="line">    tcp_states[\&quot;04\&quot;]=\&quot;TCP_FIN_WAIT1\&quot;;</span><br><span class="line">    tcp_states[\&quot;05\&quot;]=\&quot;TCP_FIN_WAIT2\&quot;;</span><br><span class="line">    tcp_states[\&quot;06\&quot;]=\&quot;TCP_TIME_WAIT\&quot;;</span><br><span class="line">    tcp_states[\&quot;07\&quot;]=\&quot;TCP_CLOSE\&quot;;</span><br><span class="line">    tcp_states[\&quot;08\&quot;]=\&quot;TCP_CLOSE_WAIT\&quot;;</span><br><span class="line">    tcp_states[\&quot;09\&quot;]=\&quot;TCP_LAST_ACK\&quot;;</span><br><span class="line">    tcp_states[\&quot;0A\&quot;]=\&quot;TCP_LISTEN\&quot;;</span><br><span class="line">    tcp_states[\&quot;0B\&quot;]=\&quot;TCP_CLOSING\&quot;;</span><br><span class="line">    status=sprintf(\&quot;%02X\&quot;, \&quot;0x\&quot; substr(status, 1, 2));</span><br><span class="line">    print tcp_states[status];</span><br><span class="line">&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line">&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031145102.png" alt="tcp" title="tcp1"></p>
-<hr>
-<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031120653.png" alt="nginx架构" title="nginx2"></p>
-<h3 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h3><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031120448.png" alt="nginx模块" title="nginx1"></p>
+        <p>在 Linux 系统上可以通过 <code>perf</code> 工具结合 <code>FlameGraph</code> 进行程序性能分析，特别适用于 CPU 密集型应用。</p>
+<h3 id="1-准备工具"><a href="#1-准备工具" class="headerlink" title="1. 准备工具"></a>1. 准备工具</h3><p>首先，确保系统安装了 <code>perf</code> 和 <code>FlameGraph</code>：</p>
+<h3 id="安装-perf"><a href="#安装-perf" class="headerlink" title="安装 perf"></a>安装 <code>perf</code></h3><p>对于大多数 Linux 发行版，可以通过包管理器安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过系统包管理器安装 Perl 核心模块：</span></span><br><span class="line"><span class="built_in">sudo</span> yum install -y perf  perf-core </span><br></pre></td></tr></table></figure>
+
+<h3 id="获取-FlameGraph"><a href="#获取-FlameGraph" class="headerlink" title="获取 FlameGraph"></a>获取 <code>FlameGraph</code></h3><p><code>FlameGraph</code> 是一个工具集，可以从 GitHub 上克隆：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br></pre></td></tr></table></figure>
+
+<p>下载完成后，进入 <code>FlameGraph</code> 目录，确保其中有 <code>stackcollapse-perf.pl</code> 和 <code>flamegraph.pl</code> 等脚本。</p>
+<h3 id="2-使用-perf-收集性能数据"><a href="#2-使用-perf-收集性能数据" class="headerlink" title="2. 使用 perf 收集性能数据"></a>2. 使用 <code>perf</code> 收集性能数据</h3><p>假设你想要分析一个进程的 CPU 使用情况。可以先使用 <code>top</code> 或 <code>htop</code> 来获取目标进程的 PID。</p>
+<h3 id="记录目标进程的性能数据"><a href="#记录目标进程的性能数据" class="headerlink" title="记录目标进程的性能数据"></a>记录目标进程的性能数据</h3><p>假设 PID 为 <code>1234</code>，运行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>F 99</code>：每秒采样 99 次，可根据需要调整采样频率。</li>
+<li><code>p 1234</code>：指定要分析的进程 PID。</li>
+<li><code>g</code>：记录调用栈信息。</li>
+<li><code>- sleep 30</code>：采样时间为 30 秒。</li>
+</ul>
+<p>采样完成后会生成一个 <code>perf.data</code> 文件，包含采样数据。</p>
+<h3 id="3-处理-perf-数据"><a href="#3-处理-perf-数据" class="headerlink" title="3. 处理 perf 数据"></a>3. 处理 <code>perf</code> 数据</h3><p>将 <code>perf.data</code> 转换为 FlameGraph 可以使用的堆栈信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br></pre></td></tr></table></figure>
+
+<p>这会将 <code>perf.data</code> 文件解析成 <code>out.perf</code>，便于生成火焰图。</p>
+<h3 id="4-生成火焰图"><a href="#4-生成火焰图" class="headerlink" title="4. 生成火焰图"></a>4. 生成火焰图</h3><p>在 <code>FlameGraph</code> 目录下运行以下命令：</p>
+<h3 id="折叠堆栈信息"><a href="#折叠堆栈信息" class="headerlink" title="折叠堆栈信息"></a>折叠堆栈信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成火焰图"><a href="#生成火焰图" class="headerlink" title="生成火焰图"></a>生成火焰图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+
+<p>生成的 <code>flamegraph.svg</code> 文件是一个交互式火焰图，可以通过浏览器打开查看。</p>
+<h3 id="5-分析火焰图"><a href="#5-分析火焰图" class="headerlink" title="5. 分析火焰图"></a>5. 分析火焰图</h3><p>火焰图中各个块的宽度表示 CPU 使用时间，占用时间越多，宽度越大。图层深度表示调用堆栈的深度。可以查看性能热点并根据需要进行优化。</p>
+<h3 id="总结的命令流程"><a href="#总结的命令流程" class="headerlink" title="总结的命令流程"></a>总结的命令流程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+
+<p>通过上述步骤，你可以生成并查看程序的 CPU 性能火焰图，为性能瓶颈定位和优化提供参考。</p>
 
     </div>
 
@@ -281,13 +307,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/10/29/k8s-patch-%E7%94%A8%E6%B3%95/" rel="prev" title="k8s patch 用法">
-      <i class="fa fa-chevron-left"></i> k8s patch 用法
+    <a href="/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" rel="prev" title="magick工具使用">
+      <i class="fa fa-chevron-left"></i> magick工具使用
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/10/31/kubectl-debug%E4%BD%BF%E7%94%A8/" rel="next" title="kubectl debug 与 nsenter">
-      kubectl debug 与 nsenter <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -346,7 +369,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%9F%E8%AE%A1%E8%BF%9E%E6%8E%A5%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">统计连接数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97"><span class="nav-number">1.2.</span> <span class="nav-text">模块</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%87%86%E5%A4%87%E5%B7%A5%E5%85%B7"><span class="nav-number">1.</span> <span class="nav-text">1. 准备工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-perf"><span class="nav-number">2.</span> <span class="nav-text">安装 perf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-FlameGraph"><span class="nav-number">3.</span> <span class="nav-text">获取 FlameGraph</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BD%BF%E7%94%A8-perf-%E6%94%B6%E9%9B%86%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">4.</span> <span class="nav-text">2. 使用 perf 收集性能数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E7%9B%AE%E6%A0%87%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">5.</span> <span class="nav-text">记录目标进程的性能数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A4%84%E7%90%86-perf-%E6%95%B0%E6%8D%AE"><span class="nav-number">6.</span> <span class="nav-text">3. 处理 perf 数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%94%9F%E6%88%90%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">7.</span> <span class="nav-text">4. 生成火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%98%E5%8F%A0%E5%A0%86%E6%A0%88%E4%BF%A1%E6%81%AF"><span class="nav-number">8.</span> <span class="nav-text">折叠堆栈信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">9.</span> <span class="nav-text">生成火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%88%86%E6%9E%90%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">10.</span> <span class="nav-text">5. 分析火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E7%9A%84%E5%91%BD%E4%BB%A4%E6%B5%81%E7%A8%8B"><span class="nav-number">11.</span> <span class="nav-text">总结的命令流程</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
