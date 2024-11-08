@@ -1931,4 +1931,15 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>nginx demo service</title>
+    <url>/2024/11/08/nginx-demo-service/</url>
+    <content><![CDATA[<h2 id="配置nginx服务"><a href="#配置nginx服务" class="headerlink" title="配置nginx服务"></a>配置nginx服务</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat &lt;&lt;EOL &gt; /Users/xxx/share/nginx.conf</span><br><span class="line">events &#123;&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name localhost;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root /usr/share/nginx/html;</span><br><span class="line">            autoindex on; # 启用目录列表功能</span><br><span class="line">            autoindex_exact_size off; # 以KB或MB显示文件大小</span><br><span class="line">            autoindex_localtime on; # 以本地时间显示文件的修改时间</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOL</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动docker服务"><a href="#启动docker服务" class="headerlink" title="启动docker服务"></a>启动docker服务</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker pull nginx</span><br><span class="line"></span><br><span class="line">docker run --name nginx-share -d \</span><br><span class="line">    -p 8080:80 \</span><br><span class="line">    -v /Users/xxx/share:/usr/share/nginx/html \</span><br><span class="line">    -v /Users/xxx/share/nginx.conf:/etc/nginx/nginx.conf:ro \</span><br><span class="line">    nginx</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>nginx</category>
+      </categories>
+  </entry>
 </search>
