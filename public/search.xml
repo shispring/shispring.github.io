@@ -1957,4 +1957,13 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>学习方式</title>
+    <url>/2024/11/13/%E5%AD%A6%E4%B9%A0%E6%96%B9%E5%BC%8F/</url>
+    <content><![CDATA[<h2 id="Bloom’s-Taxonomy"><a href="#Bloom’s-Taxonomy" class="headerlink" title="Bloom’s Taxonomy"></a>Bloom’s Taxonomy</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/Bloom's-Taxonomy.jpeg" alt="Bloom-pic1"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17321731479764_.pic.jpg" alt="Bloom-pic2"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17361731479986_.pic.jpg" alt="Bloom-pic3"></p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
 </search>
