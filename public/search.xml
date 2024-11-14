@@ -1053,6 +1053,40 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <li><strong>Role</strong>：仅限于某个命名空间，不能跨命名空间生效。它用于授予某个命名空间内资源的权限。</li>
 <li><strong>ClusterRole</strong>：在整个集群范围内生效，可以跨命名空间访问资源。它用于管理集群级别的资源或多个命名空间的资源。</li>
 </ul>
+<hr>
+<p>在 Kubernetes 1.24 及以上版本中，手动为 ServiceAccount 创建并绑定一个 Secret 令牌时，需要特别注意 <code>metadata.annotations</code> 的设置，直接通过 <code>kubectl create secret</code> 命令不会自动添加这些注解，因此容易出错。这里是最终的解决步骤：</p>
+<h3 id="最终解决方法"><a href="#最终解决方法" class="headerlink" title="最终解决方法"></a>最终解决方法</h3><ol>
+<li><p><strong>创建 ServiceAccount</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl create serviceaccount my-sa -n kube-system</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>手动创建并绑定 Secret</strong>：<br>手动创建一个符合要求的 <code>ServiceAccountToken</code> Secret，确保它包含必要的 <code>metadata.annotations</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl create secret generic my-sa-token \</span><br><span class="line">  --namespace kube-system \</span><br><span class="line">  --<span class="built_in">type</span> kubernetes.io/service-account-token \</span><br><span class="line">  --from-literal=token=<span class="string">&quot;<span class="subst">$(openssl rand -base64 32)</span>&quot;</span> \</span><br><span class="line">  --dry-run=client -o yaml | \</span><br><span class="line">  kubectl apply -f -</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>更新 Secret 注解以绑定到 ServiceAccount</strong>：<br>为了确保 Secret 正确地关联到 <code>my-sa</code> ServiceAccount，更新 Secret 的 <code>metadata.annotations</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl annotate secret my-sa-token \</span><br><span class="line">  -n kube-system kubernetes.io/service-account.name=my-sa</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="验证-1"><a href="#验证-1" class="headerlink" title="验证"></a>验证</h3><p>执行以下命令，确保 Secret 与 ServiceAccount 已正确关联：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n kube-system get serviceaccount my-sa -o yaml</span><br><span class="line">kubectl -n kube-system get secret my-sa-token -o yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取令牌"><a href="#获取令牌" class="headerlink" title="获取令牌"></a>获取令牌</h3><p>从 Secret 中获取并解码 <code>token</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n kube-system get secret my-sa-token -o jsonpath=<span class="string">&quot;&#123;.data.token&#125;&quot;</span> | <span class="built_in">base64</span> --decode</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>清理前面步骤中创建的 <code>ServiceAccount</code>、<code>Secret</code> 和 <code>ClusterRoleBinding</code> 等测试资源：</p>
+<ol>
+<li><p><strong>删除 ServiceAccount</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete serviceaccount my-sa -n kube-system</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>删除 Secret</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete secret my-sa-token -n kube-system</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>删除 ClusterRoleBinding</strong>：<br>如果创建了 <code>ClusterRoleBinding</code> 用于 <code>my-sa</code>，可以使用以下命令删除：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete clusterrolebinding my-sa-binding</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>这将清理所有与 <code>my-sa</code> 相关的资源。执行完后可以检查确认相关资源已删除：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n kube-system get serviceaccount my-sa</span><br><span class="line">kubectl -n kube-system get secret my-sa-token</span><br><span class="line">kubectl get clusterrolebinding my-sa-binding</span><br></pre></td></tr></table></figure>
+
+
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ol>
 <li>创建一个 <code>Service Account</code>。</li>
 <li>创建一个 <code>Role</code> 或 <code>ClusterRole</code>，根据需求分配权限。</li>
