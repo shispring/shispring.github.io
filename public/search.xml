@@ -1997,4 +1997,13 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 </ul>
 ]]></content>
   </entry>
+  <entry>
+    <title>yq</title>
+    <url>/2024/11/18/yq/</url>
+    <content><![CDATA[<h2 id="yq"><a href="#yq" class="headerlink" title="yq"></a>yq</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#文档：https://github.com/mikefarah/yq/releases</span></span><br><span class="line">wget https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line">tar vxf yq_linux_amd64.tar.gz ./</span><br><span class="line"><span class="built_in">mv</span> ./yq_linux_amd64 /usr/local/bin/yq</span><br><span class="line"></span><br><span class="line"><span class="comment">#k8s使用yq导出较为整洁的导出yaml</span></span><br><span class="line">kubectl get deployment &lt;deployment&gt; -n &lt;namespace&gt; -o yaml --ignore-not-found | \</span><br><span class="line">yq <span class="string">&#x27;del(.metadata.annotations, .metadata.creationTimestamp, .metadata.generation, .metadata.resourceVersion, .metadata.uid, .status, .spec.template.metadata.creationTimestamp)&#x27;</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
 </search>
