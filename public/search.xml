@@ -2006,4 +2006,10 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
         <category>tools</category>
       </categories>
   </entry>
+  <entry>
+    <title>负载均衡</title>
+    <url>/2024/11/18/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</url>
+    <content><![CDATA[<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/lvs.svg" alt="lvs"></p>
+]]></content>
+  </entry>
 </search>
