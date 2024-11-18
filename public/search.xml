@@ -1928,6 +1928,167 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <li>2001 年，一群认知心理学家、课程理论家、教学研究者和测试专家将布鲁姆分类法的类别名称从名词改为动词。</li>
 </ul>
 <p><img src="https://raw.githubusercontent.com/shispring/picgo/master/Bloom's-Taxonomy.jpeg" alt="Bloom-pic1"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17361731479986_.pic.jpg" alt="Bloom-pic2"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17321731479764_.pic.jpg" alt="Bloom-pic3"></p>
+<hr>
+<table aria-describedby="chart-description">
+<thead>
+<tr><th id="Remembering">Remembering</th><th id="Understanding">Understanding</th><th id="Applying">Applying</th><th id="Analyzing">Analyzing</th><th id="Evaluating">Evaluating</th><th id="Creating">Creating</th></tr>
+</thead>
+<tbody>
+<tr>
+<td headers="Remembering">Recall specific facts.</td>
+<td headers="Understanding">Grasp meaning of materials.</td>
+<td headers="Applying">Use information in a new situation.&nbsp;</td>
+<td headers="Analyzing">Identify schemas or relationships.&nbsp;</td>
+<td headers="Evaluating">Use information to make judgments.&nbsp;</td>
+<td headers="Creating">Create or develop something new.&nbsp;</td>
+</tr>
+<tr>
+<td headers="Remembering">
+<p>define<br>
+describe<br>
+examine<br>
+identify<br>
+label<br>
+list<br>
+locate<br>
+match<br>
+memorize<br>
+recall<br>
+recite<br>
+recognize<br>
+record<br>
+reproduce<br>
+retell<br>
+select<br>
+state<br>
+tabulate<br>
+tell<br>
+visualize<br></p>
+</td>
+<td headers="Understanding">
+<p>associate<br>
+classify<br>
+compare<br>
+contrast<br>
+convert<br>
+describe<br>
+discuss<br>
+distinguish<br>
+explain<br>
+illustrate<br>
+interpret<br>
+order<br>
+predict<br>
+relate<br>
+report<br>
+represent<br>
+restate<br>
+select<br>
+summarize<br>
+trace<br>
+transform<br>
+translate<br></p>
+</td>
+<td headers="Applying">
+<p>apply<br>
+articulate<br>
+calculate<br>
+change<br>
+chart<br>
+compute<br>
+construct<br>
+develop<br>
+employ<br>
+examine<br>
+experiment<br>
+explain<br>
+illustrate<br>
+interpret<br>
+manipulate<br>
+modify<br>
+operate<br>
+predict<br>
+produce<br>
+relate<br>
+solve<br>
+transfer<br></p>
+</td>
+<td headers="Analyzing">
+<p>analyze<br>
+categorize<br>
+compare<br>
+connect<br>
+contrast<br>
+criticize<br>
+deduce<br>
+diagram<br>
+differentiate<br>
+discriminate<br>
+dissect<br>
+estimate<br>
+evaluate<br>
+experiment<br>
+infer<br>
+organize<br>
+plan<br>
+prioritize<br>
+question<br>
+separate<br>
+survey<br>
+test</p></td>
+<td headers="Evaluating">
+appraise<br>
+argue<br>
+assess<br>
+choose<br>
+convince<br>
+critique<br>
+debate<br>
+defend<br>
+editorialize<br>
+estimate<br>
+evaluate<br>
+grade<br>
+judge<br>
+justify<br>
+measure<br>
+persuade<br>
+predict<br>
+rank<br>
+rate<br>
+reframe<br>
+summarize<br>
+support<br><p></p>
+</td>
+<td headers="Creating">
+<p>adapt<br>
+assemble<br>
+compose<br>
+construct<br>
+create<br>
+design<br>
+develop<br>
+facilitate<br>
+hypothesize<br>
+integrate<br>
+invent<br>
+modify<br>
+negotiate<br>
+plan<br>
+propose<br>
+revise<br>
+role-play<br>
+schematize<br>
+simulate<br>
+speculate<br>
+support<br>
+validate</p>
+</td>
+</tr>
+</tbody>
+</table>
+
+
 <p>###参考</p>
 <ul>
 <li><a href="https://citt.ufl.edu/resources/the-learning-process/designing-the-learning-experience/blooms-taxonomy">https://citt.ufl.edu/resources/the-learning-process/designing-the-learning-experience/blooms-taxonomy</a></li>
