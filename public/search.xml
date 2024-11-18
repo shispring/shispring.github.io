@@ -1927,7 +1927,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <li>1956 年布鲁姆分类法将知识分为六大类：知识、理解、应用、分析、综合和评价。</li>
 <li>2001 年，一群认知心理学家、课程理论家、教学研究者和测试专家将布鲁姆分类法的类别名称从名词改为动词。</li>
 </ul>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/Bloom's-Taxonomy.jpeg" alt="Bloom-pic1"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17361731479986_.pic.jpg" alt="Bloom-pic2"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17321731479764_.pic.jpg" alt="Bloom-pic3"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241118142259.png" alt="Bloom-pic3-1"></p>
+<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/Bloom's-Taxonomy.jpeg" alt="Bloom-pic1"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17361731479986_.pic.jpg" alt="Bloom-pic2"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17321731479764_.pic.jpg" alt="Bloom-pic3"></p>
 <p>###参考</p>
 <ul>
 <li><a href="https://citt.ufl.edu/resources/the-learning-process/designing-the-learning-experience/blooms-taxonomy">https://citt.ufl.edu/resources/the-learning-process/designing-the-learning-experience/blooms-taxonomy</a></li>
