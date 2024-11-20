@@ -2201,4 +2201,28 @@ validate</p>
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>vscode调试配置</title>
+    <url>/2024/11/20/vscode%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<h2 id="扩展及工具"><a href="#扩展及工具" class="headerlink" title="扩展及工具"></a>扩展及工具</h2><ul>
+<li>Remote - SSH</li>
+<li>Go</li>
+<li>go tools</li>
+</ul>
+<h2 id="根路径下配置文件"><a href="#根路径下配置文件" class="headerlink" title="根路径下配置文件"></a>根路径下配置文件</h2><ul>
+<li>新建.vscode文件夹</li>
+<li>文件 extension.json 、launch.json 、 settings.json</li>
+</ul>
+<h3 id="extension-jon"><a href="#extension-jon" class="headerlink" title="extension.jon"></a>extension.jon</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;recommendations&quot;: [</span><br><span class="line">        &quot;vivaldy22.go-auto-struct-tag&quot;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="lanuch-json"><a href="#lanuch-json" class="headerlink" title="lanuch.json"></a>lanuch.json</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</span><br><span class="line">    &quot;configurations&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot;: &quot;informer&quot;,</span><br><span class="line">            &quot;type&quot;: &quot;go&quot;,</span><br><span class="line">            &quot;request&quot;: &quot;launch&quot;,</span><br><span class="line">            &quot;mode&quot;: &quot;test&quot;, //test 或者 debug</span><br><span class="line">            &quot;program&quot;: &quot;$&#123;workspaceFolder&#125;/xxx/xxx_test.go&quot;,</span><br><span class="line">            // &quot;mode&quot;: &quot;debug&quot;, </span><br><span class="line">            // &quot;program&quot;: &quot;$&#123;workspaceFolder&#125;/xxx/main.go&quot;,</span><br><span class="line">            &quot;cwd&quot;: &quot;$&#123;workspaceFolder&#125;/xxx&quot;,</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="settings-json文件内容"><a href="#settings-json文件内容" class="headerlink" title="settings.json文件内容"></a>settings.json文件内容</h3><ul>
+<li>注意GOROOT 、GOPATH与远程主机设置一致<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    // 界面主题选择</span><br><span class="line">    // &quot;workbench.colorTheme&quot;: &quot;Visual Studio Dark&quot;,</span><br><span class="line">    // 工作栏左侧图标选择，需要安装vscode-icon插件</span><br><span class="line">    &quot;workbench.iconTheme&quot;: &quot;vscode-icons&quot;,</span><br><span class="line">    //设置 setting.json分栏显示</span><br><span class="line">    &quot;workbench.settings.useSplitJSON&quot;: false,</span><br><span class="line">    // 保存自动格式化代码</span><br><span class="line">    &quot;editor.formatOnSave&quot;: true,</span><br><span class="line">    //编辑面板字体大小</span><br><span class="line">    &quot;editor.fontSize&quot;: 14,</span><br><span class="line">    // vscode remote ssh如何搭配go env 切换golang版本</span><br><span class="line">    &quot;terminal.integrated.defaultProfile.linux&quot;: &quot;bash&quot;,</span><br><span class="line">    &quot;terminal.integrated.profiles.linux&quot;: &#123;</span><br><span class="line">        &quot;bash&quot;: &#123;</span><br><span class="line">            &quot;path&quot;: &quot;bash&quot;,</span><br><span class="line">            &quot;args&quot;: [</span><br><span class="line">                &quot;-l&quot;</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;go.toolsEnvVars&quot;: &#123;</span><br><span class="line">        &quot;GO111MODULE&quot;: &quot;auto&quot;,</span><br><span class="line">        &quot;GOPATH&quot;: &quot;/home/xxx/.gvm/pkgsets/go1.16/global&quot;,</span><br><span class="line">        &quot;GOROOT&quot;: &quot;/home/xxx/.gvm/gos/go1.16&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;go.gopath&quot;: &quot;/home/xxx/.gvm/pkgsets/go1.16/global&quot;,</span><br><span class="line">    &quot;go.goroot&quot;: &quot;/home/xxx/.gvm/gos/go1.16&quot;,</span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
 </search>

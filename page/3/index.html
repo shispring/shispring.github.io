@@ -184,6 +184,265 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/" class="post-title-link" itemprop="url">OpenSSL 支持的密钥类型和格式</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-18 14:36:12 / 修改时间：15:05:18" itemprop="dateCreated datePublished" datetime="2024-10-18T14:36:12+08:00">2024-10-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openssl/" itemprop="url" rel="index"><span itemprop="name">openssl</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong>OpenSSL 密钥类型与格式对比表</strong></p>
+<p><strong>1. 密钥类型对比</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>密钥类型</strong></th>
+<th><strong>算法描述</strong></th>
+<th><strong>典型应用场景</strong></th>
+<th><strong>生成命令示例</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>RSA</strong></td>
+<td>基于大整数分解，常见的非对称加密算法</td>
+<td>HTTPS、TLS&#x2F;SSL 证书、SSH、公钥加密</td>
+<td>openssl genrsa -out rsa_key.pem 2048</td>
+</tr>
+<tr>
+<td><strong>ECC</strong></td>
+<td>椭圆曲线密码学，短密钥更高效</td>
+<td>IoT、移动设备、TLS 1.3</td>
+<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
+</tr>
+<tr>
+<td><strong>DSA</strong></td>
+<td>基于离散对数的数字签名算法</td>
+<td>数字签名（DNSSEC 等）</td>
+<td>openssl dsaparam -genkey 2048 -out dsa_key.pem</td>
+</tr>
+<tr>
+<td><strong>DH</strong></td>
+<td>Diffie-Hellman 算法，用于密钥交换</td>
+<td>VPN、IPsec 加密通道</td>
+<td>openssl dhparam -out dh_key.pem 2048</td>
+</tr>
+<tr>
+<td><strong>ED25519</strong></td>
+<td>高效的椭圆曲线签名算法（无须参数生成）</td>
+<td>SSH、TLS 1.3、轻量级签名</td>
+<td>openssl genpkey -algorithm ED25519 -out ed25519_key.pem</td>
+</tr>
+<tr>
+<td><strong>X25519</strong></td>
+<td>专用于密钥交换的现代椭圆曲线算法</td>
+<td>TLS 1.3 密钥交换、ECDH</td>
+<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
+</tr>
+<tr>
+<td><strong>GOST</strong></td>
+<td>俄罗斯国家标准算法</td>
+<td>加密通信和签名（如 GOST SSL 证书）</td>
+<td>需 GOST 扩展支持</td>
+</tr>
+<tr>
+<td><strong>SM2</strong></td>
+<td>中国国家标准（基于 ECC）</td>
+<td>国密协议（如银行和政府应用）</td>
+<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
+</tr>
+</tbody></table>
+<p><strong>2. 密钥格式对比</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>格式</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>典型应用场景</strong></th>
+<th><strong>加密支持</strong></th>
+<th><strong>转换命令示例</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>PEM</strong></td>
+<td>Base64 编码，文本格式，以 —–BEGIN 开头</td>
+<td>TLS&#x2F;SSL 证书、服务器私钥存储</td>
+<td>支持</td>
+<td>openssl rsa -in rsa_key.pem -out private_key.pem -outform PEM</td>
+</tr>
+<tr>
+<td><strong>DER</strong></td>
+<td>二进制格式，适合嵌入式系统</td>
+<td>嵌入式系统、低级通信传输</td>
+<td>不支持</td>
+<td>openssl rsa -in rsa_key.pem -out private_key.der -outform DER</td>
+</tr>
+<tr>
+<td><strong>PKCS#8</strong></td>
+<td>私钥标准格式，支持多种算法（如 RSA、ECC）</td>
+<td>服务器密钥存储、跨平台交换</td>
+<td>支持</td>
+<td>openssl pkcs8 -topk8 -in rsa_key.pem -out pkcs8_key.pem</td>
+</tr>
+<tr>
+<td><strong>PKCS#12</strong></td>
+<td>包含证书链和私钥的打包格式（.p12&#x2F;.pfx）</td>
+<td>客户端证书、VPN、S&#x2F;MIME</td>
+<td>支持</td>
+<td>openssl pkcs12 -export -out cert.p12 -inkey ec_key.pem -in cert.pem</td>
+</tr>
+<tr>
+<td><strong>OpenSSH</strong></td>
+<td>专用于 SSH 的密钥格式</td>
+<td>SSH 登录和密钥交换</td>
+<td>支持</td>
+<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
+</tr>
+<tr>
+<td><strong>JWK</strong></td>
+<td>JSON Web Key，用于 Web 应用密钥存储和传输</td>
+<td>OAuth2、JWT 加密</td>
+<td>支持</td>
+<td>使用专用库生成</td>
+</tr>
+</tbody></table>
+<p><strong>3. 应用场景推荐</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>场景</strong></th>
+<th><strong>推荐密钥类型</strong></th>
+<th><strong>推荐格式</strong></th>
+<th><strong>命令示例</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Web 服务器（Nginx&#x2F;Apache）</strong></td>
+<td>RSA 或 ECC</td>
+<td>PEM、PKCS#8</td>
+<td>openssl pkcs8 -topk8 -in rsa_key.pem -out server_key.pem</td>
+</tr>
+<tr>
+<td><strong>IoT 设备和移动端</strong></td>
+<td>ECC（prime256v1）</td>
+<td>PKCS#8</td>
+<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
+</tr>
+<tr>
+<td><strong>VPN 客户端证书</strong></td>
+<td>RSA 或 ECC</td>
+<td>PKCS#12</td>
+<td>openssl pkcs12 -export -out vpn_cert.p12 -inkey ec_key.pem -in cert.pem</td>
+</tr>
+<tr>
+<td><strong>SSH 登录</strong></td>
+<td>ED25519 或 RSA</td>
+<td>OpenSSH</td>
+<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
+</tr>
+<tr>
+<td><strong>TLS 1.3 密钥交换</strong></td>
+<td>X25519</td>
+<td>PKCS#8</td>
+<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
+</tr>
+<tr>
+<td><strong>国密应用（SM2 签名）</strong></td>
+<td>SM2</td>
+<td>PKCS#8</td>
+<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
+</tr>
+</tbody></table>
+<p><strong>4. 实现案例</strong></p>
+<p><strong>1. 生成 RSA 密钥并转换为 PKCS#8 格式</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out rsa_key.pem 2048</span><br><span class="line"></span><br><span class="line">openssl pkcs8 -topk8 -<span class="keyword">in</span> rsa_key.pem -out rsa_key_pkcs8.pem -nocrypt</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 生成 ECC 私钥并打包为 PKCS#12</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">openssl ecparam -genkey -name prime256v1 -out ec_key.pem</span><br><span class="line"></span><br><span class="line">openssl req -new -x509 -key ec_key.pem -out ec_cert.pem -days 365</span><br><span class="line"></span><br><span class="line">openssl pkcs12 -<span class="built_in">export</span> -out ec_cert.p12 -inkey ec_key.pem -<span class="keyword">in</span> ec_cert.pem</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 生成 ED25519 密钥用于 SSH</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519</span><br></pre></td></tr></table></figure>
+
+<p><strong>5. 总结与建议</strong></p>
+<p>•	<strong>RSA</strong>：经典且兼容性好，适合 Web 服务器和通用加密应用。</p>
+<p>•	<strong>ECC</strong>：更高效、密钥短，适用于 IoT 和现代 TLS。</p>
+<p>•	<strong>ED25519&#x2F;X25519</strong>：轻量级和高性能，推荐用于 SSH 和 TLS 1.3。</p>
+<p>•	<strong>SM2&#x2F;GOST</strong>：满足特定国家或行业的加密标准。</p>
+<p>•	<strong>PKCS#8 与 PKCS#12</strong>：PKCS#8 适合服务器端私钥存储，PKCS#12 常用于客户端证书传输。</p>
+<p>选择合适的密钥类型与格式可以在 <strong>安全性、性能、兼容性</strong> 之间取得良好的平衡。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/CA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1372,112 +1631,10 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/27/swagger%E9%83%A8%E7%BD%B2k8s-open-api/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/09/27/swagger%E9%83%A8%E7%BD%B2k8s-open-api/" class="post-title-link" itemprop="url">swagger部署k8s open api</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-09-27 20:58:00" itemprop="dateCreated datePublished" datetime="2024-09-27T20:58:00+08:00">2024-09-27</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-29 14:47:01" itemprop="dateModified" datetime="2024-09-29T14:47:01+08:00">2024-09-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/server/" itemprop="url" rel="index"><span itemprop="name">server</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>708</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="一、导出k8s-API配置"><a href="#一、导出k8s-API配置" class="headerlink" title="一、导出k8s API配置"></a>一、导出k8s API配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#临时启动服务</span></span><br><span class="line">kubectl proxy --port=8082</span><br><span class="line"><span class="comment">#导出配置</span></span><br><span class="line">curl http://localhost:8082/openapi/v2 &gt; k8s-swagger.json</span><br></pre></td></tr></table></figure>
-
-<h3 id="二、启动服务"><a href="#二、启动服务" class="headerlink" title="二、启动服务"></a>二、启动服务</h3><ul>
-<li>docker启动</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 8999:8080 \</span><br><span class="line">    -e SWAGGER_JSON=/k8s-swagger.json \</span><br><span class="line">    -v $(<span class="built_in">pwd</span>)/k8s-swagger.json:/k8s-swagger.json \</span><br><span class="line">    swaggerapi/swagger-ui</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>docker-compose启动</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#vim docker-compose.yaml</span></span><br><span class="line"></span><br><span class="line">version: <span class="string">&quot;3&quot;</span></span><br><span class="line">services:</span><br><span class="line">  document:</span><br><span class="line">    environment:</span><br><span class="line">      - SWAGGER_JSON=/k8s-swagger.json</span><br><span class="line">    image: swaggerapi/swagger-ui</span><br><span class="line">    volumes:</span><br><span class="line">      - ./k8s-swagger.json:/k8s-swagger.json</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;8899:8080&quot;</span></span><br><span class="line">  editor:</span><br><span class="line">    image: swaggerapi/swagger-editor</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;9988:8080&quot;</span></span><br><span class="line">      </span><br><span class="line"> </span><br><span class="line"><span class="comment">#启动</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml up -d </span><br><span class="line"><span class="comment">#查看服务    </span></span><br><span class="line">docker-compose -f ./docker-compose.yaml ps</span><br><span class="line"><span class="comment">#停止服务</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml down</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1545,7 +1702,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1598,12 +1755,12 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">82k</span>
+    <span title="站点总字数">84k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:15</span>
+    <span title="站点阅读时长">1:16</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
