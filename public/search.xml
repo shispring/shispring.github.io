@@ -2204,7 +2204,9 @@ validate</p>
   <entry>
     <title>vscode调试配置</title>
     <url>/2024/11/20/vscode%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<h2 id="扩展及工具"><a href="#扩展及工具" class="headerlink" title="扩展及工具"></a>扩展及工具</h2><ul>
+    <content><![CDATA[<h2 id="远程主机配置go版本"><a href="#远程主机配置go版本" class="headerlink" title="远程主机配置go版本"></a>远程主机配置go版本</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#安装gvm</span><br><span class="line">bash &lt; &lt;(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)</span><br><span class="line"></span><br><span class="line">#安装go1.16,设置默认</span><br><span class="line">gvm install go1.16</span><br><span class="line">gvm use go1.16 --default</span><br><span class="line"></span><br><span class="line">#配置GOROOT、GOPATH变量，vscode配置需要，go env 查看</span><br><span class="line">.....</span><br><span class="line">GO111MODULE=&quot;auto&quot;</span><br><span class="line">GOPROXY=&quot;https://proxy.golang.org,direct&quot;</span><br><span class="line">GOROOT=&quot;/home/xxx/.gvm/gos/go1.16&quot;</span><br><span class="line">GOPATH=&quot;/home/xxx/.gvm/pkgsets/go1.16/global&quot;</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+
+<h2 id="扩展及工具"><a href="#扩展及工具" class="headerlink" title="扩展及工具"></a>扩展及工具</h2><ul>
 <li>Remote - SSH</li>
 <li>Go</li>
 <li>go tools</li>

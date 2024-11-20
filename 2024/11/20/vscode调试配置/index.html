@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="扩展及工具 Remote - SSH Go go tools  根路径下配置文件 新建.vscode文件夹 文件 extension.json 、launch.json 、 settings.json  extension.jon123456&#123;    &quot;recommendations&quot;: [        &quot;vivaldy22.go-auto-struct-">
+  <meta name="description" content="远程主机配置go版本1234567891011121314#安装gvmbash &lt; &lt;(curl -s -S -L https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;moovweb&#x2F;gvm&#x2F;master&#x2F;binscripts&#x2F;gvm-installer)#安装go1.16,设置默认gvm install go1.16gvm use go1.16 --default#配">
 <meta property="og:type" content="article">
 <meta property="og:title" content="vscode调试配置">
 <meta property="og:url" content="https://shispring.github.io/2024/11/20/vscode%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="扩展及工具 Remote - SSH Go go tools  根路径下配置文件 新建.vscode文件夹 文件 extension.json 、launch.json 、 settings.json  extension.jon123456&#123;    &quot;recommendations&quot;: [        &quot;vivaldy22.go-auto-struct-">
+<meta property="og:description" content="远程主机配置go版本1234567891011121314#安装gvmbash &lt; &lt;(curl -s -S -L https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;moovweb&#x2F;gvm&#x2F;master&#x2F;binscripts&#x2F;gvm-installer)#安装go1.16,设置默认gvm install go1.16gvm use go1.16 --default#配">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-11-20T06:30:31.000Z">
-<meta property="article:modified_time" content="2024-11-20T06:39:38.469Z">
+<meta property="article:modified_time" content="2024-11-20T06:41:25.829Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-11-20 14:30:31 / 修改时间：14:39:38" itemprop="dateCreated datePublished" datetime="2024-11-20T14:30:31+08:00">2024-11-20</time>
+              <time title="创建时间：2024-11-20 14:30:31 / 修改时间：14:41:25" itemprop="dateCreated datePublished" datetime="2024-11-20T14:30:31+08:00">2024-11-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -238,7 +238,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.7k</span>
+              <span>2.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -257,7 +257,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="扩展及工具"><a href="#扩展及工具" class="headerlink" title="扩展及工具"></a>扩展及工具</h2><ul>
+        <h2 id="远程主机配置go版本"><a href="#远程主机配置go版本" class="headerlink" title="远程主机配置go版本"></a>远程主机配置go版本</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#安装gvm</span><br><span class="line">bash &lt; &lt;(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)</span><br><span class="line"></span><br><span class="line">#安装go1.16,设置默认</span><br><span class="line">gvm install go1.16</span><br><span class="line">gvm use go1.16 --default</span><br><span class="line"></span><br><span class="line">#配置GOROOT、GOPATH变量，vscode配置需要，go env 查看</span><br><span class="line">.....</span><br><span class="line">GO111MODULE=&quot;auto&quot;</span><br><span class="line">GOPROXY=&quot;https://proxy.golang.org,direct&quot;</span><br><span class="line">GOROOT=&quot;/home/xxx/.gvm/gos/go1.16&quot;</span><br><span class="line">GOPATH=&quot;/home/xxx/.gvm/pkgsets/go1.16/global&quot;</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+
+<h2 id="扩展及工具"><a href="#扩展及工具" class="headerlink" title="扩展及工具"></a>扩展及工具</h2><ul>
 <li>Remote - SSH</li>
 <li>Go</li>
 <li>go tools</li>
@@ -350,7 +352,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E5%8F%8A%E5%B7%A5%E5%85%B7"><span class="nav-number">1.</span> <span class="nav-text">扩展及工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B9%E8%B7%AF%E5%BE%84%E4%B8%8B%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">根路径下配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#extension-jon"><span class="nav-number">2.1.</span> <span class="nav-text">extension.jon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lanuch-json"><span class="nav-number">2.2.</span> <span class="nav-text">lanuch.json</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#settings-json%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9"><span class="nav-number">2.3.</span> <span class="nav-text">settings.json文件内容</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E4%B8%BB%E6%9C%BA%E9%85%8D%E7%BD%AEgo%E7%89%88%E6%9C%AC"><span class="nav-number">1.</span> <span class="nav-text">远程主机配置go版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E5%8F%8A%E5%B7%A5%E5%85%B7"><span class="nav-number">2.</span> <span class="nav-text">扩展及工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B9%E8%B7%AF%E5%BE%84%E4%B8%8B%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">根路径下配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#extension-jon"><span class="nav-number">3.1.</span> <span class="nav-text">extension.jon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lanuch-json"><span class="nav-number">3.2.</span> <span class="nav-text">lanuch.json</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#settings-json%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9"><span class="nav-number">3.3.</span> <span class="nav-text">settings.json文件内容</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -424,7 +426,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:16</span>
+    <span title="站点阅读时长">1:17</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
