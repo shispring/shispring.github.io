@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="参考资料： https:&#x2F;&#x2F;github.com&#x2F;mingcheng&#x2F;deploy-k8s-within-aliyun-mirror  一、机器配置 确保节点的mac地址和product_uuid的唯一性 每台主机不低于2GB 内存大小，CPU大于2核心 集群中的所有主机网络互通     角色 主机ip 配置 系统版本 内核版本    k8s-master 11.123.248.100 4C 8G">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubeadm + containerd + calico 部署k8s 1.28">
+<meta property="og:url" content="https://shispring.github.io/2024/11/25/kubeadm-containerd-calico-%E9%83%A8%E7%BD%B2k8s-1-28/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="参考资料： https:&#x2F;&#x2F;github.com&#x2F;mingcheng&#x2F;deploy-k8s-within-aliyun-mirror  一、机器配置 确保节点的mac地址和product_uuid的唯一性 每台主机不低于2GB 内存大小，CPU大于2核心 集群中的所有主机网络互通     角色 主机ip 配置 系统版本 内核版本    k8s-master 11.123.248.100 4C 8G">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-11-25T13:41:18.000Z">
+<meta property="article:modified_time" content="2024-11-25T13:43:21.810Z">
+<meta property="article:author" content="shispring">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2024/11/25/kubeadm-containerd-calico-%E9%83%A8%E7%BD%B2k8s-1-28/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>kubeadm + containerd + calico 部署k8s 1.28 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/25/kubeadm-containerd-calico-%E9%83%A8%E7%BD%B2k8s-1-28/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kubeadm + containerd + calico 部署k8s 1.28
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-25 21:41:18 / 修改时间：21:43:21" itemprop="dateCreated datePublished" datetime="2024-11-25T21:41:18+08:00">2024-11-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h3><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/mingcheng/deploy-k8s-within-aliyun-mirror">https://github.com/mingcheng/deploy-k8s-within-aliyun-mirror</a></p>
+</blockquote>
+<h2 id="一、机器配置"><a href="#一、机器配置" class="headerlink" title="一、机器配置"></a>一、机器配置</h2><ul>
+<li><strong>确保节点的mac地址和product_uuid的唯一性</strong></li>
+<li><strong>每台主机不低于2GB 内存大小，CPU大于2核心</strong></li>
+<li><strong>集群中的所有主机网络互通</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>主机ip</th>
+<th>配置</th>
+<th>系统版本</th>
+<th>内核版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>k8s-master</td>
+<td>11.123.248.100</td>
+<td>4C 8G</td>
+<td>Anolis OS release 8</td>
+<td>5.10</td>
+</tr>
+<tr>
+<td>k8s-node01</td>
+<td>11.123.248.101</td>
+<td>2C 4G</td>
+<td>Anolis OS release 8</td>
+<td>5.10</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置主机名</span></span><br><span class="line"><span class="comment">#master节点</span></span><br><span class="line">hostnamectl set-hostname k8s-master</span><br><span class="line"></span><br><span class="line"><span class="comment">#node节点</span></span><br><span class="line">hostnamectl set-hostname k8s-node01</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、所有节点操作设置"><a href="#二、所有节点操作设置" class="headerlink" title="二、所有节点操作设置"></a>二、所有节点操作设置</h2><ul>
+<li>通用安装内容</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置带时间的个性主机名（非必须）</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;PS1=&#x27;\\[\\e[37;1m\\][\\[\\e[36;40m\\]\\t\\[\\e[32;40m\\]\\u\\[\\e[33;40m\\]@\\[\\e[31;40m\\]\\h \\[\\e[34;40m\\]\\w\\[\\e[37;1m\\]]\\\\$\\[\\e[m\\]&#x27;&quot;</span> &gt;&gt;.bashrc</span><br><span class="line"><span class="built_in">source</span> .bashrc</span><br><span class="line"></span><br><span class="line"><span class="comment">#配置hosts</span></span><br><span class="line"><span class="built_in">cat</span> &gt;&gt; /etc/hosts &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">11.123.248.100 k8s-master</span></span><br><span class="line"><span class="string">11.123.248.101  k8s-node01</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#关闭防火墙</span></span><br><span class="line">systemctl stop firewalld &amp;&amp; systemctl <span class="built_in">disable</span> firewalld</span><br><span class="line"></span><br><span class="line"><span class="comment">#永久禁用SElinux</span></span><br><span class="line">setenforce 0</span><br><span class="line">sed -i <span class="string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="comment">#关闭swap</span></span><br><span class="line">swapoff -a &amp;&amp; sed -i <span class="string">&#x27;s/.*swap.*/#&amp;/&#x27;</span> /etc/fstab</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加网桥过滤及内核转发配置文件，并使之生效</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/sysctl.d/k8s.conf &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables = 1</span></span><br><span class="line"><span class="string">net.ipv4.ip_forward = 1</span></span><br><span class="line"><span class="string">vm.swappiness = 0</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">sysctl --system</span><br><span class="line"></span><br><span class="line"><span class="comment">#加载k8s和containerd所需的overlay和br_netfilter两个模块</span></span><br><span class="line">modprobe overlay</span><br><span class="line">modprobe br_netfilter</span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/modules-load.d/k8s.conf &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">overlay</span></span><br><span class="line"><span class="string">br_netfilter</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">lsmod | grep  -e br_netfilter -e overlay</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装ipvs模块，保证在节点重启后能自动加载所需模块---kube-proxy开启ipvs的前置条件</span></span><br><span class="line">yum install ipset ipvsadm -y</span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/sysconfig/modules/ipvs.modules &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">#!/bin/bash</span></span><br><span class="line"><span class="string">modprobe -- ip_vs</span></span><br><span class="line"><span class="string">modprobe -- ip_vs_rr</span></span><br><span class="line"><span class="string">modprobe -- ip_vs_wrr</span></span><br><span class="line"><span class="string">modprobe -- ip_vs_sh</span></span><br><span class="line"><span class="string">modprobe -- nf_conntrack</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">chmod</span> 755 /etc/sysconfig/modules/ipvs.modules &amp;&amp; bash /etc/sysconfig/modules/ipvs.modules &amp;&amp; lsmod | grep -e ip_vs -e nf_conntrack</span><br><span class="line"></span><br><span class="line"><span class="comment">#使用rpm安装containerd</span></span><br><span class="line">wget -O /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br><span class="line">yum list | grep containerd</span><br><span class="line">yum -y install containerd.io</span><br><span class="line"><span class="comment">#设置配置文件</span></span><br><span class="line">containerd config default &gt; /etc/containerd/config.toml</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>修改containerd的配置文件：&#x2F;etc&#x2F;containerd&#x2F;config.toml</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#参考地址：</span></span><br><span class="line"><span class="comment">#&lt;https://github.com/mingcheng/deploy-k8s-within-aliyun-mirror/blob/master/README.md#containerd&gt;</span></span><br><span class="line"><span class="comment">#变更1，修改CgroupDriver为：systemd</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc.options]</span><br><span class="line">...</span><br><span class="line">SystemdCgroup = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#变更2,sandbox_image改镜像地址及版本</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>]</span><br><span class="line">...</span><br><span class="line">sandbox_image = <span class="string">&quot;registry.aliyuncs.com/google_containers/pause:3.9&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#变更3，修改默认的runtime_type</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc]</span><br><span class="line">...</span><br><span class="line">runtime_type = <span class="string">&quot;io.containerd.runc.v2&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#变更4,配置下载镜像</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.registry.mirrors]</span><br><span class="line">	[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.registry.mirrors.<span class="string">&quot;docker.io&quot;</span>]</span><br><span class="line">		endpoint = [<span class="string">&quot;https://nty7c4os.mirror.aliyuncs.co&quot;</span>]</span><br><span class="line">	[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.registry.mirrors.<span class="string">&quot;k8s.gcr.io&quot;</span>]</span><br><span class="line">		endpoint = [<span class="string">&quot;registry.aliyuncs.com/google_containers&quot;</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>重新启动containerd，安装runc</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#启动containerd</span></span><br><span class="line">systemctl <span class="built_in">enable</span> containerd</span><br><span class="line">systemctl restart containerd</span><br><span class="line">systemctl status containerd</span><br><span class="line">containerd --version</span><br><span class="line"></span><br><span class="line"><span class="comment">#下载runc，注意：如果idc主机无法下载，可在别处下载，然后上传过来</span></span><br><span class="line">wget https://github.com/opencontainers/runc/releases/download/v1.1.12/runc.amd64</span><br><span class="line"><span class="built_in">mv</span> runc.amd64 /usr/sbin/runc &amp;&amp; <span class="built_in">chmod</span> +x /usr/sbin/runc &amp;&amp; runc -v</span><br><span class="line"></span><br><span class="line"><span class="comment">#增加阿里云的kubernetes源</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">[kubernetes]</span></span><br><span class="line"><span class="string">name=Kubernetes</span></span><br><span class="line"><span class="string">baseurl=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.28/rpm/</span></span><br><span class="line"><span class="string">enabled=1</span></span><br><span class="line"><span class="string">gpgcheck=1</span></span><br><span class="line"><span class="string">gpgkey=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.28/rpm/repodata/repomd.xml.key</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"><span class="comment">#缓存元数据</span></span><br><span class="line">yum clean all &amp;&amp; yum makecache</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看kubernetes源当前状态</span></span><br><span class="line">yum --showduplicate list kubeadm kubectl kublet</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装k8s组件，kubelet、kubeadm、kubectl</span></span><br><span class="line">yum install -y kubelet-1.28.12 kubeadm-1.28.12 kubectl-1.28.12</span><br><span class="line"><span class="comment">#修改kubelet默认cgroup驱动</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/sysconfig/kubelet &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">KUBELET_EXTRA_ARGS=&quot;--cgroup-driver=systemd&quot;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> kubelet --now</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装命令自动补全</span></span><br><span class="line">kubeadm completion bash &gt; /etc/bash_completion.d/kubeadm</span><br><span class="line">kubectl completion bash &gt; /etc/bash_completion.d/kubectl</span><br><span class="line"><span class="built_in">source</span> /etc/bash_completion.d/kubeadm</span><br><span class="line"><span class="built_in">source</span> /etc/bash_completion.d/kubectl</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置crictl配置</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/crictl.yaml &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">runtime-endpoint: unix:///var/run/containerd/containerd.sock</span></span><br><span class="line"><span class="string">image-endpoint: unix:///var/run/containerd/containerd.sock</span></span><br><span class="line"><span class="string">timeout: 10</span></span><br><span class="line"><span class="string">debug: true</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="三、master节点配置"><a href="#三、master节点配置" class="headerlink" title="三、master节点配置"></a>三、master节点配置</h2><ul>
+<li>kubeadm 初始化集群操作</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#1、拉取集群所需镜像</span></span><br><span class="line">kubeadm config images list</span><br><span class="line">kubeadm config images pull --image-repository registry.aliyuncs.com/google_containers</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、初始化集群，注意--pod-network-cidr配置与后续CNI所需配置的cidr一致</span></span><br><span class="line">kubeadm init --control-plane-endpoint <span class="variable">$k8s</span>-master:6443 \\</span><br><span class="line">--kubernetes-version=v1.28.12 \\</span><br><span class="line">--pod-network-cidr=172.16.0.0/16 \\</span><br><span class="line">--service-cidr=10.96.0.0/16</span><br><span class="line">--service-dns-domain=cluster.local \\</span><br><span class="line">--image-repository=registry.aliyuncs.com/google_containers \\</span><br><span class="line">--cri-socket=unix:///run/containerd/containerd.sock \\</span><br><span class="line">--upload-certs</span><br><span class="line"></span><br><span class="line"><span class="comment">#–image-repository：选择用于拉取镜像的镜像仓库（默认为“k8s.gcr.io” ）</span></span><br><span class="line"><span class="comment">#–kubernetes-version：选择特定的Kubernetes版本（默认为“stable-1”）</span></span><br><span class="line"><span class="comment">#–service-cidr：为服务的VIP指定使用的IP地址范围（默认为“10.96.0.0/12”）</span></span><br><span class="line"><span class="comment">#–pod-network-cidr：指定Pod网络的IP地址范围。如果设置，则将自动为每个节点分配CIDR。</span></span><br><span class="line"><span class="comment">#–control-plane-endpoint=xxx.xxx.xxx.xxx:6443 。指定api-server地址，如果是公网，最好指定</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#输出内容</span></span><br><span class="line"><span class="comment">#加入控制平面：</span></span><br><span class="line"><span class="comment"># kubeadm join 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \\</span></span><br><span class="line"><span class="comment"># --discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817 \\</span></span><br><span class="line"><span class="comment"># --control-plane --certificate-key 8ed465b862780ca5510e7439543fd0f70bc3bb3cb57441ea0a44b4b266c60805</span></span><br><span class="line"><span class="comment">#...</span></span><br><span class="line"><span class="comment">#node节点加入</span></span><br><span class="line"><span class="comment">#kubeadm join 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \\</span></span><br><span class="line"><span class="comment">#--discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#3、拷贝配置</span></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="variable">$HOME</span>/.kube</span><br><span class="line"><span class="built_in">cp</span> -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"><span class="built_in">chown</span> $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">kubectl get node</span><br><span class="line"></span><br><span class="line"><span class="comment">#tips:此时因没有安装CNI，集群master节点是NOTREADY状态</span></span><br><span class="line"><span class="comment">#检查具体出现问题的节点详情：</span></span><br><span class="line">kubectl describe node k8s-master</span><br><span class="line"></span><br><span class="line"><span class="comment">#检查事件(Event)</span></span><br><span class="line">kubectl describe node k8s-master | grep -A 10 <span class="string">&#x27;Conditions:&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、node节点"><a href="#四、node节点" class="headerlink" title="四、node节点"></a>四、node节点</h2><ul>
+<li>加入集群操作</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#加入集群，可设置--cri-socket配置</span></span><br><span class="line">kubeadm <span class="built_in">join</span> 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \</span><br><span class="line">--cri-socket unix:///run/containerd/containerd.sock \</span><br><span class="line">--discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>将master节点&#x2F;root&#x2F;.kube&#x2F;config 拷贝至node节点&#x2F;root&#x2F;.kube&#x2F;config</li>
+<li>tips</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#节点删除后，重新加入集群</span></span><br><span class="line"><span class="comment">#master节点删除</span></span><br><span class="line">kubectl delete node k8s-node01</span><br><span class="line"></span><br><span class="line"><span class="comment">#node节点操作</span></span><br><span class="line"><span class="comment">#1、停止kubelet/containerd--&gt;删除各配置文件--&gt;启动containerd/kubelet</span></span><br><span class="line">systemctl stop kubelet</span><br><span class="line">systemctl stop containerd</span><br><span class="line"><span class="built_in">rm</span> -rf /var/lib/cni/</span><br><span class="line"><span class="built_in">rm</span> -rf /var/lib/kubelet/*</span><br><span class="line"><span class="built_in">rm</span> -rf /etc/cni/</span><br><span class="line"><span class="built_in">rm</span> -f /etc/kubernetes/kubelet.conf</span><br><span class="line"><span class="built_in">rm</span> -f /etc/kubernetes/pki/ca.crt</span><br><span class="line">systemctl start containerd</span><br><span class="line">systemctl start kubelet</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、重新加入</span></span><br><span class="line">kubeadm <span class="built_in">join</span> 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \\</span><br><span class="line">--cri-socket unix:///run/containerd/containerd.sock \\</span><br><span class="line">--discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="五、Calico安装参考"><a href="#五、Calico安装参考" class="headerlink" title="五、Calico安装参考"></a>五、Calico安装参考</h2><ul>
+<li>步骤1</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装步骤：https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart</span></span><br><span class="line"><span class="comment">#1、安装operator</span></span><br><span class="line">kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/tigera-operator.yaml</span><br><span class="line"><span class="comment">#2、下载自定义yaml配置，注意修改kubeadm init --pod-network-cidr变量对应的cidr</span></span><br><span class="line">wget https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/custom-resources.yaml</span><br><span class="line"><span class="comment"># 可以通过 kubectl cluster-info dump | grep cidr 查看集群cidr配置</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>步骤2：master及node节点均安装一下容器</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#镜像替换参考地址：</span></span><br><span class="line"><span class="comment">#https://docker.aityp.com/s/docker.io</span></span><br><span class="line"><span class="comment">#https://docker.aityp.com/r/docker.io/calico</span></span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/pod2daemon-flexvol:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/pod2daemon-flexvol:v3.28.0  docker.io/calico/pod2daemon-flexvol:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/cni:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/cni:v3.28.0  docker.io/calico/cni:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node:v3.28.0  docker.io/calico/node:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/apiserver:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/apiserver:v3.28.0  docker.io/calico/apiserver:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/kube-controllers:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/kube-controllers:v3.28.0  docker.io/calico/kube-controllers:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/typha:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/typha:v3.28.0  docker.io/calico/typha:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node-driver-registrar:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node-driver-registrar:v3.28.0  docker.io/calico/node-driver-registrar:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/csi:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/csi:v3.28.0  docker.io/calico/csi:v3.28.0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>启动calico配置</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#配置启动calico</span></span><br><span class="line">kubectl apply -f custom-resources.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment">#kubectl get pods -o wide --all-namespaces</span></span><br><span class="line"><span class="comment">#或者</span></span><br><span class="line">watch kubectl get pods -n calico-system</span><br><span class="line"></span><br><span class="line"><span class="comment">#失败强制删除</span></span><br><span class="line">kubectl delete pod csi-node-driver-7rhsg -n calico-system --force</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="六、集群启动信息"><a href="#六、集群启动信息" class="headerlink" title="六、集群启动信息"></a>六、集群启动信息</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl cluster-info</span><br><span class="line"></span><br><span class="line">kubectl get nodes -o wide</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/11/20/vscode%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE/" rel="prev" title="vscode调试配置">
+      <i class="fa fa-chevron-left"></i> vscode调试配置
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">参考资料：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%9C%BA%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="nav-number"></span> <span class="nav-text">一、机器配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%E6%93%8D%E4%BD%9C%E8%AE%BE%E7%BD%AE"><span class="nav-number"></span> <span class="nav-text">二、所有节点操作设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81master%E8%8A%82%E7%82%B9%E9%85%8D%E7%BD%AE"><span class="nav-number"></span> <span class="nav-text">三、master节点配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81node%E8%8A%82%E7%82%B9"><span class="nav-number"></span> <span class="nav-text">四、node节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Calico%E5%AE%89%E8%A3%85%E5%8F%82%E8%80%83"><span class="nav-number"></span> <span class="nav-text">五、Calico安装参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E9%9B%86%E7%BE%A4%E5%90%AF%E5%8A%A8%E4%BF%A1%E6%81%AF"><span class="nav-number"></span> <span class="nav-text">六、集群启动信息</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">94k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:26</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
