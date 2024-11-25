@@ -2266,14 +2266,14 @@ validate</p>
 <td>5.10</td>
 </tr>
 <tr>
-<td>k8s-node01</td>
+<td>k8s-node02</td>
 <td>11.123.248.102</td>
 <td>2C 4G</td>
 <td>Anolis OS release 8</td>
 <td>5.10</td>
 </tr>
 </tbody></table>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#设置主机名</span></span><br><span class="line"><span class="comment">#master节点</span></span><br><span class="line">hostnamectl set-hostname k8s-master</span><br><span class="line"></span><br><span class="line"><span class="comment">#node节点</span></span><br><span class="line">hostnamectl set-hostname k8s-node01</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#设置主机名</span></span><br><span class="line"><span class="comment">#master节点</span></span><br><span class="line">hostnamectl set-hostname k8s-master</span><br><span class="line"></span><br><span class="line"><span class="comment">#node节点11.123.248.101</span></span><br><span class="line">hostnamectl set-hostname k8s-node01</span><br><span class="line"><span class="comment">#node节点11.123.248.102</span></span><br><span class="line">hostnamectl set-hostname k8s-node02</span><br></pre></td></tr></table></figure>
 
 <h2 id="二、所有节点操作设置"><a href="#二、所有节点操作设置" class="headerlink" title="二、所有节点操作设置"></a>二、所有节点操作设置</h2><ul>
 <li>通用安装内容</li>
