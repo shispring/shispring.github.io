@@ -20,19 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="在 Linux 系统上可以通过 perf 工具结合 FlameGraph 进行程序性能分析，特别适用于 CPU 密集型应用。 1. 准备工具首先，确保系统安装了 perf 和 FlameGraph： 安装 perf对于大多数 Linux 发行版，可以通过包管理器安装： 12#通过系统包管理器安装 Perl 核心模块：sudo yum install -y perf  perf-core   获取">
+  <meta name="description" content="在 Kubernetes 的 client-go 中，Informer 的队列机制是控制器实现异步事件处理的核心部分。主要通过 工作队列 (WorkQueue) 实现，用于协调资源对象的事件处理，确保高效、可靠和去重的处理流程。 以下是 client-go 中工作队列的核心机制：  1. Queue 机制的核心组件client-go 的队列机制主要由以下组件组成：  WorkQueue 接口">
 <meta property="og:type" content="article">
-<meta property="og:title" content="火焰图">
-<meta property="og:url" content="https://shispring.github.io/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/index.html">
+<meta property="og:title" content="informer 核心机制">
+<meta property="og:url" content="https://shispring.github.io/2024/11/28/informer-%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="在 Linux 系统上可以通过 perf 工具结合 FlameGraph 进行程序性能分析，特别适用于 CPU 密集型应用。 1. 准备工具首先，确保系统安装了 perf 和 FlameGraph： 安装 perf对于大多数 Linux 发行版，可以通过包管理器安装： 12#通过系统包管理器安装 Perl 核心模块：sudo yum install -y perf  perf-core   获取">
+<meta property="og:description" content="在 Kubernetes 的 client-go 中，Informer 的队列机制是控制器实现异步事件处理的核心部分。主要通过 工作队列 (WorkQueue) 实现，用于协调资源对象的事件处理，确保高效、可靠和去重的处理流程。 以下是 client-go 中工作队列的核心机制：  1. Queue 机制的核心组件client-go 的队列机制主要由以下组件组成：  WorkQueue 接口">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-11-04T02:40:05.000Z">
-<meta property="article:modified_time" content="2024-11-04T02:44:48.629Z">
+<meta property="article:published_time" content="2024-11-28T10:18:05.000Z">
+<meta property="article:modified_time" content="2024-11-28T10:52:07.170Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/">
+<link rel="canonical" href="https://shispring.github.io/2024/11/28/informer-%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6/">
 
 
 <script id="page-configurations">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>火焰图 | Hexo</title>
+  <title>informer 核心机制 | Hexo</title>
   
 
 
@@ -189,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/28/informer-%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -202,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          火焰图
+          informer 核心机制
         </h1>
 
         <div class="post-meta">
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-11-04 10:40:05 / 修改时间：10:44:48" itemprop="dateCreated datePublished" datetime="2024-11-04T10:40:05+08:00">2024-11-04</time>
+              <time title="创建时间：2024-11-28 18:18:05 / 修改时间：18:52:07" itemprop="dateCreated datePublished" datetime="2024-11-28T18:18:05+08:00">2024-11-28</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -221,7 +221,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
                 </span>
             </span>
 
@@ -238,7 +238,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.1k</span>
+              <span>1.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -257,41 +257,83 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>在 Linux 系统上可以通过 <code>perf</code> 工具结合 <code>FlameGraph</code> 进行程序性能分析，特别适用于 CPU 密集型应用。</p>
-<h3 id="1-准备工具"><a href="#1-准备工具" class="headerlink" title="1. 准备工具"></a>1. 准备工具</h3><p>首先，确保系统安装了 <code>perf</code> 和 <code>FlameGraph</code>：</p>
-<h3 id="安装-perf"><a href="#安装-perf" class="headerlink" title="安装 perf"></a>安装 <code>perf</code></h3><p>对于大多数 Linux 发行版，可以通过包管理器安装：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过系统包管理器安装 Perl 核心模块：</span></span><br><span class="line"><span class="built_in">sudo</span> yum install -y perf  perf-core </span><br></pre></td></tr></table></figure>
-
-<h3 id="获取-FlameGraph"><a href="#获取-FlameGraph" class="headerlink" title="获取 FlameGraph"></a>获取 <code>FlameGraph</code></h3><p><code>FlameGraph</code> 是一个工具集，可以从 GitHub 上克隆：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br></pre></td></tr></table></figure>
-
-<p>下载完成后，进入 <code>FlameGraph</code> 目录，确保其中有 <code>stackcollapse-perf.pl</code> 和 <code>flamegraph.pl</code> 等脚本。</p>
-<h3 id="2-使用-perf-收集性能数据"><a href="#2-使用-perf-收集性能数据" class="headerlink" title="2. 使用 perf 收集性能数据"></a>2. 使用 <code>perf</code> 收集性能数据</h3><p>假设你想要分析一个进程的 CPU 使用情况。可以先使用 <code>top</code> 或 <code>htop</code> 来获取目标进程的 PID。</p>
-<h3 id="记录目标进程的性能数据"><a href="#记录目标进程的性能数据" class="headerlink" title="记录目标进程的性能数据"></a>记录目标进程的性能数据</h3><p>假设 PID 为 <code>1234</code>，运行以下命令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br></pre></td></tr></table></figure>
-
-<p>参数说明：</p>
+        <p>在 Kubernetes 的 <code>client-go</code> 中，Informer 的队列机制是控制器实现异步事件处理的核心部分。主要通过 <strong>工作队列 (WorkQueue)</strong> 实现，用于协调资源对象的事件处理，确保高效、可靠和去重的处理流程。</p>
+<p>以下是 <code>client-go</code> 中工作队列的核心机制：</p>
+<hr>
+<h3 id="1-Queue-机制的核心组件"><a href="#1-Queue-机制的核心组件" class="headerlink" title="1. Queue 机制的核心组件"></a><strong>1. Queue 机制的核心组件</strong></h3><p><code>client-go</code> 的队列机制主要由以下组件组成：</p>
+<ol>
+<li><p><strong><code>WorkQueue</code> 接口</strong>  </p>
 <ul>
-<li><code>F 99</code>：每秒采样 99 次，可根据需要调整采样频率。</li>
-<li><code>p 1234</code>：指定要分析的进程 PID。</li>
-<li><code>g</code>：记录调用栈信息。</li>
-<li><code>- sleep 30</code>：采样时间为 30 秒。</li>
+<li><code>client-go</code> 提供了一种高效的事件队列实现：<code>rateLimitingQueue</code>。</li>
+<li>常见接口包括：<code>Add</code>、<code>Get</code>、<code>Done</code>、<code>Forget</code> 和 <code>ShutDown</code>。</li>
 </ul>
-<p>采样完成后会生成一个 <code>perf.data</code> 文件，包含采样数据。</p>
-<h3 id="3-处理-perf-数据"><a href="#3-处理-perf-数据" class="headerlink" title="3. 处理 perf 数据"></a>3. 处理 <code>perf</code> 数据</h3><p>将 <code>perf.data</code> 转换为 FlameGraph 可以使用的堆栈信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>rateLimitingQueue</code></strong>  </p>
+<ul>
+<li>一种带速率限制的队列，用于在失败时控制重试的速率，防止频繁的事件触发导致资源占用过高。</li>
+<li>内部通过 <code>DelayingQueue</code> 和 <code>DefaultControllerRateLimiter</code> 实现重试和延迟处理。</li>
+</ul>
+</li>
+<li><p><strong>队列与同步机制</strong>  </p>
+<ul>
+<li><code>Informer</code> 监听到资源变化后，通过回调函数 (<code>AddEventHandler</code>) 将事件放入队列。</li>
+<li>控制器从队列中读取事件并处理，每次处理后需调用 <code>Done</code> 标记完成。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="2-队列的处理逻辑"><a href="#2-队列的处理逻辑" class="headerlink" title="2. 队列的处理逻辑"></a><strong>2. 队列的处理逻辑</strong></h3><h4 id="核心流程："><a href="#核心流程：" class="headerlink" title="核心流程："></a>核心流程：</h4><ol>
+<li><p><strong>资源事件入队</strong>：</p>
+<ul>
+<li>当 <code>Informer</code> 侦听到资源对象的 <code>Add</code>、<code>Update</code> 或 <code>Delete</code> 事件时，会通过回调将资源标识符（如名字或键）加入队列。</li>
+<li>示例代码：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">queue.Add(objKey)</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>事件出队并处理</strong>：</p>
+<ul>
+<li>控制器通过 <code>Get</code> 方法从队列取出事件，处理完成后调用 <code>Done</code>。</li>
+<li>示例代码：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    obj, shutdown := queue.Get()</span><br><span class="line">    <span class="keyword">if</span> shutdown &#123;</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 处理逻辑</span></span><br><span class="line">    handleErr(err, obj)</span><br><span class="line">    queue.Done(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>错误处理与重试</strong>：</p>
+<ul>
+<li>如果处理失败，可以调用 <code>AddRateLimited</code> 重新将事件入队，触发限速重试。</li>
+<li>如果确定不再重试，调用 <code>Forget</code> 移除事件。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="3-核心功能特性"><a href="#3-核心功能特性" class="headerlink" title="3. 核心功能特性"></a><strong>3. 核心功能特性</strong></h3><ol>
+<li><p><strong>去重</strong>：</p>
+<ul>
+<li>队列内对象使用唯一键（通常是 <code>namespace/name</code> 格式）标识，避免重复处理同一资源事件。</li>
+</ul>
+</li>
+<li><p><strong>速率限制</strong>：</p>
+<ul>
+<li>内置的速率限制器（<code>RateLimiter</code>）控制失败重试的频率，防止集群压力过大。</li>
+<li>常用速率限制器：<ul>
+<li><code>BucketRateLimiter</code>: 令牌桶算法。</li>
+<li><code>ItemExponentialFailureRateLimiter</code>: 指数增长重试间隔。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>延迟处理</strong>：</p>
+<ul>
+<li>支持延迟任务，适用于需要等待某些条件满足后再处理的场景。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="4-示例代码"><a href="#4-示例代码" class="headerlink" title="4. 示例代码"></a><strong>4. 示例代码</strong></h3><p>以下是使用 <code>WorkQueue</code> 的典型控制器实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">enqueue</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    key, err := cache.MetaNamespaceKeyFunc(obj)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    queue.Add(key)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    obj, shutdown := queue.Get()</span><br><span class="line">    <span class="keyword">if</span> shutdown &#123;</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key := obj.(<span class="type">string</span>) <span class="comment">// 处理对象的唯一标识符</span></span><br><span class="line">    err := syncHandler(key)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        queue.AddRateLimited(key)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        queue.Forget(key)</span><br><span class="line">    &#125;</span><br><span class="line">    queue.Done(key)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>这会将 <code>perf.data</code> 文件解析成 <code>out.perf</code>，便于生成火焰图。</p>
-<h3 id="4-生成火焰图"><a href="#4-生成火焰图" class="headerlink" title="4. 生成火焰图"></a>4. 生成火焰图</h3><p>在 <code>FlameGraph</code> 目录下运行以下命令：</p>
-<h3 id="折叠堆栈信息"><a href="#折叠堆栈信息" class="headerlink" title="折叠堆栈信息"></a>折叠堆栈信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br></pre></td></tr></table></figure>
-
-<h3 id="生成火焰图"><a href="#生成火焰图" class="headerlink" title="生成火焰图"></a>生成火焰图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
-
-<p>生成的 <code>flamegraph.svg</code> 文件是一个交互式火焰图，可以通过浏览器打开查看。</p>
-<h3 id="5-分析火焰图"><a href="#5-分析火焰图" class="headerlink" title="5. 分析火焰图"></a>5. 分析火焰图</h3><p>火焰图中各个块的宽度表示 CPU 使用时间，占用时间越多，宽度越大。图层深度表示调用堆栈的深度。可以查看性能热点并根据需要进行优化。</p>
-<h3 id="总结的命令流程"><a href="#总结的命令流程" class="headerlink" title="总结的命令流程"></a>总结的命令流程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
-
-<p>通过上述步骤，你可以生成并查看程序的 CPU 性能火焰图，为性能瓶颈定位和优化提供参考。</p>
+<hr>
+<h3 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5. 参考文档"></a><strong>5. 参考文档</strong></h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/kubernetes/client-go/tree/master/util/workqueue">client-go WorkQueue 实现</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/architecture/controller/">Kubernetes Informer 机制解析</a></li>
+</ul>
 
     </div>
 
@@ -307,13 +349,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" rel="prev" title="magick工具使用">
-      <i class="fa fa-chevron-left"></i> magick工具使用
+    <a href="/2024/11/25/kubeadm-containerd-calico-%E9%83%A8%E7%BD%B2k8s-1-28/" rel="prev" title="kubeadm + containerd + calico 部署k8s 1.28">
+      <i class="fa fa-chevron-left"></i> kubeadm + containerd + calico 部署k8s 1.28
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/11/07/heml%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/" rel="next" title="heml使用教程">
-      heml使用教程 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -372,7 +411,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%87%86%E5%A4%87%E5%B7%A5%E5%85%B7"><span class="nav-number">1.</span> <span class="nav-text">1. 准备工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-perf"><span class="nav-number">2.</span> <span class="nav-text">安装 perf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-FlameGraph"><span class="nav-number">3.</span> <span class="nav-text">获取 FlameGraph</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BD%BF%E7%94%A8-perf-%E6%94%B6%E9%9B%86%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">4.</span> <span class="nav-text">2. 使用 perf 收集性能数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E7%9B%AE%E6%A0%87%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">5.</span> <span class="nav-text">记录目标进程的性能数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A4%84%E7%90%86-perf-%E6%95%B0%E6%8D%AE"><span class="nav-number">6.</span> <span class="nav-text">3. 处理 perf 数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%94%9F%E6%88%90%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">7.</span> <span class="nav-text">4. 生成火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%98%E5%8F%A0%E5%A0%86%E6%A0%88%E4%BF%A1%E6%81%AF"><span class="nav-number">8.</span> <span class="nav-text">折叠堆栈信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">9.</span> <span class="nav-text">生成火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%88%86%E6%9E%90%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">10.</span> <span class="nav-text">5. 分析火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E7%9A%84%E5%91%BD%E4%BB%A4%E6%B5%81%E7%A8%8B"><span class="nav-number">11.</span> <span class="nav-text">总结的命令流程</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Queue-%E6%9C%BA%E5%88%B6%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">1. Queue 机制的核心组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%98%9F%E5%88%97%E7%9A%84%E5%A4%84%E7%90%86%E9%80%BB%E8%BE%91"><span class="nav-number">2.</span> <span class="nav-text">2. 队列的处理逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">核心流程：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E7%89%B9%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">3. 核心功能特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">4. 示例代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">5.</span> <span class="nav-text">5. 参考文档</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
