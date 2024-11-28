@@ -2408,7 +2408,6 @@ validate</p>
 <hr>
 <h3 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5. 参考文档"></a><strong>5. 参考文档</strong></h3><ul>
 <li><a href="https://github.com/kubernetes/client-go/tree/master/util/workqueue">client-go WorkQueue 实现</a></li>
-<li><a href="https://kubernetes.io/docs/concepts/architecture/controller/">Kubernetes Informer 机制解析</a></li>
 </ul>
 ]]></content>
       <categories>
