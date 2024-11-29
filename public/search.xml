@@ -2415,4 +2415,18 @@ validate</p>
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>k8s实用工具</title>
+    <url>/2024/11/29/k8s%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7/</url>
+    <content><![CDATA[<h2 id="kubetail"><a href="#kubetail" class="headerlink" title="kubetail"></a>kubetail</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#https://github.com/johanhaleby/kubetail</span></span><br><span class="line">wget https://github.com/johanhaleby/kubetail/archive/refs/tags/1.6.20.tar.gz</span><br><span class="line">tar zxvf 1.6.20.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> kubetail-1.6.20</span><br><span class="line"><span class="built_in">cp</span> kubetail /usr/local/bin/</span><br><span class="line"><span class="built_in">cp</span> kubetail.plugin.zsh /etc/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">#eg:</span></span><br><span class="line">kt <span class="string">&quot;backend|stark&quot;</span> --regex</span><br></pre></td></tr></table></figure>
+
+<h2 id="kubecolor"><a href="#kubecolor" class="headerlink" title="kubecolor"></a>kubecolor</h2><ul>
+<li><a href="https://github.com/hidetatz/kubecolor">https://github.com/hidetatz/kubecolor</a></li>
+</ul>
+<h2 id="k9s"><a href="#k9s" class="headerlink" title="k9s"></a>k9s</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#https://github.com/derailed/k9s</span></span><br><span class="line">curl -sS https://webinstall.dev/k9s | bash</span><br><span class="line"></span><br><span class="line"><span class="built_in">source</span> ~/.config/envman/PATH.<span class="built_in">env</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
 </search>
