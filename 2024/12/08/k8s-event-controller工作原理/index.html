@@ -20,19 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="安装docker1234567891011121314#使用root用户yum install -y yum-utils device-mapper-persistent-data lvm2yum-config-manager --add-repo http:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;docker-ce.repo# 查看可以安装的版本y">
+  <meta name="description" content="在 Kubernetes 中，Event Controller 是集群内部的一部分，用于管理事件资源（Event 对象）。它的主要职责是监听、存储和处理集群中的事件，这些事件是 Kubernetes 中其他组件和用户操作的结果。  Event 的定义与来源  Event 是 Kubernetes 中的一个核心资源，表示集群中发生的一个操作或状态变更。每个 Event 都是一个短期的记录，包含以下信">
 <meta property="og:type" content="article">
-<meta property="og:title" content="龙蜥安装docker">
-<meta property="og:url" content="https://shispring.github.io/2024/09/27/%E9%BE%99%E8%9C%A5%E5%AE%89%E8%A3%85docker/index.html">
+<meta property="og:title" content="k8s event controller工作原理">
+<meta property="og:url" content="https://shispring.github.io/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="安装docker1234567891011121314#使用root用户yum install -y yum-utils device-mapper-persistent-data lvm2yum-config-manager --add-repo http:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;docker-ce.repo# 查看可以安装的版本y">
+<meta property="og:description" content="在 Kubernetes 中，Event Controller 是集群内部的一部分，用于管理事件资源（Event 对象）。它的主要职责是监听、存储和处理集群中的事件，这些事件是 Kubernetes 中其他组件和用户操作的结果。  Event 的定义与来源  Event 是 Kubernetes 中的一个核心资源，表示集群中发生的一个操作或状态变更。每个 Event 都是一个短期的记录，包含以下信">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-09-27T11:50:27.000Z">
-<meta property="article:modified_time" content="2024-09-29T06:46:37.079Z">
+<meta property="article:published_time" content="2024-12-08T05:45:33.000Z">
+<meta property="article:modified_time" content="2024-12-08T05:46:18.123Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2024/09/27/%E9%BE%99%E8%9C%A5%E5%AE%89%E8%A3%85docker/">
+<link rel="canonical" href="https://shispring.github.io/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
 
 
 <script id="page-configurations">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>龙蜥安装docker | Hexo</title>
+  <title>k8s event controller工作原理 | Hexo</title>
   
 
 
@@ -189,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/27/%E9%BE%99%E8%9C%A5%E5%AE%89%E8%A3%85docker/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -202,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          龙蜥安装docker
+          k8s event controller工作原理
         </h1>
 
         <div class="post-meta">
@@ -211,24 +211,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2024-09-27 19:50:27" itemprop="dateCreated datePublished" datetime="2024-09-27T19:50:27+08:00">2024-09-27</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-29 14:46:37" itemprop="dateModified" datetime="2024-09-29T14:46:37+08:00">2024-09-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
+              <time title="创建时间：2024-12-08 13:45:33 / 修改时间：13:46:18" itemprop="dateCreated datePublished" datetime="2024-12-08T13:45:33+08:00">2024-12-08</time>
             </span>
 
           
@@ -244,14 +229,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
+              <span>2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -263,11 +248,48 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#使用root用户</span></span><br><span class="line">yum install -y yum-utils device-mapper-persistent-data lvm2</span><br><span class="line"></span><br><span class="line">yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看可以安装的版本</span></span><br><span class="line">yum list docker-ce --showduplicates | <span class="built_in">sort</span> -r</span><br><span class="line"></span><br><span class="line">yum install -y docker-ce</span><br><span class="line"></span><br><span class="line">docker version</span><br><span class="line"></span><br><span class="line"><span class="comment">#启动docker</span></span><br><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure>
+        <p>在 Kubernetes 中，Event Controller 是集群内部的一部分，用于管理事件资源（Event 对象）。它的主要职责是监听、存储和处理集群中的事件，这些事件是 Kubernetes 中其他组件和用户操作的结果。</p>
+<ol>
+<li>Event 的定义与来源</li>
+</ol>
+<p>Event 是 Kubernetes 中的一个核心资源，表示集群中发生的一个操作或状态变更。每个 Event 都是一个短期的记录，包含以下信息：<br>    •	涉及的对象（involvedObject）：与事件相关的资源（Pod、Node、Deployment 等）。<br>    •	类型：事件类型是 Normal（正常）或 Warning（警告）。<br>    •	原因：事件的简短描述（如 BackOff、Scheduled）。<br>    •	消息：事件的详细信息。<br>    •	时间戳：事件发生的时间。<br>    •	事件源：触发事件的组件（如 kubelet、scheduler、controller-manager 等）。</p>
+<ol start="2">
+<li>Event Controller 的作用</li>
+</ol>
+<p>Event Controller 的核心功能是：<br>    •	监听事件源：通过 API Server 监控事件的发生（使用 Kubernetes 的 Watch 机制）。<br>    •	记录事件：将事件持久化存储到 etcd 中。<br>    •	清理旧事件：定期清理超出 TTL（默认 1 小时）的事件，确保事件系统不会无限制地占用资源。</p>
+<p>事件驱动机制的工作原理</p>
+<p>Kubernetes 是基于 事件驱动模型 的，这体现在以下几个方面：</p>
+<ol>
+<li>事件的传播与通知</li>
+</ol>
+<p>事件是通过 Watch&#x2F;Informer 机制传播的：<br>    •	组件监听 API Server：Kubernetes 中的 Controller（如 Deployment Controller、Node Controller）通过 Watch 机制实时监听资源对象的变更。<br>    •	产生事件：当资源对象状态发生变化时，组件会向 API Server 报告事件。例如，Pod 被调度到一个节点后，Scheduler 会产生一个事件 Scheduled。<br>    •	事件流转：事件被写入 API Server，Event Controller 和其他监听组件（如自定义 Controller）会收到通知。</p>
+<ol start="2">
+<li>事件类型<br> •	Normal 事件：表示系统的正常行为，例如 Pod 被成功调度。<br> •	Warning 事件：表示可能的异常情况，例如 Pod 无法拉取镜像或节点不可用。</li>
+</ol>
+<p>Event Controller 对 CRD 自定义 Controller 的影响</p>
+<ol>
+<li>事件触发 CRD Controller 的动作<br> •	Informer 的事件驱动机制：CRD 自定义 Controller 使用 Kubernetes 提供的 Informer 来监听 CRD 对象的创建、更新和删除事件。Informer 会从 API Server 获取事件并调用相应的处理逻辑。<br> •	队列机制：事件触发后，CRD Controller 通常将事件加入队列（如 workqueue），并异步执行对应的操作。</li>
+</ol>
+<p>例如：<br>    •	用户创建一个自定义资源（CRD 实例）。<br>    •	Informer 监听到该事件，并将事件加入工作队列。<br>    •	自定义 Controller 的 Reconcile Loop 被触发，执行相应的逻辑。</p>
+<ol start="2">
+<li><p>使用事件进行调试与可观察性<br> •	CRD 自定义 Controller 通常会创建 Event 对象记录操作结果（如更新资源状态）。<br> •	这些事件便于管理员调试和观察 CRD Controller 的行为。</p>
+</li>
+<li><p>事件的级联影响<br> •	自定义 Controller 的行为可能引发新的事件。例如，Controller 更新一个 Pod 的 Label，会触发 Deployment Controller 产生新事件 Updated.</p>
+</li>
+</ol>
+<p>事件对系统整体的影响<br>    1.	调度与控制的基础：<br>    •	Scheduler 监听 Pod 的创建事件来决定调度策略。<br>    •	Deployment Controller 监听 Pod 的状态事件来决定扩容或重建策略。<br>    2.	系统状态的监控与追踪：<br>    •	事件为集群提供了一个透明的状态变更历史。<br>    •	运维人员可以通过 kubectl describe 查看事件记录。<br>    3.	问题的根因分析：<br>    •	事件链可以帮助快速定位问题。例如，Pod 创建失败的原因通常可以通过查看相关的事件找到。</p>
+<p>实践中如何生成和使用事件<br>    1.	生成自定义事件<br>自定义 Controller 可以通过 Kubernetes 提供的 EventRecorder 接口生成事件：</p>
+<p>eventRecorder.Event(resource, “Warning”, “CustomReason”, “Custom message”)</p>
+<pre><code>2.	监控事件
+</code></pre>
+<p>通过 kubectl 查看事件：</p>
+<p>kubectl get events –all-namespaces</p>
+<pre><code>3.	分析与排查问题
 
-<h3 id="配置docker镜像源"><a href="#配置docker镜像源" class="headerlink" title="配置docker镜像源"></a>配置docker镜像源</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#配置docker镜像源</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /etc/docker  </span><br><span class="line"><span class="comment">#创建添加/更新 daemon.josn文件</span></span><br><span class="line"><span class="built_in">touch</span> /etc/docker/daemon.json            </span><br><span class="line"><span class="comment">#更换腾讯镜像源                         </span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF &gt; /etc/docker/daemon.json</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">    &quot;registry-mirrors&quot;: [</span></span><br><span class="line"><span class="string">	&quot;https://dockerproxy.com&quot;,</span></span><br><span class="line"><span class="string">        &quot;https://fw92oidw.mirror.aliyuncs.com&quot;</span></span><br><span class="line"><span class="string">    ]</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#由于更新了daemon.json文件 需要重新加载daemon.json</span></span><br><span class="line">systemctl daemon-reload   </span><br><span class="line"><span class="comment">#重新启动docker</span></span><br><span class="line">systemctl restart docker  </span><br><span class="line"><span class="comment">#查看docker运行状态</span></span><br><span class="line">docker info  </span><br></pre></td></tr></table></figure>
-
-<h3 id="安装docker-compose"><a href="#安装docker-compose" class="headerlink" title="安装docker-compose"></a>安装docker-compose</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">安装Docker-compose</span><br><span class="line">Docker-compose 要求docker的内核版本高于所对应的docker最低版本 。</span><br><span class="line">1.查看当前docker的内核版本</span><br><span class="line">docker version</span><br><span class="line">2.进入docker-compose的github官方release页面</span><br><span class="line">https://github.com/docker/compose/releases</span><br><span class="line">3.下载docker-compose-Linux-x86_64</span><br><span class="line">wget https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64</span><br><span class="line">4.上传并移动到到 /usr/local/bin 目录下，然后重命名为 docker-compose</span><br><span class="line">mv docker-compose-linux-x86_64 /usr/local/bin/docker-compose</span><br><span class="line">5.赋予 docker-compose 文件root权限</span><br><span class="line">chmod +x /usr/local/bin/docker-compose</span><br><span class="line">6.查看 docker-compose 版本</span><br><span class="line">docker-compose version</span><br></pre></td></tr></table></figure>
+•	Warning 事件通常是问题的直接表现。
+•	结合事件时间顺序，可以追踪操作的完整链路。
+</code></pre>
+<p>通过事件驱动机制，Kubernetes 提供了强大的异步处理能力和可观察性，能够支撑复杂的分布式系统操作逻辑。自定义的 CRD Controller 充分利用这一机制，可以实现动态、灵活的资源管理和协调。</p>
 
     </div>
 
@@ -283,13 +305,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/09/27/vscode%E9%85%8D%E7%BD%AEtips/" rel="prev" title="vscode配置tips">
-      <i class="fa fa-chevron-left"></i> vscode配置tips
+    <a href="/2024/12/08/%E5%90%84%E5%B1%82%E7%BD%91%E7%BB%9C%E6%8E%A2%E6%B5%8B%E5%B7%A5%E5%85%B7/" rel="prev" title="各层网络探测工具">
+      <i class="fa fa-chevron-left"></i> 各层网络探测工具
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/09/27/swagger%E9%83%A8%E7%BD%B2k8s-open-api/" rel="next" title="swagger部署k8s open api">
-      swagger部署k8s open api <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -348,7 +367,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85docker"><span class="nav-number">1.</span> <span class="nav-text">安装docker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEdocker%E9%95%9C%E5%83%8F%E6%BA%90"><span class="nav-number">2.</span> <span class="nav-text">配置docker镜像源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85docker-compose"><span class="nav-number">3.</span> <span class="nav-text">安装docker-compose</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
