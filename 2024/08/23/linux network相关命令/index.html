@@ -28,7 +28,7 @@
 <meta property="og:description" content="了解节点网络拓扑的几种工具和方法：1. ip 命令ip 命令是一个功能强大的网络工具，通常用于查看和管理网络接口、路由表、策略路由和隧道。  查看网络接口和IP地址： 1ip addr show  查看路由表： 1ip route show  查看邻居（ARP 表）： 1ip neigh show  2. netstat 或 ss 命令netstat 和 ss 命令用于显示网络连接、路由表、接口统">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-08-23T11:08:18.000Z">
-<meta property="article:modified_time" content="2024-11-14T02:39:17.422Z">
+<meta property="article:modified_time" content="2024-12-09T05:31:55.385Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -219,7 +219,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-11-14 10:39:17" itemprop="dateModified" datetime="2024-11-14T10:39:17+08:00">2024-11-14</time>
+                <time title="修改时间：2024-12-09 13:31:55" itemprop="dateModified" datetime="2024-12-09T13:31:55+08:00">2024-12-09</time>
               </span>
 
           
@@ -235,14 +235,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>961</span>
+              <span>2.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -317,6 +317,84 @@
 <ul>
 <li><strong>启动 <code>iptraf-ng</code> 监控：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptraf-ng</span><br></pre></td></tr></table></figure></li>
 </ul>
+<h3 id="11-tcping"><a href="#11-tcping" class="headerlink" title="11. tcping"></a>11. <strong><code>tcping</code></strong></h3><ul>
+<li><p><strong>TCPing</strong>：基于 TCP 协议，通过三次握手连接指定端口进行探测。如果目标主机的应用程序未能及时响应或端口临时不可用，会显示为失败。</p>
+</li>
+<li><p><strong>Ping</strong>：基于 ICMP 协议（Internet Control Message Protocol），直接探测网络层连接性。如果目标主机的网络栈正常运行，但应用层服务存在问题，Ping 仍可能显示为正常。</p>
+</li>
+<li><p>TCPing 针对具体的服务端口（如 23333）测试，如果目标服务存在连接限制（如最大连接数、超时设置），可能会导致 TCPing 丢包。</p>
+</li>
+<li><p>Ping 不涉及具体的服务端口，仅测试目标主机的网络连通性。</p>
+</li>
+<li><p>如果目标主机的服务（监听 23333 端口）处理压力大，可能会导致部分连接请求（TCPing 探测）未能响应。</p>
+</li>
+<li><p>Ping 使用较少的资源和处理能力，因此即使服务端性能有限，Ping 的结果也可能保持稳定。</p>
+</li>
+<li><p>防火墙可能对 ICMP 流量和 TCP 流量设置不同的策略。例如：</p>
+<ul>
+<li>放行 ICMP 流量，但限制指定端口的 TCP 流量。</li>
+<li>对高频 TCP 请求（如 TCPing）触发限速或阻断。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="如何进一步查看网络情况"><a href="#如何进一步查看网络情况" class="headerlink" title="如何进一步查看网络情况"></a><strong>如何进一步查看网络情况</strong></h3><p>为了更深入地分析，建议从以下几方面入手：</p>
+<h4 id="1-捕获流量数据"><a href="#1-捕获流量数据" class="headerlink" title="1. 捕获流量数据"></a><strong>1. 捕获流量数据</strong></h4><p>使用 <code>tcpdump</code> 或 Wireshark 捕获目标端口的流量，查看失败的 TCP 探测对应的包状态。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i eth0 host 10.181.15.200 and port 23333 -w tcping_capture.pcap</span><br></pre></td></tr></table></figure>
+<p>在 Wireshark 中分析是否存在 TCP 重传、RST 包或服务端的延迟响应。</p>
+<h4 id="2-检查服务端状态"><a href="#2-检查服务端状态" class="headerlink" title="2. 检查服务端状态"></a><strong>2. 检查服务端状态</strong></h4><p>在目标主机上，检查监听端口 <code>23333</code> 的服务状态：</p>
+<ul>
+<li>确认是否达到连接数限制：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -anp | grep 23333</span><br></pre></td></tr></table></figure></li>
+<li>查看服务日志中是否有报错或超时。</li>
+</ul>
+<h4 id="3-路由与网络层分析"><a href="#3-路由与网络层分析" class="headerlink" title="3. 路由与网络层分析"></a><strong>3. 路由与网络层分析</strong></h4><ul>
+<li><strong>Traceroute</strong>：检查到目标的路由路径，是否有某些节点导致了延迟或丢包。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute 10.181.15.200</span><br></pre></td></tr></table></figure></li>
+<li><strong>MTR</strong>：结合 ICMP 和 TCP 路由信息，实时监控路径稳定性。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mtr -r 10.181.15.200</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="4-检查防火墙配置"><a href="#4-检查防火墙配置" class="headerlink" title="4. 检查防火墙配置"></a><strong>4. 检查防火墙配置</strong></h4><p>在客户端和服务端，分别检查防火墙或安全策略配置：</p>
+<ul>
+<li>确认是否对 <code>23333</code> 端口流量有限制（如速率限制）。</li>
+<li>调整防火墙规则，允许更多并发连接。</li>
+</ul>
+<h4 id="5-测试其他协议"><a href="#5-测试其他协议" class="headerlink" title="5. 测试其他协议"></a><strong>5. 测试其他协议</strong></h4><p>对比使用其他协议（如 UDP）进行测试，以进一步排除不同协议栈可能的问题。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iperf -c 10.181.15.200 -p 23333</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="问题排查与解决步骤"><a href="#问题排查与解决步骤" class="headerlink" title="问题排查与解决步骤"></a><strong>问题排查与解决步骤</strong></h3><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>操作方法</th>
+<th>预期结果与意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>检查服务端口状态</td>
+<td>使用 <code>netstat</code> 检查端口占用和连接状态。</td>
+<td>确认服务端是否超出连接限制，是否存在监听问题。</td>
+</tr>
+<tr>
+<td>捕获流量分析</td>
+<td>使用 <code>tcpdump</code> 或 Wireshark 捕获流量，分析是否存在超时、RST 或重传包。</td>
+<td>确认丢包原因是由网络波动还是服务处理延迟引起。</td>
+</tr>
+<tr>
+<td>路由与路径检查</td>
+<td>使用 <code>traceroute</code> 和 <code>mtr</code> 检查路径中的节点性能与稳定性。</td>
+<td>确认是否存在路径中某个节点引起的延迟或丢包问题。</td>
+</tr>
+<tr>
+<td>服务端日志检查</td>
+<td>查看目标服务的运行日志，关注超时、拒绝连接等问题。</td>
+<td>确认是否服务处理能力不足或负载高导致的连接问题。</td>
+</tr>
+<tr>
+<td>调整 TCP 设置</td>
+<td>增大 TCP 超时、发送&#x2F;接收窗口大小，优化服务端的连接队列。</td>
+<td>降低瞬时丢包率对应用的影响，提高吞吐量。</td>
+</tr>
+</tbody></table>
+<p>通过上述分析，结合抓包与服务端日志，应该能定位到 TCPing 丢包的具体原因，并制定解决方案。</p>
 
     </div>
 
@@ -397,7 +475,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91%E7%9A%84%E5%87%A0%E7%A7%8D%E5%B7%A5%E5%85%B7%E5%92%8C%E6%96%B9%E6%B3%95%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">了解节点网络拓扑的几种工具和方法：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-ip-%E5%91%BD%E4%BB%A4"><span class="nav-number">1.1.</span> <span class="nav-text">1. ip 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-netstat-%E6%88%96-ss-%E5%91%BD%E4%BB%A4"><span class="nav-number">1.2.</span> <span class="nav-text">2. netstat 或 ss 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-nmap"><span class="nav-number">1.3.</span> <span class="nav-text">3. nmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-traceroute"><span class="nav-number">1.4.</span> <span class="nav-text">4. traceroute</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-arp-scan"><span class="nav-number">1.5.</span> <span class="nav-text">5. arp-scan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-ifconfig-%E5%92%8C-route"><span class="nav-number">1.6.</span> <span class="nav-text">6. ifconfig 和 route</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-ethtool"><span class="nav-number">1.7.</span> <span class="nav-text">7. ethtool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-nmcli"><span class="nav-number">1.8.</span> <span class="nav-text">8. nmcli</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-bmon"><span class="nav-number">1.9.</span> <span class="nav-text">9. bmon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-iptraf-ng"><span class="nav-number">1.10.</span> <span class="nav-text">10. iptraf-ng</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3%E8%8A%82%E7%82%B9%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91%E7%9A%84%E5%87%A0%E7%A7%8D%E5%B7%A5%E5%85%B7%E5%92%8C%E6%96%B9%E6%B3%95%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">了解节点网络拓扑的几种工具和方法：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-ip-%E5%91%BD%E4%BB%A4"><span class="nav-number">1.1.</span> <span class="nav-text">1. ip 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-netstat-%E6%88%96-ss-%E5%91%BD%E4%BB%A4"><span class="nav-number">1.2.</span> <span class="nav-text">2. netstat 或 ss 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-nmap"><span class="nav-number">1.3.</span> <span class="nav-text">3. nmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-traceroute"><span class="nav-number">1.4.</span> <span class="nav-text">4. traceroute</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-arp-scan"><span class="nav-number">1.5.</span> <span class="nav-text">5. arp-scan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-ifconfig-%E5%92%8C-route"><span class="nav-number">1.6.</span> <span class="nav-text">6. ifconfig 和 route</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-ethtool"><span class="nav-number">1.7.</span> <span class="nav-text">7. ethtool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-nmcli"><span class="nav-number">1.8.</span> <span class="nav-text">8. nmcli</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-bmon"><span class="nav-number">1.9.</span> <span class="nav-text">9. bmon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-iptraf-ng"><span class="nav-number">1.10.</span> <span class="nav-text">10. iptraf-ng</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-tcping"><span class="nav-number">1.11.</span> <span class="nav-text">11. tcping</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%BF%9B%E4%B8%80%E6%AD%A5%E6%9F%A5%E7%9C%8B%E7%BD%91%E7%BB%9C%E6%83%85%E5%86%B5"><span class="nav-number">1.12.</span> <span class="nav-text">如何进一步查看网络情况</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%8D%95%E8%8E%B7%E6%B5%81%E9%87%8F%E6%95%B0%E6%8D%AE"><span class="nav-number">1.12.1.</span> <span class="nav-text">1. 捕获流量数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%A3%80%E6%9F%A5%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%8A%B6%E6%80%81"><span class="nav-number">1.12.2.</span> <span class="nav-text">2. 检查服务端状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E8%B7%AF%E7%94%B1%E4%B8%8E%E7%BD%91%E7%BB%9C%E5%B1%82%E5%88%86%E6%9E%90"><span class="nav-number">1.12.3.</span> <span class="nav-text">3. 路由与网络层分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E6%A3%80%E6%9F%A5%E9%98%B2%E7%81%AB%E5%A2%99%E9%85%8D%E7%BD%AE"><span class="nav-number">1.12.4.</span> <span class="nav-text">4. 检查防火墙配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E6%B5%8B%E8%AF%95%E5%85%B6%E4%BB%96%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.12.5.</span> <span class="nav-text">5. 测试其他协议</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.13.</span> <span class="nav-text">问题排查与解决步骤</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -466,12 +544,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">103k</span>
+    <span title="站点总字数">105k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:34</span>
+    <span title="站点阅读时长">1:35</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
