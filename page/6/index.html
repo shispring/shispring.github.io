@@ -184,6 +184,225 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/08/23/linux%20network%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/08/23/linux%20network%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">linux network相关命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-23 19:08:18" itemprop="dateCreated datePublished" datetime="2024-08-23T19:08:18+08:00">2024-08-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-09 13:33:21" itemprop="dateModified" datetime="2024-12-09T13:33:21+08:00">2024-12-09</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="了解节点网络拓扑的几种工具和方法："><a href="#了解节点网络拓扑的几种工具和方法：" class="headerlink" title="了解节点网络拓扑的几种工具和方法："></a>了解节点网络拓扑的几种工具和方法：</h2><h3 id="1-ip-命令"><a href="#1-ip-命令" class="headerlink" title="1. ip 命令"></a>1. <strong><code>ip</code> 命令</strong></h3><p><code>ip</code> 命令是一个功能强大的网络工具，通常用于查看和管理网络接口、路由表、策略路由和隧道。</p>
+<ul>
+<li><p><strong>查看网络接口和IP地址：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看邻居（ARP 表）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip neigh show</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-netstat-或-ss-命令"><a href="#2-netstat-或-ss-命令" class="headerlink" title="2. netstat 或 ss 命令"></a>2. <strong><code>netstat</code> 或 <code>ss</code> 命令</strong></h3><p><code>netstat</code> 和 <code>ss</code> 命令用于显示网络连接、路由表、接口统计信息和多播成员信息。</p>
+<ul>
+<li><p><strong>netstat使用</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查看所有网络连接</span></span><br><span class="line">netstat -tuln</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看路由表</span></span><br><span class="line">netstat -rn</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">ip route show</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看网络接口统计信息</span></span><br><span class="line">netstat -i</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>ss应用：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ss -tuln</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看进程使用的套接字信息</span></span><br><span class="line">ss -ptan</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="3-nmap"><a href="#3-nmap" class="headerlink" title="3. nmap"></a>3. <strong><code>nmap</code></strong></h3><p><code>nmap</code> 是一个强大的网络扫描工具，通常用于网络发现和安全审计。它可以扫描网络并获取有关局域网中其他设备的信息。</p>
+<ul>
+<li><p><strong>扫描整个子网中的活跃设备：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>获取详细的主机和服务信息：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A 192.168.1.1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="4-traceroute"><a href="#4-traceroute" class="headerlink" title="4. traceroute"></a>4. <strong><code>traceroute</code></strong></h3><p><code>traceroute</code> 命令用于跟踪数据包在网络中的路径，帮助识别网络路径和延迟情况。</p>
+<ul>
+<li><strong>跟踪到目标主机的路由：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute example.com</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="5-arp-scan"><a href="#5-arp-scan" class="headerlink" title="5. arp-scan"></a>5. <strong><code>arp-scan</code></strong></h3><p><code>arp-scan</code> 是一个网络发现工具，用于快速扫描局域网中的设备。</p>
+<ul>
+<li><strong>扫描整个子网中的设备：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arp-scan -l</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="6-ifconfig-和-route"><a href="#6-ifconfig-和-route" class="headerlink" title="6. ifconfig 和 route"></a>6. <strong><code>ifconfig</code> 和 <code>route</code></strong></h3><p>虽然已经被 <code>ip</code> 命令取代，但在某些旧系统上依然可以使用。</p>
+<ul>
+<li><p><strong>查看网络接口：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看路由表：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">route -n</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="7-ethtool"><a href="#7-ethtool" class="headerlink" title="7. ethtool"></a>7. <strong><code>ethtool</code></strong></h3><p><code>ethtool</code> 用于查询和设置以太网设备参数，可以获取接口的详细信息。</p>
+<ul>
+<li><strong>查看网卡详细信息：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ethtool eth0</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="8-nmcli"><a href="#8-nmcli" class="headerlink" title="8. nmcli"></a>8. <strong><code>nmcli</code></strong></h3><p><code>nmcli</code> 是 NetworkManager 提供的命令行工具，用于查看和管理网络连接。</p>
+<ul>
+<li><p><strong>查看所有网络连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看设备状态：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli device status</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="9-bmon"><a href="#9-bmon" class="headerlink" title="9. bmon"></a>9. <strong><code>bmon</code></strong></h3><p><code>bmon</code> 是一个带有图形界面的带宽监控和诊断工具，用于实时监控网络流量。</p>
+<ul>
+<li><strong>启动 <code>bmon</code> 监控网络流量：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bmon</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="10-iptraf-ng"><a href="#10-iptraf-ng" class="headerlink" title="10. iptraf-ng"></a>10. <strong><code>iptraf-ng</code></strong></h3><p><code>iptraf-ng</code> 是一个基于终端的实时网络监控工具，能够监控网络流量和连接。</p>
+<ul>
+<li><strong>启动 <code>iptraf-ng</code> 监控：</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptraf-ng</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="11-tcping"><a href="#11-tcping" class="headerlink" title="11. tcping"></a>11. <strong><code>tcping</code></strong></h3><ul>
+<li><p><strong>TCPing</strong>：基于 TCP 协议，通过三次握手连接指定端口进行探测。如果目标主机的应用程序未能及时响应或端口临时不可用，会显示为失败。</p>
+</li>
+<li><p><strong>Ping</strong>：基于 ICMP 协议（Internet Control Message Protocol），直接探测网络层连接性。如果目标主机的网络栈正常运行，但应用层服务存在问题，Ping 仍可能显示为正常。</p>
+</li>
+<li><p>TCPing 针对具体的服务端口（如 23333）测试，如果目标服务存在连接限制（如最大连接数、超时设置），可能会导致 TCPing 丢包。</p>
+</li>
+<li><p>Ping 不涉及具体的服务端口，仅测试目标主机的网络连通性。</p>
+</li>
+<li><p>如果目标主机的服务（监听 23333 端口）处理压力大，可能会导致部分连接请求（TCPing 探测）未能响应。</p>
+</li>
+<li><p>Ping 使用较少的资源和处理能力，因此即使服务端性能有限，Ping 的结果也可能保持稳定。</p>
+</li>
+<li><p>防火墙可能对 ICMP 流量和 TCP 流量设置不同的策略。例如：</p>
+<ul>
+<li>放行 ICMP 流量，但限制指定端口的 TCP 流量。</li>
+<li>对高频 TCP 请求（如 TCPing）触发限速或阻断。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="如何进一步查看网络情况"><a href="#如何进一步查看网络情况" class="headerlink" title="如何进一步查看网络情况"></a><strong>如何进一步查看网络情况</strong></h3><p>为了更深入地分析，建议从以下几方面入手：</p>
+<h4 id="1-捕获流量数据"><a href="#1-捕获流量数据" class="headerlink" title="1. 捕获流量数据"></a><strong>1. 捕获流量数据</strong></h4><p>使用 <code>tcpdump</code> 或 Wireshark 捕获目标端口的流量，查看失败的 TCP 探测对应的包状态。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i eth0 host 10.100.15.200 and port 3333 -w tcping_capture.pcap</span><br></pre></td></tr></table></figure>
+<p>在 Wireshark 中分析是否存在 TCP 重传、RST 包或服务端的延迟响应。</p>
+<h4 id="2-检查服务端状态"><a href="#2-检查服务端状态" class="headerlink" title="2. 检查服务端状态"></a><strong>2. 检查服务端状态</strong></h4><p>在目标主机上，检查监听端口 <code>3333</code> 的服务状态：</p>
+<ul>
+<li>确认是否达到连接数限制：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -anp | grep 3333</span><br></pre></td></tr></table></figure></li>
+<li>查看服务日志中是否有报错或超时。</li>
+</ul>
+<h4 id="3-路由与网络层分析"><a href="#3-路由与网络层分析" class="headerlink" title="3. 路由与网络层分析"></a><strong>3. 路由与网络层分析</strong></h4><ul>
+<li><strong>Traceroute</strong>：检查到目标的路由路径，是否有某些节点导致了延迟或丢包。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute 10.100.15.200</span><br></pre></td></tr></table></figure></li>
+<li><strong>MTR</strong>：结合 ICMP 和 TCP 路由信息，实时监控路径稳定性。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mtr -r 10.100.15.200</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="4-检查防火墙配置"><a href="#4-检查防火墙配置" class="headerlink" title="4. 检查防火墙配置"></a><strong>4. 检查防火墙配置</strong></h4><p>在客户端和服务端，分别检查防火墙或安全策略配置：</p>
+<ul>
+<li>确认是否对 <code>23333</code> 端口流量有限制（如速率限制）。</li>
+<li>调整防火墙规则，允许更多并发连接。</li>
+</ul>
+<h4 id="5-测试其他协议"><a href="#5-测试其他协议" class="headerlink" title="5. 测试其他协议"></a><strong>5. 测试其他协议</strong></h4><p>对比使用其他协议（如 UDP）进行测试，以进一步排除不同协议栈可能的问题。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iperf -c 10.100.15.200 -p 3333</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="问题排查与解决步骤"><a href="#问题排查与解决步骤" class="headerlink" title="问题排查与解决步骤"></a><strong>问题排查与解决步骤</strong></h3><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>操作方法</th>
+<th>预期结果与意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>检查服务端口状态</td>
+<td>使用 <code>netstat</code> 检查端口占用和连接状态。</td>
+<td>确认服务端是否超出连接限制，是否存在监听问题。</td>
+</tr>
+<tr>
+<td>捕获流量分析</td>
+<td>使用 <code>tcpdump</code> 或 Wireshark 捕获流量，分析是否存在超时、RST 或重传包。</td>
+<td>确认丢包原因是由网络波动还是服务处理延迟引起。</td>
+</tr>
+<tr>
+<td>路由与路径检查</td>
+<td>使用 <code>traceroute</code> 和 <code>mtr</code> 检查路径中的节点性能与稳定性。</td>
+<td>确认是否存在路径中某个节点引起的延迟或丢包问题。</td>
+</tr>
+<tr>
+<td>服务端日志检查</td>
+<td>查看目标服务的运行日志，关注超时、拒绝连接等问题。</td>
+<td>确认是否服务处理能力不足或负载高导致的连接问题。</td>
+</tr>
+<tr>
+<td>调整 TCP 设置</td>
+<td>增大 TCP 超时、发送&#x2F;接收窗口大小，优化服务端的连接队列。</td>
+<td>降低瞬时丢包率对应用的影响，提高吞吐量。</td>
+</tr>
+</tbody></table>
+<p>通过上述分析，结合抓包与服务端日志，应该能定位到 TCPing 丢包的具体原因，并制定解决方案。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/08/22/linux-%E5%AE%89%E8%A3%85-glances/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -896,7 +1115,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">57</span>
+          <span class="site-state-item-count">58</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -949,12 +1168,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">105k</span>
+    <span title="站点总字数">106k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:35</span>
+    <span title="站点阅读时长">1:36</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>

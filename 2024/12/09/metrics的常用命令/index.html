@@ -20,19 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="OpenSSL 密钥类型与格式对比表 1. 密钥类型对比    密钥类型 算法描述 典型应用场景 生成命令示例    RSA 基于大整数分解，常见的非对称加密算法 HTTPS、TLS&#x2F;SSL 证书、SSH、公钥加密 openssl genrsa -out rsa_key.pem 2048   ECC 椭圆曲线密码学，短密钥更高效 IoT、移动设备、TLS 1.3 openssl ecpa">
+  <meta name="description" content="关于 Metrics 的常用命令 查看 Kubelet 的指标： 1kubectl get --raw &quot;&#x2F;metrics&quot;  返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。   查看节点的 cAdvisor 指标： 1kubectl get --raw &quot;&#x2F;api&#x2F;v1&#x2F;nodes&#x2F;&lt;nodeName&gt;&#x2F;proxy&#x2F;metrics&#x2F;">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenSSL 支持的密钥类型和格式">
-<meta property="og:url" content="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/index.html">
+<meta property="og:title" content="metrics的常用命令">
+<meta property="og:url" content="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="OpenSSL 密钥类型与格式对比表 1. 密钥类型对比    密钥类型 算法描述 典型应用场景 生成命令示例    RSA 基于大整数分解，常见的非对称加密算法 HTTPS、TLS&#x2F;SSL 证书、SSH、公钥加密 openssl genrsa -out rsa_key.pem 2048   ECC 椭圆曲线密码学，短密钥更高效 IoT、移动设备、TLS 1.3 openssl ecpa">
+<meta property="og:description" content="关于 Metrics 的常用命令 查看 Kubelet 的指标： 1kubectl get --raw &quot;&#x2F;metrics&quot;  返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。   查看节点的 cAdvisor 指标： 1kubectl get --raw &quot;&#x2F;api&#x2F;v1&#x2F;nodes&#x2F;&lt;nodeName&gt;&#x2F;proxy&#x2F;metrics&#x2F;">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-10-18T06:36:12.000Z">
-<meta property="article:modified_time" content="2024-10-18T07:05:18.598Z">
+<meta property="article:published_time" content="2024-12-09T08:34:29.000Z">
+<meta property="article:modified_time" content="2024-12-09T08:38:04.995Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/">
+<link rel="canonical" href="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
 
 
 <script id="page-configurations">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>OpenSSL 支持的密钥类型和格式 | Hexo</title>
+  <title>metrics的常用命令 | Hexo</title>
   
 
 
@@ -189,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -202,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          OpenSSL 支持的密钥类型和格式
+          metrics的常用命令
         </h1>
 
         <div class="post-meta">
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-10-18 14:36:12 / 修改时间：15:05:18" itemprop="dateCreated datePublished" datetime="2024-10-18T14:36:12+08:00">2024-10-18</time>
+              <time title="创建时间：2024-12-09 16:34:29 / 修改时间：16:38:04" itemprop="dateCreated datePublished" datetime="2024-12-09T16:34:29+08:00">2024-12-09</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -221,7 +221,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/openssl/" itemprop="url" rel="index"><span itemprop="name">openssl</span></a>
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
                 </span>
             </span>
 
@@ -238,14 +238,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
+              <span>1.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>1 分钟</span>
             </span>
 
         </div>
@@ -257,184 +257,82 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><strong>OpenSSL 密钥类型与格式对比表</strong></p>
-<p><strong>1. 密钥类型对比</strong></p>
-<table>
-<thead>
-<tr>
-<th><strong>密钥类型</strong></th>
-<th><strong>算法描述</strong></th>
-<th><strong>典型应用场景</strong></th>
-<th><strong>生成命令示例</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>RSA</strong></td>
-<td>基于大整数分解，常见的非对称加密算法</td>
-<td>HTTPS、TLS&#x2F;SSL 证书、SSH、公钥加密</td>
-<td>openssl genrsa -out rsa_key.pem 2048</td>
-</tr>
-<tr>
-<td><strong>ECC</strong></td>
-<td>椭圆曲线密码学，短密钥更高效</td>
-<td>IoT、移动设备、TLS 1.3</td>
-<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
-</tr>
-<tr>
-<td><strong>DSA</strong></td>
-<td>基于离散对数的数字签名算法</td>
-<td>数字签名（DNSSEC 等）</td>
-<td>openssl dsaparam -genkey 2048 -out dsa_key.pem</td>
-</tr>
-<tr>
-<td><strong>DH</strong></td>
-<td>Diffie-Hellman 算法，用于密钥交换</td>
-<td>VPN、IPsec 加密通道</td>
-<td>openssl dhparam -out dh_key.pem 2048</td>
-</tr>
-<tr>
-<td><strong>ED25519</strong></td>
-<td>高效的椭圆曲线签名算法（无须参数生成）</td>
-<td>SSH、TLS 1.3、轻量级签名</td>
-<td>openssl genpkey -algorithm ED25519 -out ed25519_key.pem</td>
-</tr>
-<tr>
-<td><strong>X25519</strong></td>
-<td>专用于密钥交换的现代椭圆曲线算法</td>
-<td>TLS 1.3 密钥交换、ECDH</td>
-<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
-</tr>
-<tr>
-<td><strong>GOST</strong></td>
-<td>俄罗斯国家标准算法</td>
-<td>加密通信和签名（如 GOST SSL 证书）</td>
-<td>需 GOST 扩展支持</td>
-</tr>
-<tr>
-<td><strong>SM2</strong></td>
-<td>中国国家标准（基于 ECC）</td>
-<td>国密协议（如银行和政府应用）</td>
-<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
-</tr>
-</tbody></table>
-<p><strong>2. 密钥格式对比</strong></p>
-<table>
-<thead>
-<tr>
-<th><strong>格式</strong></th>
-<th><strong>描述</strong></th>
-<th><strong>典型应用场景</strong></th>
-<th><strong>加密支持</strong></th>
-<th><strong>转换命令示例</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>PEM</strong></td>
-<td>Base64 编码，文本格式，以 —–BEGIN 开头</td>
-<td>TLS&#x2F;SSL 证书、服务器私钥存储</td>
-<td>支持</td>
-<td>openssl rsa -in rsa_key.pem -out private_key.pem -outform PEM</td>
-</tr>
-<tr>
-<td><strong>DER</strong></td>
-<td>二进制格式，适合嵌入式系统</td>
-<td>嵌入式系统、低级通信传输</td>
-<td>不支持</td>
-<td>openssl rsa -in rsa_key.pem -out private_key.der -outform DER</td>
-</tr>
-<tr>
-<td><strong>PKCS#8</strong></td>
-<td>私钥标准格式，支持多种算法（如 RSA、ECC）</td>
-<td>服务器密钥存储、跨平台交换</td>
-<td>支持</td>
-<td>openssl pkcs8 -topk8 -in rsa_key.pem -out pkcs8_key.pem</td>
-</tr>
-<tr>
-<td><strong>PKCS#12</strong></td>
-<td>包含证书链和私钥的打包格式（.p12&#x2F;.pfx）</td>
-<td>客户端证书、VPN、S&#x2F;MIME</td>
-<td>支持</td>
-<td>openssl pkcs12 -export -out cert.p12 -inkey ec_key.pem -in cert.pem</td>
-</tr>
-<tr>
-<td><strong>OpenSSH</strong></td>
-<td>专用于 SSH 的密钥格式</td>
-<td>SSH 登录和密钥交换</td>
-<td>支持</td>
-<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
-</tr>
-<tr>
-<td><strong>JWK</strong></td>
-<td>JSON Web Key，用于 Web 应用密钥存储和传输</td>
-<td>OAuth2、JWT 加密</td>
-<td>支持</td>
-<td>使用专用库生成</td>
-</tr>
-</tbody></table>
-<p><strong>3. 应用场景推荐</strong></p>
-<table>
-<thead>
-<tr>
-<th><strong>场景</strong></th>
-<th><strong>推荐密钥类型</strong></th>
-<th><strong>推荐格式</strong></th>
-<th><strong>命令示例</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Web 服务器（Nginx&#x2F;Apache）</strong></td>
-<td>RSA 或 ECC</td>
-<td>PEM、PKCS#8</td>
-<td>openssl pkcs8 -topk8 -in rsa_key.pem -out server_key.pem</td>
-</tr>
-<tr>
-<td><strong>IoT 设备和移动端</strong></td>
-<td>ECC（prime256v1）</td>
-<td>PKCS#8</td>
-<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
-</tr>
-<tr>
-<td><strong>VPN 客户端证书</strong></td>
-<td>RSA 或 ECC</td>
-<td>PKCS#12</td>
-<td>openssl pkcs12 -export -out vpn_cert.p12 -inkey ec_key.pem -in cert.pem</td>
-</tr>
-<tr>
-<td><strong>SSH 登录</strong></td>
-<td>ED25519 或 RSA</td>
-<td>OpenSSH</td>
-<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
-</tr>
-<tr>
-<td><strong>TLS 1.3 密钥交换</strong></td>
-<td>X25519</td>
-<td>PKCS#8</td>
-<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
-</tr>
-<tr>
-<td><strong>国密应用（SM2 签名）</strong></td>
-<td>SM2</td>
-<td>PKCS#8</td>
-<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
-</tr>
-</tbody></table>
-<p><strong>4. 实现案例</strong></p>
-<p><strong>1. 生成 RSA 密钥并转换为 PKCS#8 格式</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out rsa_key.pem 2048</span><br><span class="line"></span><br><span class="line">openssl pkcs8 -topk8 -<span class="keyword">in</span> rsa_key.pem -out rsa_key_pkcs8.pem -nocrypt</span><br></pre></td></tr></table></figure>
-
-<p><strong>2. 生成 ECC 私钥并打包为 PKCS#12</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">openssl ecparam -genkey -name prime256v1 -out ec_key.pem</span><br><span class="line"></span><br><span class="line">openssl req -new -x509 -key ec_key.pem -out ec_cert.pem -days 365</span><br><span class="line"></span><br><span class="line">openssl pkcs12 -<span class="built_in">export</span> -out ec_cert.p12 -inkey ec_key.pem -<span class="keyword">in</span> ec_cert.pem</span><br></pre></td></tr></table></figure>
-
-<p><strong>3. 生成 ED25519 密钥用于 SSH</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519</span><br></pre></td></tr></table></figure>
-
-<p><strong>5. 总结与建议</strong></p>
-<p>•	<strong>RSA</strong>：经典且兼容性好，适合 Web 服务器和通用加密应用。</p>
-<p>•	<strong>ECC</strong>：更高效、密钥短，适用于 IoT 和现代 TLS。</p>
-<p>•	<strong>ED25519&#x2F;X25519</strong>：轻量级和高性能，推荐用于 SSH 和 TLS 1.3。</p>
-<p>•	<strong>SM2&#x2F;GOST</strong>：满足特定国家或行业的加密标准。</p>
-<p>•	<strong>PKCS#8 与 PKCS#12</strong>：PKCS#8 适合服务器端私钥存储，PKCS#12 常用于客户端证书传输。</p>
-<p>选择合适的密钥类型与格式可以在 <strong>安全性、性能、兼容性</strong> 之间取得良好的平衡。</p>
+        <h3 id="关于-Metrics-的常用命令"><a href="#关于-Metrics-的常用命令" class="headerlink" title="关于 Metrics 的常用命令"></a>关于 Metrics 的常用命令</h3><ol>
+<li><p><strong>查看 Kubelet 的指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。</li>
+</ul>
+</li>
+<li><p><strong>查看节点的 cAdvisor 指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/api/v1/nodes/&lt;nodeName&gt;/proxy/metrics/cadvisor&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>获取容器级别的详细性能指标。</li>
+</ul>
+</li>
+<li><p><strong>查看 API Server 的指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span> | grep apiserver</span><br></pre></td></tr></table></figure>
+<ul>
+<li>返回 API Server 的性能指标。</li>
+</ul>
+</li>
+<li><p><strong>查看 Controller Manager 的指标</strong>：<br>在 Controller Manager 所在的节点运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10252/metrics</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看 Scheduler 的指标</strong>：<br>在 Scheduler 所在的节点运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10251/metrics</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看 Metrics Server 的 API</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/nodes&quot;</span></span><br></pre></td></tr></table></figure>
+<p>或查看 Pod 的指标：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/pods&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Prometheus 拉取指标</strong>：<br>如果集群中部署了 Prometheus，可以直接通过其 UI 或 API 获取指标，使用 PromQL 查询资源利用率。</p>
+</li>
+</ol>
+<hr>
+<h3 id="Kubernetes-Metrics-的整体知识架构"><a href="#Kubernetes-Metrics-的整体知识架构" class="headerlink" title="Kubernetes Metrics 的整体知识架构"></a>Kubernetes Metrics 的整体知识架构</h3><h4 id="1-数据来源"><a href="#1-数据来源" class="headerlink" title="1. 数据来源"></a><strong>1. 数据来源</strong></h4><ul>
+<li><strong>Kubelet cAdvisor</strong>：提供节点和容器的资源使用数据。</li>
+<li><strong>Metrics Server</strong>：聚合来自 Kubelet 的指标，用于 Horizontal Pod Autoscaler（HPA）等。</li>
+<li><strong>Prometheus</strong>：一个全面的监控解决方案，用于存储和查询集群中所有相关的指标数据。</li>
+<li><strong>API Server 和 Controller 指标</strong>：暴露组件性能。</li>
+</ul>
+<h4 id="2-相关工具"><a href="#2-相关工具" class="headerlink" title="2. 相关工具"></a><strong>2. 相关工具</strong></h4><ul>
+<li><strong>kubectl top</strong>：快速查看节点和 Pod 的资源使用：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl top nodes</span><br><span class="line">kubectl top pods --namespace=&lt;namespace&gt;</span><br></pre></td></tr></table></figure></li>
+<li><strong>Prometheus&#x2F;Grafana</strong>：用于可视化和分析。</li>
+<li><strong>Custom Metrics Adapter</strong>：支持自定义指标。</li>
+</ul>
+<h4 id="3-最佳实践"><a href="#3-最佳实践" class="headerlink" title="3. 最佳实践"></a><strong>3. 最佳实践</strong></h4><ol>
+<li><strong>启用 Metrics Server</strong>：用于 HPA 和基本资源监控。</li>
+<li><strong>使用 Prometheus</strong>：集中化收集和存储指标。</li>
+<li><strong>建立告警系统</strong>：通过 Alertmanager 或其他工具设置告警。</li>
+<li><strong>分析指标覆盖范围</strong>：确保所有重要组件和工作负载都有相关指标暴露。</li>
+<li><strong>优化监控开销</strong>：根据需要采样和聚合数据，避免监控开销过大。</li>
+</ol>
+<hr>
+<h3 id="推荐文档与资源"><a href="#推荐文档与资源" class="headerlink" title="推荐文档与资源"></a>推荐文档与资源</h3><ol>
+<li><p><strong>Kubernetes 官方文档</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics/">Metrics for Kubernetes Components</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/cluster-administration/monitoring/">Monitoring Architecture</a></li>
+</ul>
+</li>
+<li><p><strong>Prometheus 官方文档</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://prometheus.io/docs/">Prometheus Documentation</a></li>
+</ul>
+</li>
+<li><p><strong>社区工具</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/prometheus-operator/kube-prometheus">Kube-prometheus-stack</a><br>一个推荐的 Prometheus Operator 部署方案。</li>
+</ul>
+</li>
+<li><p><strong>博客与案例</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cncf.io/">CNCF Metrics Best Practices</a><br>关于监控和指标的实践指导。</li>
+</ul>
+</li>
+</ol>
 
     </div>
 
@@ -450,13 +348,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/10/18/CA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6/" rel="prev" title="CA签发证书">
-      <i class="fa fa-chevron-left"></i> CA签发证书
+    <a href="/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" rel="prev" title="k8s event controller工作原理">
+      <i class="fa fa-chevron-left"></i> k8s event controller工作原理
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/10/21/nmap%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/" rel="next" title="nmap常用命令解析">
-      nmap常用命令解析 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -515,6 +410,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-Metrics-%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">关于 Metrics 的常用命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes-Metrics-%E7%9A%84%E6%95%B4%E4%BD%93%E7%9F%A5%E8%AF%86%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes Metrics 的整体知识架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%95%B0%E6%8D%AE%E6%9D%A5%E6%BA%90"><span class="nav-number">2.1.</span> <span class="nav-text">1. 数据来源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7"><span class="nav-number">2.2.</span> <span class="nav-text">2. 相关工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">2.3.</span> <span class="nav-text">3. 最佳实践</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E6%96%87%E6%A1%A3%E4%B8%8E%E8%B5%84%E6%BA%90"><span class="nav-number">3.</span> <span class="nav-text">推荐文档与资源</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

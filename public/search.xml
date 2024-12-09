@@ -2706,4 +2706,88 @@ validate</p>
 <p>通过事件驱动机制，Kubernetes 提供了强大的异步处理能力和可观察性，能够支撑复杂的分布式系统操作逻辑。自定义的 CRD Controller 充分利用这一机制，可以实现动态、灵活的资源管理和协调。</p>
 ]]></content>
   </entry>
+  <entry>
+    <title>metrics的常用命令</title>
+    <url>/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<h3 id="关于-Metrics-的常用命令"><a href="#关于-Metrics-的常用命令" class="headerlink" title="关于 Metrics 的常用命令"></a>关于 Metrics 的常用命令</h3><ol>
+<li><p><strong>查看 Kubelet 的指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。</li>
+</ul>
+</li>
+<li><p><strong>查看节点的 cAdvisor 指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/api/v1/nodes/&lt;nodeName&gt;/proxy/metrics/cadvisor&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>获取容器级别的详细性能指标。</li>
+</ul>
+</li>
+<li><p><strong>查看 API Server 的指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span> | grep apiserver</span><br></pre></td></tr></table></figure>
+<ul>
+<li>返回 API Server 的性能指标。</li>
+</ul>
+</li>
+<li><p><strong>查看 Controller Manager 的指标</strong>：<br>在 Controller Manager 所在的节点运行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://localhost:10252/metrics</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看 Scheduler 的指标</strong>：<br>在 Scheduler 所在的节点运行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://localhost:10251/metrics</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看 Metrics Server 的 API</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/nodes&quot;</span></span><br></pre></td></tr></table></figure>
+<p>或查看 Pod 的指标：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/pods&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Prometheus 拉取指标</strong>：<br>如果集群中部署了 Prometheus，可以直接通过其 UI 或 API 获取指标，使用 PromQL 查询资源利用率。</p>
+</li>
+</ol>
+<hr>
+<h3 id="Kubernetes-Metrics-的整体知识架构"><a href="#Kubernetes-Metrics-的整体知识架构" class="headerlink" title="Kubernetes Metrics 的整体知识架构"></a>Kubernetes Metrics 的整体知识架构</h3><h4 id="1-数据来源"><a href="#1-数据来源" class="headerlink" title="1. 数据来源"></a><strong>1. 数据来源</strong></h4><ul>
+<li><strong>Kubelet cAdvisor</strong>：提供节点和容器的资源使用数据。</li>
+<li><strong>Metrics Server</strong>：聚合来自 Kubelet 的指标，用于 Horizontal Pod Autoscaler（HPA）等。</li>
+<li><strong>Prometheus</strong>：一个全面的监控解决方案，用于存储和查询集群中所有相关的指标数据。</li>
+<li><strong>API Server 和 Controller 指标</strong>：暴露组件性能。</li>
+</ul>
+<h4 id="2-相关工具"><a href="#2-相关工具" class="headerlink" title="2. 相关工具"></a><strong>2. 相关工具</strong></h4><ul>
+<li><strong>kubectl top</strong>：快速查看节点和 Pod 的资源使用：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl top nodes</span><br><span class="line">kubectl top pods --namespace=&lt;namespace&gt;</span><br></pre></td></tr></table></figure></li>
+<li><strong>Prometheus&#x2F;Grafana</strong>：用于可视化和分析。</li>
+<li><strong>Custom Metrics Adapter</strong>：支持自定义指标。</li>
+</ul>
+<h4 id="3-最佳实践"><a href="#3-最佳实践" class="headerlink" title="3. 最佳实践"></a><strong>3. 最佳实践</strong></h4><ol>
+<li><strong>启用 Metrics Server</strong>：用于 HPA 和基本资源监控。</li>
+<li><strong>使用 Prometheus</strong>：集中化收集和存储指标。</li>
+<li><strong>建立告警系统</strong>：通过 Alertmanager 或其他工具设置告警。</li>
+<li><strong>分析指标覆盖范围</strong>：确保所有重要组件和工作负载都有相关指标暴露。</li>
+<li><strong>优化监控开销</strong>：根据需要采样和聚合数据，避免监控开销过大。</li>
+</ol>
+<hr>
+<h3 id="推荐文档与资源"><a href="#推荐文档与资源" class="headerlink" title="推荐文档与资源"></a>推荐文档与资源</h3><ol>
+<li><p><strong>Kubernetes 官方文档</strong>：</p>
+<ul>
+<li><a href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics/">Metrics for Kubernetes Components</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/cluster-administration/monitoring/">Monitoring Architecture</a></li>
+</ul>
+</li>
+<li><p><strong>Prometheus 官方文档</strong>：</p>
+<ul>
+<li><a href="https://prometheus.io/docs/">Prometheus Documentation</a></li>
+</ul>
+</li>
+<li><p><strong>社区工具</strong>：</p>
+<ul>
+<li><a href="https://github.com/prometheus-operator/kube-prometheus">Kube-prometheus-stack</a><br>一个推荐的 Prometheus Operator 部署方案。</li>
+</ul>
+</li>
+<li><p><strong>博客与案例</strong>：</p>
+<ul>
+<li><a href="https://www.cncf.io/">CNCF Metrics Best Practices</a><br>关于监控和指标的实践指导。</li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
 </search>
