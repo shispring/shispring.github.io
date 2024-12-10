@@ -20,19 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="Kubernetes 相关 API 包介绍1. k8s.io&#x2F;apimachinery&#x2F;pkg&#x2F;apis&#x2F;meta&#x2F;v1 功能：提供处理 Kubernetes 元数据的类型和函数。 常用场景： 创建、更新、删除 Kubernetes 资源时所需的元数据类型（如 ObjectMeta）。 时间戳、Label 选择器等辅助类型。    2. k8s.i">
+  <meta name="description" content="编辑.vimrc12345678910111213141516171819202122232425262728293031323334353637383940414243cat &gt; .vimrc  &lt;&lt; EOFset nocompatible          &quot; 禁用与 Vi 的兼容模式set encoding&#x3D;utf-8        &quot; 设置编码为 UT">
 <meta property="og:type" content="article">
-<meta property="og:title" content="k8s operator 开发事项">
-<meta property="og:url" content="https://shispring.github.io/2024/10/15/k8s-operator-%E5%BC%80%E5%8F%91%E4%BA%8B%E9%A1%B9/index.html">
+<meta property="og:title" content="vim基础配置">
+<meta property="og:url" content="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Kubernetes 相关 API 包介绍1. k8s.io&#x2F;apimachinery&#x2F;pkg&#x2F;apis&#x2F;meta&#x2F;v1 功能：提供处理 Kubernetes 元数据的类型和函数。 常用场景： 创建、更新、删除 Kubernetes 资源时所需的元数据类型（如 ObjectMeta）。 时间戳、Label 选择器等辅助类型。    2. k8s.i">
+<meta property="og:description" content="编辑.vimrc12345678910111213141516171819202122232425262728293031323334353637383940414243cat &gt; .vimrc  &lt;&lt; EOFset nocompatible          &quot; 禁用与 Vi 的兼容模式set encoding&#x3D;utf-8        &quot; 设置编码为 UT">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-10-15T07:44:40.000Z">
-<meta property="article:modified_time" content="2024-10-15T07:45:45.545Z">
+<meta property="article:published_time" content="2024-12-10T08:49:02.000Z">
+<meta property="article:modified_time" content="2024-12-10T08:50:21.334Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2024/10/15/k8s-operator-%E5%BC%80%E5%8F%91%E4%BA%8B%E9%A1%B9/">
+<link rel="canonical" href="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/">
 
 
 <script id="page-configurations">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>k8s operator 开发事项 | Hexo</title>
+  <title>vim基础配置 | Hexo</title>
   
 
 
@@ -189,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/15/k8s-operator-%E5%BC%80%E5%8F%91%E4%BA%8B%E9%A1%B9/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -202,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          k8s operator 开发事项
+          vim基础配置
         </h1>
 
         <div class="post-meta">
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-10-15 15:44:40 / 修改时间：15:45:45" itemprop="dateCreated datePublished" datetime="2024-10-15T15:44:40+08:00">2024-10-15</time>
+              <time title="创建时间：2024-12-10 16:49:02 / 修改时间：16:50:21" itemprop="dateCreated datePublished" datetime="2024-12-10T16:49:02+08:00">2024-12-10</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -221,7 +221,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
                 </span>
             </span>
 
@@ -238,7 +238,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.5k</span>
+              <span>1.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -257,99 +257,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="Kubernetes-相关-API-包介绍"><a href="#Kubernetes-相关-API-包介绍" class="headerlink" title="Kubernetes 相关 API 包介绍"></a><strong>Kubernetes 相关 API 包介绍</strong></h2><h3 id="1-k8s-io-apimachinery-pkg-apis-meta-v1"><a href="#1-k8s-io-apimachinery-pkg-apis-meta-v1" class="headerlink" title="1. k8s.io&#x2F;apimachinery&#x2F;pkg&#x2F;apis&#x2F;meta&#x2F;v1"></a>1. <strong>k8s.io&#x2F;apimachinery&#x2F;pkg&#x2F;apis&#x2F;meta&#x2F;v1</strong></h3><ul>
-<li><strong>功能</strong>：提供处理 Kubernetes 元数据的类型和函数。</li>
-<li><strong>常用场景</strong>：<ul>
-<li>创建、更新、删除 Kubernetes 资源时所需的元数据类型（如 <code>ObjectMeta</code>）。</li>
-<li>时间戳、Label 选择器等辅助类型。</li>
-</ul>
-</li>
-</ul>
-<h3 id="2-k8s-io-api"><a href="#2-k8s-io-api" class="headerlink" title="2. k8s.io&#x2F;api"></a>2. <strong>k8s.io&#x2F;api</strong></h3><ul>
-<li><strong>用途</strong>：定义 Kubernetes 各个 API 资源的 Go 语言结构体，按 API 组分类。</li>
-<li><strong>关键模块</strong>：<ul>
-<li><strong>core&#x2F;v1</strong>：核心资源（Pods、Services、ConfigMaps、Secrets）。</li>
-<li><strong>apps&#x2F;v1</strong>：管理工作负载（Deployments、StatefulSets、DaemonSets）。</li>
-<li><strong>batch&#x2F;v1</strong>：任务调度相关资源（Jobs、CronJobs）。</li>
-<li><strong>networking&#x2F;v1</strong>：网络资源（Ingress、NetworkPolicy）。</li>
-<li><strong>autoscaling&#x2F;v1、v2</strong>：自动扩缩容（HorizontalPodAutoscaler）。</li>
-<li><strong>rbac&#x2F;v1</strong>：访问控制（Role、ClusterRole、RoleBinding）。</li>
-</ul>
-</li>
-</ul>
-<h3 id="3-k8s-io-client-go"><a href="#3-k8s-io-client-go" class="headerlink" title="3. k8s.io&#x2F;client-go"></a>3. <strong>k8s.io&#x2F;client-go</strong></h3><h4 id="k8s-io-client-go-kubernetes"><a href="#k8s-io-client-go-kubernetes" class="headerlink" title="k8s.io&#x2F;client-go&#x2F;kubernetes"></a><strong>k8s.io&#x2F;client-go&#x2F;kubernetes</strong></h4><ul>
-<li><strong>功能</strong>：提供便捷的 API 接口用于管理和操作 Kubernetes 资源。<ul>
-<li>封装与 Kubernetes API 的交互，支持资源 CRUD 操作。</li>
-<li>支持身份认证和上下文管理。</li>
-<li>提供事件、日志和资源监控支持。</li>
-</ul>
-</li>
-</ul>
-<h4 id="k8s-io-client-go-tools"><a href="#k8s-io-client-go-tools" class="headerlink" title="k8s.io&#x2F;client-go&#x2F;tools"></a><strong>k8s.io&#x2F;client-go&#x2F;tools</strong></h4><ul>
-<li><strong>工具包</strong>：简化开发的辅助工具。<ul>
-<li><strong>cache</strong>：Informer 缓存机制，提高 API 性能。</li>
-<li><strong>clientcmd</strong>：解析 kubeconfig 文件，支持多集群配置。</li>
-<li><strong>record</strong>：记录事件到 Kubernetes 系统。</li>
-<li><strong>leaderelection</strong>：实现分布式系统中的领导选举。</li>
-</ul>
-</li>
-</ul>
-<h4 id="k8s-io-client-go-util"><a href="#k8s-io-client-go-util" class="headerlink" title="k8s.io&#x2F;client-go&#x2F;util"></a><strong>k8s.io&#x2F;client-go&#x2F;util</strong></h4><ul>
-<li><strong>实用工具</strong>：<ul>
-<li><strong>retry</strong>：实现指数退避的重试机制，处理临时错误。</li>
-<li><strong>wait</strong>：等待某个条件满足的机制。</li>
-<li><strong>homedir</strong>：获取用户主目录的路径，方便查找 kubeconfig。</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h2 id="Kubernetes-Operator-开发最佳实践"><a href="#Kubernetes-Operator-开发最佳实践" class="headerlink" title="Kubernetes Operator 开发最佳实践"></a><strong>Kubernetes Operator 开发最佳实践</strong></h2><h3 id="1-使用-Informers-和-Listers"><a href="#1-使用-Informers-和-Listers" class="headerlink" title="1. 使用 Informers 和 Listers"></a>1. <strong>使用 Informers 和 Listers</strong></h3><ul>
-<li><strong>原因</strong>：减少与 API 服务器的直接交互，避免请求限额问题。</li>
-<li><strong>做法</strong>：使用 Informers 缓存资源状态，提升性能。</li>
-</ul>
-<h3 id="2-实现幂等的-Reconcile-方法"><a href="#2-实现幂等的-Reconcile-方法" class="headerlink" title="2. 实现幂等的 Reconcile 方法"></a>2. <strong>实现幂等的 Reconcile 方法</strong></h3><ul>
-<li><strong>原因</strong>：Reconcile 方法可能被多次调用，确保其幂等性避免状态不一致。</li>
-<li><strong>实践</strong>：<ul>
-<li>获取当前资源状态，与期望状态对比并更新。</li>
-<li>避免在 Reconcile 中执行随机任务或不可重复操作。</li>
-</ul>
-</li>
-</ul>
-<h3 id="3-错误处理和重试机制"><a href="#3-错误处理和重试机制" class="headerlink" title="3. 错误处理和重试机制"></a>3. <strong>错误处理和重试机制</strong></h3><ul>
-<li><strong>原因</strong>：应对 API 服务器不可用或资源冲突。</li>
-<li><strong>做法</strong>：<ul>
-<li>使用 <code>retry.RetryOnConflict</code> 处理资源冲突。</li>
-<li>记录不可恢复的错误，触发告警或采取补救措施。</li>
-</ul>
-</li>
-</ul>
-<h3 id="4-使用-Finalizers-进行资源清理"><a href="#4-使用-Finalizers-进行资源清理" class="headerlink" title="4. 使用 Finalizers 进行资源清理"></a>4. <strong>使用 Finalizers 进行资源清理</strong></h3><ul>
-<li><strong>作用</strong>：确保删除自定义资源前完成必要的清理（如删除外部资源）。</li>
-</ul>
-<h3 id="5-遵循最小权限原则-RBAC"><a href="#5-遵循最小权限原则-RBAC" class="headerlink" title="5. 遵循最小权限原则 (RBAC)"></a>5. <strong>遵循最小权限原则 (RBAC)</strong></h3><ul>
-<li><strong>原因</strong>：减少安全风险，避免权限滥用。</li>
-<li><strong>做法</strong>：<ul>
-<li>仅授予必要的权限。</li>
-<li>定期审查 RBAC 配置。</li>
-</ul>
-</li>
-</ul>
-<h3 id="6-使用-Context-管理请求"><a href="#6-使用-Context-管理请求" class="headerlink" title="6. 使用 Context 管理请求"></a>6. <strong>使用 Context 管理请求</strong></h3><ul>
-<li><strong>原因</strong>：确保请求超时和取消逻辑的一致性。</li>
-</ul>
-<h3 id="7-日志记录与监控"><a href="#7-日志记录与监控" class="headerlink" title="7. 日志记录与监控"></a>7. <strong>日志记录与监控</strong></h3><ul>
-<li><strong>做法</strong>：<ul>
-<li>使用结构化日志（如 <code>logr</code>）。</li>
-<li>集成 Prometheus 暴露监控指标。</li>
-</ul>
-</li>
-</ul>
-<h3 id="8-全面的测试覆盖"><a href="#8-全面的测试覆盖" class="headerlink" title="8. 全面的测试覆盖"></a>8. <strong>全面的测试覆盖</strong></h3><ul>
-<li><strong>单元测试</strong>：测试 Reconcile 的逻辑和处理流程。</li>
-<li><strong>集成测试</strong>：使用 <code>envtest</code> 模拟 Kubernetes 环境。</li>
-<li><strong>端到端测试</strong>：在实际集群上验证控制器行为。</li>
-</ul>
-<hr>
+        <h2 id="编辑-vimrc"><a href="#编辑-vimrc" class="headerlink" title="编辑.vimrc"></a>编辑.vimrc</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; .vimrc  &lt;&lt; EOF</span><br><span class="line"></span><br><span class="line">set nocompatible          &quot; 禁用与 Vi 的兼容模式</span><br><span class="line">set encoding=utf-8        &quot; 设置编码为 UTF-8</span><br><span class="line">set fileencodings=utf-8,gbk,iso-2022-jp,euc-jp,latin1 &quot; 文件编码自动检测</span><br><span class="line">set ruler                 &quot; 显示光标位置</span><br><span class="line"></span><br><span class="line">&quot; 自适应窗口大小</span><br><span class="line">autocmd VimEnter * let &amp;columns=system(&#x27;tput cols&#x27;) | let &amp;lines=system(&#x27;tput lines&#x27;)</span><br><span class="line">set display=lastline</span><br><span class="line"></span><br><span class="line">&quot; 代码编辑</span><br><span class="line">syntax on                 &quot; 启用语法高亮</span><br><span class="line">set autochdir             &quot; 自动切换到当前文件的目录</span><br><span class="line">set wildmenu              &quot; 增强命令补全菜单</span><br><span class="line">set wildmode=list:longest &quot; 补全时显示所有匹配项</span><br><span class="line">set foldmethod=indent     &quot; 根据缩进自动折叠代码</span><br><span class="line">set foldlevel=99          &quot; 默认展开所有代码</span><br><span class="line">set completeopt=menu,menuone,noselect &quot; 优化补全菜单</span><br><span class="line"></span><br><span class="line">&quot; 文本缩进</span><br><span class="line">set tabstop=4             &quot; 设置 Tab 长度为 4 个空格</span><br><span class="line">set shiftwidth=4          &quot; 自动缩进宽度为 4</span><br><span class="line">set expandtab             &quot; 用空格代替 Tab</span><br><span class="line">set smartindent           &quot; 智能缩进</span><br><span class="line">set autoindent            &quot; 自动继承上一行的缩进</span><br><span class="line"></span><br><span class="line">&quot; 显示相关</span><br><span class="line">set wrap                  &quot; 自动换行</span><br><span class="line">set linebreak             &quot; 单词边界处换行</span><br><span class="line">set showbreak=⮡          &quot; 换行提示符</span><br><span class="line"></span><br><span class="line">&quot; 搜索相关</span><br><span class="line">set hlsearch              &quot; 搜索高亮</span><br><span class="line">set incsearch             &quot; 边输入边搜索</span><br><span class="line">set ignorecase            &quot; 搜索忽略大小写</span><br><span class="line">set smartcase             &quot; 如果搜索中包含大写字母，则区分大小写</span><br><span class="line">set wrapscan              &quot; 搜索到文件结尾后从头继续</span><br><span class="line"></span><br><span class="line">&quot; 快捷键映射</span><br><span class="line">nnoremap &lt;Space&gt; :nohlsearch&lt;CR&gt; &quot; 空格键清除搜索高亮</span><br><span class="line"></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -365,13 +273,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/10/14/Pod%E7%8A%B6%E6%80%81%E5%8F%8A%E5%8E%9F%E5%9B%A0/" rel="prev" title="Pod状态及原因">
-      <i class="fa fa-chevron-left"></i> Pod状态及原因
+    <a href="/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" rel="prev" title="metrics的常用命令">
+      <i class="fa fa-chevron-left"></i> metrics的常用命令
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/10/16/ingress-nginx%E5%BC%80%E5%90%AF%E6%97%A7%E7%89%88%E6%9C%ACTLS/" rel="next" title="ingress-nginx开启旧版本TLS">
-      ingress-nginx开启旧版本TLS <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -430,7 +335,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kubernetes-%E7%9B%B8%E5%85%B3-API-%E5%8C%85%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes 相关 API 包介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-k8s-io-apimachinery-pkg-apis-meta-v1"><span class="nav-number">1.1.</span> <span class="nav-text">1. k8s.io&#x2F;apimachinery&#x2F;pkg&#x2F;apis&#x2F;meta&#x2F;v1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-k8s-io-api"><span class="nav-number">1.2.</span> <span class="nav-text">2. k8s.io&#x2F;api</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-k8s-io-client-go"><span class="nav-number">1.3.</span> <span class="nav-text">3. k8s.io&#x2F;client-go</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#k8s-io-client-go-kubernetes"><span class="nav-number">1.3.1.</span> <span class="nav-text">k8s.io&#x2F;client-go&#x2F;kubernetes</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#k8s-io-client-go-tools"><span class="nav-number">1.3.2.</span> <span class="nav-text">k8s.io&#x2F;client-go&#x2F;tools</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#k8s-io-client-go-util"><span class="nav-number">1.3.3.</span> <span class="nav-text">k8s.io&#x2F;client-go&#x2F;util</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kubernetes-Operator-%E5%BC%80%E5%8F%91%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes Operator 开发最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BD%BF%E7%94%A8-Informers-%E5%92%8C-Listers"><span class="nav-number">2.1.</span> <span class="nav-text">1. 使用 Informers 和 Listers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%9E%E7%8E%B0%E5%B9%82%E7%AD%89%E7%9A%84-Reconcile-%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">2. 实现幂等的 Reconcile 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E5%92%8C%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6"><span class="nav-number">2.3.</span> <span class="nav-text">3. 错误处理和重试机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BD%BF%E7%94%A8-Finalizers-%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E6%B8%85%E7%90%86"><span class="nav-number">2.4.</span> <span class="nav-text">4. 使用 Finalizers 进行资源清理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E9%81%B5%E5%BE%AA%E6%9C%80%E5%B0%8F%E6%9D%83%E9%99%90%E5%8E%9F%E5%88%99-RBAC"><span class="nav-number">2.5.</span> <span class="nav-text">5. 遵循最小权限原则 (RBAC)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E4%BD%BF%E7%94%A8-Context-%E7%AE%A1%E7%90%86%E8%AF%B7%E6%B1%82"><span class="nav-number">2.6.</span> <span class="nav-text">6. 使用 Context 管理请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E6%97%A5%E5%BF%97%E8%AE%B0%E5%BD%95%E4%B8%8E%E7%9B%91%E6%8E%A7"><span class="nav-number">2.7.</span> <span class="nav-text">7. 日志记录与监控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E5%85%A8%E9%9D%A2%E7%9A%84%E6%B5%8B%E8%AF%95%E8%A6%86%E7%9B%96"><span class="nav-number">2.8.</span> <span class="nav-text">8. 全面的测试覆盖</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%BE%91-vimrc"><span class="nav-number">1.</span> <span class="nav-text">编辑.vimrc</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
