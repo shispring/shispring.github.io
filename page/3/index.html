@@ -184,6 +184,122 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/04/%E7%81%AB%E7%84%B0%E5%9B%BE/" class="post-title-link" itemprop="url">火焰图</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-04 10:40:05 / 修改时间：10:44:48" itemprop="dateCreated datePublished" datetime="2024-11-04T10:40:05+08:00">2024-11-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Linux 系统上可以通过 <code>perf</code> 工具结合 <code>FlameGraph</code> 进行程序性能分析，特别适用于 CPU 密集型应用。</p>
+<h3 id="1-准备工具"><a href="#1-准备工具" class="headerlink" title="1. 准备工具"></a>1. 准备工具</h3><p>首先，确保系统安装了 <code>perf</code> 和 <code>FlameGraph</code>：</p>
+<h3 id="安装-perf"><a href="#安装-perf" class="headerlink" title="安装 perf"></a>安装 <code>perf</code></h3><p>对于大多数 Linux 发行版，可以通过包管理器安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过系统包管理器安装 Perl 核心模块：</span></span><br><span class="line"><span class="built_in">sudo</span> yum install -y perf  perf-core </span><br></pre></td></tr></table></figure>
+
+<h3 id="获取-FlameGraph"><a href="#获取-FlameGraph" class="headerlink" title="获取 FlameGraph"></a>获取 <code>FlameGraph</code></h3><p><code>FlameGraph</code> 是一个工具集，可以从 GitHub 上克隆：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br></pre></td></tr></table></figure>
+
+<p>下载完成后，进入 <code>FlameGraph</code> 目录，确保其中有 <code>stackcollapse-perf.pl</code> 和 <code>flamegraph.pl</code> 等脚本。</p>
+<h3 id="2-使用-perf-收集性能数据"><a href="#2-使用-perf-收集性能数据" class="headerlink" title="2. 使用 perf 收集性能数据"></a>2. 使用 <code>perf</code> 收集性能数据</h3><p>假设你想要分析一个进程的 CPU 使用情况。可以先使用 <code>top</code> 或 <code>htop</code> 来获取目标进程的 PID。</p>
+<h3 id="记录目标进程的性能数据"><a href="#记录目标进程的性能数据" class="headerlink" title="记录目标进程的性能数据"></a>记录目标进程的性能数据</h3><p>假设 PID 为 <code>1234</code>，运行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>F 99</code>：每秒采样 99 次，可根据需要调整采样频率。</li>
+<li><code>p 1234</code>：指定要分析的进程 PID。</li>
+<li><code>g</code>：记录调用栈信息。</li>
+<li><code>- sleep 30</code>：采样时间为 30 秒。</li>
+</ul>
+<p>采样完成后会生成一个 <code>perf.data</code> 文件，包含采样数据。</p>
+<h3 id="3-处理-perf-数据"><a href="#3-处理-perf-数据" class="headerlink" title="3. 处理 perf 数据"></a>3. 处理 <code>perf</code> 数据</h3><p>将 <code>perf.data</code> 转换为 FlameGraph 可以使用的堆栈信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br></pre></td></tr></table></figure>
+
+<p>这会将 <code>perf.data</code> 文件解析成 <code>out.perf</code>，便于生成火焰图。</p>
+<h3 id="4-生成火焰图"><a href="#4-生成火焰图" class="headerlink" title="4. 生成火焰图"></a>4. 生成火焰图</h3><p>在 <code>FlameGraph</code> 目录下运行以下命令：</p>
+<h3 id="折叠堆栈信息"><a href="#折叠堆栈信息" class="headerlink" title="折叠堆栈信息"></a>折叠堆栈信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成火焰图"><a href="#生成火焰图" class="headerlink" title="生成火焰图"></a>生成火焰图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+
+<p>生成的 <code>flamegraph.svg</code> 文件是一个交互式火焰图，可以通过浏览器打开查看。</p>
+<h3 id="5-分析火焰图"><a href="#5-分析火焰图" class="headerlink" title="5. 分析火焰图"></a>5. 分析火焰图</h3><p>火焰图中各个块的宽度表示 CPU 使用时间，占用时间越多，宽度越大。图层深度表示调用堆栈的深度。可以查看性能热点并根据需要进行优化。</p>
+<h3 id="总结的命令流程"><a href="#总结的命令流程" class="headerlink" title="总结的命令流程"></a>总结的命令流程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+
+<p>通过上述步骤，你可以生成并查看程序的 CPU 性能火焰图，为性能瓶颈定位和优化提供参考。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1321,269 +1437,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/" class="post-title-link" itemprop="url">OpenSSL 支持的密钥类型和格式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-10-18 14:36:12 / 修改时间：15:05:18" itemprop="dateCreated datePublished" datetime="2024-10-18T14:36:12+08:00">2024-10-18</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/openssl/" itemprop="url" rel="index"><span itemprop="name">openssl</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>OpenSSL 密钥类型与格式对比表</strong></p>
-<p><strong>1. 密钥类型对比</strong></p>
-<table>
-<thead>
-<tr>
-<th><strong>密钥类型</strong></th>
-<th><strong>算法描述</strong></th>
-<th><strong>典型应用场景</strong></th>
-<th><strong>生成命令示例</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>RSA</strong></td>
-<td>基于大整数分解，常见的非对称加密算法</td>
-<td>HTTPS、TLS&#x2F;SSL 证书、SSH、公钥加密</td>
-<td>openssl genrsa -out rsa_key.pem 2048</td>
-</tr>
-<tr>
-<td><strong>ECC</strong></td>
-<td>椭圆曲线密码学，短密钥更高效</td>
-<td>IoT、移动设备、TLS 1.3</td>
-<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
-</tr>
-<tr>
-<td><strong>DSA</strong></td>
-<td>基于离散对数的数字签名算法</td>
-<td>数字签名（DNSSEC 等）</td>
-<td>openssl dsaparam -genkey 2048 -out dsa_key.pem</td>
-</tr>
-<tr>
-<td><strong>DH</strong></td>
-<td>Diffie-Hellman 算法，用于密钥交换</td>
-<td>VPN、IPsec 加密通道</td>
-<td>openssl dhparam -out dh_key.pem 2048</td>
-</tr>
-<tr>
-<td><strong>ED25519</strong></td>
-<td>高效的椭圆曲线签名算法（无须参数生成）</td>
-<td>SSH、TLS 1.3、轻量级签名</td>
-<td>openssl genpkey -algorithm ED25519 -out ed25519_key.pem</td>
-</tr>
-<tr>
-<td><strong>X25519</strong></td>
-<td>专用于密钥交换的现代椭圆曲线算法</td>
-<td>TLS 1.3 密钥交换、ECDH</td>
-<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
-</tr>
-<tr>
-<td><strong>GOST</strong></td>
-<td>俄罗斯国家标准算法</td>
-<td>加密通信和签名（如 GOST SSL 证书）</td>
-<td>需 GOST 扩展支持</td>
-</tr>
-<tr>
-<td><strong>SM2</strong></td>
-<td>中国国家标准（基于 ECC）</td>
-<td>国密协议（如银行和政府应用）</td>
-<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
-</tr>
-</tbody></table>
-<p><strong>2. 密钥格式对比</strong></p>
-<table>
-<thead>
-<tr>
-<th><strong>格式</strong></th>
-<th><strong>描述</strong></th>
-<th><strong>典型应用场景</strong></th>
-<th><strong>加密支持</strong></th>
-<th><strong>转换命令示例</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>PEM</strong></td>
-<td>Base64 编码，文本格式，以 —–BEGIN 开头</td>
-<td>TLS&#x2F;SSL 证书、服务器私钥存储</td>
-<td>支持</td>
-<td>openssl rsa -in rsa_key.pem -out private_key.pem -outform PEM</td>
-</tr>
-<tr>
-<td><strong>DER</strong></td>
-<td>二进制格式，适合嵌入式系统</td>
-<td>嵌入式系统、低级通信传输</td>
-<td>不支持</td>
-<td>openssl rsa -in rsa_key.pem -out private_key.der -outform DER</td>
-</tr>
-<tr>
-<td><strong>PKCS#8</strong></td>
-<td>私钥标准格式，支持多种算法（如 RSA、ECC）</td>
-<td>服务器密钥存储、跨平台交换</td>
-<td>支持</td>
-<td>openssl pkcs8 -topk8 -in rsa_key.pem -out pkcs8_key.pem</td>
-</tr>
-<tr>
-<td><strong>PKCS#12</strong></td>
-<td>包含证书链和私钥的打包格式（.p12&#x2F;.pfx）</td>
-<td>客户端证书、VPN、S&#x2F;MIME</td>
-<td>支持</td>
-<td>openssl pkcs12 -export -out cert.p12 -inkey ec_key.pem -in cert.pem</td>
-</tr>
-<tr>
-<td><strong>OpenSSH</strong></td>
-<td>专用于 SSH 的密钥格式</td>
-<td>SSH 登录和密钥交换</td>
-<td>支持</td>
-<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
-</tr>
-<tr>
-<td><strong>JWK</strong></td>
-<td>JSON Web Key，用于 Web 应用密钥存储和传输</td>
-<td>OAuth2、JWT 加密</td>
-<td>支持</td>
-<td>使用专用库生成</td>
-</tr>
-</tbody></table>
-<p><strong>3. 应用场景推荐</strong></p>
-<table>
-<thead>
-<tr>
-<th><strong>场景</strong></th>
-<th><strong>推荐密钥类型</strong></th>
-<th><strong>推荐格式</strong></th>
-<th><strong>命令示例</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Web 服务器（Nginx&#x2F;Apache）</strong></td>
-<td>RSA 或 ECC</td>
-<td>PEM、PKCS#8</td>
-<td>openssl pkcs8 -topk8 -in rsa_key.pem -out server_key.pem</td>
-</tr>
-<tr>
-<td><strong>IoT 设备和移动端</strong></td>
-<td>ECC（prime256v1）</td>
-<td>PKCS#8</td>
-<td>openssl ecparam -genkey -name prime256v1 -out ec_key.pem</td>
-</tr>
-<tr>
-<td><strong>VPN 客户端证书</strong></td>
-<td>RSA 或 ECC</td>
-<td>PKCS#12</td>
-<td>openssl pkcs12 -export -out vpn_cert.p12 -inkey ec_key.pem -in cert.pem</td>
-</tr>
-<tr>
-<td><strong>SSH 登录</strong></td>
-<td>ED25519 或 RSA</td>
-<td>OpenSSH</td>
-<td>ssh-keygen -t ed25519 -f ~&#x2F;.ssh&#x2F;id_ed25519</td>
-</tr>
-<tr>
-<td><strong>TLS 1.3 密钥交换</strong></td>
-<td>X25519</td>
-<td>PKCS#8</td>
-<td>openssl genpkey -algorithm X25519 -out x25519_key.pem</td>
-</tr>
-<tr>
-<td><strong>国密应用（SM2 签名）</strong></td>
-<td>SM2</td>
-<td>PKCS#8</td>
-<td>openssl genpkey -algorithm SM2 -out sm2_key.pem</td>
-</tr>
-</tbody></table>
-<p><strong>4. 实现案例</strong></p>
-<p><strong>1. 生成 RSA 密钥并转换为 PKCS#8 格式</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out rsa_key.pem 2048</span><br><span class="line"></span><br><span class="line">openssl pkcs8 -topk8 -<span class="keyword">in</span> rsa_key.pem -out rsa_key_pkcs8.pem -nocrypt</span><br></pre></td></tr></table></figure>
-
-<p><strong>2. 生成 ECC 私钥并打包为 PKCS#12</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">openssl ecparam -genkey -name prime256v1 -out ec_key.pem</span><br><span class="line"></span><br><span class="line">openssl req -new -x509 -key ec_key.pem -out ec_cert.pem -days 365</span><br><span class="line"></span><br><span class="line">openssl pkcs12 -<span class="built_in">export</span> -out ec_cert.p12 -inkey ec_key.pem -<span class="keyword">in</span> ec_cert.pem</span><br></pre></td></tr></table></figure>
-
-<p><strong>3. 生成 ED25519 密钥用于 SSH</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519</span><br></pre></td></tr></table></figure>
-
-<p><strong>5. 总结与建议</strong></p>
-<p>•	<strong>RSA</strong>：经典且兼容性好，适合 Web 服务器和通用加密应用。</p>
-<p>•	<strong>ECC</strong>：更高效、密钥短，适用于 IoT 和现代 TLS。</p>
-<p>•	<strong>ED25519&#x2F;X25519</strong>：轻量级和高性能，推荐用于 SSH 和 TLS 1.3。</p>
-<p>•	<strong>SM2&#x2F;GOST</strong>：满足特定国家或行业的加密标准。</p>
-<p>•	<strong>PKCS#8 与 PKCS#12</strong>：PKCS#8 适合服务器端私钥存储，PKCS#12 常用于客户端证书传输。</p>
-<p>选择合适的密钥类型与格式可以在 <strong>安全性、性能、兼容性</strong> 之间取得良好的平衡。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1651,7 +1508,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-count">61</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1704,12 +1561,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">107k</span>
+    <span title="站点总字数">109k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:38</span>
+    <span title="站点阅读时长">1:39</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
