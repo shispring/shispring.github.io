@@ -184,6 +184,154 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">magick工具使用</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-01 22:30:35 / 修改时间：22:52:18" itemprop="dateCreated datePublished" datetime="2024-11-01T22:30:35+08:00">2024-11-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><code>ImageMagick</code> 是一个强大的工具，用于图像操作和格式转换，支持各种操作如裁剪、旋转、调整大小、格式转换等。下面是一些常用的 <code>magick</code> 命令，以便你快速掌握图片处理及PDF操作技巧。以下命令基于 <code>magick</code> 7.1.1-39 版本：</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">brew install imagemagick</span><br><span class="line"></span><br><span class="line">magick -version</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-图像格式转换"><a href="#1-图像格式转换" class="headerlink" title="1. 图像格式转换"></a>1. 图像格式转换</h3><p>将图像从一种格式转换为另一种格式，适用于支持的多种格式（如 PNG、JPEG、GIF、TIFF 等）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg output.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-调整图像大小"><a href="#2-调整图像大小" class="headerlink" title="2. 调整图像大小"></a>2. 调整图像大小</h3><p>按指定比例或像素大小调整图像大小。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -resize 800x600 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-裁剪图像"><a href="#3-裁剪图像" class="headerlink" title="3. 裁剪图像"></a>3. 裁剪图像</h3><p>裁剪图像为指定大小的区域。例如，裁剪出左上角 200x200 的区域。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -crop 200x200+0+0 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-旋转图像"><a href="#4-旋转图像" class="headerlink" title="4. 旋转图像"></a>4. 旋转图像</h3><p>顺时针旋转图像 90 度。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -rotate 90 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-添加水印"><a href="#5-添加水印" class="headerlink" title="5. 添加水印"></a>5. 添加水印</h3><p>在图像上添加水印文字（位置在右下角）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -gravity southeast -pointsize 24 -fill white -annotate +10+10 <span class="string">&#x27;Watermark&#x27;</span> output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-调整图像质量"><a href="#6-调整图像质量" class="headerlink" title="6. 调整图像质量"></a>6. 调整图像质量</h3><p>设置图像质量，适用于 JPEG 格式的图片压缩。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -quality 85 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-合并图像（拼接）"><a href="#7-合并图像（拼接）" class="headerlink" title="7. 合并图像（拼接）"></a>7. 合并图像（拼接）</h3><p>水平或垂直拼接多张图像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">magick +append image1.jpg image2.jpg horizontal_output.jpg  <span class="comment"># 水平拼接</span></span><br><span class="line">magick -append image1.jpg image2.jpg vertical_output.jpg    <span class="comment"># 垂直拼接</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="8-添加边框"><a href="#8-添加边框" class="headerlink" title="8. 添加边框"></a>8. 添加边框</h3><p>为图像添加边框。例如，添加一个 5 像素的红色边框。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -bordercolor red -border 5x5 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-转换-PDF-为图像"><a href="#9-转换-PDF-为图像" class="headerlink" title="9. 转换 PDF 为图像"></a>9. 转换 PDF 为图像</h3><p>将 PDF 页面转换为 PNG 格式，指定分辨率（如 300 dpi）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick -density 300 input.pdf output.png</span><br></pre></td></tr></table></figure>
+<p>如果需要将 PDF 中的每一页保存为单独的 PNG 图像，可以使用如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick -density 300 input.pdf page_%03d.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-转换图像为-PDF"><a href="#10-转换图像为-PDF" class="headerlink" title="10. 转换图像为 PDF"></a>10. 转换图像为 PDF</h3><p>将多张图像合并成一个 PDF 文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">magick image1.jpg image2.jpg output.pdf</span><br><span class="line"></span><br><span class="line"><span class="comment">#多个图片转换</span></span><br><span class="line"><span class="built_in">ls</span> -l | awk <span class="string">&#x27;NR &gt; 1 &#123;print $NF&#125;&#x27;</span> | <span class="built_in">tr</span> <span class="string">&quot;\n&quot;</span> <span class="string">&#x27; &#x27;</span></span><br><span class="line"></span><br><span class="line">magick `<span class="built_in">ls</span> -l | grep jpg | awk <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span> | <span class="built_in">tr</span> <span class="string">&quot;\n&quot;</span> <span class="string">&#x27; &#x27;</span>` output.pdf</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-批量处理文件"><a href="#11-批量处理文件" class="headerlink" title="11. 批量处理文件"></a>11. 批量处理文件</h3><p>一次性对多个文件进行操作，调整大小为 50%：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick mogrify -resize 50% *.jpg</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：<code>mogrify</code> 会直接覆盖原始文件，建议先备份或在不同目录操作。</p>
+</blockquote>
+<h3 id="12-图像格式优化（减小文件大小）"><a href="#12-图像格式优化（减小文件大小）" class="headerlink" title="12. 图像格式优化（减小文件大小）"></a>12. 图像格式优化（减小文件大小）</h3><p>通过移除元数据和设置压缩等级优化图像大小。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -strip -quality 85 output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="13-应用模糊效果"><a href="#13-应用模糊效果" class="headerlink" title="13. 应用模糊效果"></a>13. 应用模糊效果</h3><p>对图像应用模糊效果，可以控制模糊程度。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -blur 0x8 output.jpg  <span class="comment"># 0x8 控制模糊半径和 sigma 值</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="14-翻转和镜像"><a href="#14-翻转和镜像" class="headerlink" title="14. 翻转和镜像"></a>14. 翻转和镜像</h3><p>上下翻转或左右镜像图像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -flip output_flip.jpg        <span class="comment"># 上下翻转</span></span><br><span class="line">magick input.jpg -flop output_flop.jpg        <span class="comment"># 左右镜像</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="15-提取图像信息"><a href="#15-提取图像信息" class="headerlink" title="15. 提取图像信息"></a>15. 提取图像信息</h3><p>查看图像的详细信息，包括尺寸、格式、色彩模式等。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick identify -verbose input.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="16-图像转灰度"><a href="#16-图像转灰度" class="headerlink" title="16. 图像转灰度"></a>16. 图像转灰度</h3><p>将彩色图像转换为灰度。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -colorspace Gray output.jpg</span><br></pre></td></tr></table></figure>
+
+<h3 id="17-添加阴影"><a href="#17-添加阴影" class="headerlink" title="17. 添加阴影"></a>17. 添加阴影</h3><p>为图像添加阴影效果。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -background black -shadow 80x3+5+5 output_with_shadow.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="18-动态GIF操作"><a href="#18-动态GIF操作" class="headerlink" title="18. 动态GIF操作"></a>18. 动态GIF操作</h3><p>创建或分解 GIF 动画。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">magick -delay 20 -loop 0 frame_*.jpg output.gif  <span class="comment"># 创建 GIF，20ms 间隔</span></span><br><span class="line">magick input.gif frame_%03d.png                   <span class="comment"># 将 GIF 分解成多帧 PNG 图像</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="19-将-PDF-分解成多张-PNG（每页一张）"><a href="#19-将-PDF-分解成多张-PNG（每页一张）" class="headerlink" title="19. 将 PDF 分解成多张 PNG（每页一张）"></a>19. 将 PDF 分解成多张 PNG（每页一张）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick -density 300 input.pdf output_page_%03d.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="20-从视频中提取帧并生成-GIF"><a href="#20-从视频中提取帧并生成-GIF" class="headerlink" title="20. 从视频中提取帧并生成 GIF"></a>20. 从视频中提取帧并生成 GIF</h3><p>将视频中的帧生成 GIF 动画。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i input.mp4 -r 10 <span class="string">&#x27;frame_%03d.png&#x27;</span>  <span class="comment"># 使用 FFmpeg 提取帧</span></span><br><span class="line">magick -delay 10 frame_*.png output.gif      <span class="comment"># 使用提取帧生成 GIF</span></span><br></pre></td></tr></table></figure>
+
+<p>这些 <code>magick</code> 用法可以满足大多数日常图片和PDF转换的需求。更多高级用法可以查阅 <a target="_blank" rel="noopener" href="https://imagemagick.org/index.php">ImageMagick 官方文档</a> 或 <code>magick</code> 的帮助页面：<code>magick -help</code>。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1432,109 +1580,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/CA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/18/CA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6/" class="post-title-link" itemprop="url">CA签发证书</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-10-18 12:40:11 / 修改时间：12:40:41" itemprop="dateCreated datePublished" datetime="2024-10-18T12:40:11+08:00">2024-10-18</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>CA（Certificate Authority），翻译过来就叫作证书颁发机构。用于实现数字证书的管理，包括证书颁发、吊销、续期等。PKI（Registration Authority ），翻译过来叫作注册机构，负责接收请求并验证实体的身份，然后指示 CA 为其颁发或撤销证书。CA和PKI的关系：PKI 是一个更大的框架或系统，而 CA 是 PKI 中的一个核心组件。</p>
-<h2 id="1、安装openSSL"><a href="#1、安装openSSL" class="headerlink" title="1、安装openSSL"></a>1、安装openSSL</h2><h2 id="2、创建目录"><a href="#2、创建目录" class="headerlink" title="2、创建目录"></a>2、创建目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /etc/pki/CA</span><br><span class="line"><span class="built_in">mkdir</span> /etc/pki/CA</span><br><span class="line"><span class="built_in">mkdir</span> /etc/pki/CA/&#123;certs,crl,newcerts,private,csr&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#certs目录：用于统一存放CA签发的证书</span></span><br><span class="line"><span class="comment">#crl目录：用于存放一个证书吊销文件，这个文件的内容记录了吊销证书的信息</span></span><br><span class="line"><span class="comment">#newcerts目录：这个目录存放的是刚创建的证书</span></span><br><span class="line"><span class="comment">#private：存放的是CA的私钥文件</span></span><br><span class="line"><span class="comment">#csr:单独给客户的证书请求文件创建了一个目录，用于保存客户端传输过来的CSR文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意这个文件初始时一定要为空，不然后期没法颁发证书</span></span><br><span class="line"><span class="built_in">touch</span>  /etc/pki/CA/index.txt</span><br><span class="line"><span class="built_in">echo</span> 01 &gt; /etc/pki/CA/serial</span><br><span class="line"></span><br><span class="line"><span class="comment">#文件说明：</span></span><br><span class="line"><span class="comment">#index.txt文件: 是OpenSSL用来跟踪哪些证书已经被签署的数据库。对于一个新的CA，index.txt应该是一个空文件，如果这个文件非空，签发证书的时候会失败。</span></span><br><span class="line"><span class="comment">#serial文件：存放颁发证书的编号的文件，每当签发新证书时，OpenSSL会读取这个文件中的值作为其序列号，并增加该值以供下次使用，所以需要给他赋初值。</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="3、编辑配置文件"><a href="#3、编辑配置文件" class="headerlink" title="3、编辑配置文件"></a>3、编辑配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过 openssl version -d 来查找OpenSSL的相关文件</span></span><br><span class="line">openssl version -d</span><br><span class="line"><span class="built_in">ls</span> /etc/pki/tls</span><br><span class="line"></span><br><span class="line"><span class="built_in">mv</span> /etc/pki/tls/openssl.cnf /etc/pki/tls/openssl.cnf.back</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>vim &#x2F;etc&#x2F;pki&#x2F;tls&#x2F;openssl.cnf</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># [ ca ]指定默认的 CA 配置区段，因为可能会存在多个 CA 配置区段，用于不同的目的或者不同的证书策略</span></span><br><span class="line">[ ca ]</span><br><span class="line"><span class="comment"># 定义默认的CA设置部分名称</span></span><br><span class="line">default_ca = CA_default</span><br><span class="line"></span><br><span class="line"><span class="comment"># [ CA_default ] 定义了关于证书颁发机构(CA)的默认设置和相关文件路径。</span></span><br><span class="line">[ CA_default ]</span><br><span class="line"><span class="comment"># 定义CA的主目录。</span></span><br><span class="line"><span class="built_in">dir</span> = /etc/pki/CA</span><br><span class="line"><span class="comment"># 已签发的证书的存储位置</span></span><br><span class="line">certs = <span class="variable">$dir</span>/certs</span><br><span class="line"><span class="comment"># 新证书的默认存放位置</span></span><br><span class="line">new_certs_dir = <span class="variable">$dir</span>/newcerts</span><br><span class="line"><span class="comment">#  用于存储证书签发信息的数据库文件的位置</span></span><br><span class="line">database = <span class="variable">$dir</span>/index.txt</span><br><span class="line"><span class="comment"># CA的证书位置</span></span><br><span class="line">certificate = <span class="variable">$dir</span>/certs/cacert.pem</span><br><span class="line"><span class="comment"># CA的私钥位置</span></span><br><span class="line">private_key = <span class="variable">$dir</span>/private/cakey.key</span><br><span class="line"><span class="comment"># 存储当前证书序列号的文件位置</span></span><br><span class="line">serial = <span class="variable">$dir</span>/serial</span><br><span class="line"><span class="comment"># 默认证书有效期</span></span><br><span class="line">default_days = 3650</span><br><span class="line"><span class="comment"># 默认使用的消息摘要算</span></span><br><span class="line">default_md = sha256</span><br><span class="line"><span class="comment"># 决定是否保留从证书请求(CSR)中传入的Distinguished Name(DN)的顺序</span></span><br><span class="line">preserve = no</span><br><span class="line">default_crl_days = 7</span><br><span class="line"></span><br><span class="line"><span class="comment"># 策略定义，确保以下部分存在</span></span><br><span class="line">policy = policy_match</span><br><span class="line"></span><br><span class="line">[ policy_match ]</span><br><span class="line">countryName            = match</span><br><span class="line">stateOrProvinceName    = optional</span><br><span class="line">organizationName       = match</span><br><span class="line">organizationalUnitName = optional</span><br><span class="line">commonName             = supplied</span><br><span class="line">emailAddress           = optional</span><br><span class="line"></span><br><span class="line"><span class="comment"># [ req ]定义了与生成证书请求文件（也称为Certificate Signing Request，简称CSR）相关的默认设置</span></span><br><span class="line">[ req ]</span><br><span class="line"><span class="comment"># 生成新私钥时使用的默认位数</span></span><br><span class="line">default_bits = 2048</span><br><span class="line"><span class="comment"># 是否在创建证书请求时提示用户输入详细信息</span></span><br><span class="line"><span class="comment"># no表示使用 openssl req 命令创建新的CSR或证书时，将不会被提示输入任何DN字段，会使用 [ dn ] 部分提供的默认值。</span></span><br><span class="line">prompt = no</span><br><span class="line"><span class="comment"># 用于证书请求的默认消息摘要算法</span></span><br><span class="line">default_md = sha256</span><br><span class="line"><span class="comment"># 告诉OpenSSL使用配置文件中的[ dn ]部分作为CSR的默认字段值</span></span><br><span class="line">distinguished_name = dn</span><br><span class="line"></span><br><span class="line"><span class="comment"># [ dn ] 定义了默认的Distinguished Name（可分辨名称）属性和它们的值</span></span><br><span class="line"><span class="comment"># C：国家 ST：省 L：市 O：通常是一个公司或机构的全名 OU：组织内部的一个特定部门或单位</span></span><br><span class="line"><span class="comment"># CN：在 SSL/TLS 证书的上下文中通常表示证书意图保护的域名emailAddress：邮箱</span></span><br><span class="line">[ dn ]</span><br><span class="line">C = CN</span><br><span class="line">ST = BeiJing</span><br><span class="line">L = BeiJing</span><br><span class="line">O = xxx</span><br><span class="line">OU = xxx docker</span><br><span class="line">emailAddress = xxx@yyy.cn</span><br><span class="line">CN = yyy.cn</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="4、自签名证书生成"><a href="#4、自签名证书生成" class="headerlink" title="4、自签名证书生成"></a>4、自签名证书生成</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#先生成私钥</span></span><br><span class="line">openssl genpkey -algorithm RSA -out /etc/pki/CA/private/cakey.key</span><br><span class="line"></span><br><span class="line"><span class="comment">#根据生成得私钥创建一个新的根证书,使用这个证书来签署其它得证书</span></span><br><span class="line">openssl req -key /etc/pki/CA/private/cakey.key -new -x509 -days 7300 -out /etc/pki/CA/certs/cacert.pem</span><br><span class="line"></span><br><span class="line">tree /etc/pki/CA</span><br></pre></td></tr></table></figure>
-
-<h2 id="5、CA颁发证书"><a href="#5、CA颁发证书" class="headerlink" title="5、CA颁发证书"></a>5、CA颁发证书</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#先创建一个目录存放相关文件</span></span><br><span class="line"><span class="built_in">cd</span> &amp;&amp; <span class="built_in">mkdir</span> tom &amp;&amp; <span class="built_in">cd</span> tom</span><br><span class="line"></span><br><span class="line"><span class="comment">#一步到位生成私钥和CSR</span></span><br><span class="line">openssl req -new -keyout tom.key -out tom_req.csr -nodes</span><br><span class="line"><span class="comment">#生成私钥的时候会要求输入一个密码，不输入的话可能会提示error，可以通过 -nodes 参数来不输入密码</span></span><br><span class="line"><span class="comment">#一步到位生成私钥和CSR，-keyout clientkey.pem 选项生成一个新的私钥，然后根据生成的私钥创建证书请求文件</span></span><br><span class="line"><span class="comment">#在CA上生成的CSR，配置文件里面指定了请求者的标识信息（如：组织、位置、国家、域名等，所以这里没有提示输出</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#拷贝到csr路径</span></span><br><span class="line"><span class="built_in">cp</span> ./tom_req.csr /etc/pki/CA/csr/</span><br><span class="line"></span><br><span class="line"><span class="comment">#CA签发证书，通过 -bath参数实现签署证书时自动确认，如果初始化CA环境的时候，index.txt这个数据库文件不为空，那么此时签署证书不会成功，也不会有任何错误提示。</span></span><br><span class="line">openssl ca -batch -<span class="keyword">in</span> /etc/pki/CA/csr/tom_req.csr -out /etc/pki/CA/certs/tom.pem</span><br><span class="line"></span><br><span class="line">tree /etc/pki/CA</span><br><span class="line">/etc/pki/CA</span><br><span class="line">├── certs</span><br><span class="line">│   ├── cacert.pem</span><br><span class="line">│   ├── tom1.pem</span><br><span class="line">│   └── tom.pem</span><br><span class="line">├── crl</span><br><span class="line">│   └── crl.pem</span><br><span class="line">├── csr</span><br><span class="line">│   └── tom_req.csr</span><br><span class="line">├── index.txt</span><br><span class="line">├── index.txt.attr</span><br><span class="line">├── index.txt.attr.old</span><br><span class="line">├── index.txt.old</span><br><span class="line">├── newcerts</span><br><span class="line">│   ├── 01.pem</span><br><span class="line">├── private</span><br><span class="line">│   └── cakey.key</span><br><span class="line">├── serial</span><br><span class="line">└── serial.old</span><br><span class="line"></span><br><span class="line"><span class="comment">#idnex.txt文件用于存储CA签发的所有证书，一行代表一个证书。</span></span><br><span class="line"><span class="comment">#该文件包含了index.txt文件的一些属性，unique_subject = yes表示在index.txt数据库中的每个主题应该是唯一的，即不允许有两个具有相同主题的证书</span></span><br><span class="line"><span class="comment">#index.txt.old存放上一个证书的数据库信息</span></span><br><span class="line"><span class="comment">#serial.old该文件存放上一个证书的编号信息</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查阅证书内容</span></span><br><span class="line">openssl req -noout -text -<span class="keyword">in</span> /etc/pki/CA/certs/tom.pem</span><br></pre></td></tr></table></figure>
-
-<h2 id="6、注销证书"><a href="#6、注销证书" class="headerlink" title="6、注销证书"></a>6、注销证书</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#吊销证书</span></span><br><span class="line">openssl ca -revoke /etc/pki/CA/certs/tom.pem</span><br><span class="line"><span class="comment">#吊销后，需要重新生成 CRL 文件：</span></span><br><span class="line">openssl ca -gencrl -out /etc/pki/CA/crl/crl.pem</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">openssl crl -<span class="keyword">in</span> /etc/pki/CA/crl/crl.pem -text -noout</span><br><span class="line"></span><br><span class="line">openssl verify -crl_check -CAfile /etc/pki/CA/certs/cacert.pem -CRLfile /etc/pki/CA/crl/crl.pem /etc/pki/CA/certs/tom.pem</span><br><span class="line"><span class="comment">#说明</span></span><br><span class="line">•	-crl_check：启用 CRL 检查。</span><br><span class="line">•	-CAfile：指定 CA 根证书。</span><br><span class="line">•	-CRLfile：指定 CRL 文件。</span><br></pre></td></tr></table></figure>
-
-<h2 id="常见后缀"><a href="#常见后缀" class="headerlink" title="常见后缀"></a>常见后缀</h2><ul>
-<li>.key：一般私钥就以 .key 结尾</li>
-<li>.pem：新生成的证书一般以 .pem 结尾。pem是 Privacy Enhanced Mail 的缩写，是一种文件格式，可以包含任何类型的证书或密钥。这种格式的文件类容是BASE64编码显示的，并在开始和结束时由”—–BEGIN…”和”—–END…”标记包围</li>
-<li>.csr：证书请求文件使用csr结尾，csr是Certificate Signing Request的缩写</li>
-<li>.crl：这是CA用于列出已被撤销的证书的文件常用的后缀，是Certificate Revocation List的缩写</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1606,14 +1651,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-count">60</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

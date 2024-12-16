@@ -2799,4 +2799,13 @@ validate</p>
         <category>linux</category>
       </categories>
   </entry>
+  <entry>
+    <title>mac tips</title>
+    <url>/2024/12/16/mac-tips/</url>
+    <content><![CDATA[<h2 id="合屏幕是否休眠电脑"><a href="#合屏幕是否休眠电脑" class="headerlink" title="合屏幕是否休眠电脑"></a>合屏幕是否休眠电脑</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#防止系统休眠</span><br><span class="line">pmset -a disablesleep 1</span><br><span class="line">#使系统休眠</span><br><span class="line">pmset -a disablesleep 0</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>mac</category>
+      </categories>
+  </entry>
 </search>
