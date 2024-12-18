@@ -1747,51 +1747,6 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
       </categories>
   </entry>
   <entry>
-    <title>heml使用教程</title>
-    <url>/2024/11/07/heml%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#helm与k8s版本兼容匹配：https://helm.sh/zh/docs/topics/version_skew/</span></span><br><span class="line">wget https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">tar  zxvf helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line"><span class="built_in">mv</span> linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br><span class="line"></span><br><span class="line"><span class="comment">#删除Helm使用时关于kubernetes文件的警告</span></span><br><span class="line"><span class="built_in">chmod</span> g-rw /root/.kube/config</span><br><span class="line"><span class="built_in">chmod</span> o-r /root/.kube/config</span><br></pre></td></tr></table></figure>
-
-<h2 id="缓存路径"><a href="#缓存路径" class="headerlink" title="缓存路径"></a>缓存路径</h2><table>
-<thead>
-<tr>
-<th>操作系统</th>
-<th>缓存路径</th>
-<th>配置路径</th>
-<th>数据路径</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Linux</td>
-<td><code>$HOME/.cache/helm</code></td>
-<td><code>$HOME/.config/helm</code></td>
-<td><code>$HOME/.local/share/helm</code></td>
-</tr>
-<tr>
-<td>macOS</td>
-<td><code>$HOME/Library/Caches/helm</code></td>
-<td><code>$HOME/Library/Preferences/helm</code></td>
-<td><code>$HOME/Library/helm</code></td>
-</tr>
-<tr>
-<td>Windows</td>
-<td><code>%TEMP%\helm</code></td>
-<td><code>%APPDATA%\helm</code></td>
-<td><code>%APPDATA%\helm</code></td>
-</tr>
-</tbody></table>
-<h2 id="添加仓库"><a href="#添加仓库" class="headerlink" title="添加仓库"></a>添加仓库</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#常见仓库</span></span><br><span class="line">helm repo add bitnami <span class="string">&quot;https://helm-charts.itboon.top/bitnami&quot;</span> </span><br><span class="line">helm repo add grafana <span class="string">&quot;https://helm-charts.itboon.top/grafana&quot;</span></span><br><span class="line">helm repo add prometheus-community <span class="string">&quot;https://helm-charts.itboon.top/prometheus-community&quot;</span> </span><br><span class="line">helm repo add ingress-nginx <span class="string">&quot;https://helm-charts.itboon.top/ingress-nginx&quot;</span> </span><br><span class="line">helm repo add aliyun  https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts</span><br><span class="line"></span><br><span class="line">helm repo list</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
-
-<h2 id="搜索与下载"><a href="#搜索与下载" class="headerlink" title="搜索与下载"></a>搜索与下载</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">helm search repo bitnami</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询nginx相关的包</span></span><br><span class="line">helm search repo  bitnami/nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询版本</span></span><br><span class="line">helm search repo bitnami/nginx -l</span><br><span class="line"></span><br><span class="line">helm pull bitnami/nginx --version 18.1.7</span><br><span class="line"><span class="comment">#校验打包</span></span><br><span class="line">helm lint --strict nginx-18.1.7.tgz</span><br><span class="line">tar zxvf nginx-18.1.7.tgz</span><br><span class="line">tree -L 1 nginx</span><br><span class="line">nginx</span><br><span class="line">|-- Chart.lock</span><br><span class="line">|-- Chart.yaml</span><br><span class="line">|-- README.md</span><br><span class="line">|-- charts</span><br><span class="line">|-- templates</span><br><span class="line">|-- values.schema.json</span><br><span class="line">`-- values.yaml</span><br></pre></td></tr></table></figure>
-
-<h3 id="编辑values-yaml-与Chart-yaml的镜像仓库"><a href="#编辑values-yaml-与Chart-yaml的镜像仓库" class="headerlink" title="编辑values.yaml 与Chart.yaml的镜像仓库"></a>编辑values.yaml 与Chart.yaml的镜像仓库</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">grep -rn <span class="string">&quot;image:&quot;</span></span><br><span class="line"><span class="comment">#cat Chart.yaml | grep &quot;image:&quot;</span></span><br><span class="line"><span class="comment">#将docker.io改为:swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="安装与卸载"><a href="#安装与卸载" class="headerlink" title="安装与卸载"></a>安装与卸载</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#渲染：测试模板渲染的内容但又不想安装任何实际应用时</span></span><br><span class="line"><span class="comment">#helm install webapp --debug --dry-run ./nginx</span></span><br><span class="line">helm install webapp . --<span class="built_in">set</span> service.type=NodePort -n chart-demo</span><br><span class="line"></span><br><span class="line">helm status webapp  -n chart-demo</span><br><span class="line"></span><br><span class="line">kubectl get all -n chart-demo</span><br><span class="line"></span><br><span class="line"><span class="comment">#打印releases</span></span><br><span class="line">helm list -n chart-demo</span><br><span class="line"></span><br><span class="line">helm uninstall wabapp -n chart-demo</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>k8s</category>
-      </categories>
-  </entry>
-  <entry>
     <title>k8s最佳实践(-)</title>
     <url>/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<p>Kubernetes（K8s）开发涉及到大量的组件和细节性问题。以下是 Kubernetes 开发中的最佳实践，以及需要关注的组件、调度算法、资源管理等关键内容，以便全面掌握 Kubernetes 开发过程的方方面面。</p>
@@ -2828,6 +2783,51 @@ validate</p>
 ]]></content>
       <categories>
         <category>linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>helm使用教程</title>
+    <url>/2024/11/07/helm%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#helm与k8s版本兼容匹配：https://helm.sh/zh/docs/topics/version_skew/</span></span><br><span class="line">wget https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">tar  zxvf helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line"><span class="built_in">mv</span> linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br><span class="line"></span><br><span class="line"><span class="comment">#删除Helm使用时关于kubernetes文件的警告</span></span><br><span class="line"><span class="built_in">chmod</span> g-rw /root/.kube/config</span><br><span class="line"><span class="built_in">chmod</span> o-r /root/.kube/config</span><br></pre></td></tr></table></figure>
+
+<h2 id="缓存路径"><a href="#缓存路径" class="headerlink" title="缓存路径"></a>缓存路径</h2><table>
+<thead>
+<tr>
+<th>操作系统</th>
+<th>缓存路径</th>
+<th>配置路径</th>
+<th>数据路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Linux</td>
+<td><code>$HOME/.cache/helm</code></td>
+<td><code>$HOME/.config/helm</code></td>
+<td><code>$HOME/.local/share/helm</code></td>
+</tr>
+<tr>
+<td>macOS</td>
+<td><code>$HOME/Library/Caches/helm</code></td>
+<td><code>$HOME/Library/Preferences/helm</code></td>
+<td><code>$HOME/Library/helm</code></td>
+</tr>
+<tr>
+<td>Windows</td>
+<td><code>%TEMP%\helm</code></td>
+<td><code>%APPDATA%\helm</code></td>
+<td><code>%APPDATA%\helm</code></td>
+</tr>
+</tbody></table>
+<h2 id="添加仓库"><a href="#添加仓库" class="headerlink" title="添加仓库"></a>添加仓库</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#常见仓库</span></span><br><span class="line">helm repo add bitnami <span class="string">&quot;https://helm-charts.itboon.top/bitnami&quot;</span></span><br><span class="line">helm repo add grafana <span class="string">&quot;https://helm-charts.itboon.top/grafana&quot;</span></span><br><span class="line">helm repo add prometheus-community <span class="string">&quot;https://helm-charts.itboon.top/prometheus-community&quot;</span></span><br><span class="line">helm repo add ingress-nginx <span class="string">&quot;https://helm-charts.itboon.top/ingress-nginx&quot;</span></span><br><span class="line">helm repo add aliyun  https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts</span><br><span class="line"></span><br><span class="line">helm repo list</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
+
+<h2 id="搜索与下载"><a href="#搜索与下载" class="headerlink" title="搜索与下载"></a>搜索与下载</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">helm search repo bitnami</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询nginx相关的包</span></span><br><span class="line">helm search repo  bitnami/nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询版本</span></span><br><span class="line">helm search repo bitnami/nginx -l</span><br><span class="line"></span><br><span class="line">helm pull bitnami/nginx --version 18.1.7</span><br><span class="line"><span class="comment">#校验打包</span></span><br><span class="line">helm lint --strict nginx-18.1.7.tgz</span><br><span class="line">tar zxvf nginx-18.1.7.tgz</span><br><span class="line">tree -L 1 nginx</span><br><span class="line">nginx</span><br><span class="line">|-- Chart.lock</span><br><span class="line">|-- Chart.yaml</span><br><span class="line">|-- README.md</span><br><span class="line">|-- charts</span><br><span class="line">|-- templates</span><br><span class="line">|-- values.schema.json</span><br><span class="line">`-- values.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="编辑values-yaml-与Chart-yaml的镜像仓库"><a href="#编辑values-yaml-与Chart-yaml的镜像仓库" class="headerlink" title="编辑values.yaml 与Chart.yaml的镜像仓库"></a>编辑values.yaml 与Chart.yaml的镜像仓库</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">grep -rn <span class="string">&quot;image:&quot;</span></span><br><span class="line"><span class="comment">#cat Chart.yaml | grep &quot;image:&quot;</span></span><br><span class="line"><span class="comment">#将docker.io改为:swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="安装与卸载"><a href="#安装与卸载" class="headerlink" title="安装与卸载"></a>安装与卸载</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#渲染：测试模板渲染的内容但又不想安装任何实际应用时</span></span><br><span class="line"><span class="comment">#helm install webapp --debug --dry-run ./nginx</span></span><br><span class="line">helm install webapp . --<span class="built_in">set</span> service.type=NodePort -n chart-demo</span><br><span class="line"></span><br><span class="line">helm status webapp  -n chart-demo</span><br><span class="line"></span><br><span class="line">kubectl get all -n chart-demo</span><br><span class="line"></span><br><span class="line"><span class="comment">#打印releases</span></span><br><span class="line">helm list -n chart-demo</span><br><span class="line"></span><br><span class="line">helm uninstall wabapp -n chart-demo</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
       </categories>
   </entry>
 </search>

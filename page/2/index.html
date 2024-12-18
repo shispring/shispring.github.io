@@ -1227,7 +1227,7 @@ validate</p>
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/07/heml%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/07/helm%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -1241,7 +1241,7 @@ validate</p>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/11/07/heml%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/" class="post-title-link" itemprop="url">heml使用教程</a>
+            <a href="/2024/11/07/helm%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">helm使用教程</a>
         </h2>
 
         <div class="post-meta">
@@ -1258,7 +1258,7 @@ validate</p>
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-12-18 10:33:18" itemprop="dateModified" datetime="2024-12-18T10:33:18+08:00">2024-12-18</time>
+                <time title="修改时间：2024-12-18 10:37:40" itemprop="dateModified" datetime="2024-12-18T10:37:40+08:00">2024-12-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1325,7 +1325,7 @@ validate</p>
 <td><code>%APPDATA%\helm</code></td>
 </tr>
 </tbody></table>
-<h2 id="添加仓库"><a href="#添加仓库" class="headerlink" title="添加仓库"></a>添加仓库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#常见仓库</span></span><br><span class="line">helm repo add bitnami <span class="string">&quot;https://helm-charts.itboon.top/bitnami&quot;</span> </span><br><span class="line">helm repo add grafana <span class="string">&quot;https://helm-charts.itboon.top/grafana&quot;</span></span><br><span class="line">helm repo add prometheus-community <span class="string">&quot;https://helm-charts.itboon.top/prometheus-community&quot;</span> </span><br><span class="line">helm repo add ingress-nginx <span class="string">&quot;https://helm-charts.itboon.top/ingress-nginx&quot;</span> </span><br><span class="line">helm repo add aliyun  https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts</span><br><span class="line"></span><br><span class="line">helm repo list</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
+<h2 id="添加仓库"><a href="#添加仓库" class="headerlink" title="添加仓库"></a>添加仓库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#常见仓库</span></span><br><span class="line">helm repo add bitnami <span class="string">&quot;https://helm-charts.itboon.top/bitnami&quot;</span></span><br><span class="line">helm repo add grafana <span class="string">&quot;https://helm-charts.itboon.top/grafana&quot;</span></span><br><span class="line">helm repo add prometheus-community <span class="string">&quot;https://helm-charts.itboon.top/prometheus-community&quot;</span></span><br><span class="line">helm repo add ingress-nginx <span class="string">&quot;https://helm-charts.itboon.top/ingress-nginx&quot;</span></span><br><span class="line">helm repo add aliyun  https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts</span><br><span class="line"></span><br><span class="line">helm repo list</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
 
 <h2 id="搜索与下载"><a href="#搜索与下载" class="headerlink" title="搜索与下载"></a>搜索与下载</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">helm search repo bitnami</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询nginx相关的包</span></span><br><span class="line">helm search repo  bitnami/nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询版本</span></span><br><span class="line">helm search repo bitnami/nginx -l</span><br><span class="line"></span><br><span class="line">helm pull bitnami/nginx --version 18.1.7</span><br><span class="line"><span class="comment">#校验打包</span></span><br><span class="line">helm lint --strict nginx-18.1.7.tgz</span><br><span class="line">tar zxvf nginx-18.1.7.tgz</span><br><span class="line">tree -L 1 nginx</span><br><span class="line">nginx</span><br><span class="line">|-- Chart.lock</span><br><span class="line">|-- Chart.yaml</span><br><span class="line">|-- README.md</span><br><span class="line">|-- charts</span><br><span class="line">|-- templates</span><br><span class="line">|-- values.schema.json</span><br><span class="line">`-- values.yaml</span><br></pre></td></tr></table></figure>
 
