@@ -184,6 +184,177 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/25/kubeadm-containerd-calico-%E9%83%A8%E7%BD%B2k8s-1-28/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/25/kubeadm-containerd-calico-%E9%83%A8%E7%BD%B2k8s-1-28/" class="post-title-link" itemprop="url">kubeadm + containerd + calico 部署k8s 1.28</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-25 21:41:18 / 修改时间：21:59:32" itemprop="dateCreated datePublished" datetime="2024-11-25T21:41:18+08:00">2024-11-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h3><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/mingcheng/deploy-k8s-within-aliyun-mirror">https://github.com/mingcheng/deploy-k8s-within-aliyun-mirror</a></p>
+</blockquote>
+<h2 id="一、机器配置"><a href="#一、机器配置" class="headerlink" title="一、机器配置"></a>一、机器配置</h2><ul>
+<li><strong>确保节点的mac地址和product_uuid的唯一性</strong></li>
+<li><strong>每台主机不低于2GB 内存大小，CPU大于2核心</strong></li>
+<li><strong>集群中的所有主机网络互通</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>主机ip</th>
+<th>配置</th>
+<th>系统版本</th>
+<th>内核版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>k8s-master</td>
+<td>11.123.248.100</td>
+<td>4C 8G</td>
+<td>Anolis OS release 8</td>
+<td>5.10</td>
+</tr>
+<tr>
+<td>k8s-node01</td>
+<td>11.123.248.101</td>
+<td>2C 4G</td>
+<td>Anolis OS release 8</td>
+<td>5.10</td>
+</tr>
+<tr>
+<td>k8s-node02</td>
+<td>11.123.248.102</td>
+<td>2C 4G</td>
+<td>Anolis OS release 8</td>
+<td>5.10</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置主机名</span></span><br><span class="line"><span class="comment">#master节点</span></span><br><span class="line">hostnamectl set-hostname k8s-master</span><br><span class="line"></span><br><span class="line"><span class="comment">#node节点11.123.248.101</span></span><br><span class="line">hostnamectl set-hostname k8s-node01</span><br><span class="line"><span class="comment">#node节点11.123.248.102</span></span><br><span class="line">hostnamectl set-hostname k8s-node02</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、所有节点操作设置"><a href="#二、所有节点操作设置" class="headerlink" title="二、所有节点操作设置"></a>二、所有节点操作设置</h2><ul>
+<li>通用安装内容</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置带时间的个性主机名（非必须）</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;PS1=&#x27;\[\e[37;1m\][\[\e[36;40m\]\t\[\e[32;40m\]\u\[\e[33;40m\]@\[\e[31;40m\]\h \[\e[34;40m\]\w\[\e[37;1m\]]\\$\[\e[m\]&#x27;&quot;</span> &gt;&gt;.bashrc</span><br><span class="line"><span class="built_in">source</span> .bashrc</span><br><span class="line"></span><br><span class="line"><span class="comment">#配置hosts</span></span><br><span class="line"><span class="built_in">cat</span> &gt;&gt; /etc/hosts &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">11.123.248.100  k8s-master</span></span><br><span class="line"><span class="string">11.123.248.101  k8s-node01</span></span><br><span class="line"><span class="string">11.123.243.102  k8s-node02</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#关闭防火墙</span></span><br><span class="line">systemctl stop firewalld &amp;&amp; systemctl <span class="built_in">disable</span> firewalld</span><br><span class="line"></span><br><span class="line"><span class="comment">#永久禁用SElinux</span></span><br><span class="line">setenforce 0 </span><br><span class="line">sed -i <span class="string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="comment">#关闭swap</span></span><br><span class="line">swapoff -a &amp;&amp; sed -i <span class="string">&#x27;s/.*swap.*/#&amp;/&#x27;</span> /etc/fstab</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加网桥过滤及内核转发配置文件，并使之生效</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/sysctl.d/k8s.conf &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables = 1</span></span><br><span class="line"><span class="string">net.ipv4.ip_forward = 1</span></span><br><span class="line"><span class="string">vm.swappiness = 0</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">sysctl --system</span><br><span class="line"></span><br><span class="line"><span class="comment">#加载k8s和containerd所需的overlay和br_netfilter两个模块</span></span><br><span class="line">modprobe overlay</span><br><span class="line">modprobe br_netfilter</span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/modules-load.d/k8s.conf &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">overlay	</span></span><br><span class="line"><span class="string">br_netfilter</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">lsmod | grep  -e br_netfilter -e overlay</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装ipvs模块，保证在节点重启后能自动加载所需模块---kube-proxy开启ipvs的前置条件</span></span><br><span class="line">yum install ipset ipvsadm -y</span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/sysconfig/modules/ipvs.modules &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">#!/bin/bash</span></span><br><span class="line"><span class="string">modprobe -- ip_vs</span></span><br><span class="line"><span class="string">modprobe -- ip_vs_rr</span></span><br><span class="line"><span class="string">modprobe -- ip_vs_wrr</span></span><br><span class="line"><span class="string">modprobe -- ip_vs_sh</span></span><br><span class="line"><span class="string">modprobe -- nf_conntrack</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">chmod</span> 755 /etc/sysconfig/modules/ipvs.modules &amp;&amp; bash /etc/sysconfig/modules/ipvs.modules &amp;&amp; lsmod | grep -e ip_vs -e nf_conntrack</span><br><span class="line"></span><br><span class="line"><span class="comment">#使用rpm安装containerd</span></span><br><span class="line">wget -O /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br><span class="line">yum list | grep containerd</span><br><span class="line">yum -y install containerd.io</span><br><span class="line"><span class="comment">#设置配置文件</span></span><br><span class="line">containerd config default &gt; /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>修改containerd的配置文件：&#x2F;etc&#x2F;containerd&#x2F;config.toml</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#参考地址：</span></span><br><span class="line"><span class="comment">#https://github.com/mingcheng/deploy-k8s-within-aliyun-mirror/blob/master/README.md#containerd</span></span><br><span class="line"><span class="comment">#变更1，修改CgroupDriver为：systemd</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc.options]</span><br><span class="line">...</span><br><span class="line">SystemdCgroup = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#变更2,sandbox_image改镜像地址及版本</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>]</span><br><span class="line">...</span><br><span class="line">sandbox_image = <span class="string">&quot;registry.aliyuncs.com/google_containers/pause:3.9&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#变更3，修改默认的runtime_type</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc]</span><br><span class="line">...</span><br><span class="line">runtime_type = <span class="string">&quot;io.containerd.runc.v2&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#变更4,配置下载镜像</span></span><br><span class="line">[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.registry.mirrors]</span><br><span class="line">	[plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.registry.mirrors.<span class="string">&quot;docker.io&quot;</span>]</span><br><span class="line">		endpoint = [<span class="string">&quot;https://nty7c4os.mirror.aliyuncs.com&quot;</span>]</span><br><span class="line">  [plugins.<span class="string">&quot;io.containerd.grpc.v1.cri&quot;</span>.registry.mirrors.<span class="string">&quot;k8s.gcr.io&quot;</span>]</span><br><span class="line">		endpoint = [<span class="string">&quot;registry.aliyuncs.com/google_containers&quot;</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>重新启动containerd，安装runc</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#启动containerd</span></span><br><span class="line">systemctl <span class="built_in">enable</span> containerd</span><br><span class="line">systemctl restart containerd</span><br><span class="line">systemctl status containerd</span><br><span class="line">containerd --version</span><br><span class="line"></span><br><span class="line"><span class="comment">#下载runc，注意：如果idc主机无法下载，可在别处下载，然后上传过来</span></span><br><span class="line">wget https://github.com/opencontainers/runc/releases/download/v1.1.12/runc.amd64</span><br><span class="line"><span class="built_in">mv</span> runc.amd64 /usr/sbin/runc &amp;&amp; <span class="built_in">chmod</span> +x /usr/sbin/runc &amp;&amp; runc -v</span><br><span class="line"></span><br><span class="line"><span class="comment">#增加阿里云的kubernetes源</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">[kubernetes]</span></span><br><span class="line"><span class="string">name=Kubernetes</span></span><br><span class="line"><span class="string">baseurl=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.28/rpm/</span></span><br><span class="line"><span class="string">enabled=1</span></span><br><span class="line"><span class="string">gpgcheck=1</span></span><br><span class="line"><span class="string">gpgkey=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.28/rpm/repodata/repomd.xml.key</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"><span class="comment">#缓存元数据</span></span><br><span class="line">yum clean all &amp;&amp; yum makecache</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看kubernetes源当前状态</span></span><br><span class="line">yum --showduplicate list kubeadm kubectl kublet</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装k8s组件，kubelet、kubeadm、kubectl</span></span><br><span class="line">yum install -y kubectl-1.28.12 kubelet-1.28.12 kubeadm-1.28.12 </span><br><span class="line"><span class="comment">#修改kubelet默认cgroup驱动</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/sysconfig/kubelet &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">KUBELET_EXTRA_ARGS=&quot;--cgroup-driver=systemd&quot;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> kubelet --now</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装命令自动补全</span></span><br><span class="line">kubeadm completion bash &gt; /etc/bash_completion.d/kubeadm</span><br><span class="line">kubectl completion bash &gt; /etc/bash_completion.d/kubectl</span><br><span class="line"><span class="built_in">source</span> /etc/bash_completion.d/kubeadm</span><br><span class="line"><span class="built_in">source</span> /etc/bash_completion.d/kubectl</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置crictl配置</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/crictl.yaml &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">runtime-endpoint: unix:///var/run/containerd/containerd.sock</span></span><br><span class="line"><span class="string">image-endpoint: unix:///var/run/containerd/containerd.sock</span></span><br><span class="line"><span class="string">timeout: 10</span></span><br><span class="line"><span class="string">debug: true</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="三、master节点配置"><a href="#三、master节点配置" class="headerlink" title="三、master节点配置"></a>三、master节点配置</h2><ul>
+<li>kubeadm 初始化集群操作</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#1、拉取集群所需镜像</span></span><br><span class="line">kubeadm config images list</span><br><span class="line">kubeadm config images pull --image-repository registry.aliyuncs.com/google_containers</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、初始化集群，注意--pod-network-cidr配置与后续CNI所需配置的cidr一致</span></span><br><span class="line">kubeadm init --control-plane-endpoint <span class="variable">$k8s</span>-master:6443 \</span><br><span class="line">--kubernetes-version=v1.28.12 \</span><br><span class="line">--pod-network-cidr=172.16.0.0/16 \  </span><br><span class="line">--service-cidr=10.96.0.0/16 </span><br><span class="line">--service-dns-domain=cluster.local \</span><br><span class="line">--image-repository=registry.aliyuncs.com/google_containers \</span><br><span class="line">--cri-socket=unix:///run/containerd/containerd.sock \</span><br><span class="line">--upload-certs</span><br><span class="line"></span><br><span class="line"><span class="comment">#–image-repository：选择用于拉取镜像的镜像仓库（默认为“k8s.gcr.io” ）</span></span><br><span class="line"><span class="comment">#–kubernetes-version：选择特定的Kubernetes版本（默认为“stable-1”）</span></span><br><span class="line"><span class="comment">#–service-cidr：为服务的VIP指定使用的IP地址范围（默认为“10.96.0.0/12”）</span></span><br><span class="line"><span class="comment">#–pod-network-cidr：指定Pod网络的IP地址范围。如果设置，则将自动为每个节点分配CIDR。</span></span><br><span class="line"><span class="comment">#–control-plane-endpoint=xxx.xxx.xxx.xxx:6443 。指定api-server地址，如果是公网，最好指定</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#输出内容</span></span><br><span class="line"><span class="comment">#加入控制平面：</span></span><br><span class="line"><span class="comment"># kubeadm join 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \</span></span><br><span class="line"><span class="comment"># --discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817 \</span></span><br><span class="line"><span class="comment"># --control-plane --certificate-key 8ed465b862780ca5510e7439543fd0f70bc3bb3cb57441ea0a44b4b266c60805</span></span><br><span class="line"><span class="comment">#...</span></span><br><span class="line"><span class="comment">#node节点加入</span></span><br><span class="line"><span class="comment">#kubeadm join 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \</span></span><br><span class="line"><span class="comment">#--discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#3、拷贝配置</span></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="variable">$HOME</span>/.kube</span><br><span class="line"><span class="built_in">cp</span> -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"><span class="built_in">chown</span> $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">kubectl get node</span><br><span class="line"></span><br><span class="line"><span class="comment">#tips:此时因没有安装CNI，集群master节点是NOTREADY状态</span></span><br><span class="line"><span class="comment">#检查具体出现问题的节点详情：</span></span><br><span class="line">kubectl describe node k8s-master</span><br><span class="line"></span><br><span class="line"><span class="comment">#检查事件(Event)</span></span><br><span class="line">kubectl describe node k8s-master | grep -A 10 <span class="string">&#x27;Conditions:&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、node节点"><a href="#四、node节点" class="headerlink" title="四、node节点"></a>四、node节点</h2><ul>
+<li>加入集群操作</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#加入集群，可设置--cri-socket配置</span></span><br><span class="line">kubeadm <span class="built_in">join</span> 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \</span><br><span class="line">--cri-socket unix:///run/containerd/containerd.sock \</span><br><span class="line">--discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>将master节点&#x2F;root&#x2F;.kube&#x2F;config 拷贝至node节点&#x2F;root&#x2F;.kube&#x2F;config</li>
+<li>tips</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#节点删除后，重新加入集群</span></span><br><span class="line"><span class="comment">#master节点删除</span></span><br><span class="line">kubectl delete node k8s-node01</span><br><span class="line"></span><br><span class="line"><span class="comment">#node节点操作</span></span><br><span class="line"><span class="comment">#1、停止kubelet/containerd--&gt;删除各配置文件--&gt;启动containerd/kubelet</span></span><br><span class="line">systemctl stop kubelet</span><br><span class="line">systemctl stop containerd</span><br><span class="line"><span class="built_in">rm</span> -rf /var/lib/cni/</span><br><span class="line"><span class="built_in">rm</span> -rf /var/lib/kubelet/*</span><br><span class="line"><span class="built_in">rm</span> -rf /etc/cni/</span><br><span class="line"><span class="built_in">rm</span> -f /etc/kubernetes/kubelet.conf</span><br><span class="line"><span class="built_in">rm</span> -f /etc/kubernetes/pki/ca.crt</span><br><span class="line">systemctl start containerd</span><br><span class="line">systemctl start kubelet</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、重新加入</span></span><br><span class="line">kubeadm <span class="built_in">join</span> 11.123.248.100:6443 --token 8e48x7.b7krn71bk2lkc4km \</span><br><span class="line">--cri-socket unix:///run/containerd/containerd.sock \</span><br><span class="line">--discovery-token-ca-cert-hash sha256:67deea843bb9e43865a7c228eb364ee8659628ab43424fd3f6426002916ac817</span><br><span class="line"></span><br><span class="line"><span class="comment">#3、master节点执行一下命令，获取加入指令：</span></span><br><span class="line">kubeadm token create --print-join-command</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、Calico安装参考"><a href="#五、Calico安装参考" class="headerlink" title="五、Calico安装参考"></a>五、Calico安装参考</h2><ul>
+<li>步骤1</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装步骤：https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart</span></span><br><span class="line"><span class="comment">#1、安装operator</span></span><br><span class="line">kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/tigera-operator.yaml</span><br><span class="line"><span class="comment">#2、下载自定义yaml配置，注意修改kubeadm init --pod-network-cidr变量对应的cidr</span></span><br><span class="line">wget https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/custom-resources.yaml</span><br><span class="line"><span class="comment"># 可以通过 kubectl cluster-info dump | grep cidr 查看集群cidr配置</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>步骤2：master及node节点均安装一下容器</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#镜像替换参考地址：</span></span><br><span class="line"><span class="comment">#https://docker.aityp.com/s/docker.io</span></span><br><span class="line"><span class="comment">#https://docker.aityp.com/r/docker.io/calico</span></span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/pod2daemon-flexvol:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/pod2daemon-flexvol:v3.28.0  docker.io/calico/pod2daemon-flexvol:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/cni:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/cni:v3.28.0  docker.io/calico/cni:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node:v3.28.0  docker.io/calico/node:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/apiserver:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/apiserver:v3.28.0  docker.io/calico/apiserver:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/kube-controllers:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/kube-controllers:v3.28.0  docker.io/calico/kube-controllers:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/typha:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/typha:v3.28.0  docker.io/calico/typha:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node-driver-registrar:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/node-driver-registrar:v3.28.0  docker.io/calico/node-driver-registrar:v3.28.0</span><br><span class="line"></span><br><span class="line">ctr images pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/csi:v3.28.0</span><br><span class="line">ctr images tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/calico/csi:v3.28.0  docker.io/calico/csi:v3.28.0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>启动calico配置</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#配置启动calico</span></span><br><span class="line">kubectl apply -f custom-resources.yaml</span><br><span class="line"></span><br><span class="line">kubectl get pods -o wide --all-namespaces</span><br><span class="line">或者</span><br><span class="line">watch kubectl get pods -n calico-system</span><br><span class="line"></span><br><span class="line"><span class="comment">#失败强制删除</span></span><br><span class="line">kubectl delete pod csi-node-driver-7rhsg -n calico-system --force</span><br><span class="line"></span><br><span class="line"><span class="comment">#检查集群启动情况，ComponentStatus is deprecated in v1.19+</span></span><br><span class="line"><span class="comment">#kubectl get cs </span></span><br><span class="line"><span class="comment">#kubectl get ComponentStatus</span></span><br><span class="line">kubectl get --raw=<span class="string">&#x27;/readyz?verbose&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="六、集群启动信息"><a href="#六、集群启动信息" class="headerlink" title="六、集群启动信息"></a>六、集群启动信息</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl cluster-info</span><br><span class="line"></span><br><span class="line">kubectl get nodes -o wide</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/20/vscode%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1223,132 +1394,6 @@ validate</p>
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/07/helm%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/07/helm%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">helm使用教程</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-11-07 11:19:18" itemprop="dateCreated datePublished" datetime="2024-11-07T11:19:18+08:00">2024-11-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-12-18 11:09:42" itemprop="dateModified" datetime="2024-12-18T11:09:42+08:00">2024-12-18</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.8k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#helm与k8s版本兼容匹配：https://helm.sh/zh/docs/topics/version_skew/</span></span><br><span class="line">wget https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">tar  zxvf helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line"><span class="built_in">mv</span> linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br><span class="line"></span><br><span class="line"><span class="comment">#删除Helm使用时关于kubernetes文件的警告</span></span><br><span class="line"><span class="built_in">chmod</span> g-rw /root/.kube/config</span><br><span class="line"><span class="built_in">chmod</span> o-r /root/.kube/config</span><br></pre></td></tr></table></figure>
-
-<h2 id="缓存路径"><a href="#缓存路径" class="headerlink" title="缓存路径"></a>缓存路径</h2><table>
-<thead>
-<tr>
-<th>操作系统</th>
-<th>缓存路径</th>
-<th>配置路径</th>
-<th>数据路径</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Linux</td>
-<td><code>$HOME/.cache/helm</code></td>
-<td><code>$HOME/.config/helm</code></td>
-<td><code>$HOME/.local/share/helm</code></td>
-</tr>
-<tr>
-<td>macOS</td>
-<td><code>$HOME/Library/Caches/helm</code></td>
-<td><code>$HOME/Library/Preferences/helm</code></td>
-<td><code>$HOME/Library/helm</code></td>
-</tr>
-<tr>
-<td>Windows</td>
-<td><code>%TEMP%\helm</code></td>
-<td><code>%APPDATA%\helm</code></td>
-<td><code>%APPDATA%\helm</code></td>
-</tr>
-</tbody></table>
-<h2 id="添加仓库"><a href="#添加仓库" class="headerlink" title="添加仓库"></a>添加仓库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#常见仓库</span></span><br><span class="line">helm repo add bitnami <span class="string">&quot;https://helm-charts.itboon.top/bitnami&quot;</span></span><br><span class="line">helm repo add grafana <span class="string">&quot;https://helm-charts.itboon.top/grafana&quot;</span></span><br><span class="line">helm repo add prometheus-community <span class="string">&quot;https://helm-charts.itboon.top/prometheus-community&quot;</span></span><br><span class="line">helm repo add ingress-nginx <span class="string">&quot;https://helm-charts.itboon.top/ingress-nginx&quot;</span></span><br><span class="line">helm repo add aliyun  https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts</span><br><span class="line"></span><br><span class="line">helm repo list</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
-
-<h2 id="搜索与下载"><a href="#搜索与下载" class="headerlink" title="搜索与下载"></a>搜索与下载</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">helm search repo bitnami</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询nginx相关的包</span></span><br><span class="line">helm search repo  bitnami/nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询版本</span></span><br><span class="line">helm search repo bitnami/nginx -l</span><br><span class="line"></span><br><span class="line">helm pull bitnami/nginx --version 18.1.7</span><br><span class="line"><span class="comment">#校验打包</span></span><br><span class="line">helm lint --strict nginx-18.1.7.tgz</span><br><span class="line">tar zxvf nginx-18.1.7.tgz</span><br><span class="line">tree -L 1 nginx</span><br><span class="line">nginx</span><br><span class="line">|-- Chart.lock</span><br><span class="line">|-- Chart.yaml</span><br><span class="line">|-- README.md</span><br><span class="line">|-- charts</span><br><span class="line">|-- templates</span><br><span class="line">|-- values.schema.json</span><br><span class="line">`-- values.yaml</span><br></pre></td></tr></table></figure>
-
-<h3 id="编辑values-yaml-与Chart-yaml的镜像仓库"><a href="#编辑values-yaml-与Chart-yaml的镜像仓库" class="headerlink" title="编辑values.yaml 与Chart.yaml的镜像仓库"></a>编辑values.yaml 与Chart.yaml的镜像仓库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">grep -rn <span class="string">&quot;image:&quot;</span></span><br><span class="line"><span class="comment">#cat Chart.yaml | grep &quot;image:&quot;</span></span><br><span class="line"><span class="comment">#将docker.io改为:swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="安装与卸载"><a href="#安装与卸载" class="headerlink" title="安装与卸载"></a>安装与卸载</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#渲染：测试模板渲染的内容但又不想安装任何实际应用时</span></span><br><span class="line"><span class="comment">#helm install webapp --debug --dry-run ./nginx</span></span><br><span class="line">helm install webapp . --<span class="built_in">set</span> service.type=NodePort -n chart-demo</span><br><span class="line"></span><br><span class="line">helm status webapp  -n chart-demo</span><br><span class="line"></span><br><span class="line">kubectl get all -n chart-demo</span><br><span class="line"></span><br><span class="line"><span class="comment">#打印releases</span></span><br><span class="line">helm list -n chart-demo</span><br><span class="line"></span><br><span class="line">helm uninstall wabapp -n chart-demo</span><br></pre></td></tr></table></figure>
-
-<h2 id="创建教程"><a href="#创建教程" class="headerlink" title="创建教程"></a>创建教程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#参数含义</span><br><span class="line">https://helm.sh/zh/docs/topics/charts/</span><br><span class="line"></span><br><span class="line">#创建与安装</span><br><span class="line">https://helm.sh/zh/docs/chart_template_guide/getting_started/</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1420,7 +1465,7 @@ validate</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1473,12 +1518,12 @@ validate</p>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">112k</span>
+    <span title="站点总字数">115k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:42</span>
+    <span title="站点阅读时长">1:44</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>

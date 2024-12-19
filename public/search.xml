@@ -2827,6 +2827,108 @@ validate</p>
 <h3 id="安装与卸载"><a href="#安装与卸载" class="headerlink" title="安装与卸载"></a>安装与卸载</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#渲染：测试模板渲染的内容但又不想安装任何实际应用时</span></span><br><span class="line"><span class="comment">#helm install webapp --debug --dry-run ./nginx</span></span><br><span class="line">helm install webapp . --<span class="built_in">set</span> service.type=NodePort -n chart-demo</span><br><span class="line"></span><br><span class="line">helm status webapp  -n chart-demo</span><br><span class="line"></span><br><span class="line">kubectl get all -n chart-demo</span><br><span class="line"></span><br><span class="line"><span class="comment">#打印releases</span></span><br><span class="line">helm list -n chart-demo</span><br><span class="line"></span><br><span class="line">helm uninstall wabapp -n chart-demo</span><br></pre></td></tr></table></figure>
 
 <h2 id="创建教程"><a href="#创建教程" class="headerlink" title="创建教程"></a>创建教程</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#参数含义</span><br><span class="line">https://helm.sh/zh/docs/topics/charts/</span><br><span class="line"></span><br><span class="line">#创建与安装</span><br><span class="line">https://helm.sh/zh/docs/chart_template_guide/getting_started/</span><br></pre></td></tr></table></figure>
+<h3 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#创建</span><br><span class="line">helm create mychart</span><br><span class="line"></span><br><span class="line">#helm install full-coral ./mychart</span><br><span class="line"></span><br><span class="line">#查看生成的完整的YAML</span><br><span class="line">helm get manifest full-coral</span><br><span class="line"></span><br><span class="line">#卸载</span><br><span class="line">helm uninstall full-coral</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#想测试模板渲染的内容但又不想安装任何实际应用</span><br><span class="line">helm install --debug --dry-run goodly-guppy ./mychart</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#</span><br><span class="line">helm install --dry-run --disable-openapi-validation moldy-jaguar ./mychart</span><br><span class="line"></span><br><span class="line">以下命令有助于调试：</span><br><span class="line"></span><br><span class="line">helm lint 是验证chart是否遵循最佳实践的首选工具。</span><br><span class="line">helm template --debug 在本地测试渲染chart模板。</span><br><span class="line">helm install --dry-run --debug：我们已经看到过这个技巧了，这是让服务器渲染模板的好方法，然后返回生成的清单文件。</span><br><span class="line">helm get manifest: 这是查看安装在服务器上的模板的好方法。</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>controller暴露metrics到prometheus接收数据的过程</title>
+    <url>/2024/12/19/controller%E6%9A%B4%E9%9C%B2metrics%E5%88%B0prometheus%E6%8E%A5%E6%94%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E8%BF%87%E7%A8%8B/</url>
+    <content><![CDATA[<h2 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h2><h3 id="①-controller暴露指标地址"><a href="#①-controller暴露指标地址" class="headerlink" title="① controller暴露指标地址"></a>① controller暴露指标地址</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">主机ip：10.16.217.100</span><br><span class="line">curl http://10.16.217.100:8080/metrics | grep layer</span><br><span class="line">或者</span><br><span class="line">curl http://localhost:8080/metrics | grep layer</span><br></pre></td></tr></table></figure>
+<h3 id="②-prometheus-yaml"><a href="#②-prometheus-yaml" class="headerlink" title="② prometheus.yaml"></a>② prometheus.yaml</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">global:</span><br><span class="line">  scrape_interval: 15s </span><br><span class="line">  external_labels:</span><br><span class="line">    monitor: &#x27;codelab-monitor&#x27;</span><br><span class="line">scrape_configs:</span><br><span class="line">  - job_name: &#x27;prometheus&#x27;</span><br><span class="line">    scrape_interval: 5s</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&#x27;10.16.217.100:8080&#x27;]</span><br></pre></td></tr></table></figure>
+<h3 id="③-docker-run-prometheus容器"><a href="#③-docker-run-prometheus容器" class="headerlink" title="③ docker run prometheus容器"></a>③ docker run prometheus容器</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker run --rm \</span><br><span class="line">  -p 9090:9090 \</span><br><span class="line">  -v /root/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \</span><br><span class="line">  prom/prometheus</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="验证数据采集"><a href="#验证数据采集" class="headerlink" title="验证数据采集"></a>验证数据采集</h2><h3 id="1-验证-Prometheus-是否抓取到目标的指标"><a href="#1-验证-Prometheus-是否抓取到目标的指标" class="headerlink" title="1. 验证 Prometheus 是否抓取到目标的指标"></a><strong>1. 验证 Prometheus 是否抓取到目标的指标</strong></h3><ol>
+<li><p><strong>检查 Prometheus 的 Targets 页面</strong></p>
+<ul>
+<li>在浏览器中访问 <code>http://localhost:9090/targets</code>。</li>
+<li>找到名为 <code>prometheus</code> 的抓取任务。</li>
+<li>检查 <code>State</code> 是否为 <code>UP</code>：<ul>
+<li>如果是 <code>UP</code>，说明 Prometheus 成功抓取了目标地址的指标。</li>
+<li>如果是 <code>DOWN</code>，说明 Prometheus 无法访问目标地址（可能是网络或配置问题）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>查看 Prometheus 是否抓取到目标的指标</strong></p>
+<ul>
+<li>在 Prometheus 的 Query 页面（<code>http://localhost:9090/graph</code>）运行以下查询：<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">up&#123;job=&quot;prometheus&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+<li>返回值为 <code>1</code> 表示 Prometheus 能正常访问目标。</li>
+<li>如果返回值为 <code>0</code>，需要检查目标地址是否正确，或者 Prometheus 是否能够访问 <code>10.16.217.100:8080</code>。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="2-验证目标是否暴露了-layer-数据"><a href="#2-验证目标是否暴露了-layer-数据" class="headerlink" title="2. 验证目标是否暴露了 layer 数据"></a><strong>2. 验证目标是否暴露了 <code>layer</code> 数据</strong></h3><ol>
+<li><p><strong>直接访问目标的 <code>/metrics</code></strong></p>
+<ul>
+<li>在容器外部运行：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.16.217.100:8080/metrics | grep layer</span><br></pre></td></tr></table></figure></li>
+<li>确保目标地址上有 <code>layer</code> 相关的数据。</li>
+<li>如果这里没有 <code>layer</code> 数据，说明目标程序没有暴露相关指标，问题在目标程序。</li>
+</ul>
+</li>
+<li><p><strong>验证 Prometheus 抓取的原始数据</strong></p>
+<ul>
+<li>在 Prometheus 的 Query 页面运行以下查询：<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;job=&quot;prometheus&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+<li>这会列出 Prometheus 从目标抓取的所有指标。</li>
+<li>检查是否有与 <code>layer</code> 相关的指标。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="3-检查-Docker-容器的网络配置"><a href="#3-检查-Docker-容器的网络配置" class="headerlink" title="3. 检查 Docker 容器的网络配置"></a><strong>3. 检查 Docker 容器的网络配置</strong></h3><ol>
+<li><p><strong>验证容器是否能访问目标地址</strong></p>
+<ul>
+<li>进入 Prometheus 容器：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it &lt;container_id&gt; sh</span><br></pre></td></tr></table></figure></li>
+<li>在容器内部运行：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.16.217.100:8080/metrics | grep layer</span><br></pre></td></tr></table></figure></li>
+<li>如果没有返回数据，可能是 Docker 容器的网络配置问题：<ul>
+<li>确保 Docker 容器和主机在同一网络中。</li>
+<li>如果目标是本地服务，尝试使用 <code>host.docker.internal</code> 替代 IP 地址。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>使用 <code>host</code> 网络模式</strong></p>
+<ul>
+<li>如果目标服务运行在主机上，可以使用 Docker 的 <code>host</code> 网络模式：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run --<span class="built_in">rm</span> --network host -v /root/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus</span><br></pre></td></tr></table></figure></li>
+<li>这会让容器直接使用主机网络，避免网络隔离问题。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="4-检查-Prometheus-配置文件是否正确"><a href="#4-检查-Prometheus-配置文件是否正确" class="headerlink" title="4. 检查 Prometheus 配置文件是否正确"></a><strong>4. 检查 Prometheus 配置文件是否正确</strong></h3><ol>
+<li><p><strong>验证配置文件语法</strong></p>
+<ul>
+<li>使用 <code>promtool</code> 检查配置文件：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#wget https://github.com/prometheus/prometheus/releases/download/v3.0.1/prometheus-3.0.1.linux-amd64.tar.gz</span></span><br><span class="line"><span class="comment">#tar zxvf prometheus-3.0.1.linux-amd64.tar.gz -C /usr/local</span></span><br><span class="line"></span><br><span class="line">promtool check config /root/prometheus/prometheus.yml</span><br></pre></td></tr></table></figure></li>
+<li>确保配置文件没有语法错误。</li>
+</ul>
+</li>
+<li><p><strong>验证 <code>scrape_configs</code> 的目标地址</strong></p>
+<ul>
+<li>确保 <code>10.16.217.100:8080</code> 是正确的目标地址。</li>
+<li>如果目标服务运行在本地主机，尝试使用 <code>localhost:8080</code> 替代 IP 地址。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="5-检查-Prometheus-抓取日志"><a href="#5-检查-Prometheus-抓取日志" class="headerlink" title="5. 检查 Prometheus 抓取日志"></a><strong>5. 检查 Prometheus 抓取日志</strong></h3><p>Prometheus 会记录抓取目标时的日志信息，可以通过以下方式查看：</p>
+<ol>
+<li><p><strong>访问 Prometheus 的日志页面</strong></p>
+<ul>
+<li>在 Prometheus Web 界面中访问 <code>http://localhost:9090/status</code>。</li>
+<li>检查是否有与抓取目标相关的错误日志。</li>
+</ul>
+</li>
+<li><p><strong>查看容器日志</strong></p>
+<ul>
+<li>运行以下命令查看 Prometheus 容器的日志：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker logs &lt;container_id&gt;</span><br></pre></td></tr></table></figure></li>
+<li>检查是否有关于 <code>10.16.217.100:8080</code> 的抓取错误。</li>
+</ul>
+</li>
+</ol>
+<hr>
 ]]></content>
       <categories>
         <category>k8s</category>
