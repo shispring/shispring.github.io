@@ -2934,4 +2934,13 @@ validate</p>
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>有意思的docker镜像服务</title>
+    <url>/2024/12/19/%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84docker%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1/</url>
+    <content><![CDATA[<h2 id="markdown-server服务"><a href="#markdown-server服务" class="headerlink" title="markdown server服务"></a>markdown server服务</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker run -it -d --name markdown-server -p 3000:3000 -v /root/markdown:/docs  dannyben/madness </span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>docker</category>
+      </categories>
+  </entry>
 </search>
