@@ -3053,4 +3053,119 @@ validate</p>
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>terminating的pod排查思路</title>
+    <url>/2024/12/23/terminating%E7%9A%84pod%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF/</url>
+    <content><![CDATA[<h3 id="Pod-处于-Terminating-状态的原因"><a href="#Pod-处于-Terminating-状态的原因" class="headerlink" title="Pod 处于 Terminating 状态的原因"></a><strong>Pod 处于 <code>Terminating</code> 状态的原因</strong></h3><p>Pod 长时间处于 <code>Terminating</code> 状态，通常是因为 Kubernetes 在删除 Pod 时未能正常完成某些清理操作。以下是可能的原因：</p>
+<ol>
+<li><strong>挂载的存储未能正常卸载</strong>：<ul>
+<li>Pod 使用了持久卷（PV），但存储卸载失败，导致 Pod 资源无法释放。</li>
+</ul>
+</li>
+<li><strong>容器未能正常终止</strong>：<ul>
+<li>Pod 中的容器未能按预期响应 <code>SIGTERM</code> 信号。</li>
+<li>容器运行时（如 containerd、CRI-O）可能出现问题，导致容器未能被删除。</li>
+</ul>
+</li>
+<li><strong>Finalizer 阻塞</strong>：<ul>
+<li>Pod 定义中包含了 <code>finalizer</code>，但未能按预期完成清理操作。</li>
+</ul>
+</li>
+<li><strong>网络或 API Server 问题</strong>：<ul>
+<li>Kubernetes API Server 无法与节点通信，导致删除指令未能执行。</li>
+</ul>
+</li>
+<li><strong>节点异常</strong>：<ul>
+<li>Pod 所在的节点已不可用，但 Kubernetes 仍尝试与该节点交互。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="Kubernetes-垃圾回收机制"><a href="#Kubernetes-垃圾回收机制" class="headerlink" title="Kubernetes 垃圾回收机制"></a><strong>Kubernetes 垃圾回收机制</strong></h3><ol>
+<li><strong>默认行为</strong>：<ul>
+<li>Kubernetes 的垃圾回收机制会尝试清理处于 <code>Terminating</code> 状态的 Pod，但这依赖于集群的健康状态和 Pod 的配置。</li>
+</ul>
+</li>
+<li><strong>Finalizer 的影响</strong>：<ul>
+<li>如果 Pod 含有未完成的 <code>finalizer</code>，垃圾回收机制不会自动删除 Pod。</li>
+</ul>
+</li>
+<li><strong>节点不可用的情况</strong>：<ul>
+<li>如果节点长时间不可用，Kubernetes 会将节点标记为 <code>NotReady</code>，并最终删除相关 Pod，但需要依赖 <code>node-ttl</code> 等配置。</li>
+</ul>
+</li>
+</ol>
+<p>因此，如果 Pod 长时间处于 <code>Terminating</code> 状态且无人干预，它可能会一直保留在集群中，特别是当某些资源清理失败时。</p>
+<hr>
+<h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a><strong>排查思路</strong></h3><ol>
+<li><p><strong>查看 Pod 的详细信息</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>检查 Events</strong>：<ul>
+<li>查看是否有与存储、容器终止或 Finalizer 相关的错误。</li>
+</ul>
+</li>
+<li><strong>检查 Finalizer</strong>：<ul>
+<li>Pod 的 <code>metadata.finalizers</code> 是否未被清理。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>检查 Pod 的容器状态</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pod &lt;pod-name&gt; -n &lt;namespace&gt; -o jsonpath=<span class="string">&#x27;&#123;.status.containerStatuses[*].state&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>确认容器是否已经终止。</li>
+<li>如果容器未能正常终止，可能需要进一步排查容器运行时。</li>
+</ul>
+</li>
+<li><p><strong>检查节点状态</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Pod 所在节点是否处于 <code>Ready</code> 状态。</li>
+<li>如果节点不可用，Pod 的删除可能被阻塞。</li>
+</ul>
+</li>
+<li><p><strong>检查存储状态</strong>：</p>
+<ul>
+<li>如果 Pod 使用了存储卷，检查卷是否被成功卸载：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pvc -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure></li>
+<li>查看相关 PV 和存储系统的状态。</li>
+</ul>
+</li>
+<li><p><strong>检查网络和 API Server</strong>：</p>
+<ul>
+<li>查看 API Server 和 kubelet 的日志，确认是否存在通信问题：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">journalctl -u kubelet</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>强制删除 Pod</strong>：<br>如果问题无法解决，可以强制删除 Pod，但要谨慎：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; -n &lt;namespace&gt; --force --grace-period=0</span><br></pre></td></tr></table></figure>
+<ul>
+<li>此操作会跳过 Finalizer 和清理过程。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a><strong>最佳实践</strong></h3><ol>
+<li><strong>设置合理的终止行为</strong>：<ul>
+<li>在 Pod 的 <code>spec</code> 中设置 <code>terminationGracePeriodSeconds</code>，确保容器有足够时间完成清理。</li>
+</ul>
+</li>
+<li><strong>监控和告警</strong>：<ul>
+<li>配置监控工具（如 Prometheus 和 Grafana）以检测长时间处于 <code>Terminating</code> 状态的 Pod。</li>
+</ul>
+</li>
+<li><strong>避免 Finalizer 阻塞</strong>：<ul>
+<li>确保使用的 Finalizer 能正常完成清理任务。</li>
+</ul>
+</li>
+<li><strong>定期检查节点状态</strong>：<ul>
+<li>确保节点健康，及时清理不可用的节点。</li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>k8s</category>
+        <category>pod</category>
+      </categories>
+  </entry>
 </search>
