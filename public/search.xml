@@ -3044,4 +3044,13 @@ validate</p>
         <category>linux</category>
       </categories>
   </entry>
+  <entry>
+    <title>promQL整理</title>
+    <url>/2024/12/23/promQL%E6%95%B4%E7%90%86/</url>
+    <content><![CDATA[<h2 id="CPU维度统计集群资源碎片"><a href="#CPU维度统计集群资源碎片" class="headerlink" title="CPU维度统计集群资源碎片"></a>CPU维度统计集群资源碎片</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 根据需求定义变量：cluster、cores</span><br><span class="line">sum(</span><br><span class="line">  floor(</span><br><span class="line">    (</span><br><span class="line">      sum(</span><br><span class="line">        kube_node_status_allocatable&#123;cluster=~&quot;$cluster&quot;, resource=&quot;cpu&quot;, node=~&quot;^docker.*&quot;&#125; </span><br><span class="line">        * on(node) group_left() kube_node_labels&#123;cluster=~&quot;$cluster&quot;,label_node_role_kubernetes_io_worker=&quot;true&quot;&#125;</span><br><span class="line">      ) by (cluster, node)</span><br><span class="line">      -</span><br><span class="line">      sum(</span><br><span class="line">        kube_pod_container_resource_requests&#123;cluster=~&quot;$cluster&quot;, resource=&quot;cpu&quot;, node=~&quot;^docker.*&quot;&#125; </span><br><span class="line">        * on(node) group_left() kube_node_labels&#123;cluster=~&quot;$cluster&quot;,label_node_role_kubernetes_io_worker=&quot;true&quot;&#125;</span><br><span class="line">      ) by (cluster, node)</span><br><span class="line">    ) / $cores</span><br><span class="line">  ) &gt; 0</span><br><span class="line">) by (cluster)</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
 </search>
