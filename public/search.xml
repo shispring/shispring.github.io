@@ -1531,7 +1531,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <p> 这将会让你进入容器的挂载、UTS、IPC、网络和 PID 命名空间。</p>
 </li>
 <li><p><strong>进行调试</strong>：<br>进入容器后，你可以运行各种命令进行调试。</p>
-</li>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#一些命令</span><br><span class="line">#进入网络命名空间 (--net)</span><br><span class="line">nsenter --net=/proc/&lt;pid&gt;/ns/net</span><br><span class="line">#查看网络接口：</span><br><span class="line">ip addr</span><br><span class="line"></span><br><span class="line">#查看路由表：</span><br><span class="line">ip route</span><br><span class="line"></span><br><span class="line">#检查 DNS 解析：</span><br><span class="line">cat /etc/resolv.conf</span><br><span class="line">nslookup &lt;hostname&gt;</span><br><span class="line"></span><br><span class="line">#查看 NAT 和防火墙规则：</span><br><span class="line">iptables -L -n -v</span><br><span class="line"></span><br><span class="line">#挂载命名空间 (--mnt)</span><br><span class="line">nsenter --mnt=/proc/&lt;pid&gt;/ns/mnt</span><br><span class="line"></span><br><span class="line">#检查磁盘使用情况：</span><br><span class="line">df -h</span><br><span class="line">du -sh &lt;path&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#多命名空间组合</span><br><span class="line">nsenter --net=/proc/&lt;pid&gt;/ns/net --mnt=/proc/&lt;pid&gt;/ns/mnt</span><br><span class="line"></span><br><span class="line">#排查后退出命名空间</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h3 id="nsenter-与-kubectl-debug-的比较"><a href="#nsenter-与-kubectl-debug-的比较" class="headerlink" title="nsenter 与 kubectl debug 的比较"></a><code>nsenter</code> 与 <code>kubectl debug</code> 的比较</h3><table>
 <thead>
