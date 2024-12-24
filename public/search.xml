@@ -3168,4 +3168,184 @@ validate</p>
         <category>pod</category>
       </categories>
   </entry>
+  <entry>
+    <title>pod优雅关闭与问题排查</title>
+    <url>/2024/12/24/pod%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%A7%AF%E7%B4%AF/</url>
+    <content><![CDATA[<h2 id="1-Linux-信号与服务优雅停止"><a href="#1-Linux-信号与服务优雅停止" class="headerlink" title="1. Linux 信号与服务优雅停止"></a><strong>1. Linux 信号与服务优雅停止</strong></h2><p>服务在停止前需要收到信号通知以进行资源释放、关闭连接等清理操作。以下是常见信号及其特性：</p>
+<h3 id="常见信号"><a href="#常见信号" class="headerlink" title="常见信号"></a><strong>常见信号</strong></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">kill</span> -l</span><br><span class="line">HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ...</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**SIGKILL (9)**：<ul>
+<li>强制结束程序，无法捕获、阻塞或忽略。</li>
+<li><strong>退出状态码</strong>：<code>128 + 9 = 137</code>。</li>
+</ul>
+</li>
+<li>**SIGTERM (15)**：<ul>
+<li>可被程序捕获，用于优雅停止。</li>
+<li><strong>退出状态码</strong>：<code>128 + 15 = 143</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="退出状态码范围"><a href="#退出状态码范围" class="headerlink" title="退出状态码范围"></a><strong>退出状态码范围</strong></h3><ul>
+<li><strong>0</strong>：正常退出。</li>
+<li><strong>1-128</strong>：程序自身异常退出。</li>
+<li><strong>129-255</strong>：外部信号导致退出。</li>
+</ul>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a><strong>注意</strong></h3><ul>
+<li><code>systemctl reload docker</code>：重新加载 Docker 配置文件，不中断运行中的容器。</li>
+<li><code>systemctl restart docker</code>：重启 Docker 服务，会停止并重新启动所有容器。</li>
+</ul>
+<hr>
+<h2 id="2-Pod-优雅关闭"><a href="#2-Pod-优雅关闭" class="headerlink" title="2. Pod 优雅关闭"></a><strong>2. Pod 优雅关闭</strong></h2><p>优雅关闭确保 Pod 在终止时不会中断服务、影响数据一致性或浪费资源。</p>
+<h3 id="优雅关闭的作用"><a href="#优雅关闭的作用" class="headerlink" title="优雅关闭的作用"></a><strong>优雅关闭的作用</strong></h3><ol>
+<li><strong>避免服务中断</strong>：完成当前请求后再终止。</li>
+<li><strong>确保数据一致性</strong>：允许数据持久化或事务处理。</li>
+<li><strong>最小化用户影响</strong>：避免流量路由到已删除的 Pod。</li>
+<li><strong>提高资源利用率</strong>：释放资源，避免泄露。</li>
+</ol>
+<h3 id="优雅关闭时间线"><a href="#优雅关闭时间线" class="headerlink" title="优雅关闭时间线"></a><strong>优雅关闭时间线</strong></h3><h3 id="时间线-1：网络层面的优雅关闭"><a href="#时间线-1：网络层面的优雅关闭" class="headerlink" title="时间线 1：网络层面的优雅关闭"></a><strong>时间线 1：网络层面的优雅关闭</strong></h3><ol>
+<li><p><strong>Service Endpoint 移除</strong>：</p>
+<ul>
+<li><p>Pod 进入 <code>Terminating</code> 状态后，从 Service 的 Endpoint 列表中移除。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get endpoints &lt;service-name&gt; -o yaml</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>NetworkPolicy 规则清理</strong>：</p>
+<ul>
+<li>清理与 Pod 相关的网络规则。</li>
+<li><strong>检查点</strong>：CNI 插件日志（如 Calico、Cilium）。</li>
+</ul>
+</li>
+<li><p><strong>负载均衡器更新</strong>：</p>
+<ul>
+<li><p>从后端池中移除 Pod 地址。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl describe ingress &lt;ingress-name&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<h3 id="时间线-2：Pod-的关闭步骤"><a href="#时间线-2：Pod-的关闭步骤" class="headerlink" title="时间线 2：Pod 的关闭步骤"></a><strong>时间线 2：Pod 的关闭步骤</strong></h3><ol>
+<li><p><strong>SIGTERM 信号发送</strong>：</p>
+<ul>
+<li><p>通知容器内应用进行清理。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>PreStop Hook 执行</strong>：</p>
+<ul>
+<li>执行清理脚本。</li>
+<li><strong>检查点</strong>：查看容器日志。</li>
+</ul>
+</li>
+<li><p><strong>容器优雅退出</strong>：</p>
+<ul>
+<li>处理 SIGTERM 信号。</li>
+<li><strong>检查点</strong>：确认长连接或挂起任务是否处理。</li>
+</ul>
+</li>
+<li><p>**强制终止 (SIGKILL)**：</p>
+<ul>
+<li>超过 <code>terminationGracePeriodSeconds</code> 后，发送 SIGKILL。</li>
+<li><strong>检查点</strong>：查看 kubelet 日志。</li>
+</ul>
+</li>
+<li><p><strong>资源清理</strong>：</p>
+<ul>
+<li><p>卸载存储卷，释放网络资源。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pv,pvc</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="3-Pod-删除原理"><a href="#3-Pod-删除原理" class="headerlink" title="3. Pod 删除原理"></a><strong>3. Pod 删除原理</strong></h2><h3 id="触发-Pod-删除的场景"><a href="#触发-Pod-删除的场景" class="headerlink" title="触发 Pod 删除的场景"></a><strong>触发 Pod 删除的场景</strong></h3><ol>
+<li><strong>手动删除</strong>：<code>kubectl delete pod</code>。</li>
+<li><strong>控制器策略</strong>：如 Deployment 缩减副本数。</li>
+<li><strong>节点故障</strong>：节点失效后重新调度。</li>
+<li><strong>资源限制</strong>：节点资源不足时删除低优先级 Pod。</li>
+<li><strong>健康检查失败</strong>：探针连续失败。</li>
+<li><strong>优先级抢占</strong>：释放资源给高优先级 Pod。</li>
+<li><strong>更新策略</strong>：滚动更新替换旧 Pod。</li>
+<li><strong>自动缩放</strong>：集群缩小时删除 Pod。</li>
+</ol>
+<hr>
+<h2 id="4-Pod-长时间处于-Terminating-状态的原因"><a href="#4-Pod-长时间处于-Terminating-状态的原因" class="headerlink" title="4. Pod 长时间处于 Terminating 状态的原因"></a><strong>4. Pod 长时间处于 Terminating 状态的原因</strong></h2><ol>
+<li><strong>存储未卸载</strong>：持久卷未成功释放。</li>
+<li><strong>容器未终止</strong>：未正确响应 SIGTERM。</li>
+<li><strong>Finalizer 阻塞</strong>：清理任务未完成。</li>
+<li><strong>网络或 API Server 问题</strong>：通信异常。</li>
+<li><strong>节点异常</strong>：节点不可用。</li>
+</ol>
+<h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a><strong>排查思路</strong></h3><ol>
+<li><p><strong>查看 Pod 信息</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>检查容器状态</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pod &lt;pod-name&gt; -o jsonpath=<span class="string">&#x27;&#123;.status.containerStatuses[*].state&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>检查节点状态</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>检查存储状态</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pvc</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>强制删除 Pod</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; --force --grace-period=0</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="5-Docker-与-Containerd-的日志排查"><a href="#5-Docker-与-Containerd-的日志排查" class="headerlink" title="5. Docker 与 Containerd 的日志排查"></a><strong>5. Docker 与 Containerd 的日志排查</strong></h2><h3 id="检查-Docker-日志"><a href="#检查-Docker-日志" class="headerlink" title="检查 Docker 日志"></a><strong>检查 Docker 日志</strong></h3><ol>
+<li><p>查看 Docker 守护进程日志：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">journalctl -u docker | grep &lt;docker_id&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>检查 kubelet 清理失败记录：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">journalctl -u kubelet | grep <span class="string">&quot;cleanup&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="清理-Docker-残留资源"><a href="#清理-Docker-残留资源" class="headerlink" title="清理 Docker 残留资源"></a><strong>清理 Docker 残留资源</strong></h3><ol>
+<li><p>删除退出的容器：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker container prune -f</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除未使用的镜像：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker image prune -f</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>清理未使用的网络和卷：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker network prune -f</span><br><span class="line">docker volume prune -f</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="清理-Containerd-残留资源"><a href="#清理-Containerd-残留资源" class="headerlink" title="清理 Containerd 残留资源"></a><strong>清理 Containerd 残留资源</strong></h3><ol>
+<li><p>删除残留容器：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">crictl <span class="built_in">rm</span> $(crictl ps -a -q)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除未使用的镜像：</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">crictl rmi &lt;image-id&gt;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="6-最佳实践"><a href="#6-最佳实践" class="headerlink" title="6. 最佳实践"></a><strong>6. 最佳实践</strong></h2><ol>
+<li><strong>配置优雅终止</strong>：<ul>
+<li>设置 <code>terminationGracePeriodSeconds</code>。</li>
+<li>配置 PreStop Hook。</li>
+</ul>
+</li>
+<li><strong>监控和告警</strong>：<ul>
+<li>使用 Prometheus 检测 <code>Terminating</code> 状态 Pod。</li>
+</ul>
+</li>
+<li><strong>避免 Finalizer 阻塞</strong>：<ul>
+<li>确保 Finalizer 正常完成任务。</li>
+</ul>
+</li>
+<li><strong>定期清理残留资源</strong>：<ul>
+<li>检查并清理未使用的容器、镜像和存储。</li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>k8s</category>
+      </categories>
+  </entry>
 </search>

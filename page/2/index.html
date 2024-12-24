@@ -184,6 +184,120 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">k8s event controller工作原理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-08 13:45:33 / 修改时间：13:46:18" itemprop="dateCreated datePublished" datetime="2024-12-08T13:45:33+08:00">2024-12-08</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Kubernetes 中，Event Controller 是集群内部的一部分，用于管理事件资源（Event 对象）。它的主要职责是监听、存储和处理集群中的事件，这些事件是 Kubernetes 中其他组件和用户操作的结果。</p>
+<ol>
+<li>Event 的定义与来源</li>
+</ol>
+<p>Event 是 Kubernetes 中的一个核心资源，表示集群中发生的一个操作或状态变更。每个 Event 都是一个短期的记录，包含以下信息：<br>    •	涉及的对象（involvedObject）：与事件相关的资源（Pod、Node、Deployment 等）。<br>    •	类型：事件类型是 Normal（正常）或 Warning（警告）。<br>    •	原因：事件的简短描述（如 BackOff、Scheduled）。<br>    •	消息：事件的详细信息。<br>    •	时间戳：事件发生的时间。<br>    •	事件源：触发事件的组件（如 kubelet、scheduler、controller-manager 等）。</p>
+<ol start="2">
+<li>Event Controller 的作用</li>
+</ol>
+<p>Event Controller 的核心功能是：<br>    •	监听事件源：通过 API Server 监控事件的发生（使用 Kubernetes 的 Watch 机制）。<br>    •	记录事件：将事件持久化存储到 etcd 中。<br>    •	清理旧事件：定期清理超出 TTL（默认 1 小时）的事件，确保事件系统不会无限制地占用资源。</p>
+<p>事件驱动机制的工作原理</p>
+<p>Kubernetes 是基于 事件驱动模型 的，这体现在以下几个方面：</p>
+<ol>
+<li>事件的传播与通知</li>
+</ol>
+<p>事件是通过 Watch&#x2F;Informer 机制传播的：<br>    •	组件监听 API Server：Kubernetes 中的 Controller（如 Deployment Controller、Node Controller）通过 Watch 机制实时监听资源对象的变更。<br>    •	产生事件：当资源对象状态发生变化时，组件会向 API Server 报告事件。例如，Pod 被调度到一个节点后，Scheduler 会产生一个事件 Scheduled。<br>    •	事件流转：事件被写入 API Server，Event Controller 和其他监听组件（如自定义 Controller）会收到通知。</p>
+<ol start="2">
+<li>事件类型<br> •	Normal 事件：表示系统的正常行为，例如 Pod 被成功调度。<br> •	Warning 事件：表示可能的异常情况，例如 Pod 无法拉取镜像或节点不可用。</li>
+</ol>
+<p>Event Controller 对 CRD 自定义 Controller 的影响</p>
+<ol>
+<li>事件触发 CRD Controller 的动作<br> •	Informer 的事件驱动机制：CRD 自定义 Controller 使用 Kubernetes 提供的 Informer 来监听 CRD 对象的创建、更新和删除事件。Informer 会从 API Server 获取事件并调用相应的处理逻辑。<br> •	队列机制：事件触发后，CRD Controller 通常将事件加入队列（如 workqueue），并异步执行对应的操作。</li>
+</ol>
+<p>例如：<br>    •	用户创建一个自定义资源（CRD 实例）。<br>    •	Informer 监听到该事件，并将事件加入工作队列。<br>    •	自定义 Controller 的 Reconcile Loop 被触发，执行相应的逻辑。</p>
+<ol start="2">
+<li><p>使用事件进行调试与可观察性<br> •	CRD 自定义 Controller 通常会创建 Event 对象记录操作结果（如更新资源状态）。<br> •	这些事件便于管理员调试和观察 CRD Controller 的行为。</p>
+</li>
+<li><p>事件的级联影响<br> •	自定义 Controller 的行为可能引发新的事件。例如，Controller 更新一个 Pod 的 Label，会触发 Deployment Controller 产生新事件 Updated.</p>
+</li>
+</ol>
+<p>事件对系统整体的影响<br>    1.	调度与控制的基础：<br>    •	Scheduler 监听 Pod 的创建事件来决定调度策略。<br>    •	Deployment Controller 监听 Pod 的状态事件来决定扩容或重建策略。<br>    2.	系统状态的监控与追踪：<br>    •	事件为集群提供了一个透明的状态变更历史。<br>    •	运维人员可以通过 kubectl describe 查看事件记录。<br>    3.	问题的根因分析：<br>    •	事件链可以帮助快速定位问题。例如，Pod 创建失败的原因通常可以通过查看相关的事件找到。</p>
+<p>实践中如何生成和使用事件<br>    1.	生成自定义事件<br>自定义 Controller 可以通过 Kubernetes 提供的 EventRecorder 接口生成事件：</p>
+<p>eventRecorder.Event(resource, “Warning”, “CustomReason”, “Custom message”)</p>
+<pre><code>2.	监控事件
+</code></pre>
+<p>通过 kubectl 查看事件：</p>
+<p>kubectl get events –all-namespaces</p>
+<pre><code>3.	分析与排查问题
+
+•	Warning 事件通常是问题的直接表现。
+•	结合事件时间顺序，可以追踪操作的完整链路。
+</code></pre>
+<p>通过事件驱动机制，Kubernetes 提供了强大的异步处理能力和可观察性，能够支撑复杂的分布式系统操作逻辑。自定义的 CRD Controller 充分利用这一机制，可以实现动态、灵活的资源管理和协调。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/08/%E5%90%84%E5%B1%82%E7%BD%91%E7%BB%9C%E6%8E%A2%E6%B5%8B%E5%B7%A5%E5%85%B7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1258,262 +1372,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/13/%E5%AD%A6%E4%B9%A0%E6%96%B9%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/13/%E5%AD%A6%E4%B9%A0%E6%96%B9%E5%BC%8F/" class="post-title-link" itemprop="url">学习方式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-11-13 17:39:40" itemprop="dateCreated datePublished" datetime="2024-11-13T17:39:40+08:00">2024-11-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-11-18 14:48:09" itemprop="dateModified" datetime="2024-11-18T14:48:09+08:00">2024-11-18</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Bloom’s-Taxonomy"><a href="#Bloom’s-Taxonomy" class="headerlink" title="Bloom’s Taxonomy"></a>Bloom’s Taxonomy</h2><ul>
-<li>1956 年布鲁姆分类法将知识分为六大类：知识、理解、应用、分析、综合和评价。</li>
-<li>2001 年，一群认知心理学家、课程理论家、教学研究者和测试专家将布鲁姆分类法的类别名称从名词改为动词。</li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/Bloom's-Taxonomy.jpeg" alt="Bloom-pic1"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17361731479986_.pic.jpg" alt="Bloom-pic2"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/17321731479764_.pic.jpg" alt="Bloom-pic3"></p>
-<hr>
-<table aria-describedby="chart-description">
-<thead>
-<tr><th id="Remembering">Remembering</th><th id="Understanding">Understanding</th><th id="Applying">Applying</th><th id="Analyzing">Analyzing</th><th id="Evaluating">Evaluating</th><th id="Creating">Creating</th></tr>
-</thead>
-<tbody>
-<tr>
-<td headers="Remembering">Recall specific facts.</td>
-<td headers="Understanding">Grasp meaning of materials.</td>
-<td headers="Applying">Use information in a new situation.&nbsp;</td>
-<td headers="Analyzing">Identify schemas or relationships.&nbsp;</td>
-<td headers="Evaluating">Use information to make judgments.&nbsp;</td>
-<td headers="Creating">Create or develop something new.&nbsp;</td>
-</tr>
-<tr>
-<td headers="Remembering">
-<p>define<br>
-describe<br>
-examine<br>
-identify<br>
-label<br>
-list<br>
-locate<br>
-match<br>
-memorize<br>
-recall<br>
-recite<br>
-recognize<br>
-record<br>
-reproduce<br>
-retell<br>
-select<br>
-state<br>
-tabulate<br>
-tell<br>
-visualize<br></p>
-</td>
-<td headers="Understanding">
-<p>associate<br>
-classify<br>
-compare<br>
-contrast<br>
-convert<br>
-describe<br>
-discuss<br>
-distinguish<br>
-explain<br>
-illustrate<br>
-interpret<br>
-order<br>
-predict<br>
-relate<br>
-report<br>
-represent<br>
-restate<br>
-select<br>
-summarize<br>
-trace<br>
-transform<br>
-translate<br></p>
-</td>
-<td headers="Applying">
-<p>apply<br>
-articulate<br>
-calculate<br>
-change<br>
-chart<br>
-compute<br>
-construct<br>
-develop<br>
-employ<br>
-examine<br>
-experiment<br>
-explain<br>
-illustrate<br>
-interpret<br>
-manipulate<br>
-modify<br>
-operate<br>
-predict<br>
-produce<br>
-relate<br>
-solve<br>
-transfer<br></p>
-</td>
-<td headers="Analyzing">
-<p>analyze<br>
-categorize<br>
-compare<br>
-connect<br>
-contrast<br>
-criticize<br>
-deduce<br>
-diagram<br>
-differentiate<br>
-discriminate<br>
-dissect<br>
-estimate<br>
-evaluate<br>
-experiment<br>
-infer<br>
-organize<br>
-plan<br>
-prioritize<br>
-question<br>
-separate<br>
-survey<br>
-test</p></td>
-<td headers="Evaluating">
-appraise<br>
-argue<br>
-assess<br>
-choose<br>
-convince<br>
-critique<br>
-debate<br>
-defend<br>
-editorialize<br>
-estimate<br>
-evaluate<br>
-grade<br>
-judge<br>
-justify<br>
-measure<br>
-persuade<br>
-predict<br>
-rank<br>
-rate<br>
-reframe<br>
-summarize<br>
-support<br><p></p>
-</td>
-<td headers="Creating">
-<p>adapt<br>
-assemble<br>
-compose<br>
-construct<br>
-create<br>
-design<br>
-develop<br>
-facilitate<br>
-hypothesize<br>
-integrate<br>
-invent<br>
-modify<br>
-negotiate<br>
-plan<br>
-propose<br>
-revise<br>
-role-play<br>
-schematize<br>
-simulate<br>
-speculate<br>
-support<br>
-validate</p>
-</td>
-</tr>
-</tbody>
-</table>
-
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://citt.ufl.edu/resources/the-learning-process/designing-the-learning-experience/blooms-taxonomy">https://citt.ufl.edu/resources/the-learning-process/designing-the-learning-experience/blooms-taxonomy</a></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1585,7 +1443,7 @@ validate</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">66</span>
+          <span class="site-state-item-count">67</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1638,12 +1496,12 @@ validate</p>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">119k</span>
+    <span title="站点总字数">121k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:49</span>
+    <span title="站点阅读时长">1:50</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
