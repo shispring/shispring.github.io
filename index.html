@@ -207,10 +207,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-12-24 10:31:23 / 修改时间：16:04:53" itemprop="dateCreated datePublished" datetime="2024-12-24T10:31:23+08:00">2024-12-24</time>
+              <time title="创建时间：2024-12-24 10:31:23" itemprop="dateCreated datePublished" datetime="2024-12-24T10:31:23+08:00">2024-12-24</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-25 10:43:29" itemprop="dateModified" datetime="2024-12-25T10:43:29+08:00">2024-12-25</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -227,7 +233,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.1k</span>
+              <span>2.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -359,7 +365,7 @@
 </ol>
 <h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a><strong>排查思路</strong></h3><ol>
 <li><p><strong>查看 Pod 信息</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#检查 Pod 的 Finalizer</span></span><br><span class="line">kubectl get pod &lt;pod-name&gt; -n &lt;namespace&gt; -o jsonpath=<span class="string">&#x27;&#123;.metadata.finalizers&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p><strong>检查容器状态</strong>：</p>
  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod &lt;pod-name&gt; -o jsonpath=<span class="string">&#x27;&#123;.status.containerStatuses[*].state&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
@@ -371,7 +377,7 @@
  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pvc</span><br></pre></td></tr></table></figure>
 </li>
 <li><p><strong>强制删除 Pod</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; --force --grace-period=0</span><br></pre></td></tr></table></figure></li>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; --force --grace-period=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#发送 SIGTERM 信号的几种方式</span></span><br><span class="line"><span class="built_in">kill</span> -15 &lt;container-id&gt;</span><br><span class="line">docker <span class="built_in">kill</span> --signal=SIGTERM &lt;container-id&gt;</span><br><span class="line"><span class="comment">#如果使用 crictl： crictl stop &lt;container-id&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#强制重新触发优雅终止,例如，将宽限期设置为 10 秒：</span></span><br><span class="line">kubectl delete pod &lt;pod-name&gt; -n &lt;namespace&gt; --grace-period=10</span><br></pre></td></tr></table></figure></li>
 </ol>
 <hr>
 <h2 id="5-Docker-与-Containerd-的日志排查"><a href="#5-Docker-与-Containerd-的日志排查" class="headerlink" title="5. Docker 与 Containerd 的日志排查"></a><strong>5. Docker 与 Containerd 的日志排查</strong></h2><h3 id="检查-Docker-日志"><a href="#检查-Docker-日志" class="headerlink" title="检查 Docker 日志"></a><strong>检查 Docker 日志</strong></h3><ol>
@@ -988,10 +994,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-12-19 18:01:58 / 修改时间：18:14:04" itemprop="dateCreated datePublished" datetime="2024-12-19T18:01:58+08:00">2024-12-19</time>
+              <time title="创建时间：2024-12-19 18:01:58" itemprop="dateCreated datePublished" datetime="2024-12-19T18:01:58+08:00">2024-12-19</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-20 10:38:05" itemprop="dateModified" datetime="2024-12-20T10:38:05+08:00">2024-12-20</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -1688,12 +1700,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">121k</span>
+    <span title="站点总字数">122k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:50</span>
+    <span title="站点阅读时长">1:51</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
