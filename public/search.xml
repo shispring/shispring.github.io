@@ -3348,4 +3348,102 @@ validate</p>
         <category>linux</category>
       </categories>
   </entry>
+  <entry>
+    <title>rsync用法小记</title>
+    <url>/2024/12/25/rsync%E7%94%A8%E6%B3%95%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h3 id="rsync-命令的参数含义"><a href="#rsync-命令的参数含义" class="headerlink" title="rsync 命令的参数含义"></a><strong>rsync 命令的参数含义</strong></h3><p>命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -avzP -e <span class="string">&#x27;ssh -p2222&#x27;</span> test.tar.gz root@192.168.1.100:/data</span><br></pre></td></tr></table></figure>
+
+<h4 id="参数解释"><a href="#参数解释" class="headerlink" title="参数解释"></a><strong>参数解释</strong></h4><ol>
+<li><p><strong><code>-a</code> (archive mode)</strong>  </p>
+<ul>
+<li>归档模式，表示递归同步目录并保留文件属性（如权限、时间戳、符号链接等）。  </li>
+<li>常用于完整备份。</li>
+</ul>
+</li>
+<li><p><strong><code>-v</code> (verbose)</strong>  </p>
+<ul>
+<li>显示详细信息，输出同步过程中的文件名和进度。</li>
+</ul>
+</li>
+<li><p><strong><code>-z</code> (compress)</strong>  </p>
+<ul>
+<li>启用压缩，在传输过程中压缩数据以减少带宽使用。</li>
+</ul>
+</li>
+<li><p><strong><code>-P</code> (progress + partial)</strong>  </p>
+<ul>
+<li>显示传输进度条（<code>--progress</code>）。</li>
+<li>保留部分传输的文件（<code>--partial</code>），如果传输中断，可以继续。</li>
+</ul>
+</li>
+<li><p><strong><code>-e &#39;ssh -p2222&#39;</code></strong>  </p>
+<ul>
+<li>指定使用 <code>ssh</code> 作为远程传输协议，并通过 <code>-p2222</code> 指定 SSH 使用的端口号为 <code>2222</code>。</li>
+</ul>
+</li>
+<li><p><strong><code>test.tar.gz</code></strong>  </p>
+<ul>
+<li>要同步的源文件。</li>
+</ul>
+</li>
+<li><p><strong><code>root@192.169.1.100:/data</code></strong>  </p>
+<ul>
+<li>目标地址：<ul>
+<li><code>root</code> 是远程服务器的用户名。</li>
+<li><code>1.95.89.84</code> 是远程服务器的 IP 地址。</li>
+<li><code>/data</code> 是目标路径，表示文件将被传输到该目录。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="常用-rsync-命令参数总结"><a href="#常用-rsync-命令参数总结" class="headerlink" title="常用 rsync 命令参数总结"></a><strong>常用 rsync 命令参数总结</strong></h3><h4 id="基础功能"><a href="#基础功能" class="headerlink" title="基础功能"></a><strong>基础功能</strong></h4><ul>
+<li><strong><code>-a</code></strong>: 归档模式（保留权限、时间戳、符号链接等）。</li>
+<li><strong><code>-r</code></strong>: 递归复制子目录（仅递归，不保留属性）。</li>
+<li><strong><code>-v</code></strong>: 显示详细信息。</li>
+<li><strong><code>-z</code></strong>: 压缩传输。</li>
+<li><strong><code>-P</code></strong>: 显示进度条并支持断点续传。</li>
+</ul>
+<h4 id="进阶选项"><a href="#进阶选项" class="headerlink" title="进阶选项"></a><strong>进阶选项</strong></h4><ul>
+<li><strong><code>--delete</code></strong>: 在目标中删除源中不存在的文件，保持两端一致。</li>
+<li><strong><code>--exclude=PATTERN</code></strong>: 排除匹配指定模式的文件或目录。</li>
+<li><strong><code>--include=PATTERN</code></strong>: 包括匹配指定模式的文件或目录。</li>
+<li><strong><code>--progress</code></strong>: 显示详细的传输进度信息。</li>
+<li><strong><code>--partial</code></strong>: 断点续传，保留部分传输的文件。</li>
+<li><strong><code>--bwlimit=RATE</code></strong>: 限制带宽（以 KB&#x2F;s 为单位）。</li>
+</ul>
+<h4 id="远程传输"><a href="#远程传输" class="headerlink" title="远程传输"></a><strong>远程传输</strong></h4><ul>
+<li><strong><code>-e ssh</code></strong>: 指定使用 SSH 作为传输协议。</li>
+<li><strong><code>-e &#39;ssh -pPORT&#39;</code></strong>: 使用特定的 SSH 端口。</li>
+<li><strong><code>--rsync-path=PATH</code></strong>: 指定远程服务器上的 rsync 路径。</li>
+</ul>
+<h4 id="同步模式"><a href="#同步模式" class="headerlink" title="同步模式"></a><strong>同步模式</strong></h4><ul>
+<li><strong>本地到本地</strong>：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -av /src/dir /dest/dir</span><br></pre></td></tr></table></figure></li>
+<li><strong>本地到远程</strong>：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -av /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure></li>
+<li><strong>远程到本地</strong>：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -av user@remote:/src/dir /dest/dir</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="示例"><a href="#示例" class="headerlink" title="示例"></a><strong>示例</strong></h4><ol>
+<li><p><strong>同步文件并显示进度</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -avzP file.txt user@remote:/path/to/destination</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>排除某些文件或目录</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -av --exclude <span class="string">&#x27;*.log&#x27;</span> /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>同步并删除目标多余文件</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -av --delete /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>限制带宽</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -avz --bwlimit=1000 /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>使用特定 SSH 端口</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rsync -avz -e <span class="string">&#x27;ssh -p2222&#x27;</span> /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>通过这些参数和命令，可以高效地实现文件同步和备份。</p>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
 </search>

@@ -184,6 +184,177 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/25/rsync%E7%94%A8%E6%B3%95%E5%B0%8F%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/25/rsync%E7%94%A8%E6%B3%95%E5%B0%8F%E8%AE%B0/" class="post-title-link" itemprop="url">rsync用法小记</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-25 15:01:34 / 修改时间：15:03:35" itemprop="dateCreated datePublished" datetime="2024-12-25T15:01:34+08:00">2024-12-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="rsync-命令的参数含义"><a href="#rsync-命令的参数含义" class="headerlink" title="rsync 命令的参数含义"></a><strong>rsync 命令的参数含义</strong></h3><p>命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -avzP -e <span class="string">&#x27;ssh -p2222&#x27;</span> test.tar.gz root@192.168.1.100:/data</span><br></pre></td></tr></table></figure>
+
+<h4 id="参数解释"><a href="#参数解释" class="headerlink" title="参数解释"></a><strong>参数解释</strong></h4><ol>
+<li><p><strong><code>-a</code> (archive mode)</strong>  </p>
+<ul>
+<li>归档模式，表示递归同步目录并保留文件属性（如权限、时间戳、符号链接等）。  </li>
+<li>常用于完整备份。</li>
+</ul>
+</li>
+<li><p><strong><code>-v</code> (verbose)</strong>  </p>
+<ul>
+<li>显示详细信息，输出同步过程中的文件名和进度。</li>
+</ul>
+</li>
+<li><p><strong><code>-z</code> (compress)</strong>  </p>
+<ul>
+<li>启用压缩，在传输过程中压缩数据以减少带宽使用。</li>
+</ul>
+</li>
+<li><p><strong><code>-P</code> (progress + partial)</strong>  </p>
+<ul>
+<li>显示传输进度条（<code>--progress</code>）。</li>
+<li>保留部分传输的文件（<code>--partial</code>），如果传输中断，可以继续。</li>
+</ul>
+</li>
+<li><p><strong><code>-e &#39;ssh -p2222&#39;</code></strong>  </p>
+<ul>
+<li>指定使用 <code>ssh</code> 作为远程传输协议，并通过 <code>-p2222</code> 指定 SSH 使用的端口号为 <code>2222</code>。</li>
+</ul>
+</li>
+<li><p><strong><code>test.tar.gz</code></strong>  </p>
+<ul>
+<li>要同步的源文件。</li>
+</ul>
+</li>
+<li><p><strong><code>root@192.169.1.100:/data</code></strong>  </p>
+<ul>
+<li>目标地址：<ul>
+<li><code>root</code> 是远程服务器的用户名。</li>
+<li><code>1.95.89.84</code> 是远程服务器的 IP 地址。</li>
+<li><code>/data</code> 是目标路径，表示文件将被传输到该目录。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="常用-rsync-命令参数总结"><a href="#常用-rsync-命令参数总结" class="headerlink" title="常用 rsync 命令参数总结"></a><strong>常用 rsync 命令参数总结</strong></h3><h4 id="基础功能"><a href="#基础功能" class="headerlink" title="基础功能"></a><strong>基础功能</strong></h4><ul>
+<li><strong><code>-a</code></strong>: 归档模式（保留权限、时间戳、符号链接等）。</li>
+<li><strong><code>-r</code></strong>: 递归复制子目录（仅递归，不保留属性）。</li>
+<li><strong><code>-v</code></strong>: 显示详细信息。</li>
+<li><strong><code>-z</code></strong>: 压缩传输。</li>
+<li><strong><code>-P</code></strong>: 显示进度条并支持断点续传。</li>
+</ul>
+<h4 id="进阶选项"><a href="#进阶选项" class="headerlink" title="进阶选项"></a><strong>进阶选项</strong></h4><ul>
+<li><strong><code>--delete</code></strong>: 在目标中删除源中不存在的文件，保持两端一致。</li>
+<li><strong><code>--exclude=PATTERN</code></strong>: 排除匹配指定模式的文件或目录。</li>
+<li><strong><code>--include=PATTERN</code></strong>: 包括匹配指定模式的文件或目录。</li>
+<li><strong><code>--progress</code></strong>: 显示详细的传输进度信息。</li>
+<li><strong><code>--partial</code></strong>: 断点续传，保留部分传输的文件。</li>
+<li><strong><code>--bwlimit=RATE</code></strong>: 限制带宽（以 KB&#x2F;s 为单位）。</li>
+</ul>
+<h4 id="远程传输"><a href="#远程传输" class="headerlink" title="远程传输"></a><strong>远程传输</strong></h4><ul>
+<li><strong><code>-e ssh</code></strong>: 指定使用 SSH 作为传输协议。</li>
+<li><strong><code>-e &#39;ssh -pPORT&#39;</code></strong>: 使用特定的 SSH 端口。</li>
+<li><strong><code>--rsync-path=PATH</code></strong>: 指定远程服务器上的 rsync 路径。</li>
+</ul>
+<h4 id="同步模式"><a href="#同步模式" class="headerlink" title="同步模式"></a><strong>同步模式</strong></h4><ul>
+<li><strong>本地到本地</strong>：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av /src/dir /dest/dir</span><br></pre></td></tr></table></figure></li>
+<li><strong>本地到远程</strong>：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure></li>
+<li><strong>远程到本地</strong>：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av user@remote:/src/dir /dest/dir</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="示例"><a href="#示例" class="headerlink" title="示例"></a><strong>示例</strong></h4><ol>
+<li><p><strong>同步文件并显示进度</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -avzP file.txt user@remote:/path/to/destination</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>排除某些文件或目录</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av --exclude <span class="string">&#x27;*.log&#x27;</span> /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>同步并删除目标多余文件</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av --delete /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>限制带宽</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -avz --bwlimit=1000 /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>使用特定 SSH 端口</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -avz -e <span class="string">&#x27;ssh -p2222&#x27;</span> /src/dir user@remote:/dest/dir</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>通过这些参数和命令，可以高效地实现文件同步和备份。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/24/pod%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%A7%AF%E7%B4%AF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1419,163 +1590,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">metrics的常用命令</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-12-09 16:34:29 / 修改时间：16:38:04" itemprop="dateCreated datePublished" datetime="2024-12-09T16:34:29+08:00">2024-12-09</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="关于-Metrics-的常用命令"><a href="#关于-Metrics-的常用命令" class="headerlink" title="关于 Metrics 的常用命令"></a>关于 Metrics 的常用命令</h3><ol>
-<li><p><strong>查看 Kubelet 的指标</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。</li>
-</ul>
-</li>
-<li><p><strong>查看节点的 cAdvisor 指标</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/api/v1/nodes/&lt;nodeName&gt;/proxy/metrics/cadvisor&quot;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>获取容器级别的详细性能指标。</li>
-</ul>
-</li>
-<li><p><strong>查看 API Server 的指标</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span> | grep apiserver</span><br></pre></td></tr></table></figure>
-<ul>
-<li>返回 API Server 的性能指标。</li>
-</ul>
-</li>
-<li><p><strong>查看 Controller Manager 的指标</strong>：<br>在 Controller Manager 所在的节点运行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10252/metrics</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查看 Scheduler 的指标</strong>：<br>在 Scheduler 所在的节点运行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10251/metrics</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查看 Metrics Server 的 API</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/nodes&quot;</span></span><br></pre></td></tr></table></figure>
-<p>或查看 Pod 的指标：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/pods&quot;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>Prometheus 拉取指标</strong>：<br>如果集群中部署了 Prometheus，可以直接通过其 UI 或 API 获取指标，使用 PromQL 查询资源利用率。</p>
-</li>
-</ol>
-<hr>
-<h3 id="Kubernetes-Metrics-的整体知识架构"><a href="#Kubernetes-Metrics-的整体知识架构" class="headerlink" title="Kubernetes Metrics 的整体知识架构"></a>Kubernetes Metrics 的整体知识架构</h3><h4 id="1-数据来源"><a href="#1-数据来源" class="headerlink" title="1. 数据来源"></a><strong>1. 数据来源</strong></h4><ul>
-<li><strong>Kubelet cAdvisor</strong>：提供节点和容器的资源使用数据。</li>
-<li><strong>Metrics Server</strong>：聚合来自 Kubelet 的指标，用于 Horizontal Pod Autoscaler（HPA）等。</li>
-<li><strong>Prometheus</strong>：一个全面的监控解决方案，用于存储和查询集群中所有相关的指标数据。</li>
-<li><strong>API Server 和 Controller 指标</strong>：暴露组件性能。</li>
-</ul>
-<h4 id="2-相关工具"><a href="#2-相关工具" class="headerlink" title="2. 相关工具"></a><strong>2. 相关工具</strong></h4><ul>
-<li><strong>kubectl top</strong>：快速查看节点和 Pod 的资源使用：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl top nodes</span><br><span class="line">kubectl top pods --namespace=&lt;namespace&gt;</span><br></pre></td></tr></table></figure></li>
-<li><strong>Prometheus&#x2F;Grafana</strong>：用于可视化和分析。</li>
-<li><strong>Custom Metrics Adapter</strong>：支持自定义指标。</li>
-</ul>
-<h4 id="3-最佳实践"><a href="#3-最佳实践" class="headerlink" title="3. 最佳实践"></a><strong>3. 最佳实践</strong></h4><ol>
-<li><strong>启用 Metrics Server</strong>：用于 HPA 和基本资源监控。</li>
-<li><strong>使用 Prometheus</strong>：集中化收集和存储指标。</li>
-<li><strong>建立告警系统</strong>：通过 Alertmanager 或其他工具设置告警。</li>
-<li><strong>分析指标覆盖范围</strong>：确保所有重要组件和工作负载都有相关指标暴露。</li>
-<li><strong>优化监控开销</strong>：根据需要采样和聚合数据，避免监控开销过大。</li>
-</ol>
-<hr>
-<h3 id="推荐文档与资源"><a href="#推荐文档与资源" class="headerlink" title="推荐文档与资源"></a>推荐文档与资源</h3><ol>
-<li><p><strong>Kubernetes 官方文档</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics/">Metrics for Kubernetes Components</a></li>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/cluster-administration/monitoring/">Monitoring Architecture</a></li>
-</ul>
-</li>
-<li><p><strong>Prometheus 官方文档</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://prometheus.io/docs/">Prometheus Documentation</a></li>
-</ul>
-</li>
-<li><p><strong>社区工具</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/prometheus-operator/kube-prometheus">Kube-prometheus-stack</a><br>一个推荐的 Prometheus Operator 部署方案。</li>
-</ul>
-</li>
-<li><p><strong>博客与案例</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://www.cncf.io/">CNCF Metrics Best Practices</a><br>关于监控和指标的实践指导。</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1647,7 +1661,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">67</span>
+          <span class="site-state-item-count">68</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1700,12 +1714,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">122k</span>
+    <span title="站点总字数">123k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:51</span>
+    <span title="站点阅读时长">1:52</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
