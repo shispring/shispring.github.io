@@ -3518,7 +3518,7 @@ validate</p>
   <entry>
     <title>create pod and state</title>
     <url>/2024/12/26/create-pod-and-state/</url>
-    <content><![CDATA[<h2 id="state"><a href="#state" class="headerlink" title="state"></a>state</h2><ul>
+    <content><![CDATA[<h2 id="pod状态"><a href="#pod状态" class="headerlink" title="pod状态"></a>pod状态</h2><ul>
 <li>CrashLoopBackOff : 容器退出，kubelet正在将它重启</li>
 <li>InvalidImageName : 无法解析镜像名称</li>
 <li>ImageInspectError : 无法校验镜像</li>
