@@ -3545,4 +3545,13 @@ validate</p>
         <category>k8s</category>
       </categories>
   </entry>
+  <entry>
+    <title>useful tools</title>
+    <url>/2024/12/26/useful-tools/</url>
+    <content><![CDATA[<h2 id="termtosvg"><a href="#termtosvg" class="headerlink" title="termtosvg"></a>termtosvg</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#使用pyenv安装多版本python</span><br><span class="line">which python</span><br><span class="line"></span><br><span class="line">pip3 install termtosvg</span><br><span class="line"></span><br><span class="line">#使用</span><br><span class="line">termtosvg</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line">#可以使用浏览器打开生成的svg</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
 </search>
