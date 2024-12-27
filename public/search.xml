@@ -3562,4 +3562,13 @@ validate</p>
         <category>tools</category>
       </categories>
   </entry>
+  <entry>
+    <title>openstack一些命令</title>
+    <url>/2024/12/27/openstack%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<h2 id="常规操作命令"><a href="#常规操作命令" class="headerlink" title="常规操作命令"></a>常规操作命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#计算</span><br><span class="line">openstack compute service list</span><br><span class="line"></span><br><span class="line">#网络</span><br><span class="line">openstack network agent list</span><br><span class="line">openstack network list</span><br><span class="line">openstack subnet list</span><br><span class="line">openstack router list</span><br><span class="line"></span><br><span class="line">#存储</span><br><span class="line">openstack volume list</span><br><span class="line">openstack volume snapshot list</span><br><span class="line"></span><br><span class="line">#安全组</span><br><span class="line">openstack security group list</span><br><span class="line"></span><br><span class="line">#配额</span><br><span class="line">openstack quota show --all-projects</span><br><span class="line"></span><br><span class="line">#项目</span><br><span class="line">openstack project list</span><br><span class="line"></span><br><span class="line">#镜像</span><br><span class="line">openstack image list</span><br><span class="line"></span><br><span class="line">#主机</span><br><span class="line">openstack host list</span><br><span class="line"></span><br><span class="line">#主机操作</span><br><span class="line">openstack server list</span><br><span class="line">openstack server create</span><br><span class="line">openstack server show</span><br><span class="line"></span><br><span class="line">#主机规格</span><br><span class="line">openstack flavor</span><br><span class="line"></span><br><span class="line">#端口</span><br><span class="line">openstack port list</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">openstack router</span><br><span class="line"></span><br><span class="line">#登录地址</span><br><span class="line">openstack console url show INSTANCE_UUID</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>openstack</category>
+      </categories>
+  </entry>
 </search>
