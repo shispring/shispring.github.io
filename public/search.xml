@@ -3799,4 +3799,168 @@ validate</p>
         <category>go</category>
       </categories>
   </entry>
+  <entry>
+    <title>grpc服务端TLS加密步骤及单元调试</title>
+    <url>/2024/12/31/grpc%E6%9C%8D%E5%8A%A1%E7%AB%AFTLS%E5%8A%A0%E5%AF%86%E6%AD%A5%E9%AA%A4%E5%8F%8A%E5%8D%95%E5%85%83%E8%B0%83%E8%AF%95/</url>
+    <content><![CDATA[<h2 id="github参考地址"><a href="#github参考地址" class="headerlink" title="github参考地址"></a>github参考地址</h2><blockquote>
+<p><a href="https://github.com/shispring/grpcdemo">https://github.com/shispring/grpcdemo</a></p>
+</blockquote>
+<h2 id="CA-证书制作："><a href="#CA-证书制作：" class="headerlink" title="CA 证书制作："></a>CA 证书制作：</h2><h3 id="1、生成-key-私钥文件"><a href="#1、生成-key-私钥文件" class="headerlink" title="1、生成.key  私钥文件"></a>1、生成.key  私钥文件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl genrsa -out ca.key 4096</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、生成证书"><a href="#2、生成证书" class="headerlink" title="2、生成证书"></a>2、生成证书</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#生成.csr 证书签名请求文件</span><br><span class="line">openssl req -new -key ca.key -out ca.csr  -subj &quot;/C=CN/ST=Beijing/L=Beijing/O=demo/OU=IT Department/CN=www.demo.cn&quot;</span><br><span class="line"></span><br><span class="line">#自签名生成.crt 证书文件</span><br><span class="line">openssl req -new -x509 -days 3650 -key ca.key -out ca.crt -config /opt/homebrew/etc/openssl@3/openssl.cnf \</span><br><span class="line">  -extensions v3_ca \</span><br><span class="line">  -subj &quot;/C=CN/ST=Beijing/L=Beijing/O=demo/OU=IT Department/CN=www.demo.cn&quot;</span><br></pre></td></tr></table></figure>
+
+<p>或者合成一步</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl req -new -x509 -days 3650 -key ca.key -out ca.crt \</span><br><span class="line">  -subj &quot;/C=CN/ST=Beijing/L=Beijing/O=demo/OU=IT Department/CN=www.demo.cn&quot; \</span><br><span class="line">  -config /opt/homebrew/etc/openssl@3/openssl.cnf \</span><br><span class="line">  -extensions v3_ca</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="服务端证书"><a href="#服务端证书" class="headerlink" title="服务端证书"></a>服务端证书</h2><h3 id="1、生成-key-私钥文件-1"><a href="#1、生成-key-私钥文件-1" class="headerlink" title="1、生成 .key 私钥文件"></a>1、生成 .key 私钥文件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl genrsa -out server.key 2048</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、生成-csr-证书签名请求文件"><a href="#2、生成-csr-证书签名请求文件" class="headerlink" title="2、生成 .csr 证书签名请求文件"></a>2、生成 .csr 证书签名请求文件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#查看openssl.conf</span><br><span class="line">openssl version -d</span><br><span class="line"></span><br><span class="line">#拷贝一份新的配置</span><br><span class="line">cp /opt/homebrew/etc/openssl@3/openssl.cnf server_openssl.cnf</span><br><span class="line"></span><br><span class="line">#添加SAN配置</span><br><span class="line">echo &quot;[SAN]&quot; &gt;&gt; server_openssl.cnf</span><br><span class="line">echo &quot;subjectAltName=DNS:*.demo.cn,DNS:www.demo.cn&quot; &gt;&gt; server_openssl.cnf</span><br><span class="line"></span><br><span class="line">#生成 .csr</span><br><span class="line">openssl req -new -key server.key -out server.csr -config server_openssl.cnf -reqexts SAN \</span><br><span class="line">  -subj &quot;/C=CN/ST=Beijing/L=Beijing/O=demo/OU=IT Department/CN=www.demo.cn&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3、签名生成-crt-证书文件"><a href="#3、签名生成-crt-证书文件" class="headerlink" title="3、签名生成.crt 证书文件"></a>3、签名生成.crt 证书文件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl x509 -req -days 3650 -in server.csr -out server.crt \</span><br><span class="line">  -CA ca.crt -CAkey ca.key -CAcreateserial \</span><br><span class="line">  -extensions SAN -extfile server_openssl.cnf</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="查看证书内容"><a href="#查看证书内容" class="headerlink" title="查看证书内容"></a>查看证书内容</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl x509 -in ./ca.crt -text -noout</span><br><span class="line">openssl x509 -in ./server.crt -text -noout</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">go test -v ./test/server_test.go </span><br><span class="line">go test -v ./test/client_test.go </span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="关于-subj-的使用与含义"><a href="#关于-subj-的使用与含义" class="headerlink" title="关于 -subj 的使用与含义"></a><strong>关于 <code>-subj</code> 的使用与含义</strong></h3><p><code>-subj</code> 参数用于在命令行中直接指定证书的主题信息，避免交互式输入。这是非交互式生成证书时非常常用的方式。</p>
+<h4 id="subj-参数的格式"><a href="#subj-参数的格式" class="headerlink" title="-subj 参数的格式"></a><strong><code>-subj</code> 参数的格式</strong></h4><p><code>-subj</code> 参数的值是一个以 <code>/</code> 分隔的字符串，每个字段的含义如下：</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>全称</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>C</code></td>
+<td>Country Name</td>
+<td>国家代码，需为两位 ISO 3166 国家代码</td>
+<td><code>C=CN</code></td>
+</tr>
+<tr>
+<td><code>ST</code></td>
+<td>State or Province Name</td>
+<td>州或省的名称（可选）</td>
+<td><code>ST=Beijing</code></td>
+</tr>
+<tr>
+<td><code>L</code></td>
+<td>Locality Name</td>
+<td>地区或城市名称</td>
+<td><code>L=Beijing</code></td>
+</tr>
+<tr>
+<td><code>O</code></td>
+<td>Organization Name</td>
+<td>组织名称（通常是公司名称）</td>
+<td><code>O=demo</code></td>
+</tr>
+<tr>
+<td><code>OU</code></td>
+<td>Organizational Unit</td>
+<td>组织部门名称（可选，通常是团队或部门名称）</td>
+<td><code>OU=IT Department</code></td>
+</tr>
+<tr>
+<td><code>CN</code></td>
+<td>Common Name</td>
+<td>通用名称，通常是域名或主机名</td>
+<td><code>CN=www.demo.cn</code></td>
+</tr>
+<tr>
+<td><code>emailAddress</code></td>
+<td>Email Address</td>
+<td>邮箱地址（可选）</td>
+<td><code>emailAddress=admin@demo.cn</code></td>
+</tr>
+</tbody></table>
+<h4 id="示例"><a href="#示例" class="headerlink" title="示例"></a><strong>示例</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">-subj <span class="string">&quot;/C=CN/ST=Beijing/L=Beijing/O=demo/OU=IT Department/CN=www.demo.cn&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a><strong>注意事项</strong></h3><ol>
+<li><p><strong>字段的匹配</strong>：</p>
+<ul>
+<li><code>CN</code>（Common Name）字段必须与您希望匹配的域名一致。例如，<code>CN=www.demo.cn</code> 表示该证书适用于 <code>www.demo.cn</code>。</li>
+<li>如果需要支持多个域名，请在扩展字段（如 <code>subjectAltName</code>）中添加更多域名，而不是只依赖 <code>CN</code>。</li>
+</ul>
+</li>
+<li><p><strong>格式正确性</strong>：</p>
+<ul>
+<li>每个字段必须以 <code>/</code> 开头，不能有多余的空格。</li>
+<li>如果某些字段为空，可以省略，但必须确保其他字段正确填写。</li>
+</ul>
+</li>
+<li><p><strong>兼容性问题</strong>：</p>
+<ul>
+<li><code>CN</code> 字段在现代证书中已逐渐被 <code>subjectAltName</code> 替代，因此推荐在配置文件中明确添加 <code>SAN</code> 扩展。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="Issuer-的含义"><a href="#Issuer-的含义" class="headerlink" title="Issuer 的含义"></a><strong>Issuer 的含义</strong></h3><p>在读取证书时，<code>Issuer</code> 表示签发该证书的实体信息，即证书的颁发者（CA）。以下是常见的字段及其含义：</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>C</code></td>
+<td>签发者所在国家代码</td>
+<td><code>C=CN</code></td>
+</tr>
+<tr>
+<td><code>ST</code></td>
+<td>签发者所在州或省份</td>
+<td><code>ST=Beijing</code></td>
+</tr>
+<tr>
+<td><code>L</code></td>
+<td>签发者所在城市</td>
+<td><code>L=Beijing</code></td>
+</tr>
+<tr>
+<td><code>O</code></td>
+<td>签发者组织名称</td>
+<td><code>O=demo Root CA</code></td>
+</tr>
+<tr>
+<td><code>OU</code></td>
+<td>签发者组织部门</td>
+<td><code>OU=Certificate Authority</code></td>
+</tr>
+<tr>
+<td><code>CN</code></td>
+<td>签发者的通用名称（通常是 CA 的名称）</td>
+<td><code>CN=demo Root CA</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="Issuer-和-Subject-的区别"><a href="#Issuer-和-Subject-的区别" class="headerlink" title="Issuer 和 Subject 的区别"></a><strong>Issuer 和 Subject 的区别</strong></h4><ul>
+<li>**<code>Issuer</code>**：表示证书的颁发者，即签署该证书的 CA。</li>
+<li>**<code>Subject</code>**：表示证书的持有者，即证书所代表的实体。</li>
+</ul>
+<hr>
+<h3 id="如何查看证书的-Issuer-信息"><a href="#如何查看证书的-Issuer-信息" class="headerlink" title="如何查看证书的 Issuer 信息"></a><strong>如何查看证书的 Issuer 信息</strong></h3><p>使用以下命令查看证书的详细信息：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> server.crt -text -noout</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><ol>
+<li><code>-subj</code> 提供了一种简洁、非交互式的方式指定证书的主题信息。</li>
+<li>证书的 <code>Issuer</code> 表示签发证书的 CA 信息，通常需要与信任链中的根证书匹配。</li>
+<li>在现代证书中，<code>subjectAltName</code> 的配置非常重要，<code>CN</code> 仅作为备用字段。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>go</category>
+      </categories>
+  </entry>
 </search>
