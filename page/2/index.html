@@ -184,6 +184,88 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/23/promQL%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/23/promQL%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">promQL整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-23 12:17:16 / 修改时间：12:19:05" itemprop="dateCreated datePublished" datetime="2024-12-23T12:17:16+08:00">2024-12-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>655</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="CPU维度统计集群资源碎片"><a href="#CPU维度统计集群资源碎片" class="headerlink" title="CPU维度统计集群资源碎片"></a>CPU维度统计集群资源碎片</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 根据需求定义变量：cluster、cores</span><br><span class="line">sum(</span><br><span class="line">  floor(</span><br><span class="line">    (</span><br><span class="line">      sum(</span><br><span class="line">        kube_node_status_allocatable&#123;cluster=~&quot;$cluster&quot;, resource=&quot;cpu&quot;, node=~&quot;^docker.*&quot;&#125; </span><br><span class="line">        * on(node) group_left() kube_node_labels&#123;cluster=~&quot;$cluster&quot;,label_node_role_kubernetes_io_worker=&quot;true&quot;&#125;</span><br><span class="line">      ) by (cluster, node)</span><br><span class="line">      -</span><br><span class="line">      sum(</span><br><span class="line">        kube_pod_container_resource_requests&#123;cluster=~&quot;$cluster&quot;, resource=&quot;cpu&quot;, node=~&quot;^docker.*&quot;&#125; </span><br><span class="line">        * on(node) group_left() kube_node_labels&#123;cluster=~&quot;$cluster&quot;,label_node_role_kubernetes_io_worker=&quot;true&quot;&#125;</span><br><span class="line">      ) by (cluster, node)</span><br><span class="line">    ) / $cores</span><br><span class="line">  ) &gt; 0</span><br><span class="line">) by (cluster)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/20/nfs%E9%83%A8%E7%BD%B2%E5%8F%8A%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1332,149 +1414,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/04/%E5%88%A0%E9%99%A4Terminatin%E7%8A%B6%E6%80%81%E7%9A%84%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/04/%E5%88%A0%E9%99%A4Terminatin%E7%8A%B6%E6%80%81%E7%9A%84%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/" class="post-title-link" itemprop="url">删除Terminatin状态的命名空间</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-12-04 14:27:55 / 修改时间：14:29:34" itemprop="dateCreated datePublished" datetime="2024-12-04T14:27:55+08:00">2024-12-04</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.6k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>命名空间一直处于Terminating问题分析</p>
-<pre><code>•	报错 Error from server (MethodNotAllowed) 表示某些资源类型的操作（如 GET 或 DELETE）在命名空间中不被支持，可能是某些残留的自定义资源（CRD）或特殊系统资源导致。
-•	部分资源仍存在于命名空间中，但 Kubernetes 无法正确清理，命名空间因而停留在 Terminating 状态。
-</code></pre>
-<p>解决方案</p>
-<p>方法 1：逐步清理残留资源</p>
-<pre><code>1.	列出命名空间中的资源：
-</code></pre>
-<p>使用以下命令列出所有可能影响命名空间删除的资源：</p>
-<p>kubectl api-resources –namespaced&#x3D;true -o name | xargs -n 1 kubectl -n jpshi-ca-test get –ignore-not-found</p>
-<p>如果某些资源显示报错（如 MethodNotAllowed），需要针对这些资源进一步操作。</p>
-<pre><code>2.	强制删除特定资源：
-</code></pre>
-<p>对于残留资源，可以手动清理：</p>
-<p>kubectl delete <resource-type> <resource-name> -n jpshi-ca-test –force –grace-period&#x3D;0</p>
-<p>如果资源类型无法直接删除，可能需要查看其定义并移除 finalizers。</p>
-<pre><code>3.	编辑特定资源的 Finalizers：
-</code></pre>
-<p>kubectl edit <resource-type> <resource-name> -n jpshi-ca-test</p>
-<p>在资源定义中删除类似以下内容：</p>
-<p>metadata:<br>  finalizers:</p>
-<ul>
-<li>example.finalizer.kubernetes.io</li>
-</ul>
-<p>方法 2：强制移除命名空间 Finalizers</p>
-<p>命名空间未删除的核心问题通常是 finalizers 阻止删除。以下命令会直接移除命名空间的 finalizers，强制删除：<br>    1.	编辑命名空间：</p>
-<p>kubectl edit namespace jpshi-ca-test</p>
-<p>删除以下字段：</p>
-<p>spec:<br>  finalizers:</p>
-<ul>
-<li><p>kubernetes</p>
-<ol start="2">
-<li>   或通过命令强制移除 Finalizers：</li>
-</ol>
-</li>
-</ul>
-<p>kubectl patch namespace jpshi-ca-test -p ‘{“metadata”:{“finalizers”:[]}}’ –type&#x3D;merge</p>
-<p>方法 3：彻底清理命名空间及其关联资源</p>
-<pre><code>1.	使用 kubectl proxy 调试：
-</code></pre>
-<p>通过 Kubernetes API 调用直接操作命名空间：</p>
-<p>curl -k -H “Content-Type: application&#x2F;json” -X PUT <br>–data ‘{“metadata”:{“finalizers”:[]}}’ <br><a target="_blank" rel="noopener" href="http://localhost:8001/api/v1/namespaces/jpshi-ca-test/finalize">http://localhost:8001/api/v1/namespaces/jpshi-ca-test/finalize</a></p>
-<pre><code>2.	删除命名空间及其资源：
-</code></pre>
-<p>如果仍无法删除，可以使用以下命令强制清理：</p>
-<p>kubectl delete namespace jpshi-ca-test –force –grace-period&#x3D;0</p>
-<p>方法 4：排查 CRD 资源问题</p>
-<p>如果命名空间中涉及 CRD（CustomResourceDefinitions），需要特别检查这些资源类型是否存在问题。<br>    1.	列出所有 CRD 实例：</p>
-<p>kubectl get crd</p>
-<pre><code>2.	删除与命名空间相关的 CRD 实例：
-</code></pre>
-<p>kubectl delete <crd-name> -n jpshi-ca-test –force –grace-period&#x3D;0</p>
-<pre><code>3.	检查并清理 CRD Finalizers：
-</code></pre>
-<p>kubectl patch <crd-name> -n jpshi-ca-test -p ‘{“metadata”:{“finalizers”:[]}}’ –type&#x3D;merge</p>
-<p>验证命名空间删除</p>
-<p>删除命名空间后，确认其状态：</p>
-<p>kubectl get namespaces</p>
-<p>注意事项</p>
-<pre><code>•	强制删除命名空间可能会导致资源不一致或孤立资源，请谨慎操作。
-•	如果问题持续未解决，可能需要检查 Kubernetes API Server 或 Controller Manager 的日志进行深入排查。
-</code></pre>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1546,14 +1485,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -1599,7 +1538,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">137k</span>
+    <span title="站点总字数">138k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>

@@ -3968,4 +3968,13 @@ validate</p>
         <category>go</category>
       </categories>
   </entry>
+  <entry>
+    <title>集群测试相关</title>
+    <url>/2025/01/07/%E9%9B%86%E7%BE%A4%E6%B5%8B%E8%AF%95%E7%9B%B8%E5%85%B3/</url>
+    <content><![CDATA[<h2 id="coreDNS压测"><a href="#coreDNS压测" class="headerlink" title="coreDNS压测"></a>coreDNS压测</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/guessi/dnsperf-bench</span><br><span class="line"></span><br><span class="line">##</span><br><span class="line">kubectl get configmap coredns -n kube-system -o jsonpath=&#x27;&#123;$.data.Corefile&#125;&#x27;</span><br><span class="line">kubectl get deployments coredns -n kube-system -o jsonpath=&#x27;&#123;$.spec.template.spec.containers[0].resources&#125;&#x27; | jq</span><br><span class="line">kubectl get service kube-dns -n kube-system -o jsonpath=&#x27;&#123;$.spec.clusterIP&#125;&#x27;</span><br><span class="line"></span><br><span class="line">kubectl top pods -n kube-system -l k8s-app=kube-dns</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 集群外测试</span><br><span class="line">dnsperf -s 11.33.162.100 -d domain_test.txt -Q 10000 -l 30</span><br><span class="line"></span><br><span class="line">#domain_test.txt内容</span><br><span class="line">www.google.com A</span><br><span class="line">www.amazon.com A</span><br><span class="line">kubernetes.default.svc.cluster.local A</span><br><span class="line">kube-dns.kube-system.svc.cluster.local A</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>test</category>
+      </categories>
+  </entry>
 </search>
