@@ -3986,4 +3986,13 @@ validate</p>
         <category>network</category>
       </categories>
   </entry>
+  <entry>
+    <title>linux一些命令</title>
+    <url>/2025/01/08/linux%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<h2 id="启动时间相关"><a href="#启动时间相关" class="headerlink" title="启动时间相关"></a>启动时间相关</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">w</span><br><span class="line">uptime</span><br><span class="line">who -b</span><br><span class="line">last reboot</span><br><span class="line">date -d &quot;`cut -f1 -d. /proc/uptime` seconds ago&quot;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
 </search>
