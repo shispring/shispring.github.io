@@ -3987,11 +3987,14 @@ validate</p>
       </categories>
   </entry>
   <entry>
-    <title>linux一些命令</title>
+    <title>linux性能问题排查指令</title>
     <url>/2025/01/08/linux%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/</url>
     <content><![CDATA[<h2 id="启动时间相关"><a href="#启动时间相关" class="headerlink" title="启动时间相关"></a>启动时间相关</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">w</span><br><span class="line">uptime</span><br><span class="line">who -b</span><br><span class="line">last reboot</span><br><span class="line">date -d &quot;`cut -f1 -d. /proc/uptime` seconds ago&quot;</span><br></pre></td></tr></table></figure>
 
-<h2 id="主机性能指标监控与分析指南"><a href="#主机性能指标监控与分析指南" class="headerlink" title="主机性能指标监控与分析指南"></a><strong>主机性能指标监控与分析指南</strong></h2><h4 id="1-CPU-性能监控"><a href="#1-CPU-性能监控" class="headerlink" title="1. CPU 性能监控"></a><strong>1. CPU 性能监控</strong></h4><table>
+<h2 id="主机性能指标监控与分析指南"><a href="#主机性能指标监控与分析指南" class="headerlink" title="主机性能指标监控与分析指南"></a><strong>主机性能指标监控与分析指南</strong></h2><blockquote>
+<p><a href="https://blog.csdn.net/u010420283/article/details/114502674">https://blog.csdn.net/u010420283/article/details/114502674</a></p>
+</blockquote>
+<h4 id="1-CPU-性能监控"><a href="#1-CPU-性能监控" class="headerlink" title="1. CPU 性能监控"></a><strong>1. CPU 性能监控</strong></h4><table>
 <thead>
 <tr>
 <th><strong>命令&#x2F;操作</strong></th>
