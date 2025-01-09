@@ -184,6 +184,79 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/18/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/18/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/" class="post-title-link" itemprop="url">负载均衡</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-18 12:18:07 / 修改时间：12:19:40" itemprop="dateCreated datePublished" datetime="2024-11-18T12:18:07+08:00">2024-11-18</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>0</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="https://raw.githubusercontent.com/shispring/picgo/master/lvs.svg" alt="lvs"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/18/yq/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1395,119 +1468,6 @@ validate</p>
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/" class="post-title-link" itemprop="url">pod重建|重启行为</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-11-01 17:45:45 / 修改时间：17:46:14" itemprop="dateCreated datePublished" datetime="2024-11-01T17:45:45+08:00">2024-11-01</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在Kubernetes中，<code>Deployment</code>的更新行为是有规律的。变更<code>Deployment</code>的某些字段会触发Pod重建或重启，而某些字段的变更则不会影响Pod的运行。以下是详细的总结：</p>
-<h3 id="触发Pod重建的行为"><a href="#触发Pod重建的行为" class="headerlink" title="触发Pod重建的行为"></a>触发Pod重建的行为</h3><p>以下更改会导致<code>Deployment</code>重新创建Pod，即：删除旧Pod并创建新Pod。</p>
-<ol>
-<li><strong>更新容器镜像</strong>：变更镜像的名称或标签（如从<code>v1</code>到<code>v2</code>）。</li>
-<li><strong>资源限制和请求</strong>：变更<code>resources.requests</code>或<code>resources.limits</code>。</li>
-<li><strong>环境变量</strong>：更改容器的环境变量（<code>env</code>字段）。</li>
-<li><strong>亲和性和反亲和性规则</strong>：修改或添加<code>affinity</code>和<code>antiAffinity</code>。</li>
-<li><strong>探针配置</strong>：更新<code>livenessProbe</code>或<code>readinessProbe</code>的配置。</li>
-<li><strong>卷挂载</strong>：改变<code>volumeMounts</code>或<code>volumes</code>字段。</li>
-<li><strong>initContainers</strong>或<strong>sidecar容器</strong>：添加、删除或更新init容器或sidecar容器。</li>
-<li><strong>Pod标签和注解</strong>：修改影响<code>PodSpec</code>中的<code>metadata.labels</code>或<code>metadata.annotations</code>会引发Pod重建。</li>
-<li><strong>端口配置</strong>：修改容器端口的配置。</li>
-</ol>
-<h3 id="触发Pod滚动更新但不完全重建的行为"><a href="#触发Pod滚动更新但不完全重建的行为" class="headerlink" title="触发Pod滚动更新但不完全重建的行为"></a>触发Pod滚动更新但不完全重建的行为</h3><p>一些行为会触发滚动更新，但不会删除所有Pod或引起中断：</p>
-<ol>
-<li><strong>RollingUpdate字段</strong>：变更<code>rollingUpdate</code>策略（如<code>maxUnavailable</code>或<code>maxSurge</code>），不会直接重建Pod，而是影响Pod的更新速率和方式。</li>
-<li>**Horizontal Pod Autoscaler (HPA)**：HPA的更新不会直接导致Pod重建，但可能会根据负载情况动态调整Pod数量。</li>
-</ol>
-<h3 id="不会导致Pod重建或重启的行为"><a href="#不会导致Pod重建或重启的行为" class="headerlink" title="不会导致Pod重建或重启的行为"></a>不会导致Pod重建或重启的行为</h3><p>以下行为仅影响控制层，不会直接对Pod产生重启或重建的影响：</p>
-<ol>
-<li><strong>Deployment注解和标签</strong>：在<code>Deployment</code>级别添加或修改注解和标签，不会影响Pod。</li>
-<li><strong>HPA</strong>的目标值调整（如<code>minReplicas</code>和<code>maxReplicas</code>）：更改不会重建现有Pod，而是动态扩展或缩减。</li>
-<li><strong>服务配置</strong>：更新Service或Ingress的配置不会影响已存在的Pod。</li>
-</ol>
-<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>可以使用以下命令验证某些更改是否触发了Pod重建：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout status deployment &lt;deployment-name&gt;  <span class="comment"># 检查Deployment是否正在进行滚动更新</span></span><br><span class="line">kubectl get replicaset -l &lt;app-label&gt;                <span class="comment"># 查看ReplicaSet状态，观察新旧ReplicaSet</span></span><br><span class="line">kubectl rollout <span class="built_in">history</span> deployment &lt;deployment-name&gt;  <span class="comment"># 查看变更历史</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
-<li><strong>会重建Pod</strong>：更新镜像、资源限制、环境变量、亲和性规则、探针、卷挂载、initContainers、Pod标签、端口。</li>
-<li><strong>不会重建Pod</strong>：变更HPA目标值、<code>rollingUpdate</code>策略、<code>Deployment</code>注解和标签、Service或Ingress配置。</li>
-</ul>
-<p>掌握这些更新行为有助于更灵活地管理Pod的生命周期。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1579,7 +1539,7 @@ validate</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-count">79</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1632,12 +1592,12 @@ validate</p>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">141k</span>
+    <span title="站点总字数">143k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">2:08</span>
+    <span title="站点阅读时长">2:10</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
