@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-01-09 11:10:22 / 修改时间：11:14:15" itemprop="dateCreated datePublished" datetime="2025-01-09T11:10:22+08:00">2025-01-09</time>
+              <time title="创建时间：2025-01-09 11:10:22 / 修改时间：11:27:57" itemprop="dateCreated datePublished" datetime="2025-01-09T11:10:22+08:00">2025-01-09</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -227,7 +227,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.7k</span>
+              <span>1.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -253,7 +253,7 @@
 <tr>
 <th><strong>命令</strong></th>
 <th><strong>指标&#x2F;参数</strong></th>
-<th><strong>说明&#x2F;分析</strong></th>
+<th><strong>说明</strong></th>
 </tr>
 </thead>
 <tbody><tr>
@@ -272,33 +272,35 @@
 <td>检查 CPU 是否因 I&#x2F;O 等待（<code>%iowait</code> 高）导致负载高。</td>
 </tr>
 <tr>
-<td><code>ps -eo pid,ppid,%cpu,cmd</code></td>
-<td><code>%CPU</code></td>
-<td>列出进程 CPU 使用率，辅助定位高 CPU 占用的进程。</td>
-</tr>
-<tr>
 <td><code>pidstat -p &lt;PID&gt;</code></td>
 <td><code>%CPU</code></td>
 <td>查看指定进程的 CPU 使用率，是否有异常高耗用。</td>
 </tr>
 <tr>
-<td><strong>关键分析</strong></td>
-<td></td>
-<td>- <strong><code>%idle</code> 低</strong>：CPU 使用率高，需排查高耗 CPU 进程。</td>
+<td><code>htop</code></td>
+<td>图形化监控</td>
+<td>更直观地查看高 CPU 使用率的进程和线程。</td>
 </tr>
 <tr>
-<td></td>
-<td></td>
-<td>- <strong><code>%iowait</code> 高</strong>：可能是磁盘或网络 I&#x2F;O 瓶颈。</td>
+<td><code>iotop</code></td>
+<td>CPU 列</td>
+<td>检查是否有 I&#x2F;O 相关的 CPU 消耗。</td>
 </tr>
 </tbody></table>
+<p><strong>关键分析</strong>：</p>
+<ul>
+<li><strong><code>%idle</code> 低</strong>：CPU 使用率高，需排查高耗 CPU 进程。</li>
+<li><strong><code>%iowait</code> 高</strong>：可能是磁盘或网络 I&#x2F;O 瓶颈。</li>
+<li><strong>单核高负载</strong>：检查是否为单线程任务导致瓶颈。</li>
+<li><strong>多核高负载</strong>：通常为并行任务占用，需要优化任务分配。</li>
+</ul>
 <hr>
 <h4 id="2-内存负载排查"><a href="#2-内存负载排查" class="headerlink" title="2. 内存负载排查"></a><strong>2. 内存负载排查</strong></h4><table>
 <thead>
 <tr>
 <th><strong>命令</strong></th>
 <th><strong>指标&#x2F;参数</strong></th>
-<th><strong>说明&#x2F;分析</strong></th>
+<th><strong>说明</strong></th>
 </tr>
 </thead>
 <tbody><tr>
@@ -327,23 +329,24 @@
 <td>分析进程的共享内存（<code>PSS</code>）和独占内存（<code>USS</code>）。</td>
 </tr>
 <tr>
-<td><strong>关键分析</strong></td>
-<td></td>
-<td>- 内存不足可能导致 <strong>swap</strong> 使用，进一步拖慢系统。</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>- 定位高内存占用进程，分析是否存在内存泄漏或优化空间。</td>
+<td><code>iotop</code></td>
+<td>SWAP 列</td>
+<td>检查是否有进程频繁使用 swap。</td>
 </tr>
 </tbody></table>
+<p><strong>关键分析</strong>：</p>
+<ul>
+<li><strong>内存不足</strong>：<code>free</code> 值低，可能需要扩展内存或优化内存使用。</li>
+<li><strong>swap 使用高</strong>：可能是内存不足导致，swap 会拖慢系统。</li>
+<li><strong>高内存占用进程</strong>：排查是否有内存泄漏或需优化程序逻辑。</li>
+</ul>
 <hr>
 <h4 id="3-磁盘-I-O-负载排查"><a href="#3-磁盘-I-O-负载排查" class="headerlink" title="3. 磁盘 I&#x2F;O 负载排查"></a><strong>3. 磁盘 I&#x2F;O 负载排查</strong></h4><table>
 <thead>
 <tr>
 <th><strong>命令</strong></th>
 <th><strong>指标&#x2F;参数</strong></th>
-<th><strong>说明&#x2F;分析</strong></th>
+<th><strong>说明</strong></th>
 </tr>
 </thead>
 <tbody><tr>
@@ -353,7 +356,7 @@
 </tr>
 <tr>
 <td><code>iotop</code></td>
-<td><code>DISK WRITE</code>, <code>DISK READ</code></td>
+<td>DISK READ&#x2F;WRITE 列</td>
 <td>实时查看进程的磁盘读写量，定位高 I&#x2F;O 进程。</td>
 </tr>
 <tr>
@@ -372,23 +375,24 @@
 <td>定位大文件或目录，清理磁盘空间。</td>
 </tr>
 <tr>
-<td><strong>关键分析</strong></td>
-<td></td>
-<td>- <strong><code>%util</code> 高，<code>await</code> 高</strong>：磁盘性能瓶颈，需优化磁盘读写。</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>- 定位高 I&#x2F;O 进程，检查是否有频繁读写操作。</td>
+<td><code>lsblk</code></td>
+<td>磁盘分区</td>
+<td>查看磁盘挂载和分区信息，判断是否有挂载错误。</td>
 </tr>
 </tbody></table>
+<p><strong>关键分析</strong>：</p>
+<ul>
+<li><strong><code>%util</code> 高，<code>await</code> 高</strong>：磁盘性能瓶颈，需优化磁盘读写或升级存储设备。</li>
+<li><strong>高 I&#x2F;O 进程</strong>：检查是否有频繁读写操作，优化程序逻辑。</li>
+<li><strong>磁盘空间不足</strong>：清理大文件或扩展磁盘空间。</li>
+</ul>
 <hr>
 <h4 id="4-网络-I-O-负载排查"><a href="#4-网络-I-O-负载排查" class="headerlink" title="4. 网络 I&#x2F;O 负载排查"></a><strong>4. 网络 I&#x2F;O 负载排查</strong></h4><table>
 <thead>
 <tr>
 <th><strong>命令</strong></th>
 <th><strong>指标&#x2F;参数</strong></th>
-<th><strong>说明&#x2F;分析</strong></th>
+<th><strong>说明</strong></th>
 </tr>
 </thead>
 <tbody><tr>
@@ -397,14 +401,9 @@
 <td>查看网络接口的接收&#x2F;发送数据包速率。</td>
 </tr>
 <tr>
-<td><code>ifconfig</code> 或 <code>ip a</code></td>
-<td><code>RX bytes</code>, <code>TX bytes</code></td>
-<td>检查网络接口的流量统计。</td>
-</tr>
-<tr>
-<td><code>nload</code></td>
-<td>图形化流量显示</td>
-<td>实时查看网络流量，定位高流量接口。</td>
+<td><code>iftop</code></td>
+<td>流量占用</td>
+<td>实时查看具体 IP 或端口的网络流量占用情况。</td>
 </tr>
 <tr>
 <td><code>netstat -ant</code> 或 <code>ss</code></td>
@@ -412,28 +411,29 @@
 <td>检查 TCP 连接是否过多（如大量 <code>TIME_WAIT</code>）。</td>
 </tr>
 <tr>
-<td><code>iftop</code></td>
-<td>流量占用</td>
-<td>实时查看具体 IP 或端口的网络流量占用情况。</td>
+<td><code>ip -s link</code></td>
+<td>接口状态</td>
+<td>查看网络接口的流量统计和错误信息。</td>
 </tr>
 <tr>
-<td><strong>关键分析</strong></td>
-<td></td>
-<td>- 高流量可能导致网络接口或带宽瓶颈。</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>- 检查是否存在异常的网络连接或恶意流量。</td>
+<td><code>nload</code></td>
+<td>图形化流量显示</td>
+<td>实时查看网络流量，定位高流量接口。</td>
 </tr>
 </tbody></table>
+<p><strong>关键分析</strong>：</p>
+<ul>
+<li><strong>高流量</strong>：检查是否有异常流量或带宽瓶颈。</li>
+<li><strong>TCP 连接过多</strong>：优化连接管理或增加负载均衡。</li>
+<li><strong>网络接口错误</strong>：检查是否有丢包或硬件问题。</li>
+</ul>
 <hr>
 <h4 id="5-系统整体性能排查"><a href="#5-系统整体性能排查" class="headerlink" title="5. 系统整体性能排查"></a><strong>5. 系统整体性能排查</strong></h4><table>
 <thead>
 <tr>
 <th><strong>命令</strong></th>
 <th><strong>指标&#x2F;参数</strong></th>
-<th><strong>说明&#x2F;分析</strong></th>
+<th><strong>说明</strong></th>
 </tr>
 </thead>
 <tbody><tr>
@@ -457,26 +457,34 @@
 <td>更直观地监控系统资源。</td>
 </tr>
 <tr>
-<td><strong>关键分析</strong></td>
-<td></td>
-<td>- 高负载但 CPU 使用率低，通常是 I&#x2F;O 或内存瓶颈。</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>- 结合 <code>vmstat</code> 和 <code>iostat</code> 等工具，定位具体瓶颈。</td>
+<td><code>iotop</code></td>
+<td>综合 I&#x2F;O 占用</td>
+<td>实时查看磁盘 I&#x2F;O 和 CPU 关联的进程。</td>
 </tr>
 </tbody></table>
+<p><strong>关键分析</strong>：</p>
+<ul>
+<li><strong>高负载但 CPU 使用率低</strong>：通常是 I&#x2F;O 或内存瓶颈。</li>
+<li><strong>运行队列高</strong>：表明任务处理速度跟不上，需分析具体瓶颈。</li>
+<li><strong>阻塞进程多</strong>：通常是 I&#x2F;O 或资源争用问题。</li>
+</ul>
 <hr>
-<h3 id="排查思路总结"><a href="#排查思路总结" class="headerlink" title="排查思路总结"></a><strong>排查思路总结</strong></h3><ol>
-<li><strong>系统整体检查</strong>: 从 <code>uptime</code> 或 <code>top</code> 查看负载高的原因（CPU、I&#x2F;O、内存）。</li>
-<li><strong>指标分析</strong>: 结合 <code>iostat</code>、<code>vmstat</code> 和 <code>sar</code> 等工具，定位具体资源瓶颈。</li>
-<li><strong>进程排查</strong>: 使用 <code>top</code>、<code>ps</code> 或 <code>iotop</code> 等工具，定位高资源消耗的进程。</li>
-<li><strong>优化建议</strong>:<ul>
-<li>高 CPU：优化代码逻辑，检查死循环或高频任务。</li>
-<li>高内存：检查内存泄漏，增加物理内存或优化程序。</li>
-<li>高 I&#x2F;O：优化磁盘读写，清理空间或升级存储设备。</li>
-<li>高网络：优化流量分发，限制异常流量。</li>
+<h3 id="总结与优化建议"><a href="#总结与优化建议" class="headerlink" title="总结与优化建议"></a><strong>总结与优化建议</strong></h3><ol>
+<li><strong>排查顺序</strong>：<ul>
+<li>先检查系统整体负载（<code>uptime</code>、<code>top</code>）。</li>
+<li>再分别检查 CPU、内存、磁盘 I&#x2F;O 和网络。</li>
+</ul>
+</li>
+<li><strong>结合工具</strong>：<ul>
+<li>使用 <code>iotop</code>、<code>htop</code> 等工具快速定位高资源占用的进程。</li>
+<li>使用 <code>sar</code>、<code>vmstat</code> 等工具分析历史数据。</li>
+</ul>
+</li>
+<li><strong>优化方向</strong>：<ul>
+<li>CPU：优化高耗任务或增加核数。</li>
+<li>内存：优化程序逻辑或扩展物理内存。</li>
+<li>磁盘 I&#x2F;O：减少频繁读写或升级存储设备。</li>
+<li>网络：优化流量分发或限制异常流量。</li>
 </ul>
 </li>
 </ol>
