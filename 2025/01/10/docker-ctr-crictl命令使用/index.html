@@ -22,13 +22,13 @@
 
   <meta name="description" content="命令对比   命令 docker ctr（containerd） crictl（kubernetes）    查看运行的容器 docker ps ctr task ls &#x2F; ctr container ls crictl ps   查看镜像 docker images ctr image ls &#x2F; ctr i ls crictl images   查看容器日志 docker l">
 <meta property="og:type" content="article">
-<meta property="og:title" content="docker ctr crictl命令使用">
+<meta property="og:title" content="docker ctr crictl nerdctl命令使用">
 <meta property="og:url" content="https://shispring.github.io/2025/01/10/docker-ctr-crictl%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="命令对比   命令 docker ctr（containerd） crictl（kubernetes）    查看运行的容器 docker ps ctr task ls &#x2F; ctr container ls crictl ps   查看镜像 docker images ctr image ls &#x2F; ctr i ls crictl images   查看容器日志 docker l">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-01-10T10:01:54.000Z">
-<meta property="article:modified_time" content="2025-01-10T10:14:35.542Z">
+<meta property="article:modified_time" content="2025-01-10T10:26:56.531Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>docker ctr crictl命令使用 | Hexo</title>
+  <title>docker ctr crictl nerdctl命令使用 | Hexo</title>
   
 
 
@@ -202,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          docker ctr crictl命令使用
+          docker ctr crictl nerdctl命令使用
         </h1>
 
         <div class="post-meta">
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-01-10 18:01:54 / 修改时间：18:14:35" itemprop="dateCreated datePublished" datetime="2025-01-10T18:01:54+08:00">2025-01-10</time>
+              <time title="创建时间：2025-01-10 18:01:54 / 修改时间：18:26:56" itemprop="dateCreated datePublished" datetime="2025-01-10T18:01:54+08:00">2025-01-10</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -238,7 +238,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.1k</span>
+              <span>2.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -364,9 +364,17 @@
 </tr>
 </tbody></table>
 <hr>
-<h2 id="ctr"><a href="#ctr" class="headerlink" title="ctr"></a>ctr</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- 查看containerd命名空间：ctr namespace ls</span><br><span class="line">- 查看containerd的镜像：ctr images ls（可指定命名空间，如ctr -n k8s.io images ls）</span><br><span class="line">- 拉取containerd的镜像：ctr -n k8s.io images pull &lt;image&gt;</span><br><span class="line">- 删除containerd的镜像：ctr -n k8s.io images rm &lt;image&gt;</span><br><span class="line">- 导出containerd的镜像：ctr -n k8s.io images export &lt;image&gt;</span><br><span class="line">- 导入containerd的镜像：ctr -n k8s.io image import &lt;image&gt;</span><br><span class="line">- 标记containerd的镜像（起别名）：ctr -n k8s.io images tag &lt;image&gt; &lt;alias&gt;</span><br><span class="line">- 运行containerd的容器：ctr -n k8s.io run &lt;container&gt;</span><br><span class="line">- 查看运行容器的task：ctr -n k8s.io task ls</span><br><span class="line">- 启动指定容器的task：ctr -n k8s.io task start &lt;container&gt;</span><br><span class="line">- 进入指定容器的task：ctr -n k8s.io task exec --exec-id &lt;id&gt; -t &lt;container&gt; /bin/bash</span><br><span class="line">- 删除指定容器的task：ctr -n k8s.io task rm -f &lt;container&gt;</span><br><span class="line">- 停止指定容器的task：ctr -n k8s.io task kill --signal &lt;signal&gt; &lt;container&gt;</span><br><span class="line">- 查看容器：ctr -n k8s.io c list</span><br><span class="line">- 删除容器：ctr -n k8s.io c rm &lt;container&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="ctr"><a href="#ctr" class="headerlink" title="ctr"></a>ctr</h2><blockquote>
+<p>ctr 是一个不受支持的，用于与 containerd 守护进程交互的调试和管理客户端 </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- 查看containerd命名空间：ctr namespace ls</span><br><span class="line">- 查看containerd的镜像：ctr images ls（可指定命名空间，如ctr -n k8s.io images ls）</span><br><span class="line">- 拉取containerd的镜像：ctr -n k8s.io images pull &lt;image&gt;</span><br><span class="line">- 删除containerd的镜像：ctr -n k8s.io images rm &lt;image&gt;</span><br><span class="line">- 导出containerd的镜像：ctr -n k8s.io images export &lt;image&gt;</span><br><span class="line">- 导入containerd的镜像：ctr -n k8s.io image import &lt;image&gt;</span><br><span class="line">- 标记containerd的镜像（起别名）：ctr -n k8s.io images tag &lt;image&gt; &lt;alias&gt;</span><br><span class="line">- 运行containerd的容器：ctr -n k8s.io run &lt;container&gt;</span><br><span class="line">- 查看运行容器的task：ctr -n k8s.io task ls</span><br><span class="line">- 启动指定容器的task：ctr -n k8s.io task start &lt;container&gt;</span><br><span class="line">- 进入指定容器的task：ctr -n k8s.io task exec --exec-id &lt;id&gt; -t &lt;container&gt; /bin/bash</span><br><span class="line">- 删除指定容器的task：ctr -n k8s.io task rm -f &lt;container&gt;</span><br><span class="line">- 停止指定容器的task：ctr -n k8s.io task kill --signal &lt;signal&gt; &lt;container&gt;</span><br><span class="line">- 查看容器：ctr -n k8s.io c list</span><br><span class="line">- 删除容器：ctr -n k8s.io c rm &lt;container&gt;</span><br></pre></td></tr></table></figure>
 
-<h2 id="crictl"><a href="#crictl" class="headerlink" title="crictl"></a>crictl</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">- 查看镜像：crictl images</span><br><span class="line">- 拉取镜像：crictl pull &lt;image-name&gt;:&lt;tag&gt;</span><br><span class="line">- 删除镜像：crictl rmi &lt;image-id&gt;</span><br><span class="line">- 列出当前运行的容器：crictl ps</span><br><span class="line">- 列出所有容器（包括已停止的）：crictl ps -a</span><br><span class="line">- 查看指定容器的详细信息：crictl inspect &lt;container-id&gt;</span><br><span class="line">- 停止指定ID的容器：crictl stop &lt;container-id&gt;</span><br><span class="line">- 删除指定ID的容器：crictl rm &lt;container-id&gt;</span><br><span class="line">- 列出当前运行的Pod：crictl pods</span><br><span class="line">- 查看指定Pod的详细信息：crictl inspectp &lt;pod-id&gt;</span><br><span class="line">- 停止指定ID的Pod：crictl stopp &lt;pod-id&gt;</span><br><span class="line">- 删除指定ID的Pod：crictl rmp &lt;pod-id&gt;</span><br><span class="line">- 获取指定容器的日志输出：crictl logs &lt;container-id&gt;</span><br><span class="line">- 列出指定容器的资源使用统计信息：crictl stats &lt;container-id&gt;</span><br><span class="line">- 列出指定Pod的资源使用统计信息：crictl statsp &lt;pod-id&gt;</span><br><span class="line">- 显示crictl和容器运行时的版本信息：crictl version</span><br><span class="line">- 在运行的容器中执行指定的命令：crictl exec -it &lt;container-id&gt; -- &lt;command&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="crictl"><a href="#crictl" class="headerlink" title="crictl"></a>crictl</h2><blockquote>
+<p>crictl 是一个符合 CRI 接口规范的命令行工具，通常用于检查和管理 kubelet 节点上的容器运行时和镜像</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">- 查看镜像：crictl images</span><br><span class="line">- 拉取镜像：crictl pull &lt;image-name&gt;:&lt;tag&gt;</span><br><span class="line">- 删除镜像：crictl rmi &lt;image-id&gt;</span><br><span class="line">- 列出当前运行的容器：crictl ps</span><br><span class="line">- 列出所有容器（包括已停止的）：crictl ps -a</span><br><span class="line">- 查看指定容器的详细信息：crictl inspect &lt;container-id&gt;</span><br><span class="line">- 停止指定ID的容器：crictl stop &lt;container-id&gt;</span><br><span class="line">- 删除指定ID的容器：crictl rm &lt;container-id&gt;</span><br><span class="line">- 列出当前运行的Pod：crictl pods</span><br><span class="line">- 查看指定Pod的详细信息：crictl inspectp &lt;pod-id&gt;</span><br><span class="line">- 停止指定ID的Pod：crictl stopp &lt;pod-id&gt;</span><br><span class="line">- 删除指定ID的Pod：crictl rmp &lt;pod-id&gt;</span><br><span class="line">- 获取指定容器的日志输出：crictl logs &lt;container-id&gt;</span><br><span class="line">- 列出指定容器的资源使用统计信息：crictl stats &lt;container-id&gt;</span><br><span class="line">- 列出指定Pod的资源使用统计信息：crictl statsp &lt;pod-id&gt;</span><br><span class="line">- 显示crictl和容器运行时的版本信息：crictl version</span><br><span class="line">- 在运行的容器中执行指定的命令：crictl exec -it &lt;container-id&gt; -- &lt;command&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="nerdctl"><a href="#nerdctl" class="headerlink" title="nerdctl"></a>nerdctl</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- nerdctl run：在新容器中运行命令</span><br><span class="line">- nerdctl exec：在正在运行的容器中运行命令</span><br><span class="line">- nerdctl create : 创建一个新容器</span><br><span class="line">- nerdctl logs : 获取容器日志</span><br><span class="line">- nerdctl start：启动一个或多个正在运行的容器。</span><br><span class="line">- nerdctl stop：停止一个或多个正在运行的容器。</span><br><span class="line">- nerdctl restart：重启一个或多个正在运行的容器。</span><br><span class="line">- nerdctl rm/rmi：删除一个或多个容器/图像。</span><br><span class="line">- nerdctl container prune：删除所有停止的容器。</span><br><span class="line">- nerdctl build：从 Dockerfile 构建图像。</span><br><span class="line">- nerdctl pull/push：从注册表中拉取/推送图像。</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -447,7 +455,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E5%AF%B9%E6%AF%94"><span class="nav-number">1.</span> <span class="nav-text">命令对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ctr"><span class="nav-number">2.</span> <span class="nav-text">ctr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#crictl"><span class="nav-number">3.</span> <span class="nav-text">crictl</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E5%AF%B9%E6%AF%94"><span class="nav-number">1.</span> <span class="nav-text">命令对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ctr"><span class="nav-number">2.</span> <span class="nav-text">ctr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#crictl"><span class="nav-number">3.</span> <span class="nav-text">crictl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nerdctl"><span class="nav-number">4.</span> <span class="nav-text">nerdctl</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -521,7 +529,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">2:14</span>
+    <span title="站点阅读时长">2:15</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
