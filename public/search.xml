@@ -4743,4 +4743,164 @@ validate</p>
         <category>docker</category>
       </categories>
   </entry>
+  <entry>
+    <title>ipvsadm与iptables一些命令</title>
+    <url>/2025/01/10/ipvsadm%E4%B8%8Eiptables%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<h3 id="iptables-用法表"><a href="#iptables-用法表" class="headerlink" title="iptables 用法表"></a><strong><code>iptables</code> 用法表</strong></h3><table>
+<thead>
+<tr>
+<th><strong>功能</strong></th>
+<th><strong>命令</strong></th>
+<th><strong>实例</strong></th>
+<th><strong>含义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>查看当前规则</td>
+<td><code>iptables -L -n -v</code></td>
+<td><code>iptables -L -n -v</code></td>
+<td>列出所有链规则，显示计数器、字节数，并以数字形式显示 IP 和端口。</td>
+</tr>
+<tr>
+<td>添加允许规则</td>
+<td><code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code></td>
+<td><code>iptables -A INPUT -p tcp --dport 80 -j ACCEPT</code></td>
+<td>允许所有 TCP 流量通过 80 端口进入。</td>
+</tr>
+<tr>
+<td>拒绝特定 IP 流量</td>
+<td><code>iptables -A INPUT -s 192.168.1.100 -j DROP</code></td>
+<td><code>iptables -A INPUT -s 192.168.1.100 -j DROP</code></td>
+<td>阻止来自 192.168.1.100 的所有流量。</td>
+</tr>
+<tr>
+<td>删除规则</td>
+<td><code>iptables -D INPUT &lt;rule-number&gt;</code></td>
+<td><code>iptables -D INPUT 1</code></td>
+<td>删除 INPUT 链中的第 1 条规则。</td>
+</tr>
+<tr>
+<td>清空所有规则</td>
+<td><code>iptables -F</code></td>
+<td><code>iptables -F</code></td>
+<td>清空所有链中的规则。</td>
+</tr>
+<tr>
+<td>保存规则</td>
+<td><code>iptables-save &gt; /etc/iptables.rules</code></td>
+<td><code>iptables-save &gt; /etc/iptables.rules</code></td>
+<td>将当前规则保存到文件。</td>
+</tr>
+<tr>
+<td>恢复规则</td>
+<td><code>iptables-restore &lt; /etc/iptables.rules</code></td>
+<td><code>iptables-restore &lt; /etc/iptables.rules</code></td>
+<td>从文件恢复规则。</td>
+</tr>
+<tr>
+<td>允许特定网段访问</td>
+<td><code>iptables -A INPUT -p tcp -s 192.168.1.0/24 --dport 3306 -j ACCEPT</code></td>
+<td><code>iptables -A INPUT -p tcp -s 192.168.1.0/24 --dport 3306 -j ACCEPT</code></td>
+<td>允许来自 192.168.1.0&#x2F;24 网段的流量访问 3306 端口（MySQL）。</td>
+</tr>
+<tr>
+<td>设置默认策略</td>
+<td><code>iptables -P INPUT DROP</code></td>
+<td><code>iptables -P INPUT DROP</code></td>
+<td>将 INPUT 链的默认策略设置为丢弃所有流量。</td>
+</tr>
+<tr>
+<td>NAT 转发规则</td>
+<td><code>iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to-destination 192.168.1.10:80</code></td>
+<td><code>iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to-destination 10.0.0.2:80</code></td>
+<td>将所有访问本机 8080 端口的流量转发到 192.168.1.10 的 80 端口。</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="ipvsadm-用法表"><a href="#ipvsadm-用法表" class="headerlink" title="ipvsadm 用法表"></a><strong><code>ipvsadm</code> 用法表</strong></h3><table>
+<thead>
+<tr>
+<th><strong>功能</strong></th>
+<th><strong>命令</strong></th>
+<th><strong>实例</strong></th>
+<th><strong>含义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>查看当前规则</td>
+<td><code>ipvsadm -L -n</code></td>
+<td><code>ipvsadm -L -n</code></td>
+<td>列出所有虚拟服务和真实服务器的详细信息。</td>
+</tr>
+<tr>
+<td>添加虚拟服务</td>
+<td><code>ipvsadm -A -t &lt;VIP&gt;:&lt;PORT&gt; -s &lt;SCHEDULER&gt;</code></td>
+<td><code>ipvsadm -A -t 192.168.1.100:80 -s rr</code></td>
+<td>添加一个虚拟服务，VIP 为 192.168.1.100，端口 80，调度算法为轮询（<code>rr</code>）。</td>
+</tr>
+<tr>
+<td>添加真实服务器</td>
+<td><code>ipvsadm -a -t &lt;VIP&gt;:&lt;PORT&gt; -r &lt;RIP&gt;:&lt;PORT&gt; -m</code></td>
+<td><code>ipvsadm -a -t 192.168.1.100:80 -r 192.168.1.101:80 -m</code></td>
+<td>为虚拟服务添加真实服务器，RIP 为 192.168.1.101，端口 80，使用 NAT 模式。</td>
+</tr>
+<tr>
+<td>删除虚拟服务</td>
+<td><code>ipvsadm -D -t &lt;VIP&gt;:&lt;PORT&gt;</code></td>
+<td><code>ipvsadm -D -t 192.168.1.100:80</code></td>
+<td>删除 VIP 为 192.168.1.100，端口为 80 的虚拟服务。</td>
+</tr>
+<tr>
+<td>删除真实服务器</td>
+<td><code>ipvsadm -d -t &lt;VIP&gt;:&lt;PORT&gt; -r &lt;RIP&gt;:&lt;PORT&gt;</code></td>
+<td><code>ipvsadm -d -t 192.168.1.100:80 -r 192.168.1.101:80</code></td>
+<td>删除虚拟服务中指定的真实服务器。</td>
+</tr>
+<tr>
+<td>设置连接超时</td>
+<td><code>ipvsadm --set &lt;tcp_timeout&gt; &lt;tcpfin_timeout&gt; &lt;udp_timeout&gt;</code></td>
+<td><code>ipvsadm --set 900 120 300</code></td>
+<td>设置 TCP 连接超时为 900 秒，TCP FIN 等待时间为 120 秒，UDP 超时为 300 秒。</td>
+</tr>
+<tr>
+<td>查看服务统计</td>
+<td><code>ipvsadm -L -n --stats</code></td>
+<td><code>ipvsadm -L -n --stats</code></td>
+<td>显示虚拟服务的统计信息，包括请求数、连接数等。</td>
+</tr>
+<tr>
+<td>保存规则</td>
+<td><code>ipvsadm-save &gt; /etc/ipvs.rules</code></td>
+<td><code>ipvsadm-save &gt; /etc/ipvs.rules</code></td>
+<td>保存当前 IPVS 配置到文件中。</td>
+</tr>
+<tr>
+<td>恢复规则</td>
+<td><code>ipvsadm-restore &lt; /etc/ipvs.rules</code></td>
+<td><code>ipvsadm-restore &lt; /etc/ipvs.rules</code></td>
+<td>从文件中恢复 IPVS 配置。</td>
+</tr>
+<tr>
+<td>清空所有规则</td>
+<td><code>ipvsadm -C</code></td>
+<td><code>ipvsadm -C</code></td>
+<td>清空所有虚拟服务和真实服务器规则。</td>
+</tr>
+<tr>
+<td>DR 模式的真实服务器</td>
+<td><code>ipvsadm -a -t &lt;VIP&gt;:&lt;PORT&gt; -r &lt;RIP&gt;:&lt;PORT&gt; -g</code></td>
+<td><code>ipvsadm -a -t 192.168.1.100:80 -r 192.168.1.101:80 -g</code></td>
+<td>添加一个 DR 模式的真实服务器。</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><ul>
+<li><strong><code>iptables</code></strong> 主要用于管理 Linux 防火墙规则，控制网络流量的访问策略。</li>
+<li><strong><code>ipvsadm</code></strong> 是 LVS（Linux Virtual Server）组件的用户空间工具，用于配置和管理负载均衡规则。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
 </search>
