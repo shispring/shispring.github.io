@@ -2102,6 +2102,8 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <h2 id="easydict-超级好用的OCR-翻译工具"><a href="#easydict-超级好用的OCR-翻译工具" class="headerlink" title="easydict : 超级好用的OCR 翻译工具"></a>easydict : 超级好用的OCR 翻译工具</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/tisfeng/Easydict</span><br></pre></td></tr></table></figure>
 
 <h2 id="cmatrix-黑客帝国代码雨"><a href="#cmatrix-黑客帝国代码雨" class="headerlink" title="cmatrix : 黑客帝国代码雨"></a>cmatrix : 黑客帝国代码雨</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">brew install cmatrix</span><br></pre></td></tr></table></figure>
+
+<h2 id="摘录"><a href="#摘录" class="headerlink" title="摘录"></a>摘录</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 阿里云分享</span><br><span class="line">https://mp.weixin.qq.com/s/2qgs4JYOJFCmrxHMxtctyA</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>mac</category>
