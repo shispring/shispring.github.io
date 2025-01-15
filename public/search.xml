@@ -913,9 +913,6 @@
 <h3 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5. 参考文档"></a><strong>5. 参考文档</strong></h3><ul>
 <li><a href="https://github.com/kubernetes/client-go/tree/master/util/workqueue">client-go WorkQueue 实现</a></li>
 </ul>
-<h3 id="tips"><a href="#tips" class="headerlink" title="tips"></a>tips</h3><ul>
-<li>watch接口是对list接口的一种改进，在调用watch接口后，首先会一次性返回list的数据，同时会保持会话连接，后续的接口对象的curd，都会产生事件由apiserver将变更数据推送给调用端，调用端接收数据后，再更新初始接收到的list的全量数据以及其他操作</li>
-</ul>
 ]]></content>
       <categories>
         <category>k8s</category>
@@ -1020,7 +1017,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
   <entry>
     <title>k8s api server接口交互</title>
     <url>/2024/09/29/k8s-api-server%E6%8E%A5%E5%8F%A3%E4%BA%A4%E4%BA%92/</url>
-    <content><![CDATA[<h3 id="查看api方法："><a href="#查看api方法：" class="headerlink" title="查看api方法："></a>查看api方法：</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw /</span><br><span class="line">kubectl get --raw /apis/apps/v1 | jq .resources[].name</span><br><span class="line"></span><br><span class="line">或者开启apiserver</span><br><span class="line">kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">curl http://127.0.0.1:8080/apis/batch/v1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#通过kubectl获取url请求</span></span><br><span class="line">kubectl get pod &#123;podName&#125; -v=9</span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<h3 id="查看api方法："><a href="#查看api方法：" class="headerlink" title="查看api方法："></a>查看api方法：</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get --raw /</span><br><span class="line">kubectl get --raw /apis/apps/v1 | jq .resources[].name</span><br><span class="line"></span><br><span class="line">或者开启apiserver</span><br><span class="line">kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">curl http://127.0.0.1:8080/apis/batch/v1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#通过kubectl获取url请求</span></span><br><span class="line">kubectl get pod &#123;podName&#125; -v=9</span><br><span class="line"></span><br><span class="line"><span class="comment">#短连接</span></span><br><span class="line">- kubectl get xxx</span><br><span class="line"><span class="comment">#长连接</span></span><br><span class="line">- watch接口是对list接口的一种改进，在调用watch接口后，首先会一次性返回list的数据，同时会保持会话连接，后续的接口对象的curd，都会产生事件由apiserver将变更数据推送给调用端，调用端接收数据后，再</span><br><span class="line">更新初始接收到的list的全量数据以及其他操作</span><br><span class="line"><span class="comment">#client-go informer机制</span></span><br><span class="line">- watch依然比较麻烦，毕竟list获取的数据以及后续watch到的数据，需要调用端在内部处理和更新缓存。</span><br></pre></td></tr></table></figure>
 
 <h3 id="api结构及原理"><a href="#api结构及原理" class="headerlink" title="api结构及原理"></a>api结构及原理</h3><p><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/55.jpg?raw=true"><br><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/87.jpg?raw=true"></p>
 ]]></content>
