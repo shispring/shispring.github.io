@@ -4606,7 +4606,10 @@ validate</p>
 <li><strong>阻塞进程多</strong>：通常是 I&#x2F;O 或资源争用问题。</li>
 </ul>
 <hr>
-<h3 id="总结与优化建议"><a href="#总结与优化建议" class="headerlink" title="总结与优化建议"></a><strong>总结与优化建议</strong></h3><ol>
+<h3 id="总结与优化建议"><a href="#总结与优化建议" class="headerlink" title="总结与优化建议"></a><strong>总结与优化建议</strong></h3><blockquote>
+<p><a href="https://blog.51cto.com/linhuchong/5241886">https://blog.51cto.com/linhuchong/5241886</a></p>
+</blockquote>
+<ol>
 <li><strong>排查顺序</strong>：<ul>
 <li>先检查系统整体负载（<code>uptime</code>、<code>top</code>）。</li>
 <li>再分别检查 CPU、内存、磁盘 I&#x2F;O 和网络。</li>
