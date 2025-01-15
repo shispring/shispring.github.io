@@ -913,6 +913,9 @@
 <h3 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5. 参考文档"></a><strong>5. 参考文档</strong></h3><ul>
 <li><a href="https://github.com/kubernetes/client-go/tree/master/util/workqueue">client-go WorkQueue 实现</a></li>
 </ul>
+<h3 id="tips"><a href="#tips" class="headerlink" title="tips"></a>tips</h3><ul>
+<li>watch接口是对list接口的一种改进，在调用watch接口后，首先会一次性返回list的数据，同时会保持会话连接，后续的接口对象的curd，都会产生事件由apiserver将变更数据推送给调用端，调用端接收数据后，再更新初始接收到的list的全量数据以及其他操作</li>
+</ul>
 ]]></content>
       <categories>
         <category>k8s</category>
