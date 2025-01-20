@@ -4935,6 +4935,14 @@ validate</p>
 <h2 id="lnav"><a href="#lnav" class="headerlink" title="lnav"></a>lnav</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/tstack/lnav</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#用法</span><br><span class="line">lnav /var/log/messages</span><br><span class="line">journalctl -a -o json | lnav</span><br><span class="line"></span><br><span class="line">#如果使用 systemd v236 或更新版本，输出字段可以限制为lnav实际识别的字段，以提高效率：</span><br><span class="line">journalctl -o json --output-fields=MESSAGE,PRIORITY,_PID,SYSLOG_IDENTIFIER,_SYSTEMD_UNIT | lnav</span><br></pre></td></tr></table></figure>
 
 <h2 id="lancet"><a href="#lancet" class="headerlink" title="lancet"></a>lancet</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/duke-git/lancet</span><br></pre></td></tr></table></figure>
+
+<h2 id="oha"><a href="#oha" class="headerlink" title="oha"></a>oha</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/hatoo/oha</span><br></pre></td></tr></table></figure>
+
+<h2 id="icones"><a href="#icones" class="headerlink" title="icones"></a>icones</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/antfu-collective/icones</span><br></pre></td></tr></table></figure>
+
+<h2 id="go2rtc"><a href="#go2rtc" class="headerlink" title="go2rtc"></a>go2rtc</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/AlexxIT/go2rtc</span><br></pre></td></tr></table></figure>
+
+<h2 id="白噪音"><a href="#白噪音" class="headerlink" title="白噪音"></a>白噪音</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://moodist.mvze.net/</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>tools</category>
