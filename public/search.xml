@@ -4931,6 +4931,10 @@ validate</p>
     <content><![CDATA[<h2 id="gdu"><a href="#gdu" class="headerlink" title="gdu"></a>gdu</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/dundee/gdu</span><br></pre></td></tr></table></figure>
 
 <h2 id="chsrc"><a href="#chsrc" class="headerlink" title="chsrc"></a>chsrc</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/RubyMetric/chsrc</span><br></pre></td></tr></table></figure>
+
+<h2 id="lnav"><a href="#lnav" class="headerlink" title="lnav"></a>lnav</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/tstack/lnav</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#用法</span><br><span class="line">lnav /var/log/messages</span><br><span class="line">journalctl -a -o json | lnav</span><br><span class="line"></span><br><span class="line">#如果使用 systemd v236 或更新版本，输出字段可以限制为lnav实际识别的字段，以提高效率：</span><br><span class="line">journalctl -o json --output-fields=MESSAGE,PRIORITY,_PID,SYSLOG_IDENTIFIER,_SYSTEMD_UNIT | lnav</span><br></pre></td></tr></table></figure>
+
+<h2 id="lancet"><a href="#lancet" class="headerlink" title="lancet"></a>lancet</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/duke-git/lancet</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>tools</category>
