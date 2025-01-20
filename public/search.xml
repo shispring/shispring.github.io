@@ -4925,4 +4925,15 @@ validate</p>
         <category>linux</category>
       </categories>
   </entry>
+  <entry>
+    <title>intresting tools</title>
+    <url>/2025/01/20/intresting-tools/</url>
+    <content><![CDATA[<h2 id="gdu"><a href="#gdu" class="headerlink" title="gdu"></a>gdu</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/dundee/gdu</span><br></pre></td></tr></table></figure>
+
+<h2 id="chsrc"><a href="#chsrc" class="headerlink" title="chsrc"></a>chsrc</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/RubyMetric/chsrc</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
 </search>
