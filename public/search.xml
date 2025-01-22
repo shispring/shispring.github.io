@@ -4954,4 +4954,13 @@ validate</p>
         <category>tools</category>
       </categories>
   </entry>
+  <entry>
+    <title>linux配置oh-my-posh</title>
+    <url>/2025/01/22/linux%E9%85%8D%E7%BD%AEoh-my-posh/</url>
+    <content><![CDATA[<h3 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#下载安装</span><br><span class="line">curl -s https://ohmyposh.dev/install.sh | bash -s</span><br><span class="line">oh-my-posh --version</span><br><span class="line">oh-my-posh get shell</span><br><span class="line"></span><br><span class="line">#下载主题</span><br><span class="line">mkdir -p ~/.poshthemes</span><br><span class="line">wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O ~/.poshthemes/themes.zip</span><br><span class="line">unzip ~/.poshthemes/themes.zip -d ~/.poshthemes</span><br><span class="line">rm ~/.poshthemes/themes.zip</span><br><span class="line"></span><br><span class="line">#设置主题文件的权限</span><br><span class="line">chmod u+rw ~/.poshthemes/*.json</span><br><span class="line"></span><br><span class="line">#编辑~/.bashrc (在文件末尾添加以下内容):</span><br><span class="line">eval &quot;$(oh-my-posh init bash --config ~/.poshthemes/robbyrussell.omp.json)&quot;</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
 </search>
