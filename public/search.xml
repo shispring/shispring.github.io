@@ -4959,6 +4959,7 @@ validate</p>
 <h2 id="go2rtc"><a href="#go2rtc" class="headerlink" title="go2rtc"></a>go2rtc</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/AlexxIT/go2rtc</span><br></pre></td></tr></table></figure>
 
 <h2 id="白噪音"><a href="#白噪音" class="headerlink" title="白噪音"></a>白噪音</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://moodist.mvze.net/</span><br></pre></td></tr></table></figure>
+<h2 id="freeze-生成代码图片的终端工具"><a href="#freeze-生成代码图片的终端工具" class="headerlink" title="freeze :生成代码图片的终端工具"></a>freeze :生成代码图片的终端工具</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/charmbracelet/freeze</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>tools</category>
