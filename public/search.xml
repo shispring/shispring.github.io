@@ -3031,8 +3031,11 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <li>source .bash_profile</li>
 </ul>
 <h2 id="安装tips"><a href="#安装tips" class="headerlink" title="安装tips"></a>安装tips</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#方式一：因为pyenv会自动到github上下载，速度超慢，因此推荐第二种方式</span><br><span class="line">$ pyenv install 3.12.2 -v  #-v 以日志模式显示安装过程</span><br><span class="line"></span><br><span class="line">#方式二：使用curl或者wget下载到~/.pyenv/cache下，然后再用pyenv安装。软件源可以用自己熟悉的镜像源</span><br><span class="line">$ cd ~/.pyenv</span><br><span class="line">$ sudo mkdir cache</span><br><span class="line">$ sudo wget -c https://mirrors.huaweicloud.com/python/3.12.2/Python-3.12.2.tar.xz -P  ~/.pyenv/cache/</span><br><span class="line">$ pyenv install 3.12.2 -v</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<hr>
 <h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#查看所有可用的Python版本</span><br><span class="line">pyenv install --list</span><br><span class="line"></span><br><span class="line">#列出本地可用的Python版本</span><br><span class="line">pyenv versions</span><br><span class="line"></span><br><span class="line">#生效范围不同，当前shell可用</span><br><span class="line">pyenv shell 3.12.2</span><br><span class="line">#当前目录</span><br><span class="line">pyenv local 3.12.2</span><br><span class="line">#全局</span><br><span class="line">pyenv global 3.12.2</span><br><span class="line"></span><br><span class="line">#查看当前Python版本</span><br><span class="line">python --version</span><br><span class="line"></span><br><span class="line">#删除指定Python版本</span><br><span class="line">pyenv uninstall 3.12.2</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="安装ssh-audit"><a href="#安装ssh-audit" class="headerlink" title="安装ssh-audit"></a>安装ssh-audit</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pip install ssh-audit</span><br><span class="line"></span><br><span class="line">#使用</span><br><span class="line">ssh-audit 10.16.100.100</span><br></pre></td></tr></table></figure>
 
 ]]></content>
   </entry>
