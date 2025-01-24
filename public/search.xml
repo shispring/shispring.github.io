@@ -2550,6 +2550,9 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --script <span class="string">&quot;ssl-cert,ssl-enum-ciphers&quot;</span> -p 443 example.com</span><br></pre></td></tr></table></figure>
 
 <p>•	<strong>作用</strong>：同时执行多个特定脚本，节省时间。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 22 --script ssh2-enum-algos &lt;ip_addr&gt;</span><br></pre></td></tr></table></figure>
+
+<p>• <strong>作用</strong> ：检查机器ssh版本</p>
 <p><strong>总结与学习建议</strong></p>
 <ol>
 <li><p>   ssl-enum-ciphers <strong>和</strong> ssl-cert 是日常检测 SSL&#x2F;TLS 配置的必备工具，可帮助管理员发现不安全的协议或证书问题。</p>
