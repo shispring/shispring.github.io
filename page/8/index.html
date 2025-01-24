@@ -184,6 +184,102 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/25/k8s-operator%E5%BC%80%E5%8F%91%E6%AD%A5%E9%AA%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/09/25/k8s-operator%E5%BC%80%E5%8F%91%E6%AD%A5%E9%AA%A4/" class="post-title-link" itemprop="url">k8s operator开发步骤</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-09-25 21:24:04" itemprop="dateCreated datePublished" datetime="2024-09-25T21:24:04+08:00">2024-09-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-09-29 14:45:11" itemprop="dateModified" datetime="2024-09-29T14:45:11+08:00">2024-09-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="安装kubebuilder"><a href="#安装kubebuilder" class="headerlink" title="安装kubebuilder"></a>安装kubebuilder</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -L -o kubebuilder &lt;https://go.kubebuilder.io/dl/latest/$&gt;(go env GOOS)/$(go env GOARCH)</span><br><span class="line">chmod +x kubebuilder &amp;&amp; mv kubebuilder /usr/local/bin/</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-创建脚手架工程"><a href="#1-创建脚手架工程" class="headerlink" title="1. 创建脚手架工程"></a><strong>1. 创建脚手架工程</strong></h3><ul>
+<li><code>kubebuilder init --domain edas.io</code><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubebuilder init 命令参数:</span><br><span class="line">-domain：指定 <span class="variable constant_">CRD</span> 的域名，通常使用组织或项目的域名，确保 <span class="variable constant_">CRD</span> 名称唯一。</span><br><span class="line">-repo：指定 <span class="title class_">Go</span> 模块的路径，通常是 <span class="title class_">GitHub</span> 上的路径，用于代码组织。</span><br><span class="line">-version：指定使用的 <span class="title class_">Kubernetes</span> <span class="variable constant_">API</span> 版本，默认为 v1。</span><br><span class="line">-make-symlinks：创建指向 <span class="variable constant_">API</span> 和 <span class="title class_">Controller</span> 代码的符号链接，便于管理。</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-创建-API"><a href="#2-创建-API" class="headerlink" title="2. 创建 API"></a><strong>2. 创建 API</strong></h3><ul>
+<li><code>kubebuilder create api --group apps --version v1alpha1 --kind Application</code></li>
+</ul>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">kubebuilder create api 命令参数:</span><br><span class="line">-group：指定 <span class="variable constant_">API</span> 组名，用于区分不同的资源。</span><br><span class="line">-version：指定 <span class="variable constant_">API</span> 版本，通常为 v1 或其他。</span><br><span class="line">-kind：指定自定义资源的类型名称，通常采用大写驼峰命名法。</span><br><span class="line">-resource：是否创建 <span class="variable constant_">CRD</span> 资源，默认为是。</span><br><span class="line">-controller：是否创建控制器，默认为是。</span><br><span class="line">-controller：可以不添加任何参数，系统会提示输入基本配置。</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-定义-CRD"><a href="#3-定义-CRD" class="headerlink" title="3. 定义 CRD"></a><strong>3. 定义 CRD</strong></h3><ul>
+<li><code>make manifests</code> 命令生成 CRD 文件，便于在集群中应用。</li>
+</ul>
+<h3 id="4-编写-Controller-逻辑"><a href="#4-编写-Controller-逻辑" class="headerlink" title="4. 编写 Controller 逻辑"></a><strong>4. 编写 Controller 逻辑</strong></h3><ul>
+<li>编辑生成的控制器代码，添加业务逻辑，处理自定义资源的增、删、改、查等操作。</li>
+</ul>
+<h3 id="5-构建和部署-Operator"><a href="#5-构建和部署-Operator" class="headerlink" title="5.构建和部署 Operator"></a><strong>5.构建和部署 Operator</strong></h3><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">make docker-build # 构建镜像</span><br><span class="line">make docker-push # 推送镜像</span><br><span class="line">make deploy：安装controller到k8s （make undeploy：删除controller）</span><br><span class="line"></span><br><span class="line">#或者：</span><br><span class="line">#安装<span class="variable constant_">CRD</span>到k8s，可以先手动安装（make uninstall：删除<span class="variable constant_">CRD</span>）</span><br><span class="line">make install </span><br><span class="line"></span><br><span class="line">kubectl get crd</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-测试和验证："><a href="#6-测试和验证：" class="headerlink" title="6.测试和验证："></a><strong>6.测试和验证</strong>：</h3><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 启动controller</span><br><span class="line">make run</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-卸载CRD："><a href="#7-卸载CRD：" class="headerlink" title="7.卸载CRD："></a><strong>7.卸载CRD</strong>：</h3><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 卸载crd</span><br><span class="line">make uninstall</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>开发流程包括项目初始化、API 创建、控制器实现、生成 CRD、构建和部署，最后进行测试和验证。<br>参考文档：<br><a target="_blank" rel="noopener" href="https://podsbook.com/posts/kubernetes/operator">https://podsbook.com/posts/kubernetes/operator</a><br><a target="_blank" rel="noopener" href="https://www.rushui.net/posts/kubebuilder-demo-simple">https://www.rushui.net/posts/kubebuilder-demo-simple</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/25/krew-kubecm/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -227,21 +323,7 @@
                 </span>
             </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.5k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -321,21 +403,7 @@
                 </span>
             </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.6k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -510,21 +578,7 @@
                 </span>
             </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -609,21 +663,7 @@
                 </span>
             </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>907</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -697,21 +737,7 @@
                 </span>
             </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>327</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -778,21 +804,7 @@
                 <time title="修改时间：2024-09-13 21:53:43" itemprop="dateModified" datetime="2024-09-13T21:53:43+08:00">2024-09-13</time>
               </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -862,21 +874,7 @@
                 <time title="修改时间：2024-12-09 13:33:21" itemprop="dateModified" datetime="2024-12-09T13:33:21+08:00">2024-12-09</time>
               </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -1090,21 +1088,7 @@
                 </span>
             </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>416</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -1169,21 +1153,7 @@
                 <time title="修改时间：2025-01-24 10:18:18" itemprop="dateModified" datetime="2025-01-24T10:18:18+08:00">2025-01-24</time>
               </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
+          
 
         </div>
       </header>
@@ -1208,84 +1178,6 @@
 <h2 id="安装ssh-audit"><a href="#安装ssh-audit" class="headerlink" title="安装ssh-audit"></a>安装ssh-audit</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pip install ssh-audit</span><br><span class="line"></span><br><span class="line">#使用</span><br><span class="line">ssh-audit 10.16.100.100</span><br></pre></td></tr></table></figure>
 
 
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2023/08/09/xorm-test/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/08/09/xorm-test/" class="post-title-link" itemprop="url">xorm应用测试</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-08-09 10:12:56" itemprop="dateCreated datePublished" datetime="2023-08-09T10:12:56+08:00">2023-08-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-13 21:53:43" itemprop="dateModified" datetime="2024-09-13T21:53:43+08:00">2024-09-13</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.8k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="xorm包应用测试"><a href="#xorm包应用测试" class="headerlink" title="xorm包应用测试"></a>xorm包应用测试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	_ &quot;github.com/go-sql-driver/mysql&quot;</span><br><span class="line">	&quot;log&quot;</span><br><span class="line">	&quot;xorm.io/xorm&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">type XormTest struct &#123;</span><br><span class="line">	Id        int64  `json:&quot;id&quot; xorm:&quot;autoincr pk&quot;`     </span><br><span class="line">	Username  string `json:&quot;username&quot;`                  //用户名</span><br><span class="line">	CreatedAt string `json:&quot;created_at&quot; xorm:&quot;created&quot;` //创建时间</span><br><span class="line">	UpdatedAt string `json:&quot;updated_at&quot; xorm:&quot;updated&quot;` //更新时间</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var engine *xorm.Engine</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	//mysql -h localhost -uroot -p  -P 3306 --default-character-set=utf8 -A</span><br><span class="line">	var err error</span><br><span class="line">	engine, err = xorm.NewEngine(&quot;mysql&quot;, &quot;root:xxx@tcp(127.0.0.1:3306)/yago_test?charset=utf8&quot;)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s, _ := engine.IsTableEmpty(&quot;xorm_test&quot;)</span><br><span class="line">	fmt.Println(s)</span><br><span class="line"></span><br><span class="line">	//查询</span><br><span class="line">	//selectElement(&quot;zhangsan&quot;)</span><br><span class="line">	//使用sql查询</span><br><span class="line">	queryElement()</span><br><span class="line">	//执行sql命令</span><br><span class="line">	updateBySql()</span><br><span class="line">	//插入</span><br><span class="line">	//insertElement()</span><br><span class="line">	//修改</span><br><span class="line">	//updateElement()</span><br><span class="line">	//删除</span><br><span class="line">	//deleteElement()</span><br><span class="line">	//事务</span><br><span class="line">	//transTest()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func updateBySql() &#123;</span><br><span class="line">	sql := &quot;update xorm_test set username=? where id=?&quot;</span><br><span class="line">	updateRes, err := engine.Exec(sql, &quot;wangwu&quot;, 9)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(&quot;RowNumber ==&gt; &quot;, updateRes)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func queryElement() &#123;</span><br><span class="line">	sql := &quot;select * from xorm_test where id = 8;&quot;</span><br><span class="line">	results, _ := engine.QueryString(sql)</span><br><span class="line">	fmt.Println(results)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func updateElement() &#123;</span><br><span class="line">	user := XormTest&#123;</span><br><span class="line">		Username: &quot;jpshi&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	if _, err := engine.Where(&quot;username = &#x27;wangwu&#x27;&quot;).Update(&amp;user); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func deleteElement() &#123;</span><br><span class="line">	rowNumber, err := engine.ID(2).Delete(new(XormTest))</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(&quot;RowNumber ==&gt; &quot;, rowNumber)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func transTest() &#123;</span><br><span class="line">	session := engine.NewSession()</span><br><span class="line">	defer session.Close()</span><br><span class="line">	// 开启事务</span><br><span class="line">	if err := session.Begin(); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	// 插入User</span><br><span class="line">	if _, err := session.Insert(XormTest&#123;</span><br><span class="line">		Username: &quot;zhangsan&quot;,</span><br><span class="line">	&#125;); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	// 更新User</span><br><span class="line">	if _, err := session.Where(&quot;id = &#x27;7&#x27;&quot;).Update(XormTest&#123;</span><br><span class="line">		Username: &quot;lisi&quot;,</span><br><span class="line">	&#125;); err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	// 提交事务</span><br><span class="line">	session.Commit()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func insertElement() () &#123;</span><br><span class="line">	user := XormTest&#123;</span><br><span class="line">		Username: &quot;^_^&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	rowNumber, err := engine.Insert(&amp;user) // rowNumber 受影响的行数</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(&quot;RowNumber ==&gt; &quot;, rowNumber)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func selectElement(name string)  &#123;</span><br><span class="line">	users := make([]*XormTest, 0)</span><br><span class="line">	err := engine.Where(&quot;username regexp ? &quot;,name).Find(&amp;users)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	for _, v := range users &#123;</span><br><span class="line">		fmt.Printf(&quot;%v\n&quot;, v)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -1371,7 +1263,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-count">85</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1420,16 +1312,6 @@
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">shispring</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-area"></i>
-    </span>
-    <span title="站点总字数">152k</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="站点阅读时长">2:18</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>

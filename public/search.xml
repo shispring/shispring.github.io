@@ -4986,4 +4986,40 @@ validate</p>
         <category>linux</category>
       </categories>
   </entry>
+  <entry>
+    <title>time.After内存泄漏探测</title>
+    <url>/2025/01/24/time-After%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%A2%E6%B5%8B/</url>
+    <content><![CDATA[<h2 id="demo-v1"><a href="#demo-v1" class="headerlink" title="demo-v1"></a>demo-v1</h2><ul>
+<li>代码</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    _ <span class="string">&quot;net/http/pprof&quot;</span> // 引入 pprof 包</span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">var chs chan int</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Get</span></span>() &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> v := &lt;-chs:</span><br><span class="line">            fmt.Printf(<span class="string">&quot;print:%v\n&quot;</span>, v)</span><br><span class="line">        <span class="keyword">case</span> &lt;-time.After(3 * time.Minute):</span><br><span class="line">            fmt.Printf(<span class="string">&quot;time.After:%v\n&quot;</span>, time.Now().Unix())</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Put</span></span>() &#123;</span><br><span class="line">    var i = 0</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        i++</span><br><span class="line">        chs &lt;- i</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">    chs = make(chan int, 100)</span><br><span class="line"></span><br><span class="line">    // 启动一个 goroutine 运行 pprof 服务</span><br><span class="line">    go <span class="function"><span class="title">func</span></span>() &#123;</span><br><span class="line">        fmt.Println(<span class="string">&quot;pprof server running on :6060&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> err := http.ListenAndServe(<span class="string">&quot;localhost:6060&quot;</span>, nil); err != nil &#123;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;pprof server failed: %v\n&quot;</span>, err)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    go Put()</span><br><span class="line">    Get()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>pprof监控</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">go tool pprof -http=:8081 http://127.0.0.1:6060/debug/pprof/heap</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>内存使用情况</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250124165556.png" alt="image"></p>
+<h2 id="demo-v2"><a href="#demo-v2" class="headerlink" title="demo-v2"></a>demo-v2</h2><ul>
+<li>代码</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    _ <span class="string">&quot;net/http/pprof&quot;</span> // 引入 pprof 包</span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">var chs chan int</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Get</span></span>() &#123;</span><br><span class="line">    delay := time.NewTimer(3 * time.Minute)</span><br><span class="line"></span><br><span class="line">    defer delay.Stop()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        delay.Reset(3 * time.Minute)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> v := &lt;- chs:</span><br><span class="line">                fmt.Printf(<span class="string">&quot;print:%v\n&quot;</span>, v)</span><br><span class="line">            <span class="keyword">case</span> &lt;- delay.C:</span><br><span class="line">                fmt.Printf(<span class="string">&quot;time.After:%v&quot;</span>, time.Now().Unix())</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Put</span></span>() &#123;</span><br><span class="line">    var i = 0</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        i++</span><br><span class="line">        chs &lt;- i</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">    chs = make(chan int, 100)</span><br><span class="line"></span><br><span class="line">    // 启动一个 goroutine 运行 pprof 服务</span><br><span class="line">    go <span class="function"><span class="title">func</span></span>() &#123;</span><br><span class="line">        fmt.Println(<span class="string">&quot;pprof server running on :6060&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> err := http.ListenAndServe(<span class="string">&quot;localhost:6060&quot;</span>, nil); err != nil &#123;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;pprof server failed: %v\n&quot;</span>, err)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    go Put()</span><br><span class="line">    Get()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>pprof监控</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">go tool pprof -http=:8082 http://127.0.0.1:6060/debug/pprof/heap</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>内存使用</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250124165624.png" alt="image"></p>
+]]></content>
+      <categories>
+        <category>go</category>
+      </categories>
+  </entry>
 </search>
