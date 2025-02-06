@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-02-06 14:56:33 / 修改时间：14:57:15" itemprop="dateCreated datePublished" datetime="2025-02-06T14:56:33+08:00">2025-02-06</time>
+              <time title="创建时间：2025-02-06 14:56:33 / 修改时间：15:08:45" itemprop="dateCreated datePublished" datetime="2025-02-06T14:56:33+08:00">2025-02-06</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -232,7 +232,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="lsmod-命令的作用"><a href="#lsmod-命令的作用" class="headerlink" title="lsmod 命令的作用"></a><strong><code>lsmod</code> 命令的作用</strong></h3><p><code>lsmod</code> 是 Linux 系统中的一个命令，用于显示当前已加载的 <strong>内核模块（Kernel Modules）</strong>。它可以帮助用户检查哪些模块正在运行，并用于诊断系统硬件和驱动相关问题。</p>
+          <h2 id="查看linux是否开启虚拟化"><a href="#查看linux是否开启虚拟化" class="headerlink" title="查看linux是否开启虚拟化"></a>查看linux是否开启虚拟化</h2><ul>
+<li>cat &#x2F;proc&#x2F;cpuinfo | grep -E “vmx|svm”<br>其中，vmx 表示Intel的虛拟化技术（InteIVT），svm 表示AMD的虚拟化技术（AMD-V）。</li>
+<li>lscpu</li>
+<li>lsmod | grep kvm</li>
+</ul>
+<h3 id="lsmod-命令的作用"><a href="#lsmod-命令的作用" class="headerlink" title="lsmod 命令的作用"></a><strong><code>lsmod</code> 命令的作用</strong></h3><p><code>lsmod</code> 是 Linux 系统中的一个命令，用于显示当前已加载的 <strong>内核模块（Kernel Modules）</strong>。它可以帮助用户检查哪些模块正在运行，并用于诊断系统硬件和驱动相关问题。</p>
 <h3 id="lsmod-的基本输出格式"><a href="#lsmod-的基本输出格式" class="headerlink" title="lsmod 的基本输出格式"></a><strong><code>lsmod</code> 的基本输出格式</strong></h3><p>执行 <code>lsmod</code> 命令时，会得到如下格式的输出：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
 <p>示例输出：</p>

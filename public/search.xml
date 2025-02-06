@@ -5025,7 +5025,12 @@ validate</p>
   <entry>
     <title>linux查看内核模块</title>
     <url>/2025/02/06/linux%E6%9F%A5%E7%9C%8B%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</url>
-    <content><![CDATA[<h3 id="lsmod-命令的作用"><a href="#lsmod-命令的作用" class="headerlink" title="lsmod 命令的作用"></a><strong><code>lsmod</code> 命令的作用</strong></h3><p><code>lsmod</code> 是 Linux 系统中的一个命令，用于显示当前已加载的 <strong>内核模块（Kernel Modules）</strong>。它可以帮助用户检查哪些模块正在运行，并用于诊断系统硬件和驱动相关问题。</p>
+    <content><![CDATA[<h2 id="查看linux是否开启虚拟化"><a href="#查看linux是否开启虚拟化" class="headerlink" title="查看linux是否开启虚拟化"></a>查看linux是否开启虚拟化</h2><ul>
+<li>cat &#x2F;proc&#x2F;cpuinfo | grep -E “vmx|svm”<br>其中，vmx 表示Intel的虛拟化技术（InteIVT），svm 表示AMD的虚拟化技术（AMD-V）。</li>
+<li>lscpu</li>
+<li>lsmod | grep kvm</li>
+</ul>
+<h3 id="lsmod-命令的作用"><a href="#lsmod-命令的作用" class="headerlink" title="lsmod 命令的作用"></a><strong><code>lsmod</code> 命令的作用</strong></h3><p><code>lsmod</code> 是 Linux 系统中的一个命令，用于显示当前已加载的 <strong>内核模块（Kernel Modules）</strong>。它可以帮助用户检查哪些模块正在运行，并用于诊断系统硬件和驱动相关问题。</p>
 <h3 id="lsmod-的基本输出格式"><a href="#lsmod-的基本输出格式" class="headerlink" title="lsmod 的基本输出格式"></a><strong><code>lsmod</code> 的基本输出格式</strong></h3><p>执行 <code>lsmod</code> 命令时，会得到如下格式的输出：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
 <p>示例输出：</p>
