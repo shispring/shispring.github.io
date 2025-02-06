@@ -184,6 +184,333 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/08/linux%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/01/08/linux%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">linux性能问题排查指令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-08 09:57:09" itemprop="dateCreated datePublished" datetime="2025-01-08T09:57:09+08:00">2025-01-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-01-09 10:43:28" itemprop="dateModified" datetime="2025-01-09T10:43:28+08:00">2025-01-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="启动时间相关"><a href="#启动时间相关" class="headerlink" title="启动时间相关"></a>启动时间相关</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">w</span><br><span class="line">uptime</span><br><span class="line">who -b</span><br><span class="line">last reboot</span><br><span class="line">date -d &quot;`cut -f1 -d. /proc/uptime` seconds ago&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="主机性能指标监控与分析指南"><a href="#主机性能指标监控与分析指南" class="headerlink" title="主机性能指标监控与分析指南"></a><strong>主机性能指标监控与分析指南</strong></h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u010420283/article/details/114502674">https://blog.csdn.net/u010420283/article/details/114502674</a></p>
+</blockquote>
+<h4 id="1-CPU-性能监控"><a href="#1-CPU-性能监控" class="headerlink" title="1. CPU 性能监控"></a><strong>1. CPU 性能监控</strong></h4><table>
+<thead>
+<tr>
+<th><strong>命令&#x2F;操作</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>top 内快捷键</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>显示每个逻辑 CPU 的使用情况。</td>
+</tr>
+<tr>
+<td><code>P</code></td>
+<td>按 CPU 使用率排序。</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>按运行时间排序。</td>
+</tr>
+<tr>
+<td><code>N</code></td>
+<td>按 PID 排序。</td>
+</tr>
+<tr>
+<td><code>i</code></td>
+<td>过滤掉空闲进程。</td>
+</tr>
+<tr>
+<td><code>u</code> + 用户名</td>
+<td>仅显示指定用户的进程。</td>
+</tr>
+<tr>
+<td><code>f</code> + <code>s</code> + <code>ESC</code></td>
+<td>自定义列排序（按列名选择）。</td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>高亮排序列。</td>
+</tr>
+<tr>
+<td><code>mpstat -P ALL</code></td>
+<td>显示每个 CPU 核心的详细使用情况。</td>
+</tr>
+<tr>
+<td><code>sar -P ALL</code></td>
+<td>查看每个 CPU 核的使用情况，支持历史数据分析。</td>
+</tr>
+<tr>
+<td><strong>线程查看</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>top -Hp &lt;PID&gt;</code></td>
+<td>查看某进程的线程使用情况。</td>
+</tr>
+<tr>
+<td><code>ps -Tp &lt;PID&gt;</code></td>
+<td>查看某进程的线程列表。</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="2-内存性能监控"><a href="#2-内存性能监控" class="headerlink" title="2. 内存性能监控"></a><strong>2. 内存性能监控</strong></h4><table>
+<thead>
+<tr>
+<th><strong>命令&#x2F;操作</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>free -m</code></td>
+<td>查看系统内存使用情况（单位 MB）。</td>
+</tr>
+<tr>
+<td><code>vmstat</code></td>
+<td>显示内存、进程、CPU 的综合统计信息。</td>
+</tr>
+<tr>
+<td><code>top</code> 按键 <code>M</code></td>
+<td>按内存使用率排序。</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="3-磁盘性能监控"><a href="#3-磁盘性能监控" class="headerlink" title="3. 磁盘性能监控"></a><strong>3. 磁盘性能监控</strong></h4><table>
+<thead>
+<tr>
+<th><strong>命令&#x2F;操作</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>df -h</code></td>
+<td>查看磁盘分区使用情况。</td>
+</tr>
+<tr>
+<td><code>iostat -x 1 5</code></td>
+<td>查看磁盘 I&#x2F;O 性能（详细模式）。</td>
+</tr>
+<tr>
+<td><code>iotop</code></td>
+<td>实时监控进程的磁盘 I&#x2F;O 使用情况。</td>
+</tr>
+<tr>
+<td><code>pidstat -d -p &lt;PID&gt;</code></td>
+<td>查看指定进程的磁盘 I&#x2F;O 使用情况。</td>
+</tr>
+<tr>
+<td><code>lsblk</code></td>
+<td>显示块设备信息（挂载点和大小）。</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="4-网络性能监控"><a href="#4-网络性能监控" class="headerlink" title="4. 网络性能监控"></a><strong>4. 网络性能监控</strong></h4><table>
+<thead>
+<tr>
+<th><strong>命令&#x2F;操作</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ifconfig</code> 或 <code>ip a</code></td>
+<td>查看网络接口状态和 IP 地址。</td>
+</tr>
+<tr>
+<td><code>sar -n DEV 1 5</code></td>
+<td>查看网络接口的吞吐量（发送和接收）。</td>
+</tr>
+<tr>
+<td><code>nload</code></td>
+<td>图形化实时显示网络流量。</td>
+</tr>
+<tr>
+<td><code>netstat -ant</code> 或 <code>ss -ant</code></td>
+<td>查看所有的 TCP 连接状态。</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="5-挂载点与文件系统监控"><a href="#5-挂载点与文件系统监控" class="headerlink" title="5. 挂载点与文件系统监控"></a><strong>5. 挂载点与文件系统监控</strong></h4><table>
+<thead>
+<tr>
+<th><strong>命令&#x2F;操作</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mount</code></td>
+<td>查看挂载点及挂载选项。</td>
+</tr>
+<tr>
+<td><code>du -sh /path/to/dir</code></td>
+<td>查看目录的总大小。</td>
+</tr>
+<tr>
+<td><code>df -i</code></td>
+<td>查看文件系统的 inode 使用情况。</td>
+</tr>
+<tr>
+<td><code>lsblk</code></td>
+<td>显示设备的挂载点和分区信息。</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="6-系统整体性能监控"><a href="#6-系统整体性能监控" class="headerlink" title="6. 系统整体性能监控"></a><strong>6. 系统整体性能监控</strong></h4><table>
+<thead>
+<tr>
+<th><strong>命令&#x2F;操作</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>uptime</code></td>
+<td>查看系统负载和运行时间。</td>
+</tr>
+<tr>
+<td><code>top</code></td>
+<td>实时监控系统整体性能。</td>
+</tr>
+<tr>
+<td><code>htop</code></td>
+<td>图形化进程监控工具，功能更强大。</td>
+</tr>
+<tr>
+<td><code>vmstat 1 5</code></td>
+<td>查看 CPU、内存、I&#x2F;O 的统计信息（每秒刷新一次）。</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="7-快捷键汇总（基于-top）"><a href="#7-快捷键汇总（基于-top）" class="headerlink" title="7. 快捷键汇总（基于 top）"></a><strong>7. 快捷键汇总（基于 <code>top</code>）</strong></h4><table>
+<thead>
+<tr>
+<th><strong>快捷键</strong></th>
+<th><strong>功能</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>u</code> + 用户名</td>
+<td>仅显示指定用户的进程。</td>
+</tr>
+<tr>
+<td><code>c</code></td>
+<td>显示完整的命令路径。</td>
+</tr>
+<tr>
+<td><code>o</code> + <code>COMMAND=&lt;值&gt;</code></td>
+<td>按特定条件过滤进程（需匹配列名）。</td>
+</tr>
+<tr>
+<td><code>P</code></td>
+<td>按 CPU 使用率排序。</td>
+</tr>
+<tr>
+<td><code>M</code></td>
+<td>按内存使用率排序。</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>按运行时间排序。</td>
+</tr>
+<tr>
+<td><code>i</code></td>
+<td>过滤掉空闲进程。</td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>高亮排序列。</td>
+</tr>
+<tr>
+<td><code>f</code> + <code>s</code></td>
+<td>自定义排序列。</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="补充说明"><a href="#补充说明" class="headerlink" title="补充说明"></a><strong>补充说明</strong></h3><ul>
+<li><p><strong>I&#x2F;O 等待分析</strong>: </p>
+<ul>
+<li>如果 <code>wa</code> 值较高（<code>iostat</code> 或 <code>top</code> 中显示），可能是磁盘 I&#x2F;O 性能瓶颈。</li>
+<li>可结合 <code>iotop</code> 或 <code>pidstat -d</code> 定位高 I&#x2F;O 进程。</li>
+</ul>
+</li>
+<li><p><strong>负载分析</strong>:</p>
+<ul>
+<li>负载高但 CPU 使用率低，通常是 I&#x2F;O 或内存不足导致。</li>
+<li>配合 <code>iostat</code>、<code>vmstat</code> 和 <code>iotop</code> 工具进一步分析。</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1278,251 +1605,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/24/pod%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%A7%AF%E7%B4%AF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/24/pod%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%A7%AF%E7%B4%AF/" class="post-title-link" itemprop="url">pod优雅关闭与问题排查</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-12-24 10:31:23" itemprop="dateCreated datePublished" datetime="2024-12-24T10:31:23+08:00">2024-12-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-12-25 10:43:29" itemprop="dateModified" datetime="2024-12-25T10:43:29+08:00">2024-12-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-Linux-信号与服务优雅停止"><a href="#1-Linux-信号与服务优雅停止" class="headerlink" title="1. Linux 信号与服务优雅停止"></a><strong>1. Linux 信号与服务优雅停止</strong></h2><p>服务在停止前需要收到信号通知以进行资源释放、关闭连接等清理操作。以下是常见信号及其特性：</p>
-<h3 id="常见信号"><a href="#常见信号" class="headerlink" title="常见信号"></a><strong>常见信号</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">kill</span> -l</span><br><span class="line">HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ...</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>**SIGKILL (9)**：<ul>
-<li>强制结束程序，无法捕获、阻塞或忽略。</li>
-<li><strong>退出状态码</strong>：<code>128 + 9 = 137</code>。</li>
-</ul>
-</li>
-<li>**SIGTERM (15)**：<ul>
-<li>可被程序捕获，用于优雅停止。</li>
-<li><strong>退出状态码</strong>：<code>128 + 15 = 143</code>。</li>
-</ul>
-</li>
-</ul>
-<h3 id="退出状态码范围"><a href="#退出状态码范围" class="headerlink" title="退出状态码范围"></a><strong>退出状态码范围</strong></h3><ul>
-<li><strong>0</strong>：正常退出。</li>
-<li><strong>1-128</strong>：程序自身异常退出。</li>
-<li><strong>129-255</strong>：外部信号导致退出。</li>
-</ul>
-<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a><strong>注意</strong></h3><ul>
-<li><code>systemctl reload docker</code>：重新加载 Docker 配置文件，不中断运行中的容器。</li>
-<li><code>systemctl restart docker</code>：重启 Docker 服务，会停止并重新启动所有容器。</li>
-</ul>
-<hr>
-<h2 id="2-Pod-优雅关闭"><a href="#2-Pod-优雅关闭" class="headerlink" title="2. Pod 优雅关闭"></a><strong>2. Pod 优雅关闭</strong></h2><p>优雅关闭确保 Pod 在终止时不会中断服务、影响数据一致性或浪费资源。</p>
-<h3 id="优雅关闭的作用"><a href="#优雅关闭的作用" class="headerlink" title="优雅关闭的作用"></a><strong>优雅关闭的作用</strong></h3><ol>
-<li><strong>避免服务中断</strong>：完成当前请求后再终止。</li>
-<li><strong>确保数据一致性</strong>：允许数据持久化或事务处理。</li>
-<li><strong>最小化用户影响</strong>：避免流量路由到已删除的 Pod。</li>
-<li><strong>提高资源利用率</strong>：释放资源，避免泄露。</li>
-</ol>
-<h3 id="优雅关闭时间线"><a href="#优雅关闭时间线" class="headerlink" title="优雅关闭时间线"></a><strong>优雅关闭时间线</strong></h3><h3 id="时间线-1：网络层面的优雅关闭"><a href="#时间线-1：网络层面的优雅关闭" class="headerlink" title="时间线 1：网络层面的优雅关闭"></a><strong>时间线 1：网络层面的优雅关闭</strong></h3><ol>
-<li><p><strong>Service Endpoint 移除</strong>：</p>
-<ul>
-<li><p>Pod 进入 <code>Terminating</code> 状态后，从 Service 的 Endpoint 列表中移除。</p>
-</li>
-<li><p><strong>检查点</strong>：</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get endpoints &lt;service-name&gt; -o yaml</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-<li><p><strong>NetworkPolicy 规则清理</strong>：</p>
-<ul>
-<li>清理与 Pod 相关的网络规则。</li>
-<li><strong>检查点</strong>：CNI 插件日志（如 Calico、Cilium）。</li>
-</ul>
-</li>
-<li><p><strong>负载均衡器更新</strong>：</p>
-<ul>
-<li><p>从后端池中移除 Pod 地址。</p>
-</li>
-<li><p><strong>检查点</strong>：</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe ingress &lt;ingress-name&gt;</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-</ol>
-<h3 id="时间线-2：Pod-的关闭步骤"><a href="#时间线-2：Pod-的关闭步骤" class="headerlink" title="时间线 2：Pod 的关闭步骤"></a><strong>时间线 2：Pod 的关闭步骤</strong></h3><ol>
-<li><p><strong>SIGTERM 信号发送</strong>：</p>
-<ul>
-<li><p>通知容器内应用进行清理。</p>
-</li>
-<li><p><strong>检查点</strong>：</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-<li><p><strong>PreStop Hook 执行</strong>：</p>
-<ul>
-<li>执行清理脚本。</li>
-<li><strong>检查点</strong>：查看容器日志。</li>
-</ul>
-</li>
-<li><p><strong>容器优雅退出</strong>：</p>
-<ul>
-<li>处理 SIGTERM 信号。</li>
-<li><strong>检查点</strong>：确认长连接或挂起任务是否处理。</li>
-</ul>
-</li>
-<li><p>**强制终止 (SIGKILL)**：</p>
-<ul>
-<li>超过 <code>terminationGracePeriodSeconds</code> 后，发送 SIGKILL。</li>
-<li><strong>检查点</strong>：查看 kubelet 日志。</li>
-</ul>
-</li>
-<li><p><strong>资源清理</strong>：</p>
-<ul>
-<li><p>卸载存储卷，释放网络资源。</p>
-</li>
-<li><p><strong>检查点</strong>：</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pv,pvc</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-</ol>
-<hr>
-<h2 id="3-Pod-删除原理"><a href="#3-Pod-删除原理" class="headerlink" title="3. Pod 删除原理"></a><strong>3. Pod 删除原理</strong></h2><h3 id="触发-Pod-删除的场景"><a href="#触发-Pod-删除的场景" class="headerlink" title="触发 Pod 删除的场景"></a><strong>触发 Pod 删除的场景</strong></h3><ol>
-<li><strong>手动删除</strong>：<code>kubectl delete pod</code>。</li>
-<li><strong>控制器策略</strong>：如 Deployment 缩减副本数。</li>
-<li><strong>节点故障</strong>：节点失效后重新调度。</li>
-<li><strong>资源限制</strong>：节点资源不足时删除低优先级 Pod。</li>
-<li><strong>健康检查失败</strong>：探针连续失败。</li>
-<li><strong>优先级抢占</strong>：释放资源给高优先级 Pod。</li>
-<li><strong>更新策略</strong>：滚动更新替换旧 Pod。</li>
-<li><strong>自动缩放</strong>：集群缩小时删除 Pod。</li>
-</ol>
-<hr>
-<h2 id="4-Pod-长时间处于-Terminating-状态的原因"><a href="#4-Pod-长时间处于-Terminating-状态的原因" class="headerlink" title="4. Pod 长时间处于 Terminating 状态的原因"></a><strong>4. Pod 长时间处于 Terminating 状态的原因</strong></h2><ol>
-<li><strong>存储未卸载</strong>：持久卷未成功释放。</li>
-<li><strong>容器未终止</strong>：未正确响应 SIGTERM。</li>
-<li><strong>Finalizer 阻塞</strong>：清理任务未完成。</li>
-<li><strong>网络或 API Server 问题</strong>：通信异常。</li>
-<li><strong>节点异常</strong>：节点不可用。</li>
-</ol>
-<h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a><strong>排查思路</strong></h3><ol>
-<li><p><strong>查看 Pod 信息</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#检查 Pod 的 Finalizer</span></span><br><span class="line">kubectl get pod &lt;pod-name&gt; -n &lt;namespace&gt; -o jsonpath=<span class="string">&#x27;&#123;.metadata.finalizers&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>检查容器状态</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod &lt;pod-name&gt; -o jsonpath=<span class="string">&#x27;&#123;.status.containerStatuses[*].state&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>检查节点状态</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>检查存储状态</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pvc</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>强制删除 Pod</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; --force --grace-period=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#发送 SIGTERM 信号的几种方式</span></span><br><span class="line"><span class="built_in">kill</span> -15 &lt;container-id&gt;</span><br><span class="line">docker <span class="built_in">kill</span> --signal=SIGTERM &lt;container-id&gt;</span><br><span class="line"><span class="comment">#如果使用 crictl： crictl stop &lt;container-id&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#强制重新触发优雅终止,例如，将宽限期设置为 10 秒：</span></span><br><span class="line">kubectl delete pod &lt;pod-name&gt; -n &lt;namespace&gt; --grace-period=10</span><br></pre></td></tr></table></figure></li>
-</ol>
-<hr>
-<h2 id="5-Docker-与-Containerd-的日志排查"><a href="#5-Docker-与-Containerd-的日志排查" class="headerlink" title="5. Docker 与 Containerd 的日志排查"></a><strong>5. Docker 与 Containerd 的日志排查</strong></h2><h3 id="检查-Docker-日志"><a href="#检查-Docker-日志" class="headerlink" title="检查 Docker 日志"></a><strong>检查 Docker 日志</strong></h3><ol>
-<li><p>查看 Docker 守护进程日志：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u docker | grep &lt;docker_id&gt;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>检查 kubelet 清理失败记录：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u kubelet | grep <span class="string">&quot;cleanup&quot;</span></span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="清理-Docker-残留资源"><a href="#清理-Docker-残留资源" class="headerlink" title="清理 Docker 残留资源"></a><strong>清理 Docker 残留资源</strong></h3><ol>
-<li><p>删除退出的容器：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container prune -f</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>删除未使用的镜像：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -f</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>清理未使用的网络和卷：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker network prune -f</span><br><span class="line">docker volume prune -f</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="清理-Containerd-残留资源"><a href="#清理-Containerd-残留资源" class="headerlink" title="清理 Containerd 残留资源"></a><strong>清理 Containerd 残留资源</strong></h3><ol>
-<li><p>删除残留容器：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crictl <span class="built_in">rm</span> $(crictl ps -a -q)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>删除未使用的镜像：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crictl rmi &lt;image-id&gt;</span><br></pre></td></tr></table></figure></li>
-</ol>
-<hr>
-<h2 id="6-最佳实践"><a href="#6-最佳实践" class="headerlink" title="6. 最佳实践"></a><strong>6. 最佳实践</strong></h2><ol>
-<li><strong>配置优雅终止</strong>：<ul>
-<li>设置 <code>terminationGracePeriodSeconds</code>。</li>
-<li>配置 PreStop Hook。</li>
-</ul>
-</li>
-<li><strong>监控和告警</strong>：<ul>
-<li>使用 Prometheus 检测 <code>Terminating</code> 状态 Pod。</li>
-</ul>
-</li>
-<li><strong>避免 Finalizer 阻塞</strong>：<ul>
-<li>确保 Finalizer 正常完成任务。</li>
-</ul>
-</li>
-<li><strong>定期清理残留资源</strong>：<ul>
-<li>检查并清理未使用的容器、镜像和存储。</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1594,7 +1676,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-count">87</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
