@@ -5022,4 +5022,67 @@ validate</p>
         <category>go</category>
       </categories>
   </entry>
+  <entry>
+    <title>linux查看内核模块</title>
+    <url>/2025/02/06/linux%E6%9F%A5%E7%9C%8B%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</url>
+    <content><![CDATA[<h3 id="lsmod-命令的作用"><a href="#lsmod-命令的作用" class="headerlink" title="lsmod 命令的作用"></a><strong><code>lsmod</code> 命令的作用</strong></h3><p><code>lsmod</code> 是 Linux 系统中的一个命令，用于显示当前已加载的 <strong>内核模块（Kernel Modules）</strong>。它可以帮助用户检查哪些模块正在运行，并用于诊断系统硬件和驱动相关问题。</p>
+<h3 id="lsmod-的基本输出格式"><a href="#lsmod-的基本输出格式" class="headerlink" title="lsmod 的基本输出格式"></a><strong><code>lsmod</code> 的基本输出格式</strong></h3><p>执行 <code>lsmod</code> 命令时，会得到如下格式的输出：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
+<p>示例输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Module                  Size  Used by</span><br><span class="line">ip_tables              28672  2</span><br><span class="line">x_tables               40960  1 ip_tables</span><br><span class="line">i915                 2330624  12</span><br><span class="line">drm_kms_helper        217088  1 i915</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>Module</strong>：模块名称（例如 <code>i915</code>，为 Intel 显卡驱动模块）。</li>
+<li><strong>Size</strong>：模块占用的字节数（以 KB 计算）。</li>
+<li><strong>Used by</strong>：当前使用该模块的进程数或依赖该模块的其他内核模块。</li>
+</ul>
+<hr>
+<h3 id="lsmod-的常见操作"><a href="#lsmod-的常见操作" class="headerlink" title="lsmod 的常见操作"></a><strong><code>lsmod</code> 的常见操作</strong></h3><h4 id="1-查看已加载的所有内核模块"><a href="#1-查看已加载的所有内核模块" class="headerlink" title="1. 查看已加载的所有内核模块"></a><strong>1. 查看已加载的所有内核模块</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
+<p>显示所有当前正在运行的内核模块。</p>
+<h4 id="2-过滤特定模块"><a href="#2-过滤特定模块" class="headerlink" title="2. 过滤特定模块"></a><strong>2. 过滤特定模块</strong></h4><p>如果想要查找某个特定模块（如 <code>i915</code> 显卡驱动）：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lsmod | grep i915</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-查看模块的详细信息"><a href="#3-查看模块的详细信息" class="headerlink" title="3. 查看模块的详细信息"></a><strong>3. 查看模块的详细信息</strong></h4><p><code>lsmod</code> 本身不提供详细信息，但可以使用 <code>modinfo</code> 获取：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">modinfo i915</span><br></pre></td></tr></table></figure>
+<p>返回结果可能包含：</p>
+<ul>
+<li>模块名称</li>
+<li>描述信息</li>
+<li>版本</li>
+<li>依赖关系</li>
+<li>加载参数等</li>
+</ul>
+<h4 id="4-手动加载模块"><a href="#4-手动加载模块" class="headerlink" title="4. 手动加载模块"></a><strong>4. 手动加载模块</strong></h4><p>如果某个模块没有被自动加载，可以使用 <code>modprobe</code> 加载：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe module_name</span><br></pre></td></tr></table></figure>
+<p>例如加载 <code>i915</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe i915</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-卸载内核模块"><a href="#5-卸载内核模块" class="headerlink" title="5. 卸载内核模块"></a><strong>5. 卸载内核模块</strong></h4><p>如果一个模块没有被任何进程使用，可以使用 <code>rmmod</code> 卸载：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> rmmod module_name</span><br></pre></td></tr></table></figure>
+<p>例如卸载 <code>ip_tables</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> rmmod ip_tables</span><br></pre></td></tr></table></figure>
+<p>但如果模块正在使用，可能会报错，可以使用 <code>modprobe -r</code> 尝试卸载：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe -r ip_tables</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-列出模块的依赖关系"><a href="#6-列出模块的依赖关系" class="headerlink" title="6. 列出模块的依赖关系"></a><strong>6. 列出模块的依赖关系</strong></h4><p>使用 <code>lsmod</code> 看到的 <code>Used by</code> 列并不详细，可以使用 <code>modinfo</code> 或 <code>lsmod | grep</code> 结合 <code>lsmod</code> 查看：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lsmod | grep drm_kms_helper</span><br><span class="line">modinfo drm_kms_helper</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a><strong>应用场景</strong></h3><ul>
+<li><strong>诊断硬件驱动</strong>：例如，检查显卡、网卡、USB 设备是否正确加载了驱动模块。</li>
+<li><strong>调试系统问题</strong>：如果某些功能无法使用，可以检查相关模块是否被正确加载。</li>
+<li><strong>手动管理模块</strong>：在某些情况下，用户可能需要手动加载或卸载某些模块，以优化性能或排除问题。</li>
+</ul>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><ul>
+<li><code>lsmod</code> 用于列出当前已加载的内核模块。</li>
+<li>结合 <code>grep</code> 可以快速查找特定模块。</li>
+<li><code>modinfo</code> 获取模块详细信息。</li>
+<li><code>modprobe</code> 加载模块，<code>rmmod</code> 或 <code>modprobe -r</code> 卸载模块。</li>
+<li>常用于硬件驱动诊断和系统调试。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+  </entry>
 </search>
