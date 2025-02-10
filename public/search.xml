@@ -5318,4 +5318,19 @@ validate</p>
         <tag>认知</tag>
       </tags>
   </entry>
+  <entry>
+    <title>k8s问题排查类总结</title>
+    <url>/2025/02/10/k8s%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%B1%BB%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h2 id="容器与宿主机之间复制文件"><a href="#容器与宿主机之间复制文件" class="headerlink" title="容器与宿主机之间复制文件"></a>容器与宿主机之间复制文件</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kubectl cp &lt;pod_name&gt;:&lt;container_path&gt; &lt;local_path&gt;</span><br><span class="line">kubectl cp &lt;local_path&gt; &lt;pod_name&gt;:&lt;container_path&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#docker</span><br><span class="line">docker cp &lt;container_name&gt;:&lt;container_path&gt; &lt;host_path&gt;</span><br><span class="line">docker cp &lt;host_path&gt; &lt;container_name&gt;:&lt;container_path&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="netshoot网络调试容器（也可以在宿主机上使用nsenter）"><a href="#netshoot网络调试容器（也可以在宿主机上使用nsenter）" class="headerlink" title="netshoot网络调试容器（也可以在宿主机上使用nsenter）"></a>netshoot网络调试容器（也可以在宿主机上使用nsenter）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#介绍</span><br><span class="line">https://github.com/nicolaka/netshoot</span><br><span class="line"></span><br><span class="line">#k8s命令</span><br><span class="line">kubectl run tmp-shell --rm -it --image swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nicolaka/netshoot:v0.13</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="高级调试分析"><a href="#高级调试分析" class="headerlink" title="高级调试分析"></a>高级调试分析</h2><h3 id="Jaeger"><a href="#Jaeger" class="headerlink" title="Jaeger"></a>Jaeger</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">helm repo add jaegertracing https://jaegertracing.github.io/helm-charts</span><br><span class="line">helm repo update</span><br><span class="line">helm install jaeger jaegertracing/jaeger</span><br><span class="line"></span><br><span class="line">#应用程序代码中添加 Jaeger 客户端库，并将其配置为向 Jaeger 后端报告</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
 </search>
