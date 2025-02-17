@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="一、rke工具（不同版本支持的k8s集群版本不同） https:&#x2F;&#x2F;github.com&#x2F;rancher&#x2F;rke&#x2F;releases  二、生成cluster.yml 参考:https:&#x2F;&#x2F;www.cnblogs.com&#x2F;jdbinfo&#x2F;p&#x2F;17476878.html  12345678910111213141516171819202122232425$ hostname11.100.100.100">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rke离线安装k8s集群镜像列表问题">
+<meta property="og:url" content="https://shispring.github.io/2025/02/17/rke%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85k8s%E9%9B%86%E7%BE%A4%E9%95%9C%E5%83%8F%E5%88%97%E8%A1%A8%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、rke工具（不同版本支持的k8s集群版本不同） https:&#x2F;&#x2F;github.com&#x2F;rancher&#x2F;rke&#x2F;releases  二、生成cluster.yml 参考:https:&#x2F;&#x2F;www.cnblogs.com&#x2F;jdbinfo&#x2F;p&#x2F;17476878.html  12345678910111213141516171819202122232425$ hostname11.100.100.100">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-17T10:53:55.000Z">
+<meta property="article:modified_time" content="2025-02-17T10:56:14.656Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/02/17/rke%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85k8s%E9%9B%86%E7%BE%A4%E9%95%9C%E5%83%8F%E5%88%97%E8%A1%A8%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>rke离线安装k8s集群镜像列表问题 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/17/rke%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85k8s%E9%9B%86%E7%BE%A4%E9%95%9C%E5%83%8F%E5%88%97%E8%A1%A8%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          rke离线安装k8s集群镜像列表问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-02-17 18:53:55 / 修改时间：18:56:14" itemprop="dateCreated datePublished" datetime="2025-02-17T18:53:55+08:00">2025-02-17</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、rke工具（不同版本支持的k8s集群版本不同）"><a href="#一、rke工具（不同版本支持的k8s集群版本不同）" class="headerlink" title="一、rke工具（不同版本支持的k8s集群版本不同）"></a>一、rke工具（不同版本支持的k8s集群版本不同）</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/rancher/rke/releases">https://github.com/rancher/rke/releases</a></p>
+</blockquote>
+<h2 id="二、生成cluster-yml"><a href="#二、生成cluster-yml" class="headerlink" title="二、生成cluster.yml"></a>二、生成cluster.yml</h2><blockquote>
+<p>参考:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/jdbinfo/p/17476878.html">https://www.cnblogs.com/jdbinfo/p/17476878.html</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ hostname</span><br><span class="line">11.100.100.100</span><br><span class="line">$ rke config --name cluster.yml</span><br><span class="line">[+] Cluster Level SSH Private Key Path [~/.ssh/id_rsa]:</span><br><span class="line">[+] Number of Hosts [1]:</span><br><span class="line">[+] SSH Address of host (1) [none]: 11.100.100.100</span><br><span class="line">[+] SSH Port of host (1) [22]:</span><br><span class="line">[+] SSH Private Key Path of host (11.101.222.248) [none]: ~/.ssh/id_rsa</span><br><span class="line">[+] SSH User of host (11.101.222.248) [ubuntu]: stark</span><br><span class="line">[+] Is host (11.101.222.248) a Control Plane host (y/n)? [y]: y</span><br><span class="line">[+] Is host (11.101.222.248) a Worker host (y/n)? [n]: y</span><br><span class="line">[+] Is host (11.101.222.248) an etcd host (y/n)? [n]: y</span><br><span class="line">[+] Override Hostname of host (11.101.222.248) [none]:</span><br><span class="line">[+] Internal IP of host (11.101.222.248) [none]:</span><br><span class="line">[+] Docker socket path on host (11.101.222.248) [/var/run/docker.sock]:</span><br><span class="line">[+] Network Plugin Type (flannel, calico, weave, canal, aci) [canal]: calico</span><br><span class="line">[+] Authentication Strategy [x509]:</span><br><span class="line">[+] Authorization Mode (rbac, none) [rbac]:</span><br><span class="line">[+] Kubernetes Docker image [rancher/hyperkube:v1.28.13-rancher1]: rancher/hyperkube:v1.26.15-rancher1</span><br><span class="line">[+] Cluster domain [cluster.local]:</span><br><span class="line">[+] Service Cluster IP Range [10.43.0.0/16]:</span><br><span class="line">[+] Enable PodSecurityPolicy [n]:</span><br><span class="line">[+] Cluster Network CIDR [10.42.0.0/16]:</span><br><span class="line">[+] Cluster DNS Service IP [10.43.0.10]:</span><br><span class="line">[+] Add addon manifest URLs or YAML files [no]:</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、需离线下载的镜像"><a href="#三、需离线下载的镜像" class="headerlink" title="三、需离线下载的镜像"></a>三、需离线下载的镜像</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ cat ./cluster.yml | grep &quot;rancher/&quot; | awk -F &quot;: &quot; &#x27;&#123;print $2&#125;&#x27; | sort | uniq | sort</span><br><span class="line">rancher/calico-cni:v3.27.4-rancher1</span><br><span class="line">rancher/flannel-cni:v0.3.0-rancher9</span><br><span class="line">rancher/hyperkube:v1.26.15-rancher1</span><br><span class="line">rancher/mirrored-calico-ctl:v3.27.4</span><br><span class="line">rancher/mirrored-calico-kube-controllers:v3.27.4</span><br><span class="line">rancher/mirrored-calico-node:v3.27.4</span><br><span class="line">rancher/mirrored-calico-pod2daemon-flexvol:v3.27.4</span><br><span class="line">rancher/mirrored-cluster-proportional-autoscaler:v1.8.9</span><br><span class="line">rancher/mirrored-coredns-coredns:1.10.1</span><br><span class="line">rancher/mirrored-coreos-etcd:v3.5.10</span><br><span class="line">rancher/mirrored-flannel-flannel:v0.24.2</span><br><span class="line">rancher/mirrored-ingress-nginx-kube-webhook-certgen:v20231226-1a7112e06</span><br><span class="line">rancher/mirrored-k8s-dns-dnsmasq-nanny:1.22.28</span><br><span class="line">rancher/mirrored-k8s-dns-kube-dns:1.22.28</span><br><span class="line">rancher/mirrored-k8s-dns-node-cache:1.22.28</span><br><span class="line">rancher/mirrored-k8s-dns-sidecar:1.22.28</span><br><span class="line">rancher/mirrored-metrics-server:v0.7.0</span><br><span class="line">rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1</span><br><span class="line">rancher/mirrored-pause:3.7</span><br><span class="line">rancher/nginx-ingress-controller:nginx-1.11.2-rancher1</span><br><span class="line">rancher/rke-tools:v0.1.102</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、下载k8s所需镜像并导出"><a href="#四、下载k8s所需镜像并导出" class="headerlink" title="四、下载k8s所需镜像并导出"></a>四、下载k8s所需镜像并导出</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">set -e  # 遇到错误就退出</span><br><span class="line">set -o pipefail  # 管道中任何命令失败都导致整个脚本失败</span><br><span class="line"></span><br><span class="line"># 镜像列表</span><br><span class="line">IMAGES=(</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/calico-cni:v3.27.4-rancher1&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/flannel-cni:v0.3.0-rancher9&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/hyperkube:v1.26.15-rancher1&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-calico-ctl:v3.27.4&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-calico-kube-controllers:v3.27.4&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-calico-node:v3.27.4&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-calico-pod2daemon-flexvol:v3.27.4&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-cluster-proportional-autoscaler:v1.8.9&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-coredns-coredns:1.10.1&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-coreos-etcd:v3.5.10&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-flannel-flannel:v0.24.2&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-ingress-nginx-kube-webhook-certgen:v20231226-1a7112e06&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-k8s-dns-dnsmasq-nanny:1.22.28&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-k8s-dns-kube-dns:1.22.28&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-k8s-dns-node-cache:1.22.28&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-k8s-dns-sidecar:1.22.28&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-metrics-server:v0.7.0&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/mirrored-pause:3.7&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/nginx-ingress-controller:nginx-1.11.2-rancher1&quot;</span><br><span class="line">    &quot;mirror.k8s.qihoo.net/docker/rancher/rke-tools:v0.1.102&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 下载并重新打 tag</span><br><span class="line">for IMAGE in &quot;$&#123;IMAGES[@]&#125;&quot;; do</span><br><span class="line">    echo &quot;Pulling $IMAGE ...&quot;</span><br><span class="line">    docker pull &quot;$IMAGE&quot;</span><br><span class="line"></span><br><span class="line">    # 去掉前缀 mirror.k8s.qihoo.net/docker/</span><br><span class="line">    NEW_TAG=$(echo &quot;$IMAGE&quot; | sed &#x27;s|mirror.k8s.qihoo.net/docker/||&#x27;)</span><br><span class="line"></span><br><span class="line">    echo &quot;Tagging $IMAGE as $NEW_TAG ...&quot;</span><br><span class="line">    docker tag &quot;$IMAGE&quot; &quot;$NEW_TAG&quot;</span><br><span class="line"></span><br><span class="line">    echo &quot;Removing original $IMAGE to save space ...&quot;</span><br><span class="line">    docker rmi &quot;$IMAGE&quot;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line"># 导出所有处理后的镜像</span><br><span class="line">echo &quot;Saving images to rke-images-1.26.15.tar ...&quot;</span><br><span class="line">docker save -o rke-images-1.26.15.tar $(docker images --format &quot;&#123;&#123;.Repository&#125;&#125;:&#123;&#123;.Tag&#125;&#125;&quot; | grep grep rancher)</span><br><span class="line"></span><br><span class="line">echo &quot;All images downloaded, tagged, and saved successfully!&quot;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/14/curl-unix-socket-%E7%94%A8%E6%B3%95/" rel="prev" title="curl --unix-socket 用法">
+      <i class="fa fa-chevron-left"></i> curl --unix-socket 用法
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81rke%E5%B7%A5%E5%85%B7%EF%BC%88%E4%B8%8D%E5%90%8C%E7%89%88%E6%9C%AC%E6%94%AF%E6%8C%81%E7%9A%84k8s%E9%9B%86%E7%BE%A4%E7%89%88%E6%9C%AC%E4%B8%8D%E5%90%8C%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">一、rke工具（不同版本支持的k8s集群版本不同）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E7%94%9F%E6%88%90cluster-yml"><span class="nav-number">2.</span> <span class="nav-text">二、生成cluster.yml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E9%9C%80%E7%A6%BB%E7%BA%BF%E4%B8%8B%E8%BD%BD%E7%9A%84%E9%95%9C%E5%83%8F"><span class="nav-number">3.</span> <span class="nav-text">三、需离线下载的镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%B8%8B%E8%BD%BDk8s%E6%89%80%E9%9C%80%E9%95%9C%E5%83%8F%E5%B9%B6%E5%AF%BC%E5%87%BA"><span class="nav-number">4.</span> <span class="nav-text">四、下载k8s所需镜像并导出</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">93</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
