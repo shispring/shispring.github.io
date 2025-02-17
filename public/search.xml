@@ -4146,13 +4146,13 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 </ol>
 <h3 id="清理-Docker-残留资源"><a href="#清理-Docker-残留资源" class="headerlink" title="清理 Docker 残留资源"></a><strong>清理 Docker 残留资源</strong></h3><ol>
 <li><p>删除退出的容器：</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker container prune -a</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker container prune -f</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>删除未使用的镜像：</p>
  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker image prune -a</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>清理未使用的网络和卷：</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker network prune -a</span><br><span class="line">docker volume prune -a</span><br></pre></td></tr></table></figure></li>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker network prune -f</span><br><span class="line">docker volume prune -f</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h3 id="清理-Containerd-残留资源"><a href="#清理-Containerd-残留资源" class="headerlink" title="清理 Containerd 残留资源"></a><strong>清理 Containerd 残留资源</strong></h3><ol>
 <li><p>删除残留容器：</p>

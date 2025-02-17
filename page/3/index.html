@@ -953,7 +953,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-02-17 18:53:20" itemprop="dateModified" datetime="2025-02-17T18:53:20+08:00">2025-02-17</time>
+                <time title="修改时间：2025-02-17 19:10:55" itemprop="dateModified" datetime="2025-02-17T19:10:55+08:00">2025-02-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1113,13 +1113,13 @@
 </ol>
 <h3 id="清理-Docker-残留资源"><a href="#清理-Docker-残留资源" class="headerlink" title="清理 Docker 残留资源"></a><strong>清理 Docker 残留资源</strong></h3><ol>
 <li><p>删除退出的容器：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container prune -a</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container prune -f</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>删除未使用的镜像：</p>
  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -a</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>清理未使用的网络和卷：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker network prune -a</span><br><span class="line">docker volume prune -a</span><br></pre></td></tr></table></figure></li>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker network prune -f</span><br><span class="line">docker volume prune -f</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h3 id="清理-Containerd-残留资源"><a href="#清理-Containerd-残留资源" class="headerlink" title="清理 Containerd 残留资源"></a><strong>清理 Containerd 残留资源</strong></h3><ol>
 <li><p>删除残留容器：</p>
