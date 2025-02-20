@@ -5696,7 +5696,7 @@ validate</p>
     <url>/2025/02/20/alpine%E6%BA%90%E5%8F%8A%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h2 id="alpine更换国内源"><a href="#alpine更换国内源" class="headerlink" title="alpine更换国内源"></a>alpine更换国内源</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#方式一</span><br><span class="line">sed -i &#x27;s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g&#x27; /etc/apk/repositories</span><br><span class="line"></span><br><span class="line">#方式二</span><br><span class="line">cat /etc/os-release</span><br><span class="line">cat &gt; test.txt &lt;&lt; EOF</span><br><span class="line">https://mirrors.aliyun.com/alpine/v3.19/main/</span><br><span class="line">https://mirrors.aliyun.com/alpine/v3.19/community/</span><br><span class="line">EOF</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <hr>
-<h2 id="apk工具使用"><a href="#apk工具使用" class="headerlink" title="apk工具使用"></a>apk工具使用</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://wangchujiang.com/linux-command/c/apk.html</span><br></pre></td></tr></table></figure>
+<h2 id="apk工具"><a href="#apk工具" class="headerlink" title="apk工具"></a>apk工具</h2><p><a href="https://wangchujiang.com/linux-command/c/apk.html" title="apk工具介绍">apk工具介绍</a></p>
 ]]></content>
       <tags>
         <tag>linux</tag>
