@@ -4392,6 +4392,9 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 </tbody></table>
 <hr>
 <h2 id="抓包ingress请求case"><a href="#抓包ingress请求case" class="headerlink" title="抓包ingress请求case"></a>抓包ingress请求case</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#抓包请求</span><br><span class="line">curl -H &quot;host:test.xxx.com&quot; http://10.221.100.200/api/v1/xxx</span><br><span class="line">#查看日志输出</span><br><span class="line">crictl logs  -f &lt;container-id&gt; 2&gt;&amp;1 | grep &quot;/api/v1/xxx&quot;</span><br><span class="line">#抓包过滤</span><br><span class="line">tcpdump -i eth0  -ttt -nnn -v dst host 10.221.100.200 and port 80 and src host 10.100.100.100</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><a href="https://github.com/mylxsw/growing-up/blob/master/doc/tcpdump%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B.md">github参考</a></p>
 ]]></content>
       <categories>
         <category>network</category>
