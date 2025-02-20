@@ -4344,7 +4344,52 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <li>-E 使用提供的秘钥解密IPSEC流量</li>
 </ul>
 <hr>
-<h2 id="tcpdump-一些命令"><a href="#tcpdump-一些命令" class="headerlink" title="tcpdump 一些命令"></a>tcpdump 一些命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">查看网络接口列表:</span><br><span class="line">tcpdump -D</span><br><span class="line"></span><br><span class="line">简单抓包：</span><br><span class="line">抓取某接口的所有流量：</span><br><span class="line">tcpdump -i eth0</span><br><span class="line"></span><br><span class="line">保存抓包文件:</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定IP地址的数据包:</span><br><span class="line">只抓取源地址或目标地址为 `192.168.3.110` 的流量</span><br><span class="line">sudo tcpdump -i eth0 host 192.168.3.110</span><br><span class="line"></span><br><span class="line">抓取HTTP流量（端口8080）：</span><br><span class="line">sudo tcpdump -i eth0 port 8080</span><br><span class="line"></span><br><span class="line">抓取多个端口：</span><br><span class="line">sudo tcpdump -i eth0 portrange 8000-9000</span><br><span class="line"></span><br><span class="line">抓取TCP流量</span><br><span class="line">sudo tcpdump -i eth0 tcp</span><br><span class="line">抓取UDP流量</span><br><span class="line">sudo tcpdump -i eth0 udp</span><br><span class="line"></span><br><span class="line">抓取ICMP流量（如ping）：</span><br><span class="line">sudo tcpdump -i eth0 icmp</span><br><span class="line"></span><br><span class="line">抓取指定源地址和目标端口的数据包：</span><br><span class="line">sudo tcpdump -i eth0 src 192.168.3.110 and port 22</span><br><span class="line">逻辑运算符： and：与 or ：或  not：非</span><br><span class="line"></span><br><span class="line">显示数据包的详细信息:</span><br><span class="line">sudo tcpdump -i eth0 -v</span><br><span class="line"></span><br><span class="line">如果流量异常密集，可以通过 `-c` 限制抓包数量</span><br><span class="line">sudo tcpdump -i eth0 port 22 -c 100</span><br><span class="line"></span><br><span class="line">抓包文件过大,每10MB保存一个文件</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap -C 10</span><br><span class="line"></span><br><span class="line">抓取指定时间范围的包，抓包10秒后自动停止</span><br><span class="line">timeout 10s tcpdump -i eth0</span><br></pre></td></tr></table></figure>
+<h2 id="tcpdump-一些命令"><a href="#tcpdump-一些命令" class="headerlink" title="tcpdump 一些命令"></a>tcpdump 一些命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">查看网络接口列表:</span><br><span class="line">tcpdump -D</span><br><span class="line"></span><br><span class="line">简单抓包：</span><br><span class="line">抓取某接口的所有流量：</span><br><span class="line">tcpdump -i eth0</span><br><span class="line"></span><br><span class="line">保存抓包文件:</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定IP地址的数据包:</span><br><span class="line">只抓取源地址或目标地址为 `192.168.3.110` 的流量</span><br><span class="line">sudo tcpdump -i eth0 host 192.168.3.110</span><br><span class="line"></span><br><span class="line">抓取HTTP流量（端口8080）：</span><br><span class="line">sudo tcpdump -i eth0 port 8080</span><br><span class="line"></span><br><span class="line">抓取多个端口：</span><br><span class="line">sudo tcpdump -i eth0 portrange 8000-9000</span><br><span class="line"></span><br><span class="line">抓取TCP流量</span><br><span class="line">sudo tcpdump -i eth0 tcp</span><br><span class="line">抓取UDP流量</span><br><span class="line">sudo tcpdump -i eth0 udp</span><br><span class="line"></span><br><span class="line">抓取ICMP流量（如ping）：</span><br><span class="line">sudo tcpdump -i eth0 icmp</span><br><span class="line"></span><br><span class="line">抓取指定源地址和目标端口的数据包：</span><br><span class="line">sudo tcpdump -i eth0 src 192.168.3.110 and port 22</span><br><span class="line">逻辑运算符： and：与 or ：或  not：非</span><br><span class="line"></span><br><span class="line">显示数据包的详细信息:</span><br><span class="line">sudo tcpdump -i eth0 -v</span><br><span class="line"></span><br><span class="line">如果流量异常密集，可以通过 `-c` 限制抓包数量</span><br><span class="line">sudo tcpdump -i eth0 port 22 -c 100</span><br><span class="line"></span><br><span class="line">抓包文件过大,每10MB保存一个文件</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap -C 10</span><br><span class="line"></span><br><span class="line">读取包内容</span><br><span class="line">sudo tcpdump -r capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定时间范围的包，抓包10秒后自动停止</span><br><span class="line">timeout 10s tcpdump -i eth0</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h2><table>
+<thead>
+<tr>
+<th><strong>需求</strong></th>
+<th><strong>命令</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>捕获指定接口流量</td>
+<td><code>sudo tcpdump -i eth0</code></td>
+</tr>
+<tr>
+<td>捕获指定端口流量</td>
+<td><code>sudo tcpdump -i eth0 port 80</code></td>
+</tr>
+<tr>
+<td>保存抓包到文件</td>
+<td><code>sudo tcpdump -i eth0 -w capture.pcap</code></td>
+</tr>
+<tr>
+<td>限制抓包数量</td>
+<td><code>sudo tcpdump -i eth0 -c 100</code></td>
+</tr>
+<tr>
+<td>过滤特定源 IP 或目标 IP</td>
+<td><code>sudo tcpdump -i eth0 src host 192.168.1.10</code></td>
+</tr>
+<tr>
+<td>过滤特定协议</td>
+<td><code>sudo tcpdump -i eth0 tcp</code></td>
+</tr>
+<tr>
+<td>输出包详细内容</td>
+<td><code>sudo tcpdump -i eth0 -X</code></td>
+</tr>
+<tr>
+<td>限制包的大小</td>
+<td><code>sudo tcpdump -i eth0 -s 128</code></td>
+</tr>
+<tr>
+<td>捕获 DNS 流量</td>
+<td><code>sudo tcpdump -i eth0 port 53 -vvv</code></td>
+</tr>
+</tbody></table>
 ]]></content>
       <categories>
         <category>network</category>
