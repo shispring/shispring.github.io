@@ -207,10 +207,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-02-24 18:13:00 / 修改时间：18:14:37" itemprop="dateCreated datePublished" datetime="2025-02-24T18:13:00+08:00">2025-02-24</time>
+              <time title="创建时间：2025-02-24 18:13:00" itemprop="dateCreated datePublished" datetime="2025-02-24T18:13:00+08:00">2025-02-24</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-03-06 09:54:01" itemprop="dateModified" datetime="2025-03-06T09:54:01+08:00">2025-03-06</time>
+              </span>
 
           
 
@@ -225,7 +231,7 @@
       
           <p><code>systemctl</code> 是 <strong>Systemd</strong> 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。</p>
 <hr>
-<h3 id="🌟-常用-systemctl-命令"><a href="#🌟-常用-systemctl-命令" class="headerlink" title="🌟 常用 systemctl 命令"></a>🌟 <strong>常用 systemctl 命令</strong></h3><h4 id="1-列出当前所有服务"><a href="#1-列出当前所有服务" class="headerlink" title="1. 列出当前所有服务"></a>1. <strong>列出当前所有服务</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
+<h3 id="🌟-常用-systemctl-命令"><a href="#🌟-常用-systemctl-命令" class="headerlink" title="🌟 常用 systemctl 命令"></a>🌟 <strong>常用 systemctl 命令</strong></h3><h4 id="1-列出当前所有服务"><a href="#1-列出当前所有服务" class="headerlink" title="1. 列出当前所有服务"></a>1. <strong>列出当前所有服务</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service</span><br><span class="line">systemctl --no-pager list-units --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
 <ul>
 <li>这个命令列出当前机器上所有正在运行的服务（包含活跃和非活跃的）。如果要查看更多详细信息，可以加上 <code>--all</code>。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --all</span><br></pre></td></tr></table></figure></li>
 </ul>

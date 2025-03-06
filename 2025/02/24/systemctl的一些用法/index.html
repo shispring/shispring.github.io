@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="systemctl 是 Systemd 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。  🌟 常用 systemctl 命令1. 列出当前所有服务1systemctl list-units --type&#x3D;service  这个命令列出当前机器上所有正在运行的服务（包含活跃和非活跃的）。如果要查看更多详细信息，可以">
+  <meta name="description" content="systemctl 是 Systemd 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。  🌟 常用 systemctl 命令1. 列出当前所有服务12systemctl list-units --type&#x3D;servicesystemctl --no-pager list-units --type&#x3D;service">
 <meta property="og:type" content="article">
 <meta property="og:title" content="systemctl的一些用法">
 <meta property="og:url" content="https://shispring.github.io/2025/02/24/systemctl%E7%9A%84%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="systemctl 是 Systemd 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。  🌟 常用 systemctl 命令1. 列出当前所有服务1systemctl list-units --type&#x3D;service  这个命令列出当前机器上所有正在运行的服务（包含活跃和非活跃的）。如果要查看更多详细信息，可以">
+<meta property="og:description" content="systemctl 是 Systemd 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。  🌟 常用 systemctl 命令1. 列出当前所有服务12systemctl list-units --type&#x3D;servicesystemctl --no-pager list-units --type&#x3D;service">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-02-24T10:13:00.000Z">
-<meta property="article:modified_time" content="2025-02-24T10:14:37.624Z">
+<meta property="article:modified_time" content="2025-03-06T01:54:01.633Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="linux">
 <meta name="twitter:card" content="summary">
@@ -212,10 +212,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-02-24 18:13:00 / 修改时间：18:14:37" itemprop="dateCreated datePublished" datetime="2025-02-24T18:13:00+08:00">2025-02-24</time>
+              <time title="创建时间：2025-02-24 18:13:00" itemprop="dateCreated datePublished" datetime="2025-02-24T18:13:00+08:00">2025-02-24</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-03-06 09:54:01" itemprop="dateModified" datetime="2025-03-06T09:54:01+08:00">2025-03-06</time>
+              </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -237,7 +243,7 @@
       
         <p><code>systemctl</code> 是 <strong>Systemd</strong> 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。</p>
 <hr>
-<h3 id="🌟-常用-systemctl-命令"><a href="#🌟-常用-systemctl-命令" class="headerlink" title="🌟 常用 systemctl 命令"></a>🌟 <strong>常用 systemctl 命令</strong></h3><h4 id="1-列出当前所有服务"><a href="#1-列出当前所有服务" class="headerlink" title="1. 列出当前所有服务"></a>1. <strong>列出当前所有服务</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
+<h3 id="🌟-常用-systemctl-命令"><a href="#🌟-常用-systemctl-命令" class="headerlink" title="🌟 常用 systemctl 命令"></a>🌟 <strong>常用 systemctl 命令</strong></h3><h4 id="1-列出当前所有服务"><a href="#1-列出当前所有服务" class="headerlink" title="1. 列出当前所有服务"></a>1. <strong>列出当前所有服务</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service</span><br><span class="line">systemctl --no-pager list-units --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
 <ul>
 <li>这个命令列出当前机器上所有正在运行的服务（包含活跃和非活跃的）。如果要查看更多详细信息，可以加上 <code>--all</code>。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --all</span><br></pre></td></tr></table></figure></li>
 </ul>
