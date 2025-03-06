@@ -215,7 +215,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-03-06 09:54:01" itemprop="dateModified" datetime="2025-03-06T09:54:01+08:00">2025-03-06</time>
+                <time title="修改时间：2025-03-06 09:55:36" itemprop="dateModified" datetime="2025-03-06T09:55:36+08:00">2025-03-06</time>
               </span>
 
           
@@ -271,7 +271,7 @@
 <ul>
 <li><code>-u</code> 用来指定服务，默认显示最近的日志。如果需要查看更早的日志，可以使用 <code>--since</code> 和 <code>--until</code> 选项。</li>
 </ul>
-<h4 id="10-查看系统日志"><a href="#10-查看系统日志" class="headerlink" title="10. 查看系统日志"></a>10. <strong>查看系统日志</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl</span><br></pre></td></tr></table></figure>
+<h4 id="10-查看系统日志"><a href="#10-查看系统日志" class="headerlink" title="10. 查看系统日志"></a>10. <strong>查看系统日志</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">journalctl</span><br><span class="line"></span><br><span class="line">journalctl -u docker --no-pager -n 50</span><br></pre></td></tr></table></figure>
 <ul>
 <li>查看所有系统日志。默认会显示所有日志，如果想查看最近的日志，可以使用 <code>-n</code> 参数，查看最新的 100 行：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -n 100</span><br></pre></td></tr></table></figure></li>
 </ul>
