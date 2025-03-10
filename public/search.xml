@@ -5759,7 +5759,10 @@ validate</p>
   <entry>
     <title>rke离线安装k8s集群镜像列表问题</title>
     <url>/2025/02/17/rke%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85k8s%E9%9B%86%E7%BE%A4%E9%95%9C%E5%83%8F%E5%88%97%E8%A1%A8%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="一、rke工具（不同版本支持的k8s集群版本不同）"><a href="#一、rke工具（不同版本支持的k8s集群版本不同）" class="headerlink" title="一、rke工具（不同版本支持的k8s集群版本不同）"></a>一、rke工具（不同版本支持的k8s集群版本不同）</h2><blockquote>
+    <content><![CDATA[<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a href="https://www.rockylinux.cn/notes/deploying-k8s-cluster-with-rke.html">https://www.rockylinux.cn/notes/deploying-k8s-cluster-with-rke.html</a></p>
+</blockquote>
+<h2 id="一、rke工具（不同版本支持的k8s集群版本不同）"><a href="#一、rke工具（不同版本支持的k8s集群版本不同）" class="headerlink" title="一、rke工具（不同版本支持的k8s集群版本不同）"></a>一、rke工具（不同版本支持的k8s集群版本不同）</h2><blockquote>
 <p><a href="https://github.com/rancher/rke/releases">https://github.com/rancher/rke/releases</a></p>
 </blockquote>
 <h2 id="二、生成cluster-yml"><a href="#二、生成cluster-yml" class="headerlink" title="二、生成cluster.yml"></a>二、生成cluster.yml</h2><blockquote>
