@@ -5892,4 +5892,19 @@ validate</p>
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>混合云架构示意图</title>
+    <url>/2025/03/10/%E6%B7%B7%E5%90%88%E4%BA%91%E6%9E%B6%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE/</url>
+    <content><![CDATA[<h2 id="阿里混合云架构"><a href="#阿里混合云架构" class="headerlink" title="阿里混合云架构"></a>阿里混合云架构</h2><ul>
+<li>大陆架构<br><img src="https://raw.githubusercontent.com/shispring/picgo/master/p56761.png" alt="大陆" title="大陆"></li>
+</ul>
+<hr>
+<ul>
+<li>全球架构<br><img src="https://raw.githubusercontent.com/shispring/picgo/master/onwbejlswgnv4_20240422_7402cd3196f34eb58eceaf87a6e60e2a.png" alt="全球" title="全球"></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>cloud</tag>
+      </tags>
+  </entry>
 </search>
