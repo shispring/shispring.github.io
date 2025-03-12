@@ -3810,6 +3810,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 
 <h2 id="chrome插件"><a href="#chrome插件" class="headerlink" title="chrome插件"></a>chrome插件</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/zhaoolee/ChromeAppHeroes</span><br><span class="line">https://www.crxsoso.com/</span><br></pre></td></tr></table></figure>
 
+<h2 id="k8s"><a href="#k8s" class="headerlink" title="k8s"></a>k8s</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#pv / pvc</span><br><span class="line">https://boilingfrog.github.io/2021/07/01/k8s%E4%B8%AD%E7%9A%84PV%E5%92%8CPVC%E7%90%86%E8%A7%A3/#%E4%BB%80%E4%B9%88%E6%98%AFpv%E5%92%8Cpvc</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>nice-resources</category>
