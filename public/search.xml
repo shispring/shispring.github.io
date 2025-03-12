@@ -4548,6 +4548,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <h2 id="cloc-统计代码"><a href="#cloc-统计代码" class="headerlink" title="cloc 统计代码"></a>cloc 统计代码</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#github地址</span><br><span class="line">https://github.com/AlDanial/cloc</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h2 id="kyanos"><a href="#kyanos" class="headerlink" title="kyanos"></a>kyanos</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Kyanos 是一个网络流量采集和分析工具</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
+<h2 id="远程桌面rustdesk"><a href="#远程桌面rustdesk" class="headerlink" title="远程桌面rustdesk"></a>远程桌面rustdesk</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/rustdesk/rustdesk</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>tools</category>
