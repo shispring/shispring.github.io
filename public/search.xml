@@ -5933,4 +5933,16 @@ validate</p>
         <tag>tools</tag>
       </tags>
   </entry>
+  <entry>
+    <title>rancher安装k8s</title>
+    <url>/2025/03/17/rancher%E5%AE%89%E8%A3%85k8s/</url>
+    <content><![CDATA[<h2 id="部署k8s"><a href="#部署k8s" class="headerlink" title="部署k8s"></a>部署k8s</h2><blockquote>
+<p>参考： <a href="https://blog.csdn.net/kanganrui/category_12287775.html">https://blog.csdn.net/kanganrui/category_12287775.html</a><br>注意：Rancher 依赖于 iptables 进行网络流量管理和路由控制。如果宿主机未加载 ip_tables 模块，Rancher 将无法正常配置网络规则，导致启动失败。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo modprobe ip_tables &amp;&amp; sudo echo &#x27;ip_tables&#x27; &gt;&gt; /etc/modules</span><br><span class="line"></span><br><span class="line">#使用docker启动rancher</span><br><span class="line">docker run -d --restart=unless-stopped \</span><br><span class="line">  -p 80:80 -p 443:443 \</span><br><span class="line">  --privileged \</span><br><span class="line">  rancher/rancher:latest</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
 </search>
