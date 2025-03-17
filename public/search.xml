@@ -5920,4 +5920,17 @@ validate</p>
         <tag>cloud</tag>
       </tags>
   </entry>
+  <entry>
+    <title>sublime tips</title>
+    <url>/2025/03/17/sublime-tips/</url>
+    <content><![CDATA[<h2 id="subline-去重"><a href="#subline-去重" class="headerlink" title="subline 去重"></a>subline 去重</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#1、排序</span><br><span class="line">edit-&gt; sort lines</span><br><span class="line">#2、正则替换</span><br><span class="line">find行：^(.+)$[\r\n](^\1$[\r\n]&#123;0, 1&#125;)+</span><br><span class="line">replace行：\1\n</span><br></pre></td></tr></table></figure>
+
+<h2 id="反选不包含http的行"><a href="#反选不包含http的行" class="headerlink" title="反选不包含http的行"></a>反选不包含http的行</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find行：^((?!http).)*$</span><br><span class="line">或者</span><br><span class="line">find行：^(?!.*http).+</span><br><span class="line">replace：留空</span><br></pre></td></tr></table></figure>
+
+<h2 id="去除空行"><a href="#去除空行" class="headerlink" title="去除空行"></a>去除空行</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find配置：\s+$</span><br><span class="line">replace：留空</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>tools</tag>
+      </tags>
+  </entry>
 </search>
