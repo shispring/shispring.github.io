@@ -6019,8 +6019,8 @@ validate</p>
 <li><code>myrepo/myimage:amd64</code></li>
 <li><code>myrepo/myimage:arm64</code></li>
 </ul>
-<h4 id="（2）创建-Manifest-List"><a href="#（2）创建-Manifest-List" class="headerlink" title="（2）创建 Manifest List"></a><strong>（2）创建 Manifest List</strong></h4><p>使用 <code>docker manifest create</code> 命令，将不同架构的镜像组合成一个 <code>manifest</code>：</p>
-<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker manifest create myrepo/myimage:latest \</span><br><span class="line">  myrepo/myimage:amd64 \</span><br><span class="line">  myrepo/myimage:arm64</span><br></pre></td></tr></table></figure>
+<h4 id="（2）创建-Manifest-List"><a href="#（2）创建-Manifest-List" class="headerlink" title="（2）创建 Manifest List"></a><strong>（2）创建 Manifest List</strong></h4><p>使用 <code>docker manifest create --insecure </code> 命令，将不同架构的镜像组合成一个 <code>manifest</code>：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker manifest create  --insecure myrepo/myimage:latest \</span><br><span class="line">  myrepo/myimage:amd64 \</span><br><span class="line">  myrepo/myimage:arm64</span><br></pre></td></tr></table></figure>
 
 <h4 id="（3）标注架构"><a href="#（3）标注架构" class="headerlink" title="（3）标注架构"></a><strong>（3）标注架构</strong></h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker manifest annotate myrepo/myimage:latest myrepo/myimage:amd64 --<span class="built_in">arch</span> amd64</span><br><span class="line">docker manifest annotate myrepo/myimage:latest myrepo/myimage:arm64 --<span class="built_in">arch</span> arm64</span><br></pre></td></tr></table></figure>
 
