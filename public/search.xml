@@ -1959,7 +1959,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
     <title>k8s event controller工作原理</title>
     <url>/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[<p>在 Kubernetes 中，Event Controller 是集群内部的一部分，用于管理事件资源（Event 对象）。它的主要职责是监听、存储和处理集群中的事件，这些事件是 Kubernetes 中其他组件和用户操作的结果。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get events --sort-by=<span class="string">&#x27;&#123;.metadata.creationTimestamp&#125;&#x27;</span> -n default</span><br><span class="line">kubectl get events --sort-by=<span class="string">&#x27;&#123;.metadata.creationTimestamp&#125;&#x27;</span> -o jsonpath=<span class="string">&#x27;&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;</span> -n default</span><br><span class="line">kubectl get events docker142.cloud.bjzdt.qihoo.net.182de6068e2be852 -n default -o yaml </span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get events --sort-by=<span class="string">&#x27;&#123;.metadata.creationTimestamp&#125;&#x27;</span> -n default</span><br><span class="line">kubectl get events --sort-by=<span class="string">&#x27;&#123;.metadata.creationTimestamp&#125;&#x27;</span> -o jsonpath=<span class="string">&#x27;&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;</span> -n default</span><br><span class="line">kubectl get events xxxx.182de6068e2be852 -n default -o yaml </span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>Event 的定义与来源</li>
