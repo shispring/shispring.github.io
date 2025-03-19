@@ -5999,4 +5999,86 @@ validate</p>
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>docker mainfest 使用</title>
+    <url>/2025/03/19/docker-mainfest/</url>
+    <content><![CDATA[<h3 id="1-什么是-docker-manifest？"><a href="#1-什么是-docker-manifest？" class="headerlink" title="1. 什么是 docker manifest？"></a><strong>1. 什么是 <code>docker manifest</code>？</strong></h3><p><code>docker manifest</code> 是 <strong>Docker 多架构镜像（Multi-Arch Images）</strong> 的一种机制，允许 <strong>同一个镜像名称（Tag）对应多个不同架构的镜像</strong>（如 <code>amd64</code>、<code>arm64</code>、<code>ppc64le</code> 等）。</p>
+<ul>
+<li><strong>作用</strong>：  <ul>
+<li>让 <code>docker pull my-image:latest</code> <strong>自动选择适合当前系统架构的镜像</strong>。</li>
+<li>避免用户手动指定架构（如 <code>my-image:amd64</code> 或 <code>my-image:arm64</code>）。</li>
+<li>适用于 <code>Harbor</code>、<code>Docker Hub</code>、<code>quay.io</code> 等容器镜像仓库。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="2-docker-manifest-的使用方法"><a href="#2-docker-manifest-的使用方法" class="headerlink" title="2. docker manifest 的使用方法"></a><strong>2. <code>docker manifest</code> 的使用方法</strong></h3><h4 id="（1）创建多架构镜像"><a href="#（1）创建多架构镜像" class="headerlink" title="（1）创建多架构镜像"></a><strong>（1）创建多架构镜像</strong></h4><p>假设我们已经构建了两个不同架构的镜像：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker buildx build --platform linux/amd64 -t myrepo/myimage:amd64 --push .</span><br><span class="line">docker buildx build --platform linux/arm64 -t myrepo/myimage:arm64 --push .</span><br></pre></td></tr></table></figure>
+<p>此时，Harbor 上分别有：</p>
+<ul>
+<li><code>myrepo/myimage:amd64</code></li>
+<li><code>myrepo/myimage:arm64</code></li>
+</ul>
+<h4 id="（2）创建-Manifest-List"><a href="#（2）创建-Manifest-List" class="headerlink" title="（2）创建 Manifest List"></a><strong>（2）创建 Manifest List</strong></h4><p>使用 <code>docker manifest create</code> 命令，将不同架构的镜像组合成一个 <code>manifest</code>：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker manifest create myrepo/myimage:latest \</span><br><span class="line">  myrepo/myimage:amd64 \</span><br><span class="line">  myrepo/myimage:arm64</span><br></pre></td></tr></table></figure>
+
+<h4 id="（3）标注架构"><a href="#（3）标注架构" class="headerlink" title="（3）标注架构"></a><strong>（3）标注架构</strong></h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker manifest annotate myrepo/myimage:latest myrepo/myimage:amd64 --<span class="built_in">arch</span> amd64</span><br><span class="line">docker manifest annotate myrepo/myimage:latest myrepo/myimage:arm64 --<span class="built_in">arch</span> arm64</span><br></pre></td></tr></table></figure>
+
+<h4 id="（4）推送到-Harbor"><a href="#（4）推送到-Harbor" class="headerlink" title="（4）推送到 Harbor"></a><strong>（4）推送到 Harbor</strong></h4><figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker manifest push myrepo/myimage:latest</span><br></pre></td></tr></table></figure>
+<p>此时，Harbor 就会存储 <code>myrepo/myimage:latest</code> 这个 <strong>多架构镜像</strong>。</p>
+<hr>
+<h3 id="3-docker-pull-如何选择合适的架构？"><a href="#3-docker-pull-如何选择合适的架构？" class="headerlink" title="3. docker pull 如何选择合适的架构？"></a><strong>3. <code>docker pull</code> 如何选择合适的架构？</strong></h3><p>当你执行 <code>docker pull myrepo/myimage:latest</code> 时：</p>
+<ol>
+<li>Docker 客户端 <strong>查询远程仓库</strong>，获取 <code>manifest list</code>（即不同架构的索引）。</li>
+<li>Docker 客户端 <strong>检测本机架构</strong>：<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="built_in">uname</span> -m  <span class="comment"># 获取当前架构</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>x86_64</code> → 拉取 <code>amd64</code> 版本</li>
+<li><code>aarch64</code> → 拉取 <code>arm64</code> 版本</li>
+</ul>
+</li>
+<li>Docker 根据架构 <strong>自动拉取对应的镜像层（layers）</strong>。</li>
+</ol>
+<hr>
+<h3 id="4-如何在-Harbor-中使用-docker-manifest"><a href="#4-如何在-Harbor-中使用-docker-manifest" class="headerlink" title="4. 如何在 Harbor 中使用 docker manifest"></a><strong>4. 如何在 Harbor 中使用 <code>docker manifest</code></strong></h3><p>Harbor <strong>完全支持多架构镜像</strong>，你可以在 Harbor 的 Web UI 看到：</p>
+<ul>
+<li><code>myimage:latest</code>（<code>manifest list</code>）</li>
+<li>关联的 <code>amd64</code>、<code>arm64</code> 具体镜像</li>
+</ul>
+<p>如果要手动管理 <code>manifest</code>：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">docker login harbor.example.com</span><br><span class="line">docker manifest create harbor.example.com/myrepo/myimage:latest \</span><br><span class="line">  harbor.example.com/myrepo/myimage:amd64 \</span><br><span class="line">  harbor.example.com/myrepo/myimage:arm64</span><br><span class="line">docker manifest push harbor.example.com/myrepo/myimage:latest</span><br></pre></td></tr></table></figure>
+
+<p><strong>Harbor 7.x 及以上版本</strong> 也可以在 Web 界面直接管理 <code>manifest</code>，查看不同架构的 Tag。</p>
+<hr>
+<h3 id="5-结论"><a href="#5-结论" class="headerlink" title="5. 结论"></a><strong>5. 结论</strong></h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>解答</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>docker manifest</code> 作用</strong></td>
+<td>支持多架构镜像，自动匹配 <code>amd64</code>、<code>arm64</code></td>
+</tr>
+<tr>
+<td><strong>Docker 何时判断架构</strong></td>
+<td><code>docker pull</code> 时会解析 <code>manifest list</code>，然后根据本机架构拉取对应版本</td>
+</tr>
+<tr>
+<td><strong>Harbor 是否支持</strong></td>
+<td><strong>支持</strong>，可以 <code>docker manifest push</code> 或在 Web 界面查看</td>
+</tr>
+<tr>
+<td><strong>如何在 Harbor 配置</strong></td>
+<td><strong>构建不同架构的镜像</strong> → <strong>创建 manifest</strong> → <strong>push 到 Harbor</strong></td>
+</tr>
+</tbody></table>
+<p>你可以先尝试 <strong><code>docker manifest inspect &lt;镜像&gt;</code></strong> 查看 Harbor 上是否已有 <code>manifest</code>，然后尝试 <code>docker pull</code> 来验证是否能正确拉取适配架构的镜像。</p>
+<h2 id="docker拉取指定架构镜像"><a href="#docker拉取指定架构镜像" class="headerlink" title="docker拉取指定架构镜像"></a>docker拉取指定架构镜像</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#1 修改/etc/docker/daemon.json</span></span><br><span class="line">添加 <span class="string">&quot;experimental&quot;</span>: <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl restart docker</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#2 拉取指定架构</span></span><br><span class="line">docker pull --platform arm64 xxx</span><br><span class="line">or</span><br><span class="line">docker pull --platform amd64 xxx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证架构</span></span><br><span class="line">docker inspect &lt;image_name&gt; | grep Architecture</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>docker</tag>
+      </tags>
+  </entry>
 </search>
