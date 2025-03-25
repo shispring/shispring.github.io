@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="externalgrpc.proto文件123456789101112131415#文件路径&#x2F;home&#x2F;xxx&#x2F;autoscaler&#x2F;cluster-autoscaler&#x2F;cloudprovider&#x2F;externalgrpc&#x2F;protos&#x2F;externalgrpc.proto#涉及到的importsyntax &#x3D; &quot;proto3&quot;;package clusterautoscal">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s节点扩缩组件autoscaler与externalgrpc模式的grpc调试">
+<meta property="og:url" content="https://shispring.github.io/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="externalgrpc.proto文件123456789101112131415#文件路径&#x2F;home&#x2F;xxx&#x2F;autoscaler&#x2F;cluster-autoscaler&#x2F;cloudprovider&#x2F;externalgrpc&#x2F;protos&#x2F;externalgrpc.proto#涉及到的importsyntax &#x3D; &quot;proto3&quot;;package clusterautoscal">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-25T02:33:13.000Z">
+<meta property="article:modified_time" content="2025-03-25T04:23:20.143Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>k8s节点扩缩组件autoscaler与externalgrpc模式的grpc调试 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          k8s节点扩缩组件autoscaler与externalgrpc模式的grpc调试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-03-25 10:33:13 / 修改时间：12:23:20" itemprop="dateCreated datePublished" datetime="2025-03-25T10:33:13+08:00">2025-03-25</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="externalgrpc-proto文件"><a href="#externalgrpc-proto文件" class="headerlink" title="externalgrpc.proto文件"></a>externalgrpc.proto文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#文件路径</span><br><span class="line">/home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos/externalgrpc.proto</span><br><span class="line"></span><br><span class="line">#涉及到的import</span><br><span class="line">syntax = &quot;proto3&quot;;</span><br><span class="line"></span><br><span class="line">package clusterautoscaler.cloudprovider.v1.externalgrpc;</span><br><span class="line"></span><br><span class="line">import &quot;google/protobuf/descriptor.proto&quot;;</span><br><span class="line">import &quot;google/protobuf/any.proto&quot;;</span><br><span class="line">import &quot;k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto&quot;;</span><br><span class="line"></span><br><span class="line">import &quot;k8s.io/api/core/v1/generated.proto&quot;;</span><br><span class="line">option go_package = &quot;cluster-autoscaler/cloudprovider/externalgrpc/protos&quot;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="grpc拼凑"><a href="#grpc拼凑" class="headerlink" title="grpc拼凑"></a>grpc拼凑</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#cluster-autoscaler-cloud-provider是云厂商提供服务的域名，配置在证书里</span><br><span class="line">#11.31.213.234是cloud provider的服务端地址</span><br><span class="line"></span><br><span class="line">#验证TLS请求(单项请求)</span><br><span class="line">#openssl s_client -connect  11.31.213.234:65535</span><br><span class="line"></span><br><span class="line">#服务端证书名称：ca.cert.pem ，路径为：</span><br><span class="line">BASEDIR=/home/xxx/cloud-config</span><br><span class="line"></span><br><span class="line">#认证可以通过的请求</span><br><span class="line">grpcurl \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    cluster-autoscaler-cloud-provider:65535    \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups  </span><br><span class="line"></span><br><span class="line">#11.31.213.234对应的cluster-autoscaler-cloud-provider服务podIP</span><br><span class="line">grpcurl -insecure \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    11.31.213.234:65535     \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#无法通过的请求：Failed to dial target host &quot;11.31.213.234:65535&quot;: tls: failed to verify certificate: x509: certificate is valid for 127.0.0.1, not 11.31.213.234</span><br><span class="line">grpcurl \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor  \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    11.31.213.234:65535     \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="如果是tls双向认证情况请求"><a href="#如果是tls双向认证情况请求" class="headerlink" title="如果是tls双向认证情况请求"></a>如果是tls双向认证情况请求</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#在路径配置客户端秘钥及证书</span><br><span class="line">grpcurl \</span><br><span class="line">    --cert $BASEDIR/client.cert.pem  \</span><br><span class="line">    --key $BASEDIR/client.key.pem \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    cluster-autoscaler-cloud-provider:65535    \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="openssl请求解析"><a href="#openssl请求解析" class="headerlink" title="openssl请求解析"></a>openssl请求解析</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">openssl s_client -connect cluster-autoscaler-backend:65535 -CAfile /home/xxx/cloud-config/dev-containerd/ca.cert.pem</span><br><span class="line">CONNECTED(00000003)</span><br><span class="line">Can&#x27;t use SSL_get_servername</span><br><span class="line">depth=1 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">verify return:1</span><br><span class="line">depth=0 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">verify return:1</span><br><span class="line">---</span><br><span class="line">Certificate chain</span><br><span class="line"> 0 s:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">   i:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">---</span><br><span class="line">Server certificate</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIICYDCCAgagAwIBAgIUcO+yQm6JNnr+ogeb...</span><br><span class="line">-----END CERTIFICATE-----</span><br><span class="line">subject=C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line"></span><br><span class="line">issuer=C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">No client certificate CA names sent</span><br><span class="line">Peer signing digest: SHA256</span><br><span class="line">Peer signature type: ECDSA</span><br><span class="line">Server Temp Key: X25519, 253 bits</span><br><span class="line">---</span><br><span class="line">SSL handshake has read 916 bytes and written 369 bytes</span><br><span class="line">Verification: OK</span><br><span class="line">---</span><br><span class="line">New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384</span><br><span class="line">Server public key is 256 bit</span><br><span class="line">Secure Renegotiation IS NOT supported</span><br><span class="line">Compression: NONE</span><br><span class="line">Expansion: NONE</span><br><span class="line">No ALPN negotiated</span><br><span class="line">Early data was not sent</span><br><span class="line">Verify return code: 0 (ok)</span><br><span class="line">---</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="📌-关键点解析"><a href="#📌-关键点解析" class="headerlink" title="📌 关键点解析"></a><strong>📌 关键点解析</strong></h2><h3 id="✅-1-TLS-连接成功"><a href="#✅-1-TLS-连接成功" class="headerlink" title="✅ 1. TLS 连接成功"></a><strong>✅ 1. TLS 连接成功</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CONNECTED(00000003)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>你的客户端 <code>openssl</code> 成功连接到了 <code>cluster-autoscaler-cloud-provider:65535</code> 端口，并完成了 TLS 握手。</li>
+</ul>
+<hr>
+<h3 id="✅-2-证书验证通过"><a href="#✅-2-证书验证通过" class="headerlink" title="✅ 2. 证书验证通过"></a><strong>✅ 2. 证书验证通过</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">depth=1 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">verify return:1</span><br><span class="line">depth=0 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">verify return:1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>你的 CA 证书 <code>/home/xxx/cloud-config/dev-containerd/ca.cert.pem</code> <strong>已经正确地验证了服务器证书</strong>。</li>
+<li><code>verify return:1</code> 表示 <code>openssl</code> 在认证每一级证书时，返回成功。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Verify return code: 0 (ok)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这个 <code>0 (ok)</code> 说明 <strong>TLS 证书链已经正确验证</strong>，你不再遇到 <code>unable to verify the first certificate</code> 之类的错误。</li>
+</ul>
+<p><strong>说明你的 CA 证书是正确的，服务器证书也是可信的。</strong> 🎉</p>
+<hr>
+<h3 id="✅-3-服务器提供的证书链"><a href="#✅-3-服务器提供的证书链" class="headerlink" title="✅ 3. 服务器提供的证书链"></a><strong>✅ 3. 服务器提供的证书链</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Certificate chain</span><br><span class="line"> 0 s:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">   i:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>s:</code> (<strong>subject</strong>) 表示服务器的证书 (<code>cluster-autoscaler-cloud-provider</code>)。</li>
+<li><code>i:</code> (<strong>issuer</strong>) 表示这个证书是由 <code>qihoo.net</code> 这个 CA 颁发的。</li>
+<li>你的 <code>CAfile</code> <strong>包含了 <code>qihoo.net</code> 的 CA 证书</strong>，所以能够正确验证服务器证书。</li>
+</ul>
+<hr>
+<h3 id="✅-4-服务器没有要求客户端证书"><a href="#✅-4-服务器没有要求客户端证书" class="headerlink" title="✅ 4. 服务器没有要求客户端证书"></a><strong>✅ 4. 服务器没有要求客户端证书</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">No client certificate CA names sent</span><br></pre></td></tr></table></figure>
+<ul>
+<li>服务器 <strong>不要求客户端提供证书</strong>，也就是说没有启用 **双向 TLS (mTLS)**。</li>
+<li>如果服务器需要 <strong>mTLS</strong>，你会看到 <code>Acceptable client certificate CA names</code>，并且 <code>openssl</code> 可能会要求 <code>-cert</code> 和 <code>-key</code>。</li>
+</ul>
+<hr>
+<h3 id="✅-5-TLS-版本与加密算法"><a href="#✅-5-TLS-版本与加密算法" class="headerlink" title="✅ 5. TLS 版本与加密算法"></a><strong>✅ 5. TLS 版本与加密算法</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384</span><br><span class="line">Server public key is 256 bit</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>TLS 版本</strong>: <code>TLSv1.3</code>（最新的 TLS 版本，更安全）。</li>
+<li><strong>加密算法</strong>: <code>AES_256_GCM_SHA384</code>（对称加密算法，安全性高）。</li>
+<li><strong>服务器公钥长度</strong>: <code>256 bit</code>，符合现代安全标准。</li>
+</ul>
+<p>你使用的 <code>openssl</code> 版本支持 TLS 1.3，没有出现协议不兼容的问题。</p>
+<hr>
+<h2 id="📌-结论"><a href="#📌-结论" class="headerlink" title="📌 结论"></a><strong>📌 结论</strong></h2><p>✅ <strong>你已经正确配置了 CA 证书</strong>，服务器证书也成功验证。<br>✅ <strong>TLS 连接建立正常</strong>，服务器使用 TLS 1.3，安全性较高。<br>✅ <strong>服务器不要求客户端证书</strong>，所以是 <strong>单向 TLS 认证</strong>。<br>✅ <strong>没有任何 SSL&#x2F;TLS 相关错误</strong>，一切正常！🎉</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/24/k8s%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E6%83%B3/" rel="prev" title="k8s系统设计涉及的思想">
+      <i class="fa fa-chevron-left"></i> k8s系统设计涉及的思想
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#externalgrpc-proto%E6%96%87%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">externalgrpc.proto文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#grpc%E6%8B%BC%E5%87%91"><span class="nav-number">2.</span> <span class="nav-text">grpc拼凑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E6%98%AFtls%E5%8F%8C%E5%90%91%E8%AE%A4%E8%AF%81%E6%83%85%E5%86%B5%E8%AF%B7%E6%B1%82"><span class="nav-number">3.</span> <span class="nav-text">如果是tls双向认证情况请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#openssl%E8%AF%B7%E6%B1%82%E8%A7%A3%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">openssl请求解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%8C-%E5%85%B3%E9%94%AE%E7%82%B9%E8%A7%A3%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">📌 关键点解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-1-TLS-%E8%BF%9E%E6%8E%A5%E6%88%90%E5%8A%9F"><span class="nav-number">5.1.</span> <span class="nav-text">✅ 1. TLS 连接成功</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-2-%E8%AF%81%E4%B9%A6%E9%AA%8C%E8%AF%81%E9%80%9A%E8%BF%87"><span class="nav-number">5.2.</span> <span class="nav-text">✅ 2. 证书验证通过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-3-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%8F%90%E4%BE%9B%E7%9A%84%E8%AF%81%E4%B9%A6%E9%93%BE"><span class="nav-number">5.3.</span> <span class="nav-text">✅ 3. 服务器提供的证书链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-4-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%B2%A1%E6%9C%89%E8%A6%81%E6%B1%82%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AF%81%E4%B9%A6"><span class="nav-number">5.4.</span> <span class="nav-text">✅ 4. 服务器没有要求客户端证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-5-TLS-%E7%89%88%E6%9C%AC%E4%B8%8E%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95"><span class="nav-number">5.5.</span> <span class="nav-text">✅ 5. TLS 版本与加密算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%8C-%E7%BB%93%E8%AE%BA"><span class="nav-number">6.</span> <span class="nav-text">📌 结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">104</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
