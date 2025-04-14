@@ -6602,4 +6602,108 @@ validate</p>
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>daemonset滚动升级</title>
+    <url>/2025/04/14/daemonset%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7/</url>
+    <content><![CDATA[<h2 id="🚀-DaemonSet-的-updateStrategy-升级策略详解"><a href="#🚀-DaemonSet-的-updateStrategy-升级策略详解" class="headerlink" title="🚀 DaemonSet 的 updateStrategy 升级策略详解"></a>🚀 DaemonSet 的 <code>updateStrategy</code> 升级策略详解</h2><p>DaemonSet 的升级策略定义在 <code>spec.updateStrategy</code> 字段下，用来控制 <strong>Pod 的滚动升级行为</strong>。</p>
+<p>目前支持两种类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RollingUpdate</code></td>
+<td>自动滚动升级，推荐的方式</td>
+</tr>
+<tr>
+<td><code>OnDelete</code></td>
+<td>手动删除后重建，不自动升级</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔁-1-type-RollingUpdate-（自动滚动升级）"><a href="#🔁-1-type-RollingUpdate-（自动滚动升级）" class="headerlink" title="🔁 1. type: RollingUpdate （自动滚动升级）"></a>🔁 1. <code>type: RollingUpdate</code> （自动滚动升级）</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">RollingUpdate</span></span><br><span class="line">  <span class="attr">rollingUpdate:</span></span><br><span class="line">    <span class="attr">maxUnavailable:</span> <span class="number">30</span><span class="string">%</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="🔸-含义："><a href="#🔸-含义：" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
+<li>自动将老版本的 Pod 一个个替换为新版本，<strong>每次升级部分 Pod</strong>。</li>
+<li>受 <code>maxUnavailable</code> 控制，表示 <strong>在任意时刻最多有多少 Pod 可以不可用</strong>。</li>
+</ul>
+<h4 id="📌-maxUnavailable-参数详解："><a href="#📌-maxUnavailable-参数详解：" class="headerlink" title="📌 maxUnavailable 参数详解："></a>📌 <code>maxUnavailable</code> 参数详解：</h4><ul>
+<li>可以是整数（如 <code>1</code>）或百分比（如 <code>30%</code>）</li>
+<li>表示 <strong>升级期间，允许的最大不可用 Pod 数量</strong></li>
+</ul>
+<h4 id="⛓️-升级过程（示例）："><a href="#⛓️-升级过程（示例）：" class="headerlink" title="⛓️ 升级过程（示例）："></a>⛓️ 升级过程（示例）：</h4><p>假设你在 10 个节点上部署了 DaemonSet，每个节点都有一个 Pod。</p>
+<p>升级步骤：</p>
+<ol>
+<li>允许最多 3 个 Pod（30%）同时被删除并重建。</li>
+<li>控制器会自动删除旧版本的 Pod 并创建新版本。</li>
+<li>等新版本的 Pod 启动成功后，再继续替换下一批。</li>
+</ol>
+<h4 id="✅-优点："><a href="#✅-优点：" class="headerlink" title="✅ 优点："></a>✅ 优点：</h4><ul>
+<li><strong>平滑升级</strong>，对服务影响最小</li>
+<li>推荐用于生产环境</li>
+</ul>
+<hr>
+<h3 id="🧍-2-type-OnDelete-（手动升级）"><a href="#🧍-2-type-OnDelete-（手动升级）" class="headerlink" title="🧍 2. type: OnDelete （手动升级）"></a>🧍 2. <code>type: OnDelete</code> （手动升级）</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">OnDelete</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="🔸-含义：-1"><a href="#🔸-含义：-1" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
+<li>DaemonSet 控制器 <strong>不会主动删除旧版本 Pod</strong></li>
+<li>只有当你手动 <code>kubectl delete pod xxx</code> 删除旧 Pod 时，DaemonSet 才会拉起新版本的 Pod</li>
+</ul>
+<h4 id="⛓️-升级过程："><a href="#⛓️-升级过程：" class="headerlink" title="⛓️ 升级过程："></a>⛓️ 升级过程：</h4><ol>
+<li>你修改了 DaemonSet 的模板（如 image）</li>
+<li>DaemonSet 检测到变更，但 <strong>不会更新任何 Pod</strong></li>
+<li>你需要手动删除 Pod：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete pod ingress-nginx-controller-xxxxx -n ingress-nginx</span><br></pre></td></tr></table></figure></li>
+<li>控制器自动基于新的模板重新创建 Pod</li>
+</ol>
+<h4 id="✅-适用场景："><a href="#✅-适用场景：" class="headerlink" title="✅ 适用场景："></a>✅ 适用场景：</h4><ul>
+<li>你需要<strong>精确控制每个节点 Pod 的升级时机</strong></li>
+<li>避免自动滚动升级带来的不确定性</li>
+</ul>
+<h4 id="❌-缺点："><a href="#❌-缺点：" class="headerlink" title="❌ 缺点："></a>❌ 缺点：</h4><ul>
+<li>升级需要人工干预</li>
+<li>不适合频繁迭代或高可用性要求场景</li>
+</ul>
+<hr>
+<h3 id="🧠-总结对比"><a href="#🧠-总结对比" class="headerlink" title="🧠 总结对比"></a>🧠 总结对比</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>RollingUpdate</th>
+<th>OnDelete</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>是否自动升级</td>
+<td>✅ 是</td>
+<td>❌ 否，需要手动删除</td>
+</tr>
+<tr>
+<td>可控性</td>
+<td>中等</td>
+<td>高</td>
+</tr>
+<tr>
+<td>服务连续性</td>
+<td>高（通过 <code>maxUnavailable</code> 控制）</td>
+<td>高（完全受控）</td>
+</tr>
+<tr>
+<td>推荐场景</td>
+<td>生产环境通用升级</td>
+<td>手动灰度升级、需精细控制时</td>
+</tr>
+<tr>
+<td>运维复杂度</td>
+<td>低</td>
+<td>中-高</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
 </search>
