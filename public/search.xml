@@ -1250,6 +1250,8 @@
 </ul>
 </li>
 </ol>
+<hr>
+<h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#推送</span><br><span class="line">helm chart 模式：安装cm-push插件</span><br><span class="line">helm plugin install https://github.com/chartmuseum/helm-push.git</span><br><span class="line">helm chart 模式：查看已安装插件</span><br><span class="line">helm plugin list</span><br><span class="line">helm chart 模式：推送</span><br><span class="line">HELM_REPO_USERNAME=xxx HELM_REPO_PASSWORD=xxx helm cm-push ingress-nginx-1.11.5.tgz &lt;repo&gt;</span><br><span class="line"></span><br><span class="line">#比较差异</span><br><span class="line">helm plugin install https://github.com/databus23/helm-diff.git</span><br><span class="line">helm diff revision ingress-nginx 1 2</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>k8s</category>
