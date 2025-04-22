@@ -184,6 +184,161 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/31/kubectl-debug%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/31/kubectl-debug%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">nsenter 与kubectl debug</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-10-31 17:10:28" itemprop="dateCreated datePublished" datetime="2024-10-31T17:10:28+08:00">2024-10-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-01-24 15:53:35" itemprop="dateModified" datetime="2025-01-24T15:53:35+08:00">2025-01-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="kubectl-debug"><a href="#kubectl-debug" class="headerlink" title="kubectl debug"></a><code>kubectl debug</code></h2><h3 id="一、常用命令"><a href="#一、常用命令" class="headerlink" title="一、常用命令"></a>一、常用命令</h3><ol>
+<li><p><strong>调试现有容器</strong><br>调试某个正在运行的容器，附加一个新的调试容器：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl debug -it &lt;pod-name&gt; -n &lt;namespace&gt; --image swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/google-containers/busybox:latest --profile=netadmin --target=&lt;target-container-name&gt; -- sh</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>-image</code>：指定调试容器的镜像（例如 <code>busybox</code> 或 <code>ubuntu</code>）。</li>
+<li><code>-target=&lt;target-container-name&gt;</code>：指定调试的目标容器，便于访问容器内的文件系统和网络。</li>
+</ul>
+</li>
+<li><p><strong>调试节点</strong><br>在指定节点上启动调试容器，用于节点本地调试：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl debug node/&lt;node-name&gt; -it --image=swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/google-containers/busybox:latest</span><br></pre></td></tr></table></figure>
+<p> 该命令将会在指定的节点上运行一个临时容器，并附带节点的文件系统和环境。</p>
+</li>
+</ol>
+<h3 id="二、删除调试容器"><a href="#二、删除调试容器" class="headerlink" title="二、删除调试容器"></a>二、删除调试容器</h3><ol>
+<li><p><strong>手动删除调试容器</strong><br>调试完成后，通过以下命令删除调试产生的临时容器：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<p> 如果不想删除整个 Pod，可以只删除 Ephemeral Containers 的配置，但目前 Kubernetes 并不直接支持对 Ephemeral Containers 的单独删除（这是设计选择）。在这种情况下，通常需要删除整个 Pod 并重新创&gt;建。</p>
+</li>
+<li><p><strong>重启 Pod（删除后重建）</strong><br>对于不可变应用，可以考虑重启 Pod（删除原有 Pod，由控制器重新创建），以清理所有调试状态。</p>
+</li>
+</ol>
+<hr>
+<h2 id="nsenter"><a href="#nsenter" class="headerlink" title="nsenter"></a>nsenter</h2><p><code>nsenter</code> 是一个用于在 Linux 命名空间中执行命令的工具，可以让你进入其他进程的命名空间进行调试。与 <code>kubectl debug</code> 相比，<code>nsenter</code> 更加底层和灵活，但使用起来也稍显复杂。以下是使用 <code>nsenter</code> 的场景、操作步骤以及与 <code>kubectl debug</code> 的比较。</p>
+<h3 id="一、使用-nsenter-的场景"><a href="#一、使用-nsenter-的场景" class="headerlink" title="一、使用 nsenter 的场景"></a>一、使用 <code>nsenter</code> 的场景</h3><ol>
+<li><strong>底层访问</strong>：当需要深入到容器内的某些细节时，例如调试内核级别的问题或网络问题，<code>nsenter</code> 可以提供更直接的访问。</li>
+<li><strong>没有 Kubelet 访问</strong>：在某些情况下，可能没有权限或无法通过 Kubernetes API 访问 Pod，这时可以直接在节点上使用 <code>nsenter</code>。</li>
+<li><strong>特殊容器环境</strong>：对于某些特殊或自定义的容器环境，<code>kubectl debug</code> 可能无法满足需求，此时 <code>nsenter</code> 提供了更多的灵活性。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">安装：</span><br><span class="line">sudo apt-get install util-linux -y  # Ubuntu/Debian</span><br><span class="line">sudo yum install util-linux -y     # CentOS/Red Hat</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="二、nsenter-的操作步骤"><a href="#二、nsenter-的操作步骤" class="headerlink" title="二、nsenter 的操作步骤"></a>二、<code>nsenter</code> 的操作步骤</h3><ol>
+<li><p><strong>找到容器的 PID</strong>：<br>使用 <code>docker ps</code> 或 <code>crictl ps</code> 命令找到目标容器的 PID。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker inspect &lt;containerID&gt; | grep Pid</span><br><span class="line">crictl inspect &lt;containerID&gt; | grep Pid</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>使用 <code>nsenter</code> 进入命名空间</strong>：<br>使用找到的 PID 进入容器的命名空间。以下是一个例子：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#进入容器的挂载、UTS、IPC、网络和 PID 命名空间。</span></span><br><span class="line">nsenter --target &lt;pid&gt; --mount --uts --ipc --net --pid</span><br><span class="line">iptables -t nat -S</span><br><span class="line"></span><br><span class="line"><span class="comment">#进入容器的网络命名空间</span></span><br><span class="line">nsenter -n -t &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>进行调试</strong>：<br>进入容器后，你可以运行各种命令进行调试。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#一些命令</span><br><span class="line">#进入网络命名空间 (--net)</span><br><span class="line">nsenter --net=/proc/&lt;pid&gt;/ns/net</span><br><span class="line">#查看网络接口：</span><br><span class="line">ip addr</span><br><span class="line"></span><br><span class="line">#查看路由表：</span><br><span class="line">ip route</span><br><span class="line"></span><br><span class="line">#检查 DNS 解析：</span><br><span class="line">cat /etc/resolv.conf</span><br><span class="line">nslookup &lt;hostname&gt;</span><br><span class="line"></span><br><span class="line">#查看 NAT 和防火墙规则：</span><br><span class="line">iptables -L -n -v</span><br><span class="line"></span><br><span class="line">#挂载命名空间 (--mnt)</span><br><span class="line">nsenter --mnt=/proc/&lt;pid&gt;/ns/mnt</span><br><span class="line"></span><br><span class="line">#检查磁盘使用情况：</span><br><span class="line">df -h</span><br><span class="line">du -sh &lt;path&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#多命名空间组合</span><br><span class="line">nsenter --net=/proc/&lt;pid&gt;/ns/net --mnt=/proc/&lt;pid&gt;/ns/mnt</span><br><span class="line"></span><br><span class="line">#排查后退出命名空间</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="nsenter-与-kubectl-debug-的比较"><a href="#nsenter-与-kubectl-debug-的比较" class="headerlink" title="nsenter 与 kubectl debug 的比较"></a><code>nsenter</code> 与 <code>kubectl debug</code> 的比较</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>nsenter</code></th>
+<th><code>kubectl debug</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>灵活性</strong></td>
+<td>高，支持任何 Linux 命名空间</td>
+<td>主要针对 Kubernetes 的 Pod 和容器</td>
+</tr>
+<tr>
+<td><strong>使用复杂度</strong></td>
+<td>较高，需要手动找到 PID</td>
+<td>较低，使用 Kubernetes API 进行操作</td>
+</tr>
+<tr>
+<td><strong>环境依赖</strong></td>
+<td>需要在节点上运行，依赖容器运行环境</td>
+<td>依赖 Kubernetes 集群环境</td>
+</tr>
+<tr>
+<td><strong>适用范围</strong></td>
+<td>通用，可用于任何容器运行时</td>
+<td>专为 Kubernetes 设计</td>
+</tr>
+<tr>
+<td><strong>调试深度</strong></td>
+<td>深入，直接与宿主机交互</td>
+<td>通过添加临时容器进行调试</td>
+</tr>
+<tr>
+<td><strong>清理操作</strong></td>
+<td>手动清理，退出命名空间即可</td>
+<td>自动清理 Ephemeral Containers</td>
+</tr>
+</tbody></table>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>使用 <code>nsenter</code> 适合需要底层访问和灵活性的调试场景，但操作较为复杂。</li>
+<li><code>kubectl debug</code> 提供了简单易用的界面，适合日常容器调试，尤其是在 Kubernetes 环境中。</li>
+</ul>
+<p>根据具体需求选择合适的工具进行调试。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1361,190 +1516,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/14/Pod%E7%8A%B6%E6%80%81%E5%8F%8A%E5%8E%9F%E5%9B%A0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/14/Pod%E7%8A%B6%E6%80%81%E5%8F%8A%E5%8E%9F%E5%9B%A0/" class="post-title-link" itemprop="url">Pod状态及原因</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-10-14 15:48:13 / 修改时间：15:49:07" itemprop="dateCreated datePublished" datetime="2024-10-14T15:48:13+08:00">2024-10-14</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>以下是 Kubernetes <strong>Pod 各种状态</strong>及其<strong>原因分析</strong>的详细总结：</p>
-<hr>
-<h3 id="1-Pending"><a href="#1-Pending" class="headerlink" title="1. Pending"></a><strong>1. Pending</strong></h3><p><strong>解释</strong>：Pod 被成功创建，但其中的一个或多个容器尚未启动。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>没有足够的资源（CPU、内存）调度到合适的节点。  </li>
-<li>存在节点污点，Pod 无法容忍（Taints and Tolerations）。  </li>
-<li>镜像下载缓慢或失败（如网络问题或镜像仓库不可用）。  </li>
-<li>存在 PVC（Persistent Volume Claim）绑定问题。</li>
-</ul>
-<hr>
-<h3 id="2-Running"><a href="#2-Running" class="headerlink" title="2. Running"></a><strong>2. Running</strong></h3><p><strong>解释</strong>：Pod 中的所有容器已启动并正在运行。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>一切正常，Pod 正在按预期工作。  </li>
-<li>若部分容器不断重启，则可能与健康检查失败有关（检查 Liveness 和 Readiness Probes）。</li>
-</ul>
-<hr>
-<h3 id="3-CrashLoopBackOff"><a href="#3-CrashLoopBackOff" class="headerlink" title="3. CrashLoopBackOff"></a><strong>3. CrashLoopBackOff</strong></h3><p><strong>解释</strong>：容器在启动后不断崩溃，Kubelet 正在尝试重启它。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>应用程序的错误配置或依赖缺失导致容器崩溃。  </li>
-<li>容器中的应用程序无法正确初始化（可能因为端口占用或数据库连接失败）。  </li>
-<li>Liveness Probe 检查失败导致 Kubelet 不断重启容器。</li>
-</ul>
-<hr>
-<h3 id="4-ImagePullBackOff"><a href="#4-ImagePullBackOff" class="headerlink" title="4. ImagePullBackOff"></a><strong>4. ImagePullBackOff</strong></h3><p><strong>解释</strong>：Kubernetes 无法拉取容器镜像，正在等待重试。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>镜像名或版本标记（tag）错误。  </li>
-<li>镜像仓库不可访问（网络问题或仓库服务中断）。  </li>
-<li>私有镜像仓库的认证失败（未正确配置 Secret）。</li>
-</ul>
-<hr>
-<h3 id="5-ErrImagePull"><a href="#5-ErrImagePull" class="headerlink" title="5. ErrImagePull"></a><strong>5. ErrImagePull</strong></h3><p><strong>解释</strong>：尝试拉取镜像时发生错误。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>镜像不存在于指定的仓库中。  </li>
-<li>镜像仓库地址错误或不可访问。  </li>
-<li>网络问题导致拉取失败。</li>
-</ul>
-<hr>
-<h3 id="6-ErrImageNeverPull"><a href="#6-ErrImageNeverPull" class="headerlink" title="6. ErrImageNeverPull"></a><strong>6. ErrImageNeverPull</strong></h3><p><strong>解释</strong>：镜像策略被设置为 <code>ImagePullPolicy: Never</code>，但镜像在本地不存在。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>配置错误导致 Kubernetes 无法从本地找到镜像。  </li>
-<li>需要将拉取策略设置为 <code>IfNotPresent</code> 或 <code>Always</code>。</li>
-</ul>
-<hr>
-<h3 id="7-Completed"><a href="#7-Completed" class="headerlink" title="7. Completed"></a><strong>7. Completed</strong></h3><p><strong>解释</strong>：Pod 中的所有容器正常终止，且没有重启策略（适用于 <strong>Job</strong> 和 <strong>CronJob</strong>）。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>容器执行的任务已完成，Pod 正常退出。  </li>
-<li>Job 或 CronJob 工作负载按计划执行结束。</li>
-</ul>
-<hr>
-<h3 id="8-Terminating"><a href="#8-Terminating" class="headerlink" title="8. Terminating"></a><strong>8. Terminating</strong></h3><p><strong>解释</strong>：Pod 正在终止，但未在规定时间内结束。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>Pod 中的进程未响应 SIGTERM 信号。  </li>
-<li>容器内进程未正确设置退出钩子（如未处理 terminationGracePeriodSeconds）。  </li>
-<li>挂载的 Volume 无法及时卸载。</li>
-</ul>
-<hr>
-<h3 id="9-Unknown"><a href="#9-Unknown" class="headerlink" title="9. Unknown"></a><strong>9. Unknown</strong></h3><p><strong>解释</strong>：Pod 的状态无法从 API 服务器获取。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>节点可能与 API 服务器失去连接（网络问题或节点崩溃）。  </li>
-<li>etcd 数据库不稳定，导致状态获取失败。</li>
-</ul>
-<hr>
-<h3 id="10-Failed"><a href="#10-Failed" class="headerlink" title="10. Failed"></a><strong>10. Failed</strong></h3><p><strong>解释</strong>：Pod 中的所有容器都已终止，并且至少有一个容器以非 0 状态码退出。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>容器内的应用程序发生崩溃。  </li>
-<li>必要的依赖服务（如数据库或 API）不可用。  </li>
-<li>Liveness Probe 检查失败后被 Kubernetes 终止。</li>
-</ul>
-<hr>
-<h3 id="11-NodeAffinity-PodAffinity-Unsatisfied"><a href="#11-NodeAffinity-PodAffinity-Unsatisfied" class="headerlink" title="11. NodeAffinity&#x2F;PodAffinity Unsatisfied"></a><strong>11. NodeAffinity&#x2F;PodAffinity Unsatisfied</strong></h3><p><strong>解释</strong>：由于节点亲和性或 Pod 亲和性规则，Pod 无法被调度到任何节点上。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>设置了严格的 NodeAffinity 或 PodAffinity，无法匹配任何可用节点。  </li>
-<li>调度策略配置不当。</li>
-</ul>
-<hr>
-<h3 id="12-OOMKilled-Out-of-Memory-Killed"><a href="#12-OOMKilled-Out-of-Memory-Killed" class="headerlink" title="12. OOMKilled (Out of Memory Killed)"></a><strong>12. OOMKilled (Out of Memory Killed)</strong></h3><p><strong>解释</strong>：由于容器超出分配的内存限制，被操作系统的 OOM（Out Of Memory）杀死。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>容器请求的内存不足以满足其应用的需求。  </li>
-<li>负载过高导致内存泄漏或突发增长。  </li>
-<li>需要调整 <code>requests.memory</code> 和 <code>limits.memory</code>。</li>
-</ul>
-<hr>
-<h3 id="13-Evicted"><a href="#13-Evicted" class="headerlink" title="13. Evicted"></a><strong>13. Evicted</strong></h3><p><strong>解释</strong>：由于节点资源不足，Pod 被驱逐（Eviction）。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>节点内存、CPU 等资源不足。  </li>
-<li>节点磁盘压力高导致驱逐。  </li>
-<li>调度策略驱逐低优先级 Pod 以释放资源。</li>
-</ul>
-<hr>
-<h3 id="14-ContainerCreating"><a href="#14-ContainerCreating" class="headerlink" title="14. ContainerCreating"></a><strong>14. ContainerCreating</strong></h3><p><strong>解释</strong>：Pod 的容器正在创建中，但尚未启动。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>拉取镜像耗时较长。  </li>
-<li>卷（Volume）未能及时挂载。  </li>
-<li>网络插件问题导致容器未能启动。</li>
-</ul>
-<hr>
-<h3 id="15-NotReady"><a href="#15-NotReady" class="headerlink" title="15. NotReady"></a><strong>15. NotReady</strong></h3><p><strong>解释</strong>：Pod 尚未准备好接受流量（Readiness Probe 失败）。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>容器内的服务未能正常启动。  </li>
-<li>Readiness Probe 配置不当或探测路径错误。  </li>
-<li>依赖的外部服务未启动或不可访问。</li>
-</ul>
-<hr>
-<h3 id="16-Waiting"><a href="#16-Waiting" class="headerlink" title="16. Waiting"></a><strong>16. Waiting</strong></h3><p><strong>解释</strong>：容器由于某些原因正在等待，并未真正运行。<br><strong>可能原因</strong>：</p>
-<ul>
-<li>等待 Volume 挂载或镜像拉取完成。  </li>
-<li>等待依赖资源（如 ConfigMap 或 Secret）。  </li>
-<li>等待调度器将其分配到节点上。</li>
-</ul>
-<hr>
-<h2 id="总结与最佳实践"><a href="#总结与最佳实践" class="headerlink" title="总结与最佳实践"></a><strong>总结与最佳实践</strong></h2><ul>
-<li><strong>监控和告警</strong>：使用监控工具（如 Prometheus 和 Grafana）实时监控 Pod 状态，及时发现问题。  </li>
-<li><strong>日志分析</strong>：查看 Pod 和容器的日志来分析具体原因（<code>kubectl logs &lt;pod-name&gt;</code>）。  </li>
-<li><strong>资源规划</strong>：合理设置 Pod 的资源请求和限制（requests&#x2F;limits），避免 OOM 和驱逐问题。  </li>
-<li><strong>健康检查配置</strong>：配置合适的 Liveness 和 Readiness Probe，确保 Pod 正常运行和流量切换。  </li>
-<li><strong>滚动升级策略</strong>：使用 Deployment 的滚动升级策略（RollingUpdate），避免大规模 Pod 重启。</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1616,7 +1587,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">106</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1629,7 +1600,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

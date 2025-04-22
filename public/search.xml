@@ -6830,4 +6830,20 @@ validate</p>
         <tag>认知</tag>
       </tags>
   </entry>
+  <entry>
+    <title>ffmpeg处理视频tips</title>
+    <url>/2025/04/22/ffmpeg%E5%A4%84%E7%90%86%E8%A7%86%E9%A2%91tips/</url>
+    <content><![CDATA[<h3 id="查看视频总帧数"><a href="#查看视频总帧数" class="headerlink" title="查看视频总帧数"></a>查看视频总帧数</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 your_video.mp4</span><br></pre></td></tr></table></figure>
+
+<h3 id="导出视频的每一帧为图片"><a href="#导出视频的每一帧为图片" class="headerlink" title="导出视频的每一帧为图片"></a>导出视频的每一帧为图片</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffmpeg -i your_video.mp4 -q:v 1 output/frame_%05d.jpg</span><br><span class="line">参数含义</span><br><span class="line">-i your_video.mp4 : 输入文件</span><br><span class="line">-q:v 1 : 设置输出图像质量，1 是最高（1~31）</span><br><span class="line">output/frame_%05d.jpg : 输出路径和命名格式（5位数字序号）</span><br></pre></td></tr></table></figure>
+
+<h3 id="制作正向视频"><a href="#制作正向视频" class="headerlink" title="制作正向视频"></a>制作正向视频</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; frames.txt</span><br><span class="line">file &#x27;frame_00076.jpg&#x27;</span><br><span class="line">file &#x27;frame_00077.jpg&#x27;</span><br><span class="line">file &#x27;frame_00078.jpg&#x27;</span><br><span class="line">file &#x27;frame_00079.jpg&#x27;</span><br><span class="line">file &#x27;frame_00080.jpg&#x27;</span><br><span class="line">file &#x27;frame_00081.jpg&#x27;</span><br><span class="line">file &#x27;frame_00082.jpg&#x27;</span><br><span class="line">file &#x27;frame_00083.jpg&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -r 25 -i frames.txt -c:v libx264 -pix_fmt yuv420p forward.mp4</span><br><span class="line"></span><br><span class="line">解释：</span><br><span class="line">-framerate 25: 设置帧率为25（可按需调整）</span><br><span class="line">-i frame_%05d.jpg: 匹配 frame_00076.jpg 至 frame_00083.jpg（确保目录下这些帧是连续命名的）</span><br><span class="line">-vframes 8: 指定只使用8帧</span><br><span class="line">-c:v libx264: 使用 H.264 编码</span><br><span class="line">-pix_fmt yuv420p: 保证兼容性（尤其是网页或播放器）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="制作倒序视频"><a href="#制作倒序视频" class="headerlink" title="制作倒序视频"></a>制作倒序视频</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; reverse.txt</span><br><span class="line">file &#x27;frame_00082.jpg&#x27;</span><br><span class="line">file &#x27;frame_00081.jpg&#x27;</span><br><span class="line">file &#x27;frame_00080.jpg&#x27;</span><br><span class="line">file &#x27;frame_00079.jpg&#x27;</span><br><span class="line">file &#x27;frame_00078.jpg&#x27;</span><br><span class="line">file &#x27;frame_00077.jpg&#x27;</span><br><span class="line">file &#x27;frame_00076.jpg&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -r 25 -i reverse.txt -c:v libx264 -pix_fmt yuv420p reverse.mp4</span><br></pre></td></tr></table></figure>
+<h3 id="拼接正向-反向-视频"><a href="#拼接正向-反向-视频" class="headerlink" title="拼接正向 + 反向 视频"></a>拼接正向 + 反向 视频</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; concat.txt</span><br><span class="line">file &#x27;forward.mp4&#x27;</span><br><span class="line">file &#x27;reverse.mp4&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -i concat.txt -r 25 -c:v libx264 -pix_fmt yuv420p looped.mp4</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>ffmpeg</tag>
+      </tags>
+  </entry>
 </search>
