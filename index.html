@@ -184,6 +184,73 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/23/k8s%E8%B5%84%E6%BA%90%E7%9B%B8%E5%85%B3%E7%BB%9F%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/04/23/k8s%E8%B5%84%E6%BA%90%E7%9B%B8%E5%85%B3%E7%BB%9F%E8%AE%A1/" class="post-title-link" itemprop="url">k8s资源相关统计</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-04-23 15:04:12 / 修改时间：15:09:26" itemprop="dateCreated datePublished" datetime="2025-04-23T15:04:12+08:00">2025-04-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="1-统计节点可分配的CPU-内存"><a href="#1-统计节点可分配的CPU-内存" class="headerlink" title="1. 统计节点可分配的CPU&#x2F;内存"></a>1. 统计节点可分配的CPU&#x2F;内存</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes -o=jsonpath=&#x27;&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.cpu&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.memory&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27; </span><br><span class="line"></span><br><span class="line">Allocatable字段表示节点可分配给Pod的资源总量（已扣除系统预留和kubelet资源）。</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-统计节点已分配的CPU-内存"><a href="#2-统计节点已分配的CPU-内存" class="headerlink" title="2. 统计节点已分配的CPU&#x2F;内存"></a>2. 统计节点已分配的CPU&#x2F;内存</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">方法一：通过节点描述直接获取（实时数据）</span><br><span class="line">kubectl describe node &lt;节点名称&gt; | grep -A 3 &quot;Allocated resources&quot;</span><br><span class="line">显示该节点所有Pod的资源请求总和（非实际使用量）。</span><br><span class="line"></span><br><span class="line">方法二：通过Pod请求汇总（精确统计）</span><br><span class="line">kubectl get pods --all-namespaces -o=jsonpath=&#x27;&#123;range .items[*]&#125;&#123;.spec.nodeName&#125;&#123;&quot;\t&quot;&#125;&#123;.spec.containers[*].resources.requests.cpu&#125;&#123;&quot;\t&quot;&#125;&#123;.spec.containers[*].resources.requests.memory&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;  | awk &#x27;&#123;cpu[$1]+=$2; mem[$1]+=$3&#125; END &#123;for (n in cpu) print n, cpu[n], mem[n]&#125;&#x27;</span><br><span class="line">遍历所有Pod，按节点汇总资源请求量（需处理单位一致性）。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-统计节点剩余可分配CPU-内存"><a href="#3-统计节点剩余可分配CPU-内存" class="headerlink" title="3. 统计节点剩余可分配CPU&#x2F;内存"></a>3. 统计节点剩余可分配CPU&#x2F;内存</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 先获取可分配总量和已分配量 </span><br><span class="line">allocatable=$(kubectl get node &lt;节点名称&gt; -o jsonpath=&#x27;&#123;.status.allocatable.cpu&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.memory&#125;&#x27;) </span><br><span class="line">allocated=$(kubectl describe node &lt;节点名称&gt; | grep -A 3 &quot;Allocated resources&quot; | grep &quot;cpu\|memory&quot; | awk &#x27;&#123;print $2&#125;&#x27; | tr &#x27;\n&#x27; &#x27;\t&#x27;)</span><br><span class="line"> </span><br><span class="line"># 计算剩余量（需转换单位，示例仅逻辑描述）</span><br><span class="line">remaining_cpu = allocatable.cpu  - allocated.cpu  </span><br><span class="line">remaining_mem = allocatable.mem  - allocated.mem  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="集群维度"><a href="#集群维度" class="headerlink" title="集群维度"></a>集群维度</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#集群总可分配资源</span><br><span class="line">kubectl get nodes -o jsonpath=&#x27;&#123;range .items[*]&#125;&#123;.status.allocatable.cpu&#125;&#123;&quot;\n&quot;&#125;&#123;.status.allocatable.memory&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;  | awk &#x27;/m$/ &#123;sum+=$0/1000&#125; /Ki$/ &#123;sum+=$0/1024/1024&#125; END &#123;print &quot;总CPU核数:&quot;, sum, &quot;总内存GiB:&quot;, sum&#125;&#x27;</span><br><span class="line"></span><br><span class="line">#集群剩余可分配资源</span><br><span class="line"># 遍历所有节点计算剩余资源并汇总 </span><br><span class="line">kubectl get nodes -o json | jq -r &#x27;.items[] | .metadata.name  + &quot; &quot; + .status.allocatable.cpu  + &quot; &quot; + .status.allocatable.memory&#x27;  | while read node cpu mem; do </span><br><span class="line">    allocated_cpu=$(kubectl describe node $node | grep -A 3 &quot;Allocated resources&quot; | grep &quot;cpu&quot; | awk &#x27;&#123;print $2&#125;&#x27; | sed &#x27;s/m//&#x27;)</span><br><span class="line">    allocated_mem=$(kubectl describe node $node | grep -A 3 &quot;Allocated resources&quot; | grep &quot;memory&quot; | awk &#x27;&#123;print $2&#125;&#x27; | sed &#x27;s/Ki//&#x27;)</span><br><span class="line">    remaining_cpu=$(echo &quot;$(echo $cpu | sed &#x27;s/m//&#x27;) - $allocated_cpu&quot; | bc)</span><br><span class="line">    remaining_mem=$(echo &quot;$(echo $mem | sed &#x27;s/Ki//&#x27;) - $allocated_mem&quot; | bc)</span><br><span class="line">    echo &quot;$remaining_cpu $remaining_mem&quot;</span><br><span class="line">done | awk &#x27;&#123;cpu+=$1; mem+=$2&#125; END &#123;print &quot;剩余CPU(m):&quot;, cpu, &quot;剩余内存(Ki):&quot;, mem&#125;&#x27;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/22/ffmpeg%E5%A4%84%E7%90%86%E8%A7%86%E9%A2%91tips/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1530,69 +1597,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/17/sublime-tips/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/03/17/sublime-tips/" class="post-title-link" itemprop="url">sublime tips</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-03-17 12:04:00 / 修改时间：12:05:44" itemprop="dateCreated datePublished" datetime="2025-03-17T12:04:00+08:00">2025-03-17</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="subline-去重"><a href="#subline-去重" class="headerlink" title="subline 去重"></a>subline 去重</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#1、排序</span><br><span class="line">edit-&gt; sort lines</span><br><span class="line">#2、正则替换</span><br><span class="line">find行：^(.+)$[\r\n](^\1$[\r\n]&#123;0, 1&#125;)+</span><br><span class="line">replace行：\1\n</span><br></pre></td></tr></table></figure>
-
-<h2 id="反选不包含http的行"><a href="#反选不包含http的行" class="headerlink" title="反选不包含http的行"></a>反选不包含http的行</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">find行：^((?!http).)*$</span><br><span class="line">或者</span><br><span class="line">find行：^(?!.*http).+</span><br><span class="line">replace：留空</span><br></pre></td></tr></table></figure>
-
-<h2 id="去除空行"><a href="#去除空行" class="headerlink" title="去除空行"></a>去除空行</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">find配置：\s+$</span><br><span class="line">replace：留空</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1664,7 +1668,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">107</span>
+          <span class="site-state-item-count">108</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

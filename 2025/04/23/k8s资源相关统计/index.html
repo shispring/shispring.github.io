@@ -20,19 +20,20 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="编辑.vimrc12345678910111213141516171819202122232425262728293031323334353637383940414243cat &gt; .vimrc  &lt;&lt; EOFset nocompatible          &quot; 禁用与 Vi 的兼容模式set encoding&#x3D;utf-8        &quot; 设置编码为 UT">
+  <meta name="description" content="1. 统计节点可分配的CPU&#x2F;内存123kubectl get nodes -o&#x3D;jsonpath&#x3D;&#x27;&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.cpu&#125;&#123;&quot;\t&quot;&amp;#125">
 <meta property="og:type" content="article">
-<meta property="og:title" content="vim基础配置">
-<meta property="og:url" content="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:title" content="k8s资源相关统计">
+<meta property="og:url" content="https://shispring.github.io/2025/04/23/k8s%E8%B5%84%E6%BA%90%E7%9B%B8%E5%85%B3%E7%BB%9F%E8%AE%A1/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="编辑.vimrc12345678910111213141516171819202122232425262728293031323334353637383940414243cat &gt; .vimrc  &lt;&lt; EOFset nocompatible          &quot; 禁用与 Vi 的兼容模式set encoding&#x3D;utf-8        &quot; 设置编码为 UT">
+<meta property="og:description" content="1. 统计节点可分配的CPU&#x2F;内存123kubectl get nodes -o&#x3D;jsonpath&#x3D;&#x27;&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.cpu&#125;&#123;&quot;\t&quot;&amp;#125">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-12-10T08:49:02.000Z">
-<meta property="article:modified_time" content="2024-12-10T08:50:21.334Z">
+<meta property="article:published_time" content="2025-04-23T07:04:12.000Z">
+<meta property="article:modified_time" content="2025-04-23T07:09:26.442Z">
 <meta property="article:author" content="shispring">
+<meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/">
+<link rel="canonical" href="https://shispring.github.io/2025/04/23/k8s%E8%B5%84%E6%BA%90%E7%9B%B8%E5%85%B3%E7%BB%9F%E8%AE%A1/">
 
 
 <script id="page-configurations">
@@ -45,7 +46,7 @@
   };
 </script>
 
-  <title>vim基础配置 | Hexo</title>
+  <title>k8s资源相关统计 | Hexo</title>
   
 
 
@@ -189,7 +190,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/23/k8s%E8%B5%84%E6%BA%90%E7%9B%B8%E5%85%B3%E7%BB%9F%E8%AE%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -202,7 +203,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          vim基础配置
+          k8s资源相关统计
         </h1>
 
         <div class="post-meta">
@@ -213,16 +214,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-12-10 16:49:02 / 修改时间：16:50:21" itemprop="dateCreated datePublished" datetime="2024-12-10T16:49:02+08:00">2024-12-10</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
+              <time title="创建时间：2025-04-23 15:04:12 / 修改时间：15:09:26" itemprop="dateCreated datePublished" datetime="2025-04-23T15:04:12+08:00">2025-04-23</time>
             </span>
 
           
@@ -243,7 +235,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="编辑-vimrc"><a href="#编辑-vimrc" class="headerlink" title="编辑.vimrc"></a>编辑.vimrc</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; .vimrc  &lt;&lt; EOF</span><br><span class="line"></span><br><span class="line">set nocompatible          &quot; 禁用与 Vi 的兼容模式</span><br><span class="line">set encoding=utf-8        &quot; 设置编码为 UTF-8</span><br><span class="line">set fileencodings=utf-8,gbk,iso-2022-jp,euc-jp,latin1 &quot; 文件编码自动检测</span><br><span class="line">set ruler                 &quot; 显示光标位置</span><br><span class="line"></span><br><span class="line">&quot; 自适应窗口大小</span><br><span class="line">autocmd VimEnter * let &amp;columns=system(&#x27;tput cols&#x27;) | let &amp;lines=system(&#x27;tput lines&#x27;)</span><br><span class="line">set display=lastline</span><br><span class="line"></span><br><span class="line">&quot; 代码编辑</span><br><span class="line">syntax on                 &quot; 启用语法高亮</span><br><span class="line">set autochdir             &quot; 自动切换到当前文件的目录</span><br><span class="line">set wildmenu              &quot; 增强命令补全菜单</span><br><span class="line">set wildmode=list:longest &quot; 补全时显示所有匹配项</span><br><span class="line">set foldmethod=indent     &quot; 根据缩进自动折叠代码</span><br><span class="line">set foldlevel=99          &quot; 默认展开所有代码</span><br><span class="line">set completeopt=menu,menuone,noselect &quot; 优化补全菜单</span><br><span class="line"></span><br><span class="line">&quot; 文本缩进</span><br><span class="line">set tabstop=4             &quot; 设置 Tab 长度为 4 个空格</span><br><span class="line">set shiftwidth=4          &quot; 自动缩进宽度为 4</span><br><span class="line">set expandtab             &quot; 用空格代替 Tab</span><br><span class="line">set smartindent           &quot; 智能缩进</span><br><span class="line">set autoindent            &quot; 自动继承上一行的缩进</span><br><span class="line"></span><br><span class="line">&quot; 显示相关</span><br><span class="line">set wrap                  &quot; 自动换行</span><br><span class="line">set linebreak             &quot; 单词边界处换行</span><br><span class="line">set showbreak=⮡          &quot; 换行提示符</span><br><span class="line"></span><br><span class="line">&quot; 搜索相关</span><br><span class="line">set hlsearch              &quot; 搜索高亮</span><br><span class="line">set incsearch             &quot; 边输入边搜索</span><br><span class="line">set ignorecase            &quot; 搜索忽略大小写</span><br><span class="line">set smartcase             &quot; 如果搜索中包含大写字母，则区分大小写</span><br><span class="line">set wrapscan              &quot; 搜索到文件结尾后从头继续</span><br><span class="line"></span><br><span class="line">&quot; 快捷键映射</span><br><span class="line">nnoremap &lt;Space&gt; :nohlsearch&lt;CR&gt; &quot; 空格键清除搜索高亮</span><br><span class="line"></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+        <h3 id="1-统计节点可分配的CPU-内存"><a href="#1-统计节点可分配的CPU-内存" class="headerlink" title="1. 统计节点可分配的CPU&#x2F;内存"></a>1. 统计节点可分配的CPU&#x2F;内存</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes -o=jsonpath=&#x27;&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.cpu&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.memory&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27; </span><br><span class="line"></span><br><span class="line">Allocatable字段表示节点可分配给Pod的资源总量（已扣除系统预留和kubelet资源）。</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-统计节点已分配的CPU-内存"><a href="#2-统计节点已分配的CPU-内存" class="headerlink" title="2. 统计节点已分配的CPU&#x2F;内存"></a>2. 统计节点已分配的CPU&#x2F;内存</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">方法一：通过节点描述直接获取（实时数据）</span><br><span class="line">kubectl describe node &lt;节点名称&gt; | grep -A 3 &quot;Allocated resources&quot;</span><br><span class="line">显示该节点所有Pod的资源请求总和（非实际使用量）。</span><br><span class="line"></span><br><span class="line">方法二：通过Pod请求汇总（精确统计）</span><br><span class="line">kubectl get pods --all-namespaces -o=jsonpath=&#x27;&#123;range .items[*]&#125;&#123;.spec.nodeName&#125;&#123;&quot;\t&quot;&#125;&#123;.spec.containers[*].resources.requests.cpu&#125;&#123;&quot;\t&quot;&#125;&#123;.spec.containers[*].resources.requests.memory&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;  | awk &#x27;&#123;cpu[$1]+=$2; mem[$1]+=$3&#125; END &#123;for (n in cpu) print n, cpu[n], mem[n]&#125;&#x27;</span><br><span class="line">遍历所有Pod，按节点汇总资源请求量（需处理单位一致性）。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-统计节点剩余可分配CPU-内存"><a href="#3-统计节点剩余可分配CPU-内存" class="headerlink" title="3. 统计节点剩余可分配CPU&#x2F;内存"></a>3. 统计节点剩余可分配CPU&#x2F;内存</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 先获取可分配总量和已分配量 </span><br><span class="line">allocatable=$(kubectl get node &lt;节点名称&gt; -o jsonpath=&#x27;&#123;.status.allocatable.cpu&#125;&#123;&quot;\t&quot;&#125;&#123;.status.allocatable.memory&#125;&#x27;) </span><br><span class="line">allocated=$(kubectl describe node &lt;节点名称&gt; | grep -A 3 &quot;Allocated resources&quot; | grep &quot;cpu\|memory&quot; | awk &#x27;&#123;print $2&#125;&#x27; | tr &#x27;\n&#x27; &#x27;\t&#x27;)</span><br><span class="line"> </span><br><span class="line"># 计算剩余量（需转换单位，示例仅逻辑描述）</span><br><span class="line">remaining_cpu = allocatable.cpu  - allocated.cpu  </span><br><span class="line">remaining_mem = allocatable.mem  - allocated.mem  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="集群维度"><a href="#集群维度" class="headerlink" title="集群维度"></a>集群维度</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#集群总可分配资源</span><br><span class="line">kubectl get nodes -o jsonpath=&#x27;&#123;range .items[*]&#125;&#123;.status.allocatable.cpu&#125;&#123;&quot;\n&quot;&#125;&#123;.status.allocatable.memory&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;  | awk &#x27;/m$/ &#123;sum+=$0/1000&#125; /Ki$/ &#123;sum+=$0/1024/1024&#125; END &#123;print &quot;总CPU核数:&quot;, sum, &quot;总内存GiB:&quot;, sum&#125;&#x27;</span><br><span class="line"></span><br><span class="line">#集群剩余可分配资源</span><br><span class="line"># 遍历所有节点计算剩余资源并汇总 </span><br><span class="line">kubectl get nodes -o json | jq -r &#x27;.items[] | .metadata.name  + &quot; &quot; + .status.allocatable.cpu  + &quot; &quot; + .status.allocatable.memory&#x27;  | while read node cpu mem; do </span><br><span class="line">    allocated_cpu=$(kubectl describe node $node | grep -A 3 &quot;Allocated resources&quot; | grep &quot;cpu&quot; | awk &#x27;&#123;print $2&#125;&#x27; | sed &#x27;s/m//&#x27;)</span><br><span class="line">    allocated_mem=$(kubectl describe node $node | grep -A 3 &quot;Allocated resources&quot; | grep &quot;memory&quot; | awk &#x27;&#123;print $2&#125;&#x27; | sed &#x27;s/Ki//&#x27;)</span><br><span class="line">    remaining_cpu=$(echo &quot;$(echo $cpu | sed &#x27;s/m//&#x27;) - $allocated_cpu&quot; | bc)</span><br><span class="line">    remaining_mem=$(echo &quot;$(echo $mem | sed &#x27;s/Ki//&#x27;) - $allocated_mem&quot; | bc)</span><br><span class="line">    echo &quot;$remaining_cpu $remaining_mem&quot;</span><br><span class="line">done | awk &#x27;&#123;cpu+=$1; mem+=$2&#125; END &#123;print &quot;剩余CPU(m):&quot;, cpu, &quot;剩余内存(Ki):&quot;, mem&#125;&#x27;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
 
     </div>
 
@@ -252,6 +252,10 @@
     
 
       <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
 
         
 
@@ -259,13 +263,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" rel="prev" title="metrics的常用命令">
-      <i class="fa fa-chevron-left"></i> metrics的常用命令
+    <a href="/2025/04/22/ffmpeg%E5%A4%84%E7%90%86%E8%A7%86%E9%A2%91tips/" rel="prev" title="ffmpeg处理视频tips">
+      <i class="fa fa-chevron-left"></i> ffmpeg处理视频tips
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/12/16/mac-tips/" rel="next" title="mac tips">
-      mac tips <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -324,7 +325,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%BE%91-vimrc"><span class="nav-number">1.</span> <span class="nav-text">编辑.vimrc</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%BB%9F%E8%AE%A1%E8%8A%82%E7%82%B9%E5%8F%AF%E5%88%86%E9%85%8D%E7%9A%84CPU-%E5%86%85%E5%AD%98"><span class="nav-number">1.</span> <span class="nav-text">1. 统计节点可分配的CPU&#x2F;内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BB%9F%E8%AE%A1%E8%8A%82%E7%82%B9%E5%B7%B2%E5%88%86%E9%85%8D%E7%9A%84CPU-%E5%86%85%E5%AD%98"><span class="nav-number">2.</span> <span class="nav-text">2. 统计节点已分配的CPU&#x2F;内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%BB%9F%E8%AE%A1%E8%8A%82%E7%82%B9%E5%89%A9%E4%BD%99%E5%8F%AF%E5%88%86%E9%85%8DCPU-%E5%86%85%E5%AD%98"><span class="nav-number">3.</span> <span class="nav-text">3. 统计节点剩余可分配CPU&#x2F;内存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E7%BB%B4%E5%BA%A6"><span class="nav-number"></span> <span class="nav-text">集群维度</span></a></div>
       </div>
       <!--/noindex-->
 
