@@ -187,7 +187,7 @@
   <entry>
     <title>OpenSSL 支持的密钥类型和格式</title>
     <url>/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/</url>
-    <content><![CDATA[<p>** OpenSSL 证书链 **</p>
+    <content><![CDATA[<p><strong>OpenSSL 证书链</strong></p>
 <blockquote>
 <p><a href="https://darutk.medium.com/illustrated-x-509-certificate-84aece2c5c2e">https://darutk.medium.com/illustrated-x-509-certificate-84aece2c5c2e</a></p>
 </blockquote>
