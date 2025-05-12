@@ -358,6 +358,9 @@
 <p><strong>3. 生成 ED25519 密钥用于 SSH</strong></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519</span><br></pre></td></tr></table></figure>
 
+<p><strong>4. 查看证书</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl x509 -in ./ca.crt -text -noout</span><br></pre></td></tr></table></figure>
+
 <p><strong>5. 总结与建议</strong></p>
 <p>•	<strong>RSA</strong>：经典且兼容性好，适合 Web 服务器和通用加密应用。</p>
 <p>•	<strong>ECC</strong>：更高效、密钥短，适用于 IoT 和现代 TLS。</p>
