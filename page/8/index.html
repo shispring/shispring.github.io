@@ -184,6 +184,105 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/01/pod%E9%87%8D%E5%BB%BA-%E9%87%8D%E5%90%AF%E8%A1%8C%E4%B8%BA/" class="post-title-link" itemprop="url">pod重建|重启行为</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-01 17:45:45 / 修改时间：17:46:14" itemprop="dateCreated datePublished" datetime="2024-11-01T17:45:45+08:00">2024-11-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在Kubernetes中，<code>Deployment</code>的更新行为是有规律的。变更<code>Deployment</code>的某些字段会触发Pod重建或重启，而某些字段的变更则不会影响Pod的运行。以下是详细的总结：</p>
+<h3 id="触发Pod重建的行为"><a href="#触发Pod重建的行为" class="headerlink" title="触发Pod重建的行为"></a>触发Pod重建的行为</h3><p>以下更改会导致<code>Deployment</code>重新创建Pod，即：删除旧Pod并创建新Pod。</p>
+<ol>
+<li><strong>更新容器镜像</strong>：变更镜像的名称或标签（如从<code>v1</code>到<code>v2</code>）。</li>
+<li><strong>资源限制和请求</strong>：变更<code>resources.requests</code>或<code>resources.limits</code>。</li>
+<li><strong>环境变量</strong>：更改容器的环境变量（<code>env</code>字段）。</li>
+<li><strong>亲和性和反亲和性规则</strong>：修改或添加<code>affinity</code>和<code>antiAffinity</code>。</li>
+<li><strong>探针配置</strong>：更新<code>livenessProbe</code>或<code>readinessProbe</code>的配置。</li>
+<li><strong>卷挂载</strong>：改变<code>volumeMounts</code>或<code>volumes</code>字段。</li>
+<li><strong>initContainers</strong>或<strong>sidecar容器</strong>：添加、删除或更新init容器或sidecar容器。</li>
+<li><strong>Pod标签和注解</strong>：修改影响<code>PodSpec</code>中的<code>metadata.labels</code>或<code>metadata.annotations</code>会引发Pod重建。</li>
+<li><strong>端口配置</strong>：修改容器端口的配置。</li>
+</ol>
+<h3 id="触发Pod滚动更新但不完全重建的行为"><a href="#触发Pod滚动更新但不完全重建的行为" class="headerlink" title="触发Pod滚动更新但不完全重建的行为"></a>触发Pod滚动更新但不完全重建的行为</h3><p>一些行为会触发滚动更新，但不会删除所有Pod或引起中断：</p>
+<ol>
+<li><strong>RollingUpdate字段</strong>：变更<code>rollingUpdate</code>策略（如<code>maxUnavailable</code>或<code>maxSurge</code>），不会直接重建Pod，而是影响Pod的更新速率和方式。</li>
+<li>**Horizontal Pod Autoscaler (HPA)**：HPA的更新不会直接导致Pod重建，但可能会根据负载情况动态调整Pod数量。</li>
+</ol>
+<h3 id="不会导致Pod重建或重启的行为"><a href="#不会导致Pod重建或重启的行为" class="headerlink" title="不会导致Pod重建或重启的行为"></a>不会导致Pod重建或重启的行为</h3><p>以下行为仅影响控制层，不会直接对Pod产生重启或重建的影响：</p>
+<ol>
+<li><strong>Deployment注解和标签</strong>：在<code>Deployment</code>级别添加或修改注解和标签，不会影响Pod。</li>
+<li><strong>HPA</strong>的目标值调整（如<code>minReplicas</code>和<code>maxReplicas</code>）：更改不会重建现有Pod，而是动态扩展或缩减。</li>
+<li><strong>服务配置</strong>：更新Service或Ingress的配置不会影响已存在的Pod。</li>
+</ol>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>可以使用以下命令验证某些更改是否触发了Pod重建：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout status deployment &lt;deployment-name&gt;  <span class="comment"># 检查Deployment是否正在进行滚动更新</span></span><br><span class="line">kubectl get replicaset -l &lt;app-label&gt;                <span class="comment"># 查看ReplicaSet状态，观察新旧ReplicaSet</span></span><br><span class="line">kubectl rollout <span class="built_in">history</span> deployment &lt;deployment-name&gt;  <span class="comment"># 查看变更历史</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li><strong>会重建Pod</strong>：更新镜像、资源限制、环境变量、亲和性规则、探针、卷挂载、initContainers、Pod标签、端口。</li>
+<li><strong>不会重建Pod</strong>：变更HPA目标值、<code>rollingUpdate</code>策略、<code>Deployment</code>注解和标签、Service或Ingress配置。</li>
+</ul>
+<p>掌握这些更新行为有助于更灵活地管理Pod的生命周期。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/ab%E3%80%81wrk%E3%80%81wrk2%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1369,84 +1468,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/16/ingress-nginx%E5%BC%80%E5%90%AF%E6%97%A7%E7%89%88%E6%9C%ACTLS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/16/ingress-nginx%E5%BC%80%E5%90%AF%E6%97%A7%E7%89%88%E6%9C%ACTLS/" class="post-title-link" itemprop="url">ingress-nginx开启旧版本TLS</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-10-16 09:59:47 / 修改时间：10:11:15" itemprop="dateCreated datePublished" datetime="2024-10-16T09:59:47+08:00">2024-10-16</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-创建工作负载"><a href="#1-创建工作负载" class="headerlink" title="1.创建工作负载"></a>1.创建工作负载</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建一个deployment型的工作负载，端口使用nginx默认的80</span></span><br><span class="line">kubectl create deployment nginx-demo --image=swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nginx:1.27.0 --port=80</span><br><span class="line"></span><br><span class="line"><span class="comment">#暴露服务端口</span></span><br><span class="line">kubectl expose deployment nginx-demo --port=80 --<span class="built_in">type</span>=ClusterIP</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建一个ingress规则</span></span><br><span class="line">kubectl create ingress nginx-demo --class=nginx --rule=<span class="string">&quot;test.qihoo.net/*=nginx-demo:80&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#获取ingress pod ip</span></span><br><span class="line"><span class="comment">#kubectl get pods -o=jsonpath=&#x27;&#123;@&#125;&#x27; | jq</span></span><br><span class="line">kubectl get pod -n ingress-nginx -o jsonpath=<span class="string">&quot;&#123;.items[*][&#x27;.status.hostIP&#x27;]&#125;&quot;</span></span><br><span class="line">11.33.162.177</span><br><span class="line"></span><br><span class="line"><span class="comment">#配置host，保证请求经过ingress，</span></span><br><span class="line"><span class="built_in">cat</span> /etc/hosts</span><br><span class="line">11.33.162.177 test.qihoo.net</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-查看TLS支持版本"><a href="#2-查看TLS支持版本" class="headerlink" title="2.查看TLS支持版本"></a>2.查看TLS支持版本</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#请求后端服务</span></span><br><span class="line">curl -v http://test.qihoo.net</span><br><span class="line"></span><br><span class="line"><span class="comment">#使用nmap或者openssl请求</span></span><br><span class="line">nmap --script ssl-enum-ciphers -p 443 test.qihoo.net</span><br><span class="line">nmap --script ssl-enum-ciphers -p 443 11.33.162.177</span><br><span class="line"></span><br><span class="line"><span class="comment">#或者</span></span><br><span class="line">openssl s_client -connect test.qihoo.net:443 -tls1_1</span><br><span class="line">openssl s_client -connect test.qihoo.net:443 -tls1_2</span><br><span class="line">openssl s_client -connect test.qihoo.net:443 -tls1_3</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-编辑ingress-nginx-configmap配置"><a href="#3-编辑ingress-nginx-configmap配置" class="headerlink" title="3.编辑ingress-nginx configmap配置"></a>3.编辑ingress-nginx configmap配置</h2><ul>
-<li><p>获取ingress-nginx的configmap，编辑配置</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#获取ingress-nginx 的configmap，编辑配置</span></span><br><span class="line">kubectl get cm -n ingress-nginx</span><br><span class="line">NAME                       DATA   AGE</span><br><span class="line">ingress-nginx-controller   3      47d</span><br><span class="line">kube-root-ca.crt           1      47d</span><br><span class="line">nginx-template             1      47d</span><br><span class="line"></span><br><span class="line">kubectl edit cm ingress-nginx-controller -n ingress-nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">#data配置添加以下内容：</span></span><br><span class="line">ssl-ciphers: ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:@SECLEVEL=0</span><br><span class="line">ssl-protocols: TLSv1 TLSv1.1 TLSv1.2 TLSv1.3</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="4-再次请求查看支持的TLS版本"><a href="#4-再次请求查看支持的TLS版本" class="headerlink" title="4.再次请求查看支持的TLS版本"></a>4.再次请求查看支持的TLS版本</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nmap --script ssl-enum-ciphers -p 443 11.33.162.177</span><br><span class="line">或者</span><br><span class="line">nmap --script ssl-enum-ciphers -p 443 test.qihoo.net</span><br></pre></td></tr></table></figure>
-
-<h2 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5.参考文档"></a>5.参考文档</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/</span><br><span class="line"></span><br><span class="line">https://stackoverflow.com/questions/59371313/kubernetes-nginx-ingress-controller-activate-tlsv1-1</span><br><span class="line"></span><br><span class="line">https://help.aliyun.com/zh/ack/ack-managed-and-ack-dedicated/user-guide/nginx-ingress-faq</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1518,7 +1539,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-count">109</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1531,7 +1552,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

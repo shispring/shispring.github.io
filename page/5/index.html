@@ -184,6 +184,95 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/26/create-pod-and-state/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/26/create-pod-and-state/" class="post-title-link" itemprop="url">create pod and state</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-26 21:28:15 / 修改时间：21:33:48" itemprop="dateCreated datePublished" datetime="2024-12-26T21:28:15+08:00">2024-12-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="pod状态"><a href="#pod状态" class="headerlink" title="pod状态"></a>pod状态</h2><ul>
+<li>CrashLoopBackOff : 容器退出，kubelet正在将它重启</li>
+<li>InvalidImageName : 无法解析镜像名称</li>
+<li>ImageInspectError : 无法校验镜像</li>
+<li>ErrImageNeverPull : 策略禁止拉取镜像</li>
+<li>ImagePullBackOff : 正在重试拉取</li>
+<li>RegistryUnavailable : 连接不到镜像中心</li>
+<li>ErrImagePull : 通用的拉取镜像出错</li>
+<li>CreateContainerConfigError : 不能创建kubelet使用的容器配置</li>
+<li>CreateContainerError : 创建容器失败</li>
+<li>m.internalLifecycle.PreStartContainer : 执行hook报错</li>
+<li>RunContainerError : 启动容器失败</li>
+<li>PostStartHookError : 执行hook报错</li>
+<li>ContainersNotInitialized : 容器没有初始化完毕</li>
+<li>ContainersNotRead : 容器没有准备完毕</li>
+<li>ContainerCreating : 容器创建中</li>
+<li>PodInitializing : pod : 初始化中</li>
+<li>DockerDaemonNotReady : docker还没有完全启动</li>
+<li>NetworkPluginNotReady : 网络插件还没有完全启动</li>
+<li>Evicted : Pod被驱逐</li>
+</ul>
+<h2 id="创建流程"><a href="#创建流程" class="headerlink" title="创建流程"></a>创建流程</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/pod-create.png" alt="create pod"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/25/rsync%E7%94%A8%E6%B3%95%E5%B0%8F%E8%AE%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1410,82 +1499,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">vim基础配置</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-12-10 16:49:02" itemprop="dateCreated datePublished" datetime="2024-12-10T16:49:02+08:00">2024-12-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-05-12 16:51:07" itemprop="dateModified" datetime="2025-05-12T16:51:07+08:00">2025-05-12</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="编辑-vimrc"><a href="#编辑-vimrc" class="headerlink" title="编辑.vimrc"></a>编辑.vimrc</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; .vimrc  &lt;&lt; EOF</span><br><span class="line"></span><br><span class="line">set nocompatible          &quot; 禁用与 Vi 的兼容模式</span><br><span class="line">set encoding=utf-8        &quot; 设置编码为 UTF-8</span><br><span class="line">set fileencodings=utf-8,gbk,iso-2022-jp,euc-jp,latin1 &quot; 文件编码自动检测</span><br><span class="line">set ruler                 &quot; 显示光标位置</span><br><span class="line"></span><br><span class="line">&quot; 自适应窗口大小</span><br><span class="line">autocmd VimEnter * let &amp;columns=system(&#x27;tput cols&#x27;) | let &amp;lines=system(&#x27;tput lines&#x27;)</span><br><span class="line">set display=lastline</span><br><span class="line"></span><br><span class="line">&quot; 代码编辑</span><br><span class="line">syntax on                 &quot; 启用语法高亮</span><br><span class="line">set autochdir             &quot; 自动切换到当前文件的目录</span><br><span class="line">set wildmenu              &quot; 增强命令补全菜单</span><br><span class="line">set wildmode=list:longest &quot; 补全时显示所有匹配项</span><br><span class="line">set foldmethod=indent     &quot; 根据缩进自动折叠代码</span><br><span class="line">set foldlevel=99          &quot; 默认展开所有代码</span><br><span class="line">set completeopt=menu,menuone,noselect &quot; 优化补全菜单</span><br><span class="line"></span><br><span class="line">&quot; 文本缩进</span><br><span class="line">set tabstop=4             &quot; 设置 Tab 长度为 4 个空格</span><br><span class="line">set shiftwidth=4          &quot; 自动缩进宽度为 4</span><br><span class="line">set expandtab             &quot; 用空格代替 Tab</span><br><span class="line">set smartindent           &quot; 智能缩进</span><br><span class="line">set autoindent            &quot; 自动继承上一行的缩进</span><br><span class="line"></span><br><span class="line">&quot; 显示相关</span><br><span class="line">set wrap                  &quot; 自动换行</span><br><span class="line">set linebreak             &quot; 单词边界处换行</span><br><span class="line">set showbreak=⮡          &quot; 换行提示符</span><br><span class="line"></span><br><span class="line">&quot; 搜索相关</span><br><span class="line">set hlsearch              &quot; 搜索高亮</span><br><span class="line">set incsearch             &quot; 边输入边搜索</span><br><span class="line">set ignorecase            &quot; 搜索忽略大小写</span><br><span class="line">set smartcase             &quot; 如果搜索中包含大写字母，则区分大小写</span><br><span class="line">set wrapscan              &quot; 搜索到文件结尾后从头继续</span><br><span class="line"></span><br><span class="line">&quot; 快捷键映射</span><br><span class="line">nnoremap &lt;Space&gt; :nohlsearch&lt;CR&gt; &quot; 空格键清除搜索高亮</span><br><span class="line"></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-
-<h2 id="粘贴乱码"><a href="#粘贴乱码" class="headerlink" title="粘贴乱码"></a>粘贴乱码</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">:set paste </span><br><span class="line">进入paste模式以后，可以在插入模式下粘贴内容，不会有任何变形</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1557,7 +1570,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-count">109</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1570,7 +1583,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

@@ -6893,4 +6893,18 @@ validate</p>
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>mac下openssl自签证书及证书链</title>
+    <url>/2025/05/13/mac%E4%B8%8Bopenssl%E8%87%AA%E7%AD%BE%E8%AF%81%E4%B9%A6%E5%8F%8A%E8%AF%81%E4%B9%A6%E9%93%BE/</url>
+    <content><![CDATA[<h2 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#安装openssl</span><br><span class="line">brew install openssl</span><br><span class="line"></span><br><span class="line">#查看版本信息</span><br><span class="line">/opt/homebrew/bin/openssl version -a</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#私钥生成</span><br><span class="line">openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 &gt; private_key.pem</span><br><span class="line">解释：</span><br><span class="line">genpkey ：生成私钥。openssl openssl 提供了 genrsa 和 gendsa 子命令来生成 RSA/DSA 私钥，但它们已被 genpkey 取代。</span><br><span class="line">-algorithm EC ：使用椭圆曲线算法。请注意，使用时 -algorithm 选项必须位于 -pkeyopt 选项之前。</span><br><span class="line">-pkeyopt ec_paramgen_curve:P-256 ：使用 P-256 曲线，这是椭圆曲线算法特有的参数。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#私钥内容</span><br><span class="line">openssl pkey -text -noout -in private_key.pem</span><br><span class="line"></span><br><span class="line">#将密钥格式从 PEM 转换为 JWK （ RFC 7517 ）</span><br><span class="line">sudo npm install -g eckles</span><br><span class="line">eckles private_key.pem &gt; private_key.jwk</span><br><span class="line">cat private_key.jwk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#从 PEM 格式的私钥中提取公钥</span><br><span class="line">openssl pkey -pubout -in private_key.pem &gt; public_key.pem</span><br><span class="line"></span><br><span class="line">#将公钥格式从 PEM 转换为 JWK</span><br><span class="line">eckles public_key.pem &gt; public_key.jwk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#自签名证书</span><br><span class="line">openssl req -x509 -key private_key.pem -subj /CN=Client.example.com &gt; certificate.pem</span><br><span class="line">解释：</span><br><span class="line">req -x509 ：生成自签名的 X.509 证书。</span><br><span class="line">-key private_key.pem ：指定用于签名的私钥和目标公钥</span><br><span class="line">-subj /CN=client.example.com ：指定主体可分辨名称。如果未指定 -subj 选项， openssl 命令会提示您以交互方式输入主体可分辨名称。</span><br><span class="line">-days ：如果未指定有效期限，则使用 30 天作为默认值。可以使用 -days 选项指定有效期限（以天为单位）。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#证书内容</span><br><span class="line">openssl x509 -text -noout -in certificate.pem</span><br><span class="line">解释：</span><br><span class="line">-text ：以纯文本形式显示信息。</span><br><span class="line">-text ：以纯文本形式显示信息。</span><br><span class="line">-noout ：抑制编码输出。</span><br><span class="line">-in certificate.pem ：指定输入文件。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#注意：</span><br><span class="line">自签名的证书：因此颁发者（Issuer）和主体(Subject)是相同的。目标公钥的信息包含在主体公钥信息块中。</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><blockquote>
+<p><a href="https://darutk.medium.com/illustrated-x-509-certificate-84aece2c5c2e">https://darutk.medium.com/illustrated-x-509-certificate-84aece2c5c2e</a></p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>openssl</tag>
+      </tags>
+  </entry>
 </search>
