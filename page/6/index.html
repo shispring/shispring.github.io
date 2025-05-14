@@ -184,6 +184,91 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/16/expect%E8%B7%B3%E8%BD%ACtips/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/16/expect%E8%B7%B3%E8%BD%ACtips/" class="post-title-link" itemprop="url">expect跳转tips</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-16 15:22:13" itemprop="dateCreated datePublished" datetime="2024-12-16T15:22:13+08:00">2024-12-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-03-14 16:11:22" itemprop="dateModified" datetime="2025-03-14T16:11:22+08:00">2025-03-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、单次跳转"><a href="#一、单次跳转" class="headerlink" title="一、单次跳转"></a>一、单次跳转</h2><ul>
+<li>① shell脚本拼凑登录信息</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">#!/opt/homebrew/bin/bash</span><br><span class="line">###---------------###</span><br><span class="line">#mac安装新版本bash: 支持declare -A xxx</span><br><span class="line">#brew install bash</span><br><span class="line">#</span><br><span class="line">###---------------###</span><br><span class="line"></span><br><span class="line"># 全局变量</span><br><span class="line">PORT=&quot;22&quot;</span><br><span class="line">USER=&quot;xxx&quot;</span><br><span class="line">PASSWORD=&quot;xxx&quot;</span><br><span class="line"></span><br><span class="line"># ANSI 转义码定义颜色</span><br><span class="line">RESET=&quot;\033[0m&quot;</span><br><span class="line">RED=&quot;\033[31m&quot;</span><br><span class="line">GREEN=&quot;\033[32m&quot;</span><br><span class="line">YELLOW=&quot;\033[33m&quot;</span><br><span class="line"></span><br><span class="line"># 函数：打印日志（支持颜色）</span><br><span class="line">log_message() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    local message=$2</span><br><span class="line">    local color</span><br><span class="line"></span><br><span class="line">    case $level in</span><br><span class="line">        INFO)</span><br><span class="line">            color=$GREEN</span><br><span class="line">            ;;</span><br><span class="line">        WARN)</span><br><span class="line">            color=$YELLOW</span><br><span class="line">            ;;</span><br><span class="line">        ERROR)</span><br><span class="line">            color=$RED</span><br><span class="line">            ;;</span><br><span class="line">        *)</span><br><span class="line">            color=$RESET</span><br><span class="line">            ;;</span><br><span class="line">    esac</span><br><span class="line"></span><br><span class="line">    echo -e &quot;$(date &#x27;+%Y-%m-%dT%H:%M:%S&#x27;) [$&#123;color&#125;$&#123;level&#125;$&#123;RESET&#125;] $message&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 函数：定义 IP 映射</span><br><span class="line">declare -A IP_MAP</span><br><span class="line">IP_MAP[&quot;dev_194&quot;]=&quot;10.xxx.xxx.194&quot;</span><br><span class="line">IP_MAP[&quot;jump_113&quot;]=&quot;10.xxx.xxx.113&quot;</span><br><span class="line"></span><br><span class="line"># 函数：获取 IP 地址</span><br><span class="line">get_ip() &#123;</span><br><span class="line">    local key=&quot;$&#123;1&#125;_$&#123;2&#125;&quot;</span><br><span class="line">    echo &quot;$&#123;IP_MAP[$key]&#125;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 参数检查</span><br><span class="line">if [[ $# -lt 2 ]]; then</span><br><span class="line">    log_message &quot;ERROR&quot; &quot;Usage: $0 &lt;environment&gt; &lt;option&gt;&quot;</span><br><span class="line">    log_message &quot;INFO&quot; &quot;Examples: $0 dev 194&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># 获取参数</span><br><span class="line">ENVIRONMENT=$1</span><br><span class="line">OPTION=$2</span><br><span class="line"></span><br><span class="line"># 获取目标 IP</span><br><span class="line">IP=$(get_ip &quot;$ENVIRONMENT&quot; &quot;$OPTION&quot;)</span><br><span class="line">echo $IP</span><br><span class="line">if [[ -z $IP ]]; then</span><br><span class="line">    log_message &quot;ERROR&quot; &quot;Invalid environment or option: $ENVIRONMENT $OPTION&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># 调用 Expect 脚本</span><br><span class="line">log_message &quot;INFO&quot; &quot;Connecting to $IP with user $USER on port $PORT&quot;</span><br><span class="line"></span><br><span class="line">expect /Users/xxx/shell/expectLogin.exp &quot;$IP&quot; &quot;$PORT&quot; &quot;$USER&quot; &quot;$PASSWORD&quot;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>② 配合的expectLogin.exp脚本</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/expect -f</span><br><span class="line"></span><br><span class="line"># 获取参数</span><br><span class="line">set ip [lindex $argv 0]</span><br><span class="line">set port [lindex $argv 1]</span><br><span class="line">set user [lindex $argv 2]</span><br><span class="line">set password [lindex $argv 3]</span><br><span class="line"></span><br><span class="line"># 设置超时时间</span><br><span class="line">set timeout 0.5</span><br><span class="line"></span><br><span class="line"># 打印日志</span><br><span class="line">puts &quot;[clock format [clock seconds] -format %Y-%m-%dT%H:%M:%S] Connecting to $ip&quot;</span><br><span class="line"></span><br><span class="line"># 执行 SSH 登录（ssh config 可自动处理免密情况）</span><br><span class="line">spawn ssh -p $port $user@$ip</span><br><span class="line"></span><br><span class="line"># 通过循环处理可能的交互情况</span><br><span class="line">while &#123;1&#125; &#123;</span><br><span class="line">    expect &#123;</span><br><span class="line">        -re &quot;Are you sure you want to continue connecting.*\\(yes/no\\)\\?&quot; &#123;</span><br><span class="line">            send &quot;yes\r&quot;</span><br><span class="line">            exp_continue</span><br><span class="line">        &#125;</span><br><span class="line">        -re &quot;(?i)password:&quot; &#123;</span><br><span class="line">            # 如果传入的密码为空，说明可能是免密登录，不发送密码</span><br><span class="line">            if &#123;$password ne &quot;&quot;&#125; &#123;</span><br><span class="line">                send &quot;$password\r&quot;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                # 若密码为空则直接进入交互模式</span><br><span class="line">                break</span><br><span class="line">            &#125;</span><br><span class="line">            exp_continue</span><br><span class="line">        &#125;</span><br><span class="line">        -re &#123;([\$#] $)&#125; &#123;</span><br><span class="line">            # 匹配到标准 shell 提示符（支持$或#结尾），登录成功</span><br><span class="line">            break</span><br><span class="line">        &#125;</span><br><span class="line">        timeout &#123;</span><br><span class="line">            # 如果等待超时，也尝试结束循环进入交互模式</span><br><span class="line">            # puts &quot;等待响应超时，尝试进入交互模式，请注意确认登录状态。&quot;</span><br><span class="line">            # send &quot;\r&quot;</span><br><span class="line">	    break</span><br><span class="line">        &#125;</span><br><span class="line">        eof &#123;</span><br><span class="line">            break</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 进入交互模式</span><br><span class="line">interact</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="两次跳转登录"><a href="#两次跳转登录" class="headerlink" title="两次跳转登录"></a>两次跳转登录</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/expect</span><br><span class="line">#############################################</span><br><span class="line">#</span><br><span class="line">#脚本目的：从本地mac ---经跳板机---&gt; 跳到IDC主机</span><br><span class="line">#使用方法：</span><br><span class="line">#1、chmod +x jump.exp</span><br><span class="line">#2、可在.bash_profile 定义脚本别名 alias jump=&#x27;xxxx/jump.exp&#x27;</span><br><span class="line">#3、登录机器 jump &#123;hostname&#125;</span><br><span class="line">#############################################</span><br><span class="line"></span><br><span class="line">set port 22</span><br><span class="line">set user xxx</span><br><span class="line">set password xxx</span><br><span class="line">set jumper xxx</span><br><span class="line"></span><br><span class="line"># 定义登录主机名</span><br><span class="line">set hostname [lindex $argv 0]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if &#123; $argc &lt; 1 &#125; &#123;</span><br><span class="line">    puts &quot;please input: jump &#123;hostname&#125; &quot;</span><br><span class="line">    exit</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if &#123; $argc == 1 &#125; &#123;</span><br><span class="line"></span><br><span class="line">    # 关闭mac层连接的标准输出</span><br><span class="line">    log_user 0</span><br><span class="line"></span><br><span class="line">    #特殊处理主机,该主机配置了无密码登录，可以不再设置密码登录</span><br><span class="line">    if &#123;$hostname == $jumper&#125; &#123;</span><br><span class="line"></span><br><span class="line">        spawn ssh -p $port $user@$hostname</span><br><span class="line">        expect &#123;</span><br><span class="line">            &quot;*yes/no&quot; &#123; </span><br><span class="line">                send &quot;yes\r&quot;; exp_continue </span><br><span class="line">            &#125;</span><br><span class="line">            &quot;*password:*&quot; &#123; </span><br><span class="line">                send &quot;$password\r;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">            &quot;$&quot; &#123;</span><br><span class="line">                send &quot;\r;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        # spawn 是 expect 环境的内部命令，它主要的功能是给 ssh 运行进程加个壳，用来传递交互指令。</span><br><span class="line">        spawn ssh -p $port $user@$jumper</span><br><span class="line"></span><br><span class="line">        # expect 也是 expect 环境的一个内部命令，用来判断上一个指令输入之后的得到输出结果是否包含 &quot;&quot; 双引号里的字符串，-re 表示通过正则来匹配。</span><br><span class="line">        # 如果是第一次登录，会出现 &quot;yes/no&quot; 的字符串，就发送（send）指令 &quot;yes\r&quot;，然后继续（exp_continue）。</span><br><span class="line">        expect &#123;</span><br><span class="line">            &quot;*yes/no&quot; &#123;    send &quot;yes\r&quot;; exp_continue &#125;</span><br><span class="line">            &quot;*password:*&quot; &#123;   send &quot;$password\r;&quot;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        # 关闭mac层连接的标准输出</span><br><span class="line">        log_user 0</span><br><span class="line"></span><br><span class="line">        expect &quot;@&quot; &#123; send &quot;ssh -p $port $user@$hostname\r&quot;&#125;</span><br><span class="line">        expect &#123;</span><br><span class="line">            &quot;*yes/no&quot; &#123;    send &quot;yes\r&quot;; exp_continue &#125;</span><br><span class="line">            &quot;*password*&quot; &#123;   send &quot;$password\r;&quot;&#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    #保持交互状态，把控制权交给控制台。</span><br><span class="line">    interact</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/16/mac-tips/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1245,103 +1330,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/20/vscode%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/20/vscode%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">vscode调试配置</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-11-20 14:30:31" itemprop="dateCreated datePublished" datetime="2024-11-20T14:30:31+08:00">2024-11-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-12-10 11:28:07" itemprop="dateModified" datetime="2024-12-10T11:28:07+08:00">2024-12-10</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">https://vscode.js.cn/docs/remote/ssh</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="远程主机配置go版本"><a href="#远程主机配置go版本" class="headerlink" title="远程主机配置go版本"></a>远程主机配置go版本</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#安装gvm</span><br><span class="line">bash &lt; &lt;(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)</span><br><span class="line"></span><br><span class="line">#安装go1.23,设置默认</span><br><span class="line">gvm install go1.23</span><br><span class="line">gvm use go1.23 --default</span><br><span class="line"></span><br><span class="line">#配置GOROOT、GOPATH变量，vscode配置需要，go env 查看</span><br><span class="line">.....</span><br><span class="line">GO111MODULE=&quot;auto&quot;</span><br><span class="line">GOPROXY=&quot;https://proxy.golang.org,direct&quot;</span><br><span class="line">GOROOT=&quot;/home/xxx/.gvm/gos/go1.23&quot;</span><br><span class="line">GOPATH=&quot;/home/xxx/.gvm/pkgsets/go1.23/global&quot;</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
-
-<h2 id="扩展及工具"><a href="#扩展及工具" class="headerlink" title="扩展及工具"></a>扩展及工具</h2><ul>
-<li>Remote - SSH</li>
-<li>Go</li>
-<li>go tools</li>
-</ul>
-<h2 id="根路径下配置文件"><a href="#根路径下配置文件" class="headerlink" title="根路径下配置文件"></a>根路径下配置文件</h2><ul>
-<li>新建.vscode文件夹</li>
-<li>文件 extension.json 、launch.json 、 settings.json</li>
-</ul>
-<h3 id="extension-jon"><a href="#extension-jon" class="headerlink" title="extension.jon"></a>extension.jon</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;recommendations&quot;: [</span><br><span class="line">        &quot;vivaldy22.go-auto-struct-tag&quot;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="lanuch-json"><a href="#lanuch-json" class="headerlink" title="lanuch.json"></a>lanuch.json</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</span><br><span class="line">    &quot;configurations&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot;: &quot;informer&quot;,</span><br><span class="line">            &quot;type&quot;: &quot;go&quot;,</span><br><span class="line">            &quot;request&quot;: &quot;launch&quot;,</span><br><span class="line">            &quot;mode&quot;: &quot;test&quot;, //test 或者 debug</span><br><span class="line">            &quot;program&quot;: &quot;$&#123;workspaceFolder&#125;/xxx/xxx_test.go&quot;,</span><br><span class="line">            // &quot;mode&quot;: &quot;debug&quot;, </span><br><span class="line">            // &quot;program&quot;: &quot;$&#123;workspaceFolder&#125;/xxx/main.go&quot;,</span><br><span class="line">            &quot;cwd&quot;: &quot;$&#123;workspaceFolder&#125;/xxx&quot;,</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="settings-json文件内容"><a href="#settings-json文件内容" class="headerlink" title="settings.json文件内容"></a>settings.json文件内容</h3><ul>
-<li>注意GOROOT 、GOPATH与远程主机设置一致<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    // 界面主题选择、图标选择（需要安装插件： Material Icon Theme ）</span><br><span class="line">    &quot;workbench.colorTheme&quot;: &quot;GitHub Dark&quot;,</span><br><span class="line">    &quot;workbench.iconTheme&quot;: &quot;material-icon-theme&quot;,</span><br><span class="line">    // ---编辑面板字体大小</span><br><span class="line">    &quot;editor.fontSize&quot;: 14,</span><br><span class="line">    // ---丝滑打字配置</span><br><span class="line">    &quot;editor.smoothScrolling&quot;: true,</span><br><span class="line">    &quot;editor.cursorBlinking&quot;: &quot;expand&quot;,</span><br><span class="line">    &quot;editor.cursorSmoothCaretAnimation&quot;: &quot;on&quot;,</span><br><span class="line">    &quot;workbench.list.smoothScrolling&quot;: true,</span><br><span class="line">    // ---鼠标控制大小,使用鼠标的可以尝试</span><br><span class="line">    // &quot;editor.mouseWheelZoom&quot;: true,</span><br><span class="line">    // ---彩虹括号与作用域块线条提示</span><br><span class="line">    &quot;editor.guides.bracketPairs&quot;: true,</span><br><span class="line">    &quot;editor.bracketPairColorization.enabled&quot;: true,</span><br><span class="line">    // ---更加智能的代码提示</span><br><span class="line">    // 控制活动代码段是否阻止快速建议</span><br><span class="line">    &quot;editor.suggest.snippetsPreventQuickSuggestions&quot;: false,</span><br><span class="line">    // 除了 `Tab` 键以外， `Enter` 键是否同样可以接受建议</span><br><span class="line">    // 这能减少“插入新行”和“接受建议”命令之间的歧义</span><br><span class="line">    &quot;editor.acceptSuggestionOnEnter&quot;: &quot;smart&quot;,</span><br><span class="line">    // 代码补全列表中，优先选择最近的建议</span><br><span class="line">    &quot;editor.suggestSelection&quot;: &quot;recentlyUsedByPrefix&quot;,</span><br><span class="line">    // ---自动补全括号、引号</span><br><span class="line">    &quot;editor.autoClosingBrackets&quot;: &quot;beforeWhitespace&quot;,</span><br><span class="line">    &quot;editor.autoClosingDelete&quot;: &quot;always&quot;,</span><br><span class="line">    &quot;editor.autoClosingOvertype&quot;: &quot;always&quot;,</span><br><span class="line">    &quot;editor.autoClosingQuotes&quot;: &quot;beforeWhitespace&quot;,</span><br><span class="line">    // ---自动换行和行高</span><br><span class="line">    &quot;editor.wordWrap&quot;: &quot;on&quot;,</span><br><span class="line">    &quot;editor.lineHeight&quot;: 1.5,</span><br><span class="line">    // ---保存自动删除末尾空格</span><br><span class="line">    &quot;files.trimTrailingWhitespace&quot;: false,</span><br><span class="line">    // ---保存自动格式化代码</span><br><span class="line">    &quot;editor.formatOnSave&quot;: true,</span><br><span class="line">    // ---双击选中被截断的字符</span><br><span class="line">    &quot;editor.wordSeparators&quot;: &quot;`~!@%^&amp;*()=+[&#123;]&#125;\\|;:&#x27;\&quot;,.&lt;&gt;/?（），。；：&quot;,</span><br><span class="line">    // ---折行缩进策略和关闭右侧代码地图</span><br><span class="line">    &quot;editor.minimap.enabled&quot;: false,</span><br><span class="line">    &quot;editor.foldingStrategy&quot;: &quot;indentation&quot;,</span><br><span class="line">    &quot;go.toolsEnvVars&quot;: &#123;</span><br><span class="line">        &quot;GOFLAGS&quot;: &quot;-mod=mod&quot;, // -mod=vendor</span><br><span class="line">        &quot;GO111MODULE&quot;: &quot;on&quot;,</span><br><span class="line">        &quot;GOPATH&quot;: &quot;/home/xxx/.gvm/pkgsets/go1.23.0/global&quot;,</span><br><span class="line">        &quot;GOROOT&quot;: &quot;/home/xxx/.gvm/gos/go1.23.0&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;go.gopath&quot;: &quot;/home/xxx/.gvm/pkgsets/go1.23.0/global&quot;,</span><br><span class="line">    &quot;go.goroot&quot;: &quot;/home/xxx/.gvm/gos/go1.23.0&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1. 指定模块根目录(kubernetes/sample-controller项目引出)</span><br><span class="line">将 &quot;program&quot; 设置为项目的根目录（&quot;$&#123;workspaceFolder&#125;&quot;），确保调试器加载完整的模块。</span><br><span class="line">•当 launch.json 中指定 &quot;program&quot;: &quot;$&#123;workspaceFolder&#125;&quot; 时，调试器会将整个工作目录（即包含 go.mod 文件的项目根目录）作为编译和调试的上下文。</span><br><span class="line">•如果指定为某个文件（如 main.go），调试器会将范围限制在该文件中，而可能忽略与该文件同目录下的其他文件。</span><br><span class="line"></span><br><span class="line">2. 检查 go.mod 和模块配置</span><br><span class="line">确保 go.mod 中的依赖和模块路径正确，避免调试时出错。</span><br><span class="line"></span><br><span class="line">3. 保持文件组织一致性</span><br><span class="line">将同一逻辑单元的 .go 文件保存在同一目录，并声明相同的包名。</span><br><span class="line"></span><br><span class="line">tips:</span><br><span class="line">1、如果本地升级了vscode版本</span><br><span class="line">① 需要清理远程 .vscode-server 文件夹</span><br><span class="line">② 本地清理vscode扩展 ：rm -fr ~/.vscode/extensions</span><br><span class="line"></span><br><span class="line">2、如果重新配置了.vscode/settings.json里go版本：可删除go扩展重新安装</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1409,7 +1401,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">110</span>
+          <span class="site-state-item-count">111</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
