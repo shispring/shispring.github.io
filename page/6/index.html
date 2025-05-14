@@ -184,6 +184,95 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/16/mac-tips/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/16/mac-tips/" class="post-title-link" itemprop="url">mac tips</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-16 14:07:35" itemprop="dateCreated datePublished" datetime="2024-12-16T14:07:35+08:00">2024-12-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-13 16:55:50" itemprop="dateModified" datetime="2025-05-13T16:55:50+08:00">2025-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mac/" itemprop="url" rel="index"><span itemprop="name">mac</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="合屏幕是否休眠电脑"><a href="#合屏幕是否休眠电脑" class="headerlink" title="合屏幕是否休眠电脑"></a>合屏幕是否休眠电脑</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#防止系统休眠</span><br><span class="line">pmset -a disablesleep 1</span><br><span class="line">#使系统休眠</span><br><span class="line">pmset -a disablesleep 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="终端配置"><a href="#终端配置" class="headerlink" title="终端配置"></a>终端配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#Oh My Zsh 搭配主题、插件</span><br><span class="line">#参考：https://www.poloxue.com/</span><br><span class="line">powerlevel10k + zsh-autosuggestions + zsh-syntax-highlighting</span><br><span class="line"></span><br><span class="line">#github安装</span><br><span class="line">git clone --depth=1 https://gitee.com/romkatv/powerlevel10k.git $&#123;ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom&#125;/themes/powerlevel10k</span><br><span class="line">git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $&#123;ZSH_CUSTOM:-~/.oh-my-zsh/custom&#125;/plugins/zsh-syntax-highlighting</span><br><span class="line">git clone https://github.com/zsh-users/zsh-autosuggestions $&#123;ZSH_CUSTOM:-~/.oh-my-zsh/custom&#125;/plugins/zsh-autosuggestions</span><br><span class="line"></span><br><span class="line">#vim .zshrc</span><br><span class="line">plugins=(git zsh-autosuggestions z zsh-syntax-highlighting )</span><br><span class="line"></span><br><span class="line">ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=&quot;fg=#6C737C,bg=cyan,bold,underline&quot;</span><br><span class="line">ZSH_AUTOSUGGEST_STRATEGY=(history completion)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="chrome-插件"><a href="#chrome-插件" class="headerlink" title="chrome : 插件"></a>chrome : 插件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Vimum</span><br><span class="line">用法：https://juejin.cn/post/7208129482095067197</span><br><span class="line"></span><br><span class="line">沉浸式翻译</span><br><span class="line">https://immersivetranslate.com/</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Medium Unlock</span><br><span class="line">备注：查看 https://medium.com/ 上的付费文章</span><br><span class="line">#也可以使用 https://freedium.cfd/ 地址粘贴URL查看</span><br></pre></td></tr></table></figure>
+
+<h2 id="easydict-超级好用的OCR-翻译工具"><a href="#easydict-超级好用的OCR-翻译工具" class="headerlink" title="easydict : 超级好用的OCR 翻译工具"></a>easydict : 超级好用的OCR 翻译工具</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/tisfeng/Easydict</span><br></pre></td></tr></table></figure>
+
+<h2 id="cmatrix-黑客帝国代码雨"><a href="#cmatrix-黑客帝国代码雨" class="headerlink" title="cmatrix : 黑客帝国代码雨"></a>cmatrix : 黑客帝国代码雨</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install cmatrix</span><br></pre></td></tr></table></figure>
+
+<h2 id="摘录"><a href="#摘录" class="headerlink" title="摘录"></a>摘录</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 阿里云分享</span><br><span class="line">https://mp.weixin.qq.com/s/2qgs4JYOJFCmrxHMxtctyA</span><br></pre></td></tr></table></figure>
+
+<h2 id="ping加时间戳"><a href="#ping加时间戳" class="headerlink" title="ping加时间戳"></a>ping加时间戳</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#安装moreutils</span><br><span class="line">brew install moreutils</span><br><span class="line"></span><br><span class="line">ping &quot;$@&quot; | ts &#x27;[%Y-%m-%d %H:%M:%S]&#x27;</span><br></pre></td></tr></table></figure>
+
+<h2 id="截长图工具"><a href="#截长图工具" class="headerlink" title="截长图工具"></a>截长图工具</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ishot</span><br></pre></td></tr></table></figure>
+
+<h2 id="相信任何源"><a href="#相信任何源" class="headerlink" title="相信任何源"></a>相信任何源</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo spctl --master-disable</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1249,95 +1338,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/18/kubebuilder%E4%BD%BF%E7%94%A8demo/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/18/kubebuilder%E4%BD%BF%E7%94%A8demo/" class="post-title-link" itemprop="url">kubebuilder使用demo</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-11-18 18:29:03" itemprop="dateCreated datePublished" datetime="2024-11-18T18:29:03+08:00">2024-11-18</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-12-03 15:23:27" itemprop="dateModified" datetime="2024-12-03T15:23:27+08:00">2024-12-03</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>  从头开始去构建一个 CRD 控制器并不容易，需要对 Kubernetes 的 API 有深入了解，并且 RBAC 集成、镜像构建、持续集成和部署等都需要很大工作量。为了解决这个问题，社区就推出了对应的简单易用的 Operator 框架，比较主流的是 kubebuilder 和 Operator Framework。</p>
-<h2 id="一、创建项目并初始化"><a href="#一、创建项目并初始化" class="headerlink" title="一、创建项目并初始化"></a>一、创建项目并初始化</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建go项目</span></span><br><span class="line"><span class="built_in">mkdir</span> lb</span><br><span class="line"><span class="built_in">cd</span> lb</span><br><span class="line">go mod init test.net</span><br><span class="line"></span><br><span class="line"><span class="comment">#设计好GVK表述，以下生成的的crd名为：loadbalances.network.k8s.test.net</span></span><br><span class="line">kubebuilder init --domain k8s.test.net</span><br><span class="line">kubebuilder create api --group network --version v1 --kind LoadBalance</span><br><span class="line"></span><br><span class="line"><span class="comment">#生成crd, 该命令可以确保项目中的Kubernetes资源定义文件是最新的</span></span><br><span class="line">make manifests</span><br><span class="line"></span><br><span class="line"><span class="comment">#tips</span></span><br><span class="line"><span class="comment">#命名空间配置文件：config/default/kustomization.yaml</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="二、调试开发"><a href="#二、调试开发" class="headerlink" title="二、调试开发"></a>二、调试开发</h2><h3 id="①重点处理文件"><a href="#①重点处理文件" class="headerlink" title="①重点处理文件"></a>①重点处理文件</h3><ul>
-<li>api&#x2F;v1alpha1&#x2F;loadbalance_types.go</li>
-<li>internal&#x2F;controller&#x2F;loadbalance_controller.go</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#变更spec：</span></span><br><span class="line">vim api/v1alpha1/loadbalance_types.go</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">#关注 Reconcile 方法实现业务逻辑</span></span><br><span class="line">vim internal/controller/loadbalance_controller.go</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">#重新生成crd等文件</span></span><br><span class="line">make manifests generate</span><br><span class="line"><span class="comment">#查看生成的yaml：</span></span><br><span class="line"><span class="built_in">ls</span> config/crd/bases/network.k8s.test.net_loadbalances.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装crd到k8s集群,这里用于kustomize</span></span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看crd是否安装成功</span></span><br><span class="line">kubectl get crd</span><br><span class="line"></span><br><span class="line"><span class="comment">#启动controller</span></span><br><span class="line">make run</span><br></pre></td></tr></table></figure>
-
-<h3 id="②另一终端验证"><a href="#②另一终端验证" class="headerlink" title="②另一终端验证"></a>②另一终端验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 部署cr</span></span><br><span class="line">kubectl apply -f config/samples/network_v1_loadbalance.yaml</span><br><span class="line"></span><br><span class="line">kubectl get loadbalance</span><br></pre></td></tr></table></figure>
-
-<h3 id="③删除资源"><a href="#③删除资源" class="headerlink" title="③删除资源"></a>③删除资源</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete loadbalance loadbalance-sample</span><br><span class="line"></span><br><span class="line"><span class="comment"># ctrl + c 停止程序,卸载crd</span></span><br><span class="line">make uninstall</span><br></pre></td></tr></table></figure>
-
-<h2 id="三、构建镜像–-部署–-卸载部署"><a href="#三、构建镜像–-部署–-卸载部署" class="headerlink" title="三、构建镜像–&gt;部署–&gt;卸载部署"></a>三、构建镜像–&gt;部署–&gt;卸载部署</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1、注意修改Dockfile镜像地址，可能无法拉取</span></span><br><span class="line">sed -i <span class="string">&#x27;s#golang:1.22#swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/golang:1.22.5#&#x27;</span> Dockerfile</span><br><span class="line">sed -i <span class="string">&#x27;s#gcr.io/distroless/static:nonroot#swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/distroless/static:nonroot#&#x27;</span> Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、开始构建镜像（root用户）</span></span><br><span class="line">make docker-build IMG=loadbalance/lb:0.0.1</span><br><span class="line"><span class="comment">#push 到远程仓库，先docker login</span></span><br><span class="line"><span class="comment">#make docker-build docker-push IMG=loadbalance/lb:0.0.1</span></span><br><span class="line">或者</span><br><span class="line">docker build -t loadbalance/lb:0.0.1 .</span><br><span class="line"><span class="comment">#docker push loadbalance/lb:0.0.1 xxxx</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#指定构建平台</span></span><br><span class="line"><span class="comment">#make docker-buildx IMG=loadbalance/lb:0.0.1 PLATFORM=linux/amd64</span></span><br><span class="line"><span class="comment">#支持多种平台构建</span></span><br><span class="line"><span class="comment">#docker buildx build --platform linux/amd64,linux/arm64 -t loadbalance/lb:0.0.1 .</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看构建的镜像</span></span><br><span class="line"><span class="built_in">sudo</span> docker images</span><br><span class="line">REPOSITORY                  TAG               IMAGE ID       CREATED              SIZE</span><br><span class="line">loadbalance/lb              0.0.1             3d702a7b6e16   About a minute ago   72.1MB</span><br><span class="line"></span><br><span class="line"><span class="comment">#部署到当前集群</span></span><br><span class="line">make deploy IMG=loadbalance/lb:0.0.1</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">kubectl get svc,deploy,pod -n lb-system</span><br><span class="line"></span><br><span class="line"><span class="comment"># 卸载部署</span></span><br><span class="line">make undeploy</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#cronjob test</span><br><span class="line">https://github.com/kubernetes-sigs/kubebuilder/tree/master/docs/book/src/cronjob-tutorial/testdata/project</span><br><span class="line"></span><br><span class="line">https://github.com/kubernetes-sigs/kubebuilder/blob/master/docs/kubebuilder_annotation.md</span><br><span class="line">+[header]:[module]:[submodule]:[key-value elements]</span><br><span class="line"></span><br><span class="line">#云原生社区</span><br><span class="line">https://cloudnative.to/kubebuilder/</span><br><span class="line"></span><br><span class="line">#标记注释</span><br><span class="line">https://cloudpods.csdn.net/657812bcb8e5f01e1e449ece.html</span><br><span class="line"></span><br><span class="line">https://xie.infoq.cn/article/7a315f5168fda5e2e534ca406</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1409,7 +1409,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">109</span>
+          <span class="site-state-item-count">110</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1422,7 +1422,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

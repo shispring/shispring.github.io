@@ -6914,4 +6914,13 @@ validate</p>
         <tag>openssl</tag>
       </tags>
   </entry>
+  <entry>
+    <title>cursor</title>
+    <url>/2025/05/14/cursor/</url>
+    <content><![CDATA[<h2 id="续杯cursor"><a href="#续杯cursor" class="headerlink" title="续杯cursor"></a>续杯cursor</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">youtube教程地址：https://www.youtube.com/watch?v=qDLePOI9LI0</span><br><span class="line">1、退出Cursor IDE里账户</span><br><span class="line">2、删除Cursor官网： https://www.cursor.com/settings 里google账户</span><br><span class="line">Account --&gt; Advanced --&gt; Delete Account</span><br><span class="line">3、登录github运行go-cursor-help里脚本</span><br><span class="line">  https://github.com/yuaotian/go-cursor-help</span><br><span class="line">  # Method two</span><br><span class="line">  命令： curl -fsSL https://aizaozao.com/accelerate.php/https://raw.githubusercontent.com/yuaotian/go-cursor-help/refs/heads/master/scripts/run/cursor_mac_id_modifier.sh -o ./cursor_mac_id_modifier.sh &amp;&amp; sudo bash ./cursor_mac_id_modifier.sh &amp;&amp; rm ./cursor_mac_id_modifier.sh</span><br><span class="line">4、运行cursor-free-vip</span><br><span class="line">  github地址： https://github.com/yeongpin/cursor-free-vip</span><br><span class="line">  执行命令：curl -fsSL https://raw.githubusercontent.com/yeongpin/cursor-free-vip/main/scripts/install.sh -o install.sh &amp;&amp; chmod +x install.sh &amp;&amp; ./install.sh</span><br><span class="line">  #重置机器ID</span><br><span class="line">  请输入您的选择 (0-17): 1</span><br><span class="line">5、登录Cursor官网--&gt;sign up （google的无限邮箱模式）</span><br><span class="line">6、登录google账户输入验证码</span><br><span class="line">7、在Cursor IDE里登录</span><br><span class="line">  Cursor --&gt; Preferences --&gt; Cursor Settings --&gt; Account</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>IDE</tag>
+      </tags>
+  </entry>
 </search>
