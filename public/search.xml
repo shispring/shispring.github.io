@@ -6938,4 +6938,50 @@ validate</p>
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>高质量shell脚本tips</title>
+    <url>/2025/05/21/shell%E8%84%9A%E6%9C%AC%E5%8A%A0%E5%9B%BA%E5%8A%9E%E6%B3%95/</url>
+    <content><![CDATA[<h3 id="shell-目标"><a href="#shell-目标" class="headerlink" title="shell 目标"></a>shell 目标</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">严谨、健壮、自检、自愈、可读</span><br></pre></td></tr></table></figure>
+<h3 id="首行加固"><a href="#首行加固" class="headerlink" title="首行加固"></a>首行加固</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">set -euo pipefail</span><br></pre></td></tr></table></figure>
+
+<h3 id="安全读取变量"><a href="#安全读取变量" class="headerlink" title="安全读取变量"></a>安全读取变量</h3><table>
+<thead>
+<tr>
+<th>${VAR:-}</th>
+<th>如果未定义，返回空字符串</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>${VAR:&#x3D;默认}</td>
+<td>如果未定义，赋值为默认值</td>
+</tr>
+<tr>
+<td>${VAR:+替代}</td>
+<td>如果已定义，返回替代值</td>
+</tr>
+<tr>
+<td>${VAR:?错误信息}</td>
+<td>如果未定义，抛出指定错误</td>
+</tr>
+</tbody></table>
+<h3 id="让路径永远基于脚本本身，无论哪里执行都正确"><a href="#让路径永远基于脚本本身，无论哪里执行都正确" class="headerlink" title="让路径永远基于脚本本身，无论哪里执行都正确"></a>让路径永远基于脚本本身，无论哪里执行都正确</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;$&#123;BASH_SOURCE[0]&#125;&quot;)&quot; &amp;&amp; pwd)&quot;</span><br><span class="line">cd &quot;$SCRIPT_DIR&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="检查命令执行结果"><a href="#检查命令执行结果" class="headerlink" title="检查命令执行结果"></a>检查命令执行结果</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#优雅的写法</span><br><span class="line">wget xxx || &#123; echo &quot;下载失败&quot;; exit 1; &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="保持脚本输出清晰简洁，尤其是日志信息"><a href="#保持脚本输出清晰简洁，尤其是日志信息" class="headerlink" title="保持脚本输出清晰简洁，尤其是日志信息"></a>保持脚本输出清晰简洁，尤其是日志信息</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、打印正在做什么</span><br><span class="line">2、成功/失败都提示</span><br><span class="line">3、错误信息清晰</span><br></pre></td></tr></table></figure>
+
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><blockquote>
+<p><a href="https://mp.weixin.qq.com/s/lBAsqOIB72FtawjckiVrDg">https://mp.weixin.qq.com/s/lBAsqOIB72FtawjckiVrDg</a> </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line">SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;$&#123;BASH_SOURCE[0]&#125;&quot;)&quot; &amp;&amp; pwd)&quot;</span><br><span class="line">cd &quot;$SCRIPT_DIR&quot;</span><br><span class="line"></span><br><span class="line"># 加载.env</span><br><span class="line">if [ -f &quot;.env&quot; ]; then</span><br><span class="line">    export $(grep -v &#x27;^#&#x27; .env | xargs)</span><br><span class="line">else</span><br><span class="line">    echo &quot;❌ .env文件不存在&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># 示例逻辑</span><br><span class="line">echo &quot;🚀 开始任务...&quot;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="颜色配置"><a href="#颜色配置" class="headerlink" title="颜色配置"></a>颜色配置</h3><ul>
+<li>mac下兼容 Bash 3 的方式：用 case + if else 实现颜色映射<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"># 颜色定义</span><br><span class="line">readonly RED=&#x27;\033[0;31m&#x27;</span><br><span class="line">readonly GREEN=&#x27;\033[0;32m&#x27;</span><br><span class="line">readonly YELLOW=&#x27;\033[0;33m&#x27;</span><br><span class="line">readonly BLUE=&#x27;\033[0;34m&#x27;</span><br><span class="line">readonly NC=&#x27;\033[0m&#x27; # No Color</span><br><span class="line"></span><br><span class="line"># 日志函数</span><br><span class="line">log() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    shift</span><br><span class="line">    local timestamp=$(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)</span><br><span class="line">    local message=&quot;[$&#123;timestamp&#125;] [$&#123;level&#125;] $*&quot;</span><br><span class="line"></span><br><span class="line">    case &quot;$level&quot; in</span><br><span class="line">        &quot;ERROR&quot;) color=$RED ;;</span><br><span class="line">        &quot;WARNING&quot;) color=$YELLOW ;;</span><br><span class="line">        &quot;INFO&quot;) color=$BLUE ;;</span><br><span class="line">        &quot;SUCCESS&quot;) color=$GREEN ;;</span><br><span class="line">        *) color=$NC ;;</span><br><span class="line">    esac</span><br><span class="line"></span><br><span class="line">    echo -e &quot;$&#123;color&#125;$&#123;message&#125;$&#123;NC&#125;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">log &quot;SUCCESS&quot; &quot;✅ All done.&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li>linux下<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line"># 颜色定义</span><br><span class="line">readonly RED=&#x27;\033[0;31m&#x27;</span><br><span class="line">readonly GREEN=&#x27;\033[0;32m&#x27;</span><br><span class="line">readonly YELLOW=&#x27;\033[0;33m&#x27;</span><br><span class="line">readonly BLUE=&#x27;\033[0;34m&#x27;</span><br><span class="line">readonly NC=&#x27;\033[0m&#x27;</span><br><span class="line"></span><br><span class="line"># 日志级别颜色映射</span><br><span class="line">declare -A LOG_COLORS=(</span><br><span class="line">    [&quot;ERROR&quot;]=&quot;$&#123;RED&#125;&quot;</span><br><span class="line">    [&quot;WARNING&quot;]=&quot;$&#123;YELLOW&#125;&quot;</span><br><span class="line">    [&quot;INFO&quot;]=&quot;$&#123;BLUE&#125;&quot;</span><br><span class="line">    [&quot;SUCCESS&quot;]=&quot;$&#123;GREEN&#125;&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 日志函数</span><br><span class="line">log() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    shift</span><br><span class="line">    local color=$&#123;LOG_COLORS[$level]:-$NC&#125;</span><br><span class="line">    local timestamp=$(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)</span><br><span class="line">    local message=&quot;[$&#123;timestamp&#125;] [$&#123;level&#125;] $*&quot;</span><br><span class="line">    echo -e &quot;$&#123;color&#125;$&#123;message&#125;$&#123;NC&#125;&quot; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">log INFO &quot;这是信息日志&quot;</span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>shell</tag>
+      </tags>
+  </entry>
 </search>
