@@ -3502,6 +3502,13 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <li><strong>阻塞进程多</strong>：通常是 I&#x2F;O 或资源争用问题。</li>
 </ul>
 <hr>
+<h3 id="iostat安装及命令解析"><a href="#iostat安装及命令解析" class="headerlink" title="iostat安装及命令解析"></a>iostat安装及命令解析</h3><blockquote>
+<p><a href="https://jueee.github.io/2020/12/2020-12-16-Linux%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8iostat%E5%91%BD%E4%BB%A4">https://jueee.github.io/2020/12/2020-12-16-Linux%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8iostat%E5%91%BD%E4%BB%A4</a></p>
+</blockquote>
+<ul>
+<li>安装：yum -y install sysstat<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">选项:</span><br><span class="line">-c：仅显示 CPU 使用情况；</span><br><span class="line">-d：仅显示设备利用率；</span><br><span class="line">-k：显示状态以千字节每秒为单位，而不使用块每秒；</span><br><span class="line">-m：显示状态以兆字节每秒为单位；</span><br><span class="line">-p：仅显示块设备和所有被使用的其他分区的状态；</span><br><span class="line">-t：显示每个报告产生时的时间；</span><br><span class="line">-V：显示版号并退出；</span><br><span class="line">-x：显示扩展状态。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">参数：</span><br><span class="line">间隔时间：每次报告的间隔时间（秒）；</span><br><span class="line">次数：显示报告的次数。</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
 <h3 id="总结与优化建议"><a href="#总结与优化建议" class="headerlink" title="总结与优化建议"></a><strong>总结与优化建议</strong></h3><blockquote>
 <p><a href="https://blog.51cto.com/linhuchong/5241886">https://blog.51cto.com/linhuchong/5241886</a></p>
 </blockquote>
