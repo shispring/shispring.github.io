@@ -438,7 +438,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-05-12 12:13:34" itemprop="dateModified" datetime="2025-05-12T12:13:34+08:00">2025-05-12</time>
+                <time title="修改时间：2025-05-23 16:51:45" itemprop="dateModified" datetime="2025-05-23T16:51:45+08:00">2025-05-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -641,12 +641,14 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -in ./ca.crt -text -noout</span><br></pre></td></tr></table></figure>
 
 <p><strong>5. 总结与建议</strong></p>
-<p>•	<strong>RSA</strong>：经典且兼容性好，适合 Web 服务器和通用加密应用。</p>
-<p>•	<strong>ECC</strong>：更高效、密钥短，适用于 IoT 和现代 TLS。</p>
-<p>•	<strong>ED25519&#x2F;X25519</strong>：轻量级和高性能，推荐用于 SSH 和 TLS 1.3。</p>
-<p>•	<strong>SM2&#x2F;GOST</strong>：满足特定国家或行业的加密标准。</p>
-<p>•	<strong>PKCS#8 与 PKCS#12</strong>：PKCS#8 适合服务器端私钥存储，PKCS#12 常用于客户端证书传输。</p>
+<p>•<strong>RSA</strong>：经典且兼容性好，适合 Web 服务器和通用加密应用。</p>
+<p>•<strong>ECC</strong>：更高效、密钥短，适用于 IoT 和现代 TLS。</p>
+<p>•<strong>ED25519&#x2F;X25519</strong>：轻量级和高性能，推荐用于 SSH 和 TLS 1.3。</p>
+<p>•<strong>SM2&#x2F;GOST</strong>：满足特定国家或行业的加密标准。</p>
+<p>•<strong>PKCS#8 与 PKCS#12</strong>：PKCS#8 适合服务器端私钥存储，PKCS#12 常用于客户端证书传输。</p>
 <p>选择合适的密钥类型与格式可以在 <strong>安全性、性能、兼容性</strong> 之间取得良好的平衡。</p>
+<hr>
+<h2 id="openssh-套件"><a href="#openssh-套件" class="headerlink" title="openssh 套件"></a>openssh 套件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">https://www.rockylinux.cn/notes/gnu-linux-basic-services-openssh-software-suite.html</span><br><span class="line"></span><br><span class="line">## /etc/ssh/sshd_config 配置</span><br><span class="line">grep -v -E &quot;^#|^$&quot; /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
 
       
     </div>
