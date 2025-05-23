@@ -207,10 +207,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-02-14 12:10:05 / 修改时间：12:10:38" itemprop="dateCreated datePublished" datetime="2025-02-14T12:10:05+08:00">2025-02-14</time>
+              <time title="创建时间：2025-02-14 12:10:05" itemprop="dateCreated datePublished" datetime="2025-02-14T12:10:05+08:00">2025-02-14</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-23 16:43:32" itemprop="dateModified" datetime="2025-05-23T16:43:32+08:00">2025-05-23</time>
+              </span>
 
           
 
@@ -341,6 +347,11 @@
 
 <hr>
 <p><strong>🎯 这样，你就可以直接使用 <code>curl --unix-socket</code> 与 Docker 交互，而无需 <code>docker</code> CLI！</strong> 🚀</p>
+<hr>
+<h2 id="curl-URL-耗时分析"><a href="#curl-URL-耗时分析" class="headerlink" title="curl URL  耗时分析"></a>curl URL  耗时分析</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.rockylinux.cn/notes/the-curl-command-detects-the-time-consumption-of-each-stage.html">https://www.rockylinux.cn/notes/the-curl-command-detects-the-time-consumption-of-each-stage.html</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">curl -o /dev/null -s -w time_namelookup:&quot;\t&quot;%&#123;time_namelookup&#125;&quot;\n&quot;time_connect:&quot;\t\t&quot;%&#123;time_connect&#125;&quot;\n&quot;time_appconnect:&quot;\t&quot;%&#123;time_appconnect&#125;&quot;\n&quot;time_pretransfer:&quot;\t&quot;%&#123;time_pretransfer&#125;&quot;\n&quot;time_starttransfer:&quot;\t&quot;%&#123;time_starttransfer&#125;&quot;\n&quot;time_total:&quot;\t\t&quot;%&#123;time_total&#125;&quot;\n&quot;time_redirect:&quot;\t\t&quot;%&#123;time_redirect&#125;&quot;\n&quot; --location &#x27;https://api.rockylinux.cn&#x27; --header &#x27;Content-Type: application/json&#x27; --header &#x27;Cookie: ID=xxx;&#x27; --data &#x27;&#123;&quot;key&quot;:[&quot;xxx&quot;,&quot;xxx&quot;]&#125;&#x27;</span><br><span class="line"></span><br><span class="line">curl 命令的参数非常多，可以使用 curl --help all 命令查看所有参数，这里使用 curl 命令来测试接口性能，下面是每个参数的具体含义： </span><br><span class="line">-o /dev/null：告诉 curl 将下载的数据丢弃，不输出到任何文件中。</span><br><span class="line">&quot;/dev/null&quot; 是一个特殊的设备，它会丢弃所有写入它的数据。 </span><br><span class="line">-s：告诉 curl 在操作过程中不显示进度信息或错误信息。这通常用于在脚本中静默运行 curl。 </span><br><span class="line">-w：允许您设置显示的格式，后面跟的是具体的格式字符串。在这个命令中，它被用来显示各种时间信息。 </span><br><span class="line">time_namelookup：DNS 解析的时间，即从请求开始到域名解析完成的时间。 </span><br><span class="line">time_connect：建立到服务器的 TCP 连接所需的时间。 </span><br><span class="line">time_appconnect：建立到应用级别协议的连接所需的时间。例如，在使用 HTTPS 时，这将包括 SSL 握手的时间。 </span><br><span class="line">time_pretransfer：从请求开始到文件传输即将开始所需的时间。 </span><br><span class="line">time_starttransfer：从请求开始到第一个字节被 curl 接收的时间。 </span><br><span class="line">time_total：整个请求所需的总时间。 </span><br><span class="line">time_redirect：所有重定向步骤所需的时间，包括 DNS 解析、连接、预传输等。 https://api.rockylinux.cn：想要访问的网站的 URL。 这个命令的总体目的是测试访问指定 URL 各个阶段所需时间。</span><br></pre></td></tr></table></figure>
 
       
     </div>
