@@ -7134,7 +7134,7 @@ validate</p>
 <h2 id="官方文档与社区资源"><a href="#官方文档与社区资源" class="headerlink" title="官方文档与社区资源"></a>官方文档与社区资源</h2><ul>
 <li>Go 官方测试文档：<br><a href="https://go.dev/doc/testing">https://go.dev/doc/testing</a></li>
 <li>Go 官方标准库 testing 包：<br><a href="https://pkg.go.dev/testing">https://pkg.go.dev/testing</a></li>
-<li>Go Blog: Table-driven Tests<br><a href="https://go.dev/blog/table-driven-tests">https://go.dev/blog/table-driven-tests</a></li>
+<li>Go Blog: Table-driven Tests<br><a href="https://go.dev/wiki/TableDrivenTests">https://go.dev/wiki/TableDrivenTests</a></li>
 <li>Go Blog: Subtests and Sub-benchmarks<br><a href="https://go.dev/blog/subtests">https://go.dev/blog/subtests</a></li>
 <li>Testify 断言库<br><a href="https://github.com/stretchr/testify">https://github.com/stretchr/testify</a></li>
 </ul>
