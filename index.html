@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-06-09 10:11:23 / 修改时间：10:18:23" itemprop="dateCreated datePublished" datetime="2025-06-09T10:11:23+08:00">2025-06-09</time>
+              <time title="创建时间：2025-06-09 10:11:23 / 修改时间：10:23:47" itemprop="dateCreated datePublished" datetime="2025-06-09T10:11:23+08:00">2025-06-09</time>
             </span>
 
           
@@ -223,55 +223,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="单元测试的标准与最佳实践"><a href="#单元测试的标准与最佳实践" class="headerlink" title="单元测试的标准与最佳实践"></a>单元测试的标准与最佳实践</h2><p>在 Go 语言中，单元测试通常需要遵循以下标准和最佳实践：</p>
-<ol>
-<li><p><strong>函数命名规范</strong><br>测试函数必须以 Test 开头，后跟要测试的函数名或功能点，如 TestLoadBalanceReconcile_getIdc。</p>
-</li>
-<li><p><strong>测试用例覆盖</strong>  </p>
-<ul>
-<li>覆盖正常情况、边界情况、异常情况。</li>
-<li>尽量覆盖所有分支和逻辑路径。</li>
-</ul>
-</li>
-<li><p><strong>结构清晰</strong>  </p>
-<ul>
-<li>使用 table-driven 测试（表驱动测试），便于添加和维护用例。</li>
-<li>测试用例结构体字段要表达清楚输入、期望输出。</li>
-</ul>
-</li>
-<li><p><strong>断言明确</strong>  </p>
-<ul>
-<li>使用 t.Errorf 或 t.Fatalf 明确指出期望与实际的差异。</li>
-<li>错误信息要有可读性，便于定位问题。</li>
-</ul>
-</li>
-<li><p><strong>独立性</strong>  </p>
-<ul>
-<li>每个测试用例应相互独立，不能依赖其他测试的执行结果。</li>
-<li>尽量避免全局变量或外部依赖。</li>
-</ul>
-</li>
-<li><p><strong>可读性与可维护性</strong>  </p>
-<ul>
-<li>变量命名清晰，结构体字段含义明确。</li>
-<li>适当注释复杂逻辑。</li>
-</ul>
-</li>
-<li><p><strong>自动化</strong>  </p>
-<ul>
-<li>测试应能自动运行，且不需要人工干预。</li>
-</ul>
-</li>
-</ol>
-<h2 id="测试模式"><a href="#测试模式" class="headerlink" title="测试模式"></a>测试模式</h2><p><strong>表驱动测试</strong>（table-driven test）是 Go 语言社区非常推崇的一种测试模式。它的核心思想是：<br><strong>把一组输入和期望输出写成一个“表”（通常是切片或数组），然后用循环依次执行每组用例。</strong></p>
-<p>这样做的好处是：  </p>
-<ul>
-<li>结构清晰，易于维护和扩展  </li>
-<li>新增用例只需加一行数据  </li>
-<li>代码更简洁，避免重复</li>
-</ul>
-<hr>
-<h3 id="1-表驱动测试的基本结构"><a href="#1-表驱动测试的基本结构" class="headerlink" title="1.表驱动测试的基本结构"></a>1.表驱动测试的基本结构</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestAdd</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 定义测试用例表</span></span><br><span class="line">    tests := []<span class="keyword">struct</span> &#123;</span><br><span class="line">        name <span class="type">string</span>    <span class="comment">// 用例名称</span></span><br><span class="line">        a, b <span class="type">int</span>       <span class="comment">// 输入参数</span></span><br><span class="line">        want <span class="type">int</span>       <span class="comment">// 期望输出</span></span><br><span class="line">    &#125;&#123;</span><br><span class="line">        &#123;<span class="string">&quot;正数相加&quot;</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;负数相加&quot;</span>, <span class="number">-1</span>, <span class="number">-2</span>, <span class="number">-3</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;正负相加&quot;</span>, <span class="number">1</span>, <span class="number">-2</span>, <span class="number">-1</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;零相加&quot;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历表，逐个执行</span></span><br><span class="line">    <span class="keyword">for</span> _, tt := <span class="keyword">range</span> tests &#123;</span><br><span class="line">        t.Run(tt.name, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">            got := Add(tt.a, tt.b)</span><br><span class="line">            <span class="keyword">if</span> got != tt.want &#123;</span><br><span class="line">                t.Errorf(<span class="string">&quot;Add(%d, %d) = %d, want %d&quot;</span>, tt.a, tt.b, got, tt.want)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 被测试的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Add</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <h2 id="单元测试的标准与最佳实践"><a href="#单元测试的标准与最佳实践" class="headerlink" title="单元测试的标准与最佳实践"></a>单元测试的标准与最佳实践</h2><h2 id="在-Go-语言中，单元测试通常需要遵循以下标准和最佳实践：1-函数命名规范-测试函数必须以-Test-开头，后跟要测试的函数名或功能点2-测试用例覆盖-覆盖正常情况、边界情况、异常情况。-尽量覆盖所有分支和逻辑路径。3-结构清晰-使用-table-driven-测试（表驱动测试），便于添加和维护用例。-测试用例结构体字段要表达清楚输入、期望输出。4-断言明确-使用-t-Errorf-或-t-Fatalf-明确指出期望与实际的差异。-错误信息要有可读性，便于定位问题。5-独立性-每个测试用例应相互独立，不能依赖其他测试的执行结果。-尽量避免全局变量或外部依赖。6-可读性与可维护性-变量命名清晰，结构体字段含义明确。-适当注释复杂逻辑。7-自动化-测试应能自动运行，且不需要人工干预。-测试模式表驱动测试（table-driven-test）是-Go-语言社区非常推崇的一种测试模式。它的核心思想是：把一组输入和期望输出写成一个“表”（通常是切片或数组），然后用循环依次执行每组用例。这样做的好处是：-结构清晰，易于维护和扩展-新增用例只需加一行数据-代码更简洁，避免重复"><a href="#在-Go-语言中，单元测试通常需要遵循以下标准和最佳实践：1-函数命名规范-测试函数必须以-Test-开头，后跟要测试的函数名或功能点2-测试用例覆盖-覆盖正常情况、边界情况、异常情况。-尽量覆盖所有分支和逻辑路径。3-结构清晰-使用-table-driven-测试（表驱动测试），便于添加和维护用例。-测试用例结构体字段要表达清楚输入、期望输出。4-断言明确-使用-t-Errorf-或-t-Fatalf-明确指出期望与实际的差异。-错误信息要有可读性，便于定位问题。5-独立性-每个测试用例应相互独立，不能依赖其他测试的执行结果。-尽量避免全局变量或外部依赖。6-可读性与可维护性-变量命名清晰，结构体字段含义明确。-适当注释复杂逻辑。7-自动化-测试应能自动运行，且不需要人工干预。-测试模式表驱动测试（table-driven-test）是-Go-语言社区非常推崇的一种测试模式。它的核心思想是：把一组输入和期望输出写成一个“表”（通常是切片或数组），然后用循环依次执行每组用例。这样做的好处是：-结构清晰，易于维护和扩展-新增用例只需加一行数据-代码更简洁，避免重复" class="headerlink" title="在 Go 语言中，单元测试通常需要遵循以下标准和最佳实践：1. 函数命名规范   测试函数必须以 Test 开头，后跟要测试的函数名或功能点2. 测试用例覆盖   - 覆盖正常情况、边界情况、异常情况。   - 尽量覆盖所有分支和逻辑路径。3. 结构清晰   - 使用 table-driven 测试（表驱动测试），便于添加和维护用例。   - 测试用例结构体字段要表达清楚输入、期望输出。4. 断言明确   - 使用 t.Errorf 或 t.Fatalf 明确指出期望与实际的差异。   - 错误信息要有可读性，便于定位问题。5. 独立性   - 每个测试用例应相互独立，不能依赖其他测试的执行结果。   - 尽量避免全局变量或外部依赖。6. 可读性与可维护性   - 变量命名清晰，结构体字段含义明确。   - 适当注释复杂逻辑。7. 自动化   - 测试应能自动运行，且不需要人工干预。## 测试模式表驱动测试（table-driven test）是 Go 语言社区非常推崇的一种测试模式。它的核心思想是：把一组输入和期望输出写成一个“表”（通常是切片或数组），然后用循环依次执行每组用例。这样做的好处是：- 结构清晰，易于维护和扩展- 新增用例只需加一行数据- 代码更简洁，避免重复"></a>在 Go 语言中，单元测试通常需要遵循以下标准和最佳实践：<br>1. <strong>函数命名规范</strong><br>   测试函数必须以 Test 开头，后跟要测试的函数名或功能点<br>2. <strong>测试用例覆盖</strong><br>   - 覆盖正常情况、边界情况、异常情况。<br>   - 尽量覆盖所有分支和逻辑路径。<br>3. <strong>结构清晰</strong><br>   - 使用 table-driven 测试（表驱动测试），便于添加和维护用例。<br>   - 测试用例结构体字段要表达清楚输入、期望输出。<br>4. <strong>断言明确</strong><br>   - 使用 t.Errorf 或 t.Fatalf 明确指出期望与实际的差异。<br>   - 错误信息要有可读性，便于定位问题。<br>5. <strong>独立性</strong><br>   - 每个测试用例应相互独立，不能依赖其他测试的执行结果。<br>   - 尽量避免全局变量或外部依赖。<br>6. <strong>可读性与可维护性</strong><br>   - 变量命名清晰，结构体字段含义明确。<br>   - 适当注释复杂逻辑。<br>7. <strong>自动化</strong><br>   - 测试应能自动运行，且不需要人工干预。<br>## 测试模式<br><strong>表驱动测试</strong>（table-driven test）是 Go 语言社区非常推崇的一种测试模式。它的核心思想是：<br><strong>把一组输入和期望输出写成一个“表”（通常是切片或数组），然后用循环依次执行每组用例。</strong><br>这样做的好处是：<br>- 结构清晰，易于维护和扩展<br>- 新增用例只需加一行数据<br>- 代码更简洁，避免重复</h2><h3 id="1-表驱动测试的基本结构"><a href="#1-表驱动测试的基本结构" class="headerlink" title="1.表驱动测试的基本结构"></a>1.表驱动测试的基本结构</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestAdd</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 定义测试用例表</span></span><br><span class="line">    tests := []<span class="keyword">struct</span> &#123;</span><br><span class="line">        name <span class="type">string</span>    <span class="comment">// 用例名称</span></span><br><span class="line">        a, b <span class="type">int</span>       <span class="comment">// 输入参数</span></span><br><span class="line">        want <span class="type">int</span>       <span class="comment">// 期望输出</span></span><br><span class="line">    &#125;&#123;</span><br><span class="line">        &#123;<span class="string">&quot;正数相加&quot;</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;负数相加&quot;</span>, <span class="number">-1</span>, <span class="number">-2</span>, <span class="number">-3</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;正负相加&quot;</span>, <span class="number">1</span>, <span class="number">-2</span>, <span class="number">-1</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;零相加&quot;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历表，逐个执行</span></span><br><span class="line">    <span class="keyword">for</span> _, tt := <span class="keyword">range</span> tests &#123;</span><br><span class="line">        t.Run(tt.name, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">            got := Add(tt.a, tt.b)</span><br><span class="line">            <span class="keyword">if</span> got != tt.want &#123;</span><br><span class="line">                t.Errorf(<span class="string">&quot;Add(%d, %d) = %d, want %d&quot;</span>, tt.a, tt.b, got, tt.want)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 被测试的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Add</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h4 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h4><ul>
 <li>输入输出明确、参数组合多的函数</li>
@@ -279,40 +231,29 @@
 </ul>
 <hr>
 <h3 id="2-子测试（Subtests）"><a href="#2-子测试（Subtests）" class="headerlink" title="2.子测试（Subtests）"></a>2.子测试（Subtests）</h3><ul>
-<li><p><strong>简介</strong>：使用 <code>t.Run</code> 创建子测试，便于分组、并发和独立执行。</p>
-</li>
-<li><p><strong>优点</strong>：可以单独运行某个子测试，输出更清晰。</p>
-</li>
-<li><p><strong>示例</strong>：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestSomething</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Run(<span class="string">&quot;case1&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 测试逻辑</span></span><br><span class="line">    &#125;)</span><br><span class="line">    t.Run(<span class="string">&quot;case2&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 测试逻辑</span></span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>简介</strong>：使用 <code>t.Run</code> 创建子测试，便于分组、并发和独立执行。</li>
+<li><strong>优点</strong>：可以单独运行某个子测试，输出更清晰。</li>
+<li><strong>示例</strong>：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestSomething</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Run(<span class="string">&quot;case1&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 测试逻辑</span></span><br><span class="line">    &#125;)</span><br><span class="line">    t.Run(<span class="string">&quot;case2&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 测试逻辑</span></span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <hr>
 <h3 id="3-基准测试（Benchmark）"><a href="#3-基准测试（Benchmark）" class="headerlink" title="3.基准测试（Benchmark）"></a>3.基准测试（Benchmark）</h3><ul>
-<li><p><strong>简介</strong>：以 <code>Benchmark</code> 开头的函数，用于性能测试。</p>
-</li>
-<li><p><strong>规范</strong>：函数签名为 <code>func(b *testing.B)</code>，通过循环多次执行被测代码。</p>
-</li>
-<li><p><strong>示例</strong>：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkAdd</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">        Add(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>简介</strong>：以 <code>Benchmark</code> 开头的函数，用于性能测试。</li>
+<li><strong>规范</strong>：函数签名为 <code>func(b *testing.B)</code>，通过循环多次执行被测代码。</li>
+<li><strong>示例</strong>：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkAdd</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">        Add(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <hr>
 <h3 id="4-并发测试（Parallel-Test）"><a href="#4-并发测试（Parallel-Test）" class="headerlink" title="4.并发测试（Parallel Test）"></a>4.并发测试（Parallel Test）</h3><ul>
-<li><p><strong>简介</strong>：使用 <code>t.Parallel()</code> 让测试用例并发执行，检测并发安全问题。</p>
-</li>
-<li><p><strong>示例</strong>：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestParallel</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Parallel()</span><br><span class="line">    <span class="comment">// 并发相关测试逻辑</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>简介</strong>：使用 <code>t.Parallel()</code> 让测试用例并发执行，检测并发安全问题。</li>
+<li><h2 id="示例："><a href="#示例：" class="headerlink" title="示例："></a><strong>示例</strong>：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestParallel</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Parallel()</span><br><span class="line">    <span class="comment">// 并发相关测试逻辑</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2></li>
 </ul>
-<p>–</p>
 <h3 id="5-测试覆盖率（Coverage）"><a href="#5-测试覆盖率（Coverage）" class="headerlink" title="5. 测试覆盖率（Coverage）"></a>5. 测试覆盖率（Coverage）</h3><ul>
 <li><strong>简介</strong>：通过 <code>go test -cover</code> 查看测试覆盖率，确保代码质量。</li>
 <li><strong>建议</strong>：覆盖率不是越高越好，但应覆盖核心逻辑和边界情况。</li>
 </ul>
 <hr>
 <h3 id="6-断言库（Assertion-Library）"><a href="#6-断言库（Assertion-Library）" class="headerlink" title="6. 断言库（Assertion Library）"></a>6. 断言库（Assertion Library）</h3><ul>
-<li><p><strong>简介</strong>：使用断言库简化判断和输出，如 <code>github.com/stretchr/testify/assert</code>。</p>
-</li>
-<li><p><strong>示例</strong>：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;github.com/stretchr/testify/assert&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestAdd</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    assert.Equal(t, <span class="number">3</span>, Add(<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>简介</strong>：使用断言库简化判断和输出，如 <code>github.com/stretchr/testify/assert</code>。</li>
+<li><strong>示例</strong>：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;github.com/stretchr/testify/assert&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestAdd</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    assert.Equal(t, <span class="number">3</span>, Add(<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <hr>
 <h3 id="7-Mock-和-Stub"><a href="#7-Mock-和-Stub" class="headerlink" title="7. Mock 和 Stub"></a>7. Mock 和 Stub</h3><ul>
