@@ -184,6 +184,133 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/06/linux%E6%9F%A5%E7%9C%8B%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/06/linux%E6%9F%A5%E7%9C%8B%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/" class="post-title-link" itemprop="url">linux查看内核模块</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-02-06 14:56:33 / 修改时间：15:08:45" itemprop="dateCreated datePublished" datetime="2025-02-06T14:56:33+08:00">2025-02-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="查看linux是否开启虚拟化"><a href="#查看linux是否开启虚拟化" class="headerlink" title="查看linux是否开启虚拟化"></a>查看linux是否开启虚拟化</h2><ul>
+<li>cat &#x2F;proc&#x2F;cpuinfo | grep -E “vmx|svm”<br>其中，vmx 表示Intel的虛拟化技术（InteIVT），svm 表示AMD的虚拟化技术（AMD-V）。</li>
+<li>lscpu</li>
+<li>lsmod | grep kvm</li>
+</ul>
+<h3 id="lsmod-命令的作用"><a href="#lsmod-命令的作用" class="headerlink" title="lsmod 命令的作用"></a><strong><code>lsmod</code> 命令的作用</strong></h3><p><code>lsmod</code> 是 Linux 系统中的一个命令，用于显示当前已加载的 <strong>内核模块（Kernel Modules）</strong>。它可以帮助用户检查哪些模块正在运行，并用于诊断系统硬件和驱动相关问题。</p>
+<h3 id="lsmod-的基本输出格式"><a href="#lsmod-的基本输出格式" class="headerlink" title="lsmod 的基本输出格式"></a><strong><code>lsmod</code> 的基本输出格式</strong></h3><p>执行 <code>lsmod</code> 命令时，会得到如下格式的输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
+<p>示例输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Module                  Size  Used by</span><br><span class="line">ip_tables              28672  2</span><br><span class="line">x_tables               40960  1 ip_tables</span><br><span class="line">i915                 2330624  12</span><br><span class="line">drm_kms_helper        217088  1 i915</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>Module</strong>：模块名称（例如 <code>i915</code>，为 Intel 显卡驱动模块）。</li>
+<li><strong>Size</strong>：模块占用的字节数（以 KB 计算）。</li>
+<li><strong>Used by</strong>：当前使用该模块的进程数或依赖该模块的其他内核模块。</li>
+</ul>
+<hr>
+<h3 id="lsmod-的常见操作"><a href="#lsmod-的常见操作" class="headerlink" title="lsmod 的常见操作"></a><strong><code>lsmod</code> 的常见操作</strong></h3><h4 id="1-查看已加载的所有内核模块"><a href="#1-查看已加载的所有内核模块" class="headerlink" title="1. 查看已加载的所有内核模块"></a><strong>1. 查看已加载的所有内核模块</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
+<p>显示所有当前正在运行的内核模块。</p>
+<h4 id="2-过滤特定模块"><a href="#2-过滤特定模块" class="headerlink" title="2. 过滤特定模块"></a><strong>2. 过滤特定模块</strong></h4><p>如果想要查找某个特定模块（如 <code>i915</code> 显卡驱动）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep i915</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-查看模块的详细信息"><a href="#3-查看模块的详细信息" class="headerlink" title="3. 查看模块的详细信息"></a><strong>3. 查看模块的详细信息</strong></h4><p><code>lsmod</code> 本身不提供详细信息，但可以使用 <code>modinfo</code> 获取：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">modinfo i915</span><br></pre></td></tr></table></figure>
+<p>返回结果可能包含：</p>
+<ul>
+<li>模块名称</li>
+<li>描述信息</li>
+<li>版本</li>
+<li>依赖关系</li>
+<li>加载参数等</li>
+</ul>
+<h4 id="4-手动加载模块"><a href="#4-手动加载模块" class="headerlink" title="4. 手动加载模块"></a><strong>4. 手动加载模块</strong></h4><p>如果某个模块没有被自动加载，可以使用 <code>modprobe</code> 加载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe module_name</span><br></pre></td></tr></table></figure>
+<p>例如加载 <code>i915</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe i915</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-卸载内核模块"><a href="#5-卸载内核模块" class="headerlink" title="5. 卸载内核模块"></a><strong>5. 卸载内核模块</strong></h4><p>如果一个模块没有被任何进程使用，可以使用 <code>rmmod</code> 卸载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> rmmod module_name</span><br></pre></td></tr></table></figure>
+<p>例如卸载 <code>ip_tables</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> rmmod ip_tables</span><br></pre></td></tr></table></figure>
+<p>但如果模块正在使用，可能会报错，可以使用 <code>modprobe -r</code> 尝试卸载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe -r ip_tables</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-列出模块的依赖关系"><a href="#6-列出模块的依赖关系" class="headerlink" title="6. 列出模块的依赖关系"></a><strong>6. 列出模块的依赖关系</strong></h4><p>使用 <code>lsmod</code> 看到的 <code>Used by</code> 列并不详细，可以使用 <code>modinfo</code> 或 <code>lsmod | grep</code> 结合 <code>lsmod</code> 查看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep drm_kms_helper</span><br><span class="line">modinfo drm_kms_helper</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a><strong>应用场景</strong></h3><ul>
+<li><strong>诊断硬件驱动</strong>：例如，检查显卡、网卡、USB 设备是否正确加载了驱动模块。</li>
+<li><strong>调试系统问题</strong>：如果某些功能无法使用，可以检查相关模块是否被正确加载。</li>
+<li><strong>手动管理模块</strong>：在某些情况下，用户可能需要手动加载或卸载某些模块，以优化性能或排除问题。</li>
+</ul>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><ul>
+<li><code>lsmod</code> 用于列出当前已加载的内核模块。</li>
+<li>结合 <code>grep</code> 可以快速查找特定模块。</li>
+<li><code>modinfo</code> 获取模块详细信息。</li>
+<li><code>modprobe</code> 加载模块，<code>rmmod</code> 或 <code>modprobe -r</code> 卸载模块。</li>
+<li>常用于硬件驱动诊断和系统调试。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/24/time-After%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%A2%E6%B5%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1761,154 +1888,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">tcpdump抓包的几个命令</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-01-07 16:41:59" itemprop="dateCreated datePublished" datetime="2025-01-07T16:41:59+08:00">2025-01-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-04-30 09:52:51" itemprop="dateModified" datetime="2025-04-30T09:52:51+08:00">2025-04-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/network/" itemprop="url" rel="index"><span itemprop="name">network</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h2><ul>
-<li>-i any 监听所有的网卡接口，用来查看是否有网络流量</li>
-<li>-i eth0 只监听eth0网卡接口</li>
-<li>-D 显示可用的接口列表</li>
-<li>-n 不要解析主机名</li>
-<li>-nn 不要解析主机名或者端口名</li>
-<li>-q 显示更少的输出(更加quiet)</li>
-<li>-t 输出可读的时间戳</li>
-<li>-tttt 输出最大程度可读的时间戳</li>
-<li>-X 以hex和ASCII两种形式显示包的内容</li>
-<li>-XX 与**-X**类似，增加以太网header的显示</li>
-<li>-v, -vv, -vvv 显示更加多的包信息</li>
-<li>-c 只读取x个包，然后停止</li>
-<li>-s 指定每一个包捕获的长度，单位是byte，使用 -s 0 可以捕获整个包的内容</li>
-<li>-S 输出绝对的序列号</li>
-<li>-e 获取以太网header</li>
-<li>-E 使用提供的秘钥解密IPSEC流量</li>
-</ul>
-<hr>
-<h2 id="tcpdump-一些命令"><a href="#tcpdump-一些命令" class="headerlink" title="tcpdump 一些命令"></a>tcpdump 一些命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">查看网络接口列表:</span><br><span class="line">tcpdump -D</span><br><span class="line"></span><br><span class="line">简单抓包：</span><br><span class="line">抓取某接口的所有流量：</span><br><span class="line">tcpdump -i eth0</span><br><span class="line"></span><br><span class="line">保存抓包文件:</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定IP地址的数据包:</span><br><span class="line">只抓取源地址或目标地址为 `192.168.3.110` 的流量</span><br><span class="line">sudo tcpdump -i eth0 host 192.168.3.110</span><br><span class="line"></span><br><span class="line">抓取HTTP流量（端口8080）：</span><br><span class="line">sudo tcpdump -i eth0 port 8080</span><br><span class="line"></span><br><span class="line">抓取多个端口：</span><br><span class="line">sudo tcpdump -i eth0 portrange 8000-9000</span><br><span class="line"></span><br><span class="line">抓取TCP流量</span><br><span class="line">sudo tcpdump -i eth0 tcp</span><br><span class="line">抓取UDP流量</span><br><span class="line">sudo tcpdump -i eth0 udp</span><br><span class="line"></span><br><span class="line">抓取ICMP流量（如ping）：</span><br><span class="line">sudo tcpdump -i eth0 icmp</span><br><span class="line"></span><br><span class="line">抓取指定源地址和目标端口的数据包：</span><br><span class="line">sudo tcpdump -i eth0 src 192.168.3.110 and port 22</span><br><span class="line">逻辑运算符： and：与 or ：或  not：非</span><br><span class="line"></span><br><span class="line">显示数据包的详细信息:</span><br><span class="line">sudo tcpdump -i eth0 -v</span><br><span class="line"></span><br><span class="line">如果流量异常密集，可以通过 `-c` 限制抓包数量</span><br><span class="line">sudo tcpdump -i eth0 port 22 -c 100</span><br><span class="line"></span><br><span class="line">抓包文件过大,每10MB保存一个文件</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap -C 10</span><br><span class="line"></span><br><span class="line">读取包内容</span><br><span class="line">sudo tcpdump -r capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定时间范围的包，抓包10秒后自动停止</span><br><span class="line">timeout 10s tcpdump -i eth0</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h2><table>
-<thead>
-<tr>
-<th><strong>需求</strong></th>
-<th><strong>命令</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>捕获指定接口流量</td>
-<td><code>sudo tcpdump -i eth0</code></td>
-</tr>
-<tr>
-<td>捕获指定端口流量</td>
-<td><code>sudo tcpdump -i eth0 port 80</code></td>
-</tr>
-<tr>
-<td>保存抓包到文件</td>
-<td><code>sudo tcpdump -i eth0 -w capture.pcap</code></td>
-</tr>
-<tr>
-<td>限制抓包数量</td>
-<td><code>sudo tcpdump -i eth0 -c 100</code></td>
-</tr>
-<tr>
-<td>过滤特定源 IP 或目标 IP</td>
-<td><code>sudo tcpdump -i eth0 src host 192.168.1.10</code></td>
-</tr>
-<tr>
-<td>过滤特定协议</td>
-<td><code>sudo tcpdump -i eth0 tcp</code></td>
-</tr>
-<tr>
-<td>输出包详细内容</td>
-<td><code>sudo tcpdump -i eth0 -X</code></td>
-</tr>
-<tr>
-<td>限制包的大小</td>
-<td><code>sudo tcpdump -i eth0 -s 128</code></td>
-</tr>
-<tr>
-<td>捕获 DNS 流量</td>
-<td><code>sudo tcpdump -i eth0 port 53 -vvv</code></td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="抓包ingress请求case"><a href="#抓包ingress请求case" class="headerlink" title="抓包ingress请求case"></a>抓包ingress请求case</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#抓包请求</span><br><span class="line">curl -H &quot;host:test.xxx.com&quot; http://10.221.100.200/api/v1/xxx</span><br><span class="line">#查看日志输出</span><br><span class="line">crictl logs  -f &lt;container-id&gt; 2&gt;&amp;1 | grep &quot;/api/v1/xxx&quot;</span><br><span class="line">#抓包过滤</span><br><span class="line">tcpdump -i eth0  -ttt -nnn -v dst host 10.221.100.200 and port 80 and src host 10.100.100.100</span><br></pre></td></tr></table></figure>
-
-<h2 id="抓包脚本及注意事项"><a href="#抓包脚本及注意事项" class="headerlink" title="抓包脚本及注意事项"></a>抓包脚本及注意事项</h2><ul>
-<li>使用ifconfig查看要抓的源ip的网卡(要知道请求ip地址所在网卡)</li>
-<li>或者使用bmon 或者 iptraf-ng 查看网卡的流量</li>
-<li>或者设定要抓取的网卡（也可以指定为：any）<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># 输出以时间戳命名的 pcap 文件，便于后续 Wireshark 分析</span><br><span class="line"></span><br><span class="line">VIP=&quot;10.xxx.xxx.xxx&quot;</span><br><span class="line">PORT=&quot;443&quot;</span><br><span class="line">DURATION=60  # 抓包时长，单位为秒，可根据需要修改</span><br><span class="line">OUT_FILE=&quot;./tcpdump_k8s_$(date +%Y%m%d_%H%M%S).pcap&quot;</span><br><span class="line"></span><br><span class="line">echo &quot;[*] Starting tcpdump for $DURATION seconds on host $VIP:$PORT...&quot;</span><br><span class="line">sudo timeout $DURATION tcpdump -i any host $VIP and port $PORT -ttt -nn -vv -s 0 -w $OUT_FILE</span><br><span class="line"></span><br><span class="line">echo &quot;[+] Capture complete: $OUT_FILE&quot;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<hr>
-<p><a target="_blank" rel="noopener" href="https://github.com/mylxsw/growing-up/blob/master/doc/tcpdump%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B.md">github参考</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1980,7 +1959,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">115</span>
+          <span class="site-state-item-count">116</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1993,7 +1972,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

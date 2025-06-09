@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="操作步骤12345678mkdir postgrescd postgresdocker-compose -f docker-compose.yml up -ddocker ps#进入容器docker exec -it bf6c98a18b07 sh#连接psql -U admin -d admin .env配置1234POSTGRES_USER&#x3D;adminPOSTGRES_PASSWORD&#x3D;adm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker-compose部署postgres测试">
+<meta property="og:url" content="https://shispring.github.io/2025/06/09/docker-compose%E9%83%A8%E7%BD%B2postgres%E6%B5%8B%E8%AF%95/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="操作步骤12345678mkdir postgrescd postgresdocker-compose -f docker-compose.yml up -ddocker ps#进入容器docker exec -it bf6c98a18b07 sh#连接psql -U admin -d admin .env配置1234POSTGRES_USER&#x3D;adminPOSTGRES_PASSWORD&#x3D;adm">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-09T09:51:48.000Z">
+<meta property="article:modified_time" content="2025-06-09T10:00:41.230Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="postgres">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/06/09/docker-compose%E9%83%A8%E7%BD%B2postgres%E6%B5%8B%E8%AF%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>docker-compose部署postgres测试 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/09/docker-compose%E9%83%A8%E7%BD%B2postgres%E6%B5%8B%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker-compose部署postgres测试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-09 17:51:48 / 修改时间：18:00:41" itemprop="dateCreated datePublished" datetime="2025-06-09T17:51:48+08:00">2025-06-09</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mkdir postgres</span><br><span class="line">cd postgres</span><br><span class="line">docker-compose -f docker-compose.yml up -d</span><br><span class="line">docker ps</span><br><span class="line">#进入容器</span><br><span class="line">docker exec -it bf6c98a18b07 sh</span><br><span class="line">#连接</span><br><span class="line">psql -U admin -d admin</span><br></pre></td></tr></table></figure>
+<h2 id="env配置"><a href="#env配置" class="headerlink" title=".env配置"></a>.env配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POSTGRES_USER=admin</span><br><span class="line">POSTGRES_PASSWORD=admin123</span><br><span class="line">POSTGRES_DB=admin</span><br><span class="line">POSTGRES_PORT=5432</span><br></pre></td></tr></table></figure>
+
+<h2 id="docker-compose-yaml"><a href="#docker-compose-yaml" class="headerlink" title="docker-compose.yaml"></a>docker-compose.yaml</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">version: &#x27;3.5&#x27;</span><br><span class="line">services:</span><br><span class="line">  postgres:</span><br><span class="line">    container_name: postgresql</span><br><span class="line">    image: bitnami/postgresql:latest</span><br><span class="line">    environment:</span><br><span class="line">      POSTGRES_USER: $&#123;POSTGRES_USER:-admin&#125;</span><br><span class="line">      POSTGRES_PASSWORD: $&#123;POSTGRES_PASSWORD:-admin123&#125;</span><br><span class="line">      POSTGRES_DB: $&#123;POSTGRES_DB:-admin&#125;</span><br><span class="line">      POSTGRES_INITDB_ARGS: &quot;--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8&quot;</span><br><span class="line">      TZ: Asia/Shanghai</span><br><span class="line">      LANG: en_US.UTF-8</span><br><span class="line">    privileged: true</span><br><span class="line">    env_file:</span><br><span class="line">      - ./.env</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;$&#123;POSTGRES_PORT&#125;:5432&quot;</span><br><span class="line">    volumes:</span><br><span class="line">      - $&#123;PWD&#125;pgdata:/var/lib/postgresql/data:z</span><br><span class="line">      - /etc/localtime:/etc/localtime:ro</span><br><span class="line">      - $&#123;PWD&#125;/tablespace:/tablespace_location:z</span><br><span class="line">      - $&#123;PWD&#125;/log:/var/log/postgresql</span><br><span class="line">    networks:</span><br><span class="line">      - postgres</span><br><span class="line">    restart: always</span><br><span class="line">    hostname: postgresql</span><br><span class="line">networks:</span><br><span class="line">  postgres:</span><br><span class="line">    driver: bridge</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="🧭-MySQL-→-PostgreSQL-迁移速查手册"><a href="#🧭-MySQL-→-PostgreSQL-迁移速查手册" class="headerlink" title="🧭 MySQL → PostgreSQL 迁移速查手册"></a>🧭 MySQL → PostgreSQL 迁移速查手册</h2><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>MySQL 示例</th>
+<th>PostgreSQL 示例</th>
+<th>差异说明</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>连接</strong></td>
+<td><code>mysql -u root -p</code></td>
+<td><code>psql -U postgres -d mydb</code></td>
+<td><code>psql</code> 连接使用 <code>-d</code> 指定数据库</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>字符串连接</strong></td>
+<td><code>CONCAT(&#39;a&#39;, &#39;b&#39;)</code></td>
+<td>`‘a’</td>
+<td></td>
+<td>‘b’`</td>
+<td>使用 `</td>
+<td></td>
+<td>` 而不是函数</td>
+</tr>
+<tr>
+<td><strong>自增字段</strong></td>
+<td><code>id INT AUTO_INCREMENT</code></td>
+<td><code>id SERIAL</code> 或 <code>GENERATED ALWAYS AS IDENTITY</code></td>
+<td><code>SERIAL</code> 简洁；新项目推荐用 <code>IDENTITY</code></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>引号类型</strong></td>
+<td>反引号 <code>`id`</code></td>
+<td>双引号 <code>&quot;id&quot;</code></td>
+<td>PostgreSQL 使用双引号标识大小写敏感字段</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LIMIT 分页</strong></td>
+<td><code>LIMIT 10 OFFSET 20</code></td>
+<td><code>LIMIT 10 OFFSET 20</code></td>
+<td>一致，语义相同</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>字符串比较</strong></td>
+<td>默认不区分大小写</td>
+<td>默认区分大小写</td>
+<td>PostgreSQL 可用 <code>ILIKE</code> 替代</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>布尔类型</strong></td>
+<td>无 <code>BOOLEAN</code>，用 <code>TINYINT(1)</code></td>
+<td>有原生 <code>BOOLEAN</code> 类型</td>
+<td><code>true</code>&#x2F;<code>false</code> 是关键字</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>默认引擎</strong></td>
+<td><code>InnoDB</code></td>
+<td><code>无引擎概念</code></td>
+<td>PostgreSQL 不需要指定存储引擎</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>批量插入</strong></td>
+<td><code>INSERT INTO t VALUES (...), (...);</code></td>
+<td>一致支持</td>
+<td>PostgreSQL &gt;&#x3D; 8.2 支持</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>CURRENT_TIMESTAMP</strong></td>
+<td>默认值 <code>DEFAULT CURRENT_TIMESTAMP</code></td>
+<td>相同语法</td>
+<td>支持一致</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>时间类型</strong></td>
+<td><code>DATETIME</code>, <code>TIMESTAMP</code></td>
+<td><code>TIMESTAMP</code>, <code>TIMESTAMPTZ</code></td>
+<td><code>TIMESTAMPTZ</code> 支持时区</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>文本类型</strong></td>
+<td><code>TEXT</code>, <code>VARCHAR(n)</code></td>
+<td>一致支持</td>
+<td><code>TEXT</code> 无长度限制</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>IF&#x2F;ELSE</strong></td>
+<td><code>IF(condition, a, b)</code></td>
+<td><code>CASE WHEN ... THEN ... ELSE ... END</code></td>
+<td>PostgreSQL 没有 <code>IF()</code> 函数</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NULL 判定</strong></td>
+<td><code>IFNULL(a, b)</code></td>
+<td><code>COALESCE(a, b)</code></td>
+<td><code>COALESCE</code> 更强大</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>JSON 支持</strong></td>
+<td><code>JSON</code>，功能有限</td>
+<td><code>JSON</code> &#x2F; <code>JSONB</code>，原生操作</td>
+<td>PostgreSQL 拥有 JSON 索引、函数支持更完善</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>全文索引</strong></td>
+<td><code>FULLTEXT</code></td>
+<td><code>GIN</code> + <code>to_tsvector()</code></td>
+<td>PostgreSQL 内置强大的全文检索</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SHOW 命令</strong></td>
+<td><code>SHOW TABLES;</code></td>
+<td><code>\dt</code> 或查询 <code>pg_catalog</code></td>
+<td><code>psql</code> 使用元命令</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>权限管理</strong></td>
+<td><code>GRANT SELECT ON db.* TO &#39;user&#39;@&#39;host&#39;;</code></td>
+<td><code>GRANT SELECT ON ALL TABLES IN SCHEMA public TO user;</code></td>
+<td>PostgreSQL 更强调 schema 权限管理</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>默认排序</strong></td>
+<td>不保证</td>
+<td>不保证</td>
+<td>二者都需要 <code>ORDER BY</code> 明确指定</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🛠️-常用迁移建议（最佳实践）"><a href="#🛠️-常用迁移建议（最佳实践）" class="headerlink" title="🛠️ 常用迁移建议（最佳实践）"></a>🛠️ 常用迁移建议（最佳实践）</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>建议做法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>自增主键</td>
+<td>使用 <code>GENERATED ALWAYS AS IDENTITY</code> 替代 <code>SERIAL</code></td>
+</tr>
+<tr>
+<td>时间字段</td>
+<td>使用 <code>TIMESTAMPTZ</code>，统一处理时区问题</td>
+</tr>
+<tr>
+<td>字符集</td>
+<td>PostgreSQL 默认支持 UTF-8，无需额外配置</td>
+</tr>
+<tr>
+<td>JSON 数据</td>
+<td>使用 <code>JSONB</code>，并配合 <code>GIN</code> 索引提高性能</td>
+</tr>
+<tr>
+<td>枚举字段</td>
+<td>使用 <code>CHECK</code> 或自定义 <code>ENUM</code> 类型</td>
+</tr>
+<tr>
+<td>存储过程</td>
+<td>PostgreSQL 使用 <code>DO $$ BEGIN ... END; $$ LANGUAGE plpgsql;</code> 或 <code>CREATE FUNCTION</code></td>
+</tr>
+<tr>
+<td>MySQL 特有语法（如 <code>REPLACE INTO</code>）</td>
+<td>转换为 <code>INSERT ... ON CONFLICT ... DO UPDATE</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="📄-附加内容：PostgreSQL-SQL-模板速查"><a href="#📄-附加内容：PostgreSQL-SQL-模板速查" class="headerlink" title="📄 附加内容：PostgreSQL SQL 模板速查"></a>📄 附加内容：PostgreSQL SQL 模板速查</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 建表</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> example (</span><br><span class="line">    id SERIAL <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">100</span>),</span><br><span class="line">    age <span class="type">INT</span>,</span><br><span class="line">    created_at TIMESTAMPTZ <span class="keyword">DEFAULT</span> now()</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 插入</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> example (name, age) <span class="keyword">VALUES</span> (<span class="string">&#x27;Alice&#x27;</span>, <span class="number">30</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 更新</span></span><br><span class="line"><span class="keyword">UPDATE</span> example <span class="keyword">SET</span> age <span class="operator">=</span> <span class="number">31</span> <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Alice&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 删除</span></span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> example <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Alice&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> example <span class="keyword">WHERE</span> age <span class="operator">&gt;</span> <span class="number">25</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> created_at <span class="keyword">DESC</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- JSON 查询</span></span><br><span class="line"><span class="keyword">SELECT</span> data<span class="operator">-</span><span class="operator">&gt;&gt;</span><span class="string">&#x27;name&#x27;</span> <span class="keyword">FROM</span> json_table <span class="keyword">WHERE</span> data<span class="operator">-</span><span class="operator">&gt;&gt;</span><span class="string">&#x27;age&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;30&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- GIN 索引</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_json_data <span class="keyword">ON</span> json_table <span class="keyword">USING</span> GIN (data);</span><br></pre></td></tr></table></figure>
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/postgres/" rel="tag"><i class="fa fa-tag"></i> postgres</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/09/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" rel="prev" title="单元测试">
+      <i class="fa fa-chevron-left"></i> 单元测试
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.</span> <span class="nav-text">操作步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#env%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">.env配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-compose-yaml"><span class="nav-number">3.</span> <span class="nav-text">docker-compose.yaml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%AD-MySQL-%E2%86%92-PostgreSQL-%E8%BF%81%E7%A7%BB%E9%80%9F%E6%9F%A5%E6%89%8B%E5%86%8C"><span class="nav-number">4.</span> <span class="nav-text">🧭 MySQL → PostgreSQL 迁移速查手册</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%9B%A0%EF%B8%8F-%E5%B8%B8%E7%94%A8%E8%BF%81%E7%A7%BB%E5%BB%BA%E8%AE%AE%EF%BC%88%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">🛠️ 常用迁移建议（最佳实践）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%84-%E9%99%84%E5%8A%A0%E5%86%85%E5%AE%B9%EF%BC%9APostgreSQL-SQL-%E6%A8%A1%E6%9D%BF%E9%80%9F%E6%9F%A5"><span class="nav-number">6.</span> <span class="nav-text">📄 附加内容：PostgreSQL SQL 模板速查</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">116</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
