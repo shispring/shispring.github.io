@@ -7079,6 +7079,9 @@ validate</p>
 <ul>
 <li>kubectl apply -f rbac.yaml</li>
 </ul>
+<h2 id="参看"><a href="#参看" class="headerlink" title="参看"></a>参看</h2><blockquote>
+<p><a href="https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go">https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go</a></p>
+</blockquote>
 ]]></content>
       <tags>
         <tag>k8s</tag>

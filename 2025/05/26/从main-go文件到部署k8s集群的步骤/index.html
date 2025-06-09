@@ -28,7 +28,7 @@
 <meta property="og:description" content="1、初始化 Go Modules123456789go mod init myappgo mod tidy#注意.├── main.go├── go.mod      &lt;-- 必须有├── go.sum      &lt;-- 自动生成├── Dockerfile 解释：  go mod init myapp：初始化模块，生成 go.mod go mod tidy：自动下载并写入依赖  💡">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-05-26T08:09:46.000Z">
-<meta property="article:modified_time" content="2025-05-26T08:26:50.603Z">
+<meta property="article:modified_time" content="2025-06-09T08:42:40.970Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
@@ -212,10 +212,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-05-26 16:09:46 / 修改时间：16:26:50" itemprop="dateCreated datePublished" datetime="2025-05-26T16:09:46+08:00">2025-05-26</time>
+              <time title="创建时间：2025-05-26 16:09:46" itemprop="dateCreated datePublished" datetime="2025-05-26T16:09:46+08:00">2025-05-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-06-09 16:42:40" itemprop="dateModified" datetime="2025-06-09T16:42:40+08:00">2025-06-09</time>
+              </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -251,6 +257,9 @@
 <ul>
 <li>kubectl apply -f rbac.yaml</li>
 </ul>
+<h2 id="参看"><a href="#参看" class="headerlink" title="参看"></a>参看</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go">https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go</a></p>
+</blockquote>
 
     </div>
 
@@ -335,7 +344,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%88%9D%E5%A7%8B%E5%8C%96-Go-Modules"><span class="nav-number">1.</span> <span class="nav-text">1、初始化 Go Modules</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E6%9C%80%E4%BD%B3-Dockerfile%EF%BC%88%E6%94%AF%E6%8C%81%E4%BE%9D%E8%B5%96%E6%9E%84%E5%BB%BA%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">2、最佳 Dockerfile（支持依赖构建）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E6%9E%84%E5%BB%BA%E5%B9%B6%E6%8E%A8%E9%80%81%E9%95%9C%E5%83%8F"><span class="nav-number">3.</span> <span class="nav-text">3、构建并推送镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81%E8%BF%90%E8%A1%8Ckubectl%E5%91%BD%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">4、运行kubectl命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81%E6%B3%A8%E6%84%8FServiceAccount%E6%9D%83%E9%99%90-%E6%B5%8B%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">5、注意ServiceAccount权限(测试)</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%88%9D%E5%A7%8B%E5%8C%96-Go-Modules"><span class="nav-number">1.</span> <span class="nav-text">1、初始化 Go Modules</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E6%9C%80%E4%BD%B3-Dockerfile%EF%BC%88%E6%94%AF%E6%8C%81%E4%BE%9D%E8%B5%96%E6%9E%84%E5%BB%BA%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">2、最佳 Dockerfile（支持依赖构建）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E6%9E%84%E5%BB%BA%E5%B9%B6%E6%8E%A8%E9%80%81%E9%95%9C%E5%83%8F"><span class="nav-number">3.</span> <span class="nav-text">3、构建并推送镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81%E8%BF%90%E8%A1%8Ckubectl%E5%91%BD%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">4、运行kubectl命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81%E6%B3%A8%E6%84%8FServiceAccount%E6%9D%83%E9%99%90-%E6%B5%8B%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">5、注意ServiceAccount权限(测试)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E7%9C%8B"><span class="nav-number">6.</span> <span class="nav-text">参看</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
