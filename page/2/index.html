@@ -184,6 +184,160 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/14/daemonset%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/04/14/daemonset%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7/" class="post-title-link" itemprop="url">daemonset滚动升级</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-04-14 16:03:49 / 修改时间：16:04:16" itemprop="dateCreated datePublished" datetime="2025-04-14T16:03:49+08:00">2025-04-14</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="🚀-DaemonSet-的-updateStrategy-升级策略详解"><a href="#🚀-DaemonSet-的-updateStrategy-升级策略详解" class="headerlink" title="🚀 DaemonSet 的 updateStrategy 升级策略详解"></a>🚀 DaemonSet 的 <code>updateStrategy</code> 升级策略详解</h2><p>DaemonSet 的升级策略定义在 <code>spec.updateStrategy</code> 字段下，用来控制 <strong>Pod 的滚动升级行为</strong>。</p>
+<p>目前支持两种类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RollingUpdate</code></td>
+<td>自动滚动升级，推荐的方式</td>
+</tr>
+<tr>
+<td><code>OnDelete</code></td>
+<td>手动删除后重建，不自动升级</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔁-1-type-RollingUpdate-（自动滚动升级）"><a href="#🔁-1-type-RollingUpdate-（自动滚动升级）" class="headerlink" title="🔁 1. type: RollingUpdate （自动滚动升级）"></a>🔁 1. <code>type: RollingUpdate</code> （自动滚动升级）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">RollingUpdate</span></span><br><span class="line">  <span class="attr">rollingUpdate:</span></span><br><span class="line">    <span class="attr">maxUnavailable:</span> <span class="number">30</span><span class="string">%</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="🔸-含义："><a href="#🔸-含义：" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
+<li>自动将老版本的 Pod 一个个替换为新版本，<strong>每次升级部分 Pod</strong>。</li>
+<li>受 <code>maxUnavailable</code> 控制，表示 <strong>在任意时刻最多有多少 Pod 可以不可用</strong>。</li>
+</ul>
+<h4 id="📌-maxUnavailable-参数详解："><a href="#📌-maxUnavailable-参数详解：" class="headerlink" title="📌 maxUnavailable 参数详解："></a>📌 <code>maxUnavailable</code> 参数详解：</h4><ul>
+<li>可以是整数（如 <code>1</code>）或百分比（如 <code>30%</code>）</li>
+<li>表示 <strong>升级期间，允许的最大不可用 Pod 数量</strong></li>
+</ul>
+<h4 id="⛓️-升级过程（示例）："><a href="#⛓️-升级过程（示例）：" class="headerlink" title="⛓️ 升级过程（示例）："></a>⛓️ 升级过程（示例）：</h4><p>假设你在 10 个节点上部署了 DaemonSet，每个节点都有一个 Pod。</p>
+<p>升级步骤：</p>
+<ol>
+<li>允许最多 3 个 Pod（30%）同时被删除并重建。</li>
+<li>控制器会自动删除旧版本的 Pod 并创建新版本。</li>
+<li>等新版本的 Pod 启动成功后，再继续替换下一批。</li>
+</ol>
+<h4 id="✅-优点："><a href="#✅-优点：" class="headerlink" title="✅ 优点："></a>✅ 优点：</h4><ul>
+<li><strong>平滑升级</strong>，对服务影响最小</li>
+<li>推荐用于生产环境</li>
+</ul>
+<hr>
+<h3 id="🧍-2-type-OnDelete-（手动升级）"><a href="#🧍-2-type-OnDelete-（手动升级）" class="headerlink" title="🧍 2. type: OnDelete （手动升级）"></a>🧍 2. <code>type: OnDelete</code> （手动升级）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">OnDelete</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="🔸-含义：-1"><a href="#🔸-含义：-1" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
+<li>DaemonSet 控制器 <strong>不会主动删除旧版本 Pod</strong></li>
+<li>只有当你手动 <code>kubectl delete pod xxx</code> 删除旧 Pod 时，DaemonSet 才会拉起新版本的 Pod</li>
+</ul>
+<h4 id="⛓️-升级过程："><a href="#⛓️-升级过程：" class="headerlink" title="⛓️ 升级过程："></a>⛓️ 升级过程：</h4><ol>
+<li>你修改了 DaemonSet 的模板（如 image）</li>
+<li>DaemonSet 检测到变更，但 <strong>不会更新任何 Pod</strong></li>
+<li>你需要手动删除 Pod：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod ingress-nginx-controller-xxxxx -n ingress-nginx</span><br></pre></td></tr></table></figure></li>
+<li>控制器自动基于新的模板重新创建 Pod</li>
+</ol>
+<h4 id="✅-适用场景："><a href="#✅-适用场景：" class="headerlink" title="✅ 适用场景："></a>✅ 适用场景：</h4><ul>
+<li>你需要<strong>精确控制每个节点 Pod 的升级时机</strong></li>
+<li>避免自动滚动升级带来的不确定性</li>
+</ul>
+<h4 id="❌-缺点："><a href="#❌-缺点：" class="headerlink" title="❌ 缺点："></a>❌ 缺点：</h4><ul>
+<li>升级需要人工干预</li>
+<li>不适合频繁迭代或高可用性要求场景</li>
+</ul>
+<hr>
+<h3 id="🧠-总结对比"><a href="#🧠-总结对比" class="headerlink" title="🧠 总结对比"></a>🧠 总结对比</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>RollingUpdate</th>
+<th>OnDelete</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>是否自动升级</td>
+<td>✅ 是</td>
+<td>❌ 否，需要手动删除</td>
+</tr>
+<tr>
+<td>可控性</td>
+<td>中等</td>
+<td>高</td>
+</tr>
+<tr>
+<td>服务连续性</td>
+<td>高（通过 <code>maxUnavailable</code> 控制）</td>
+<td>高（完全受控）</td>
+</tr>
+<tr>
+<td>推荐场景</td>
+<td>生产环境通用升级</td>
+<td>手动灰度升级、需精细控制时</td>
+</tr>
+<tr>
+<td>运维复杂度</td>
+<td>低</td>
+<td>中-高</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1334,156 +1488,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/24/systemctl%E7%9A%84%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/24/systemctl%E7%9A%84%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">systemctl的一些用法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-02-24 18:13:00" itemprop="dateCreated datePublished" datetime="2025-02-24T18:13:00+08:00">2025-02-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-06-06 15:52:31" itemprop="dateModified" datetime="2025-06-06T15:52:31+08:00">2025-06-06</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><code>systemctl</code> 是 <strong>Systemd</strong> 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。</p>
-<hr>
-<h3 id="🌟-常用-systemctl-命令"><a href="#🌟-常用-systemctl-命令" class="headerlink" title="🌟 常用 systemctl 命令"></a>🌟 <strong>常用 systemctl 命令</strong></h3><h4 id="1-列出当前所有服务"><a href="#1-列出当前所有服务" class="headerlink" title="1. 列出当前所有服务"></a>1. <strong>列出当前所有服务</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service</span><br><span class="line">systemctl --no-pager list-units --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这个命令列出当前机器上所有正在运行的服务（包含活跃和非活跃的）。如果要查看更多详细信息，可以加上 <code>--all</code>。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --all</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="2-查看服务的状态"><a href="#2-查看服务的状态" class="headerlink" title="2. 查看服务的状态"></a>2. <strong>查看服务的状态</strong></h4><p>查看某个服务（比如 <code>sshd</code>）的状态：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>会显示该服务是否正在运行，启动类型（<code>active</code> 或 <code>inactive</code>），以及日志输出的最新部分。</li>
-</ul>
-<h4 id="3-启动服务"><a href="#3-启动服务" class="headerlink" title="3. 启动服务"></a>3. <strong>启动服务</strong></h4><p>启动某个服务，比如 <code>sshd</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这将立即启动 <code>sshd</code> 服务。</li>
-</ul>
-<h4 id="4-停止服务"><a href="#4-停止服务" class="headerlink" title="4. 停止服务"></a>4. <strong>停止服务</strong></h4><p>停止某个服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>停止 <code>sshd</code> 服务后，你将无法通过 SSH 访问机器，除非本地访问或其他服务仍然活跃。</li>
-</ul>
-<h4 id="5-重启服务"><a href="#5-重启服务" class="headerlink" title="5. 重启服务"></a>5. <strong>重启服务</strong></h4><p>重启某个服务，适用于更新配置等操作：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="6-重新加载服务配置"><a href="#6-重新加载服务配置" class="headerlink" title="6. 重新加载服务配置"></a>6. <strong>重新加载服务配置</strong></h4><p>有时候更改了服务的配置文件（例如 SSH 配置），并希望让服务应用新的配置，而不完全重启服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl reload sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>此命令会让 <code>sshd</code> 服务重新加载配置，但不中断当前的连接。</li>
-</ul>
-<h4 id="7-启用服务开机自启"><a href="#7-启用服务开机自启" class="headerlink" title="7. 启用服务开机自启"></a>7. <strong>启用服务开机自启</strong></h4><p>使服务在系统启动时自动启动：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这会创建一个符号链接，使 <code>sshd</code> 服务在系统启动时自动启动。</li>
-</ul>
-<h4 id="8-禁用服务自启"><a href="#8-禁用服务自启" class="headerlink" title="8. 禁用服务自启"></a>8. <strong>禁用服务自启</strong></h4><p>取消服务的开机自启：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">disable</span> sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="9-查看服务日志"><a href="#9-查看服务日志" class="headerlink" title="9. 查看服务日志"></a>9. <strong>查看服务日志</strong></h4><p>查看 <code>sshd</code> 服务的日志，利用 <code>journalctl</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>-u</code> 用来指定服务，默认显示最近的日志。如果需要查看更早的日志，可以使用 <code>--since</code> 和 <code>--until</code> 选项。</li>
-</ul>
-<h4 id="10-查看系统日志"><a href="#10-查看系统日志" class="headerlink" title="10. 查看系统日志"></a>10. <strong>查看系统日志</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">journalctl</span><br><span class="line"></span><br><span class="line">journalctl -u docker --no-pager -n 50</span><br></pre></td></tr></table></figure>
-<ul>
-<li>查看所有系统日志。默认会显示所有日志，如果想查看最近的日志，可以使用 <code>-n</code> 参数，查看最新的 100 行：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -n 100</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="11-查看服务的启动类型"><a href="#11-查看服务的启动类型" class="headerlink" title="11. 查看服务的启动类型"></a>11. <strong>查看服务的启动类型</strong></h4><p>查看 <code>sshd</code> 服务的启动类型（是否是自动启动）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl is-enabled sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>会显示 <code>enabled</code>（已启用）、<code>disabled</code>（已禁用）或者 <code>static</code>（由其他服务依赖的启动）。</li>
-</ul>
-<h4 id="12-查看服务的依赖"><a href="#12-查看服务的依赖" class="headerlink" title="12. 查看服务的依赖"></a>12. <strong>查看服务的依赖</strong></h4><p>查看服务的所有依赖项和依赖于它的服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-dependencies sshd</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="🔧-对服务的其他操作"><a href="#🔧-对服务的其他操作" class="headerlink" title="🔧 对服务的其他操作"></a>🔧 <strong>对服务的其他操作</strong></h3><h4 id="13-查看服务的启动情况"><a href="#13-查看服务的启动情况" class="headerlink" title="13. 查看服务的启动情况"></a><strong>13. 查看服务的启动情况</strong></h4><p>查看当前系统启动时的所有服务状态：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --state=running</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这只会显示当前正在运行的服务。</li>
-</ul>
-<h4 id="14-查看是否正在等待某个服务"><a href="#14-查看是否正在等待某个服务" class="headerlink" title="14. 查看是否正在等待某个服务"></a><strong>14. 查看是否正在等待某个服务</strong></h4><p>如果你想查看某个服务（如 <code>sshd</code>）是否正在等待其他服务启动，可以使用：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="15-开机后立即启动服务"><a href="#15-开机后立即启动服务" class="headerlink" title="15. 开机后立即启动服务"></a><strong>15. 开机后立即启动服务</strong></h4><p>如果你想在系统启动时立即启动某个服务（而不是等到下次重启），可以使用：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="16-管理多个服务"><a href="#16-管理多个服务" class="headerlink" title="16. 管理多个服务"></a><strong>16. 管理多个服务</strong></h4><p>你可以在一个命令中管理多个服务。例如，停止 <code>sshd</code> 和 <code>nginx</code> 服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop sshd nginx</span><br></pre></td></tr></table></figure>
-
-<h4 id="17-显示服务的更多细节"><a href="#17-显示服务的更多细节" class="headerlink" title="17. 显示服务的更多细节"></a><strong>17. 显示服务的更多细节</strong></h4><p>查看某个服务的详细信息（包括环境变量、启动命令等）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show sshd</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="📋-总结"><a href="#📋-总结" class="headerlink" title="📋 总结"></a>📋 <strong>总结</strong></h3><ul>
-<li><strong>启动&#x2F;停止&#x2F;重启</strong>：<code>start</code> &#x2F; <code>stop</code> &#x2F; <code>restart</code></li>
-<li><strong>状态检查</strong>：<code>status</code></li>
-<li><strong>查看日志</strong>：<code>journalctl -u &lt;service&gt;</code></li>
-<li><strong>启用&#x2F;禁用自启</strong>：<code>enable</code> &#x2F; <code>disable</code></li>
-<li><strong>服务依赖</strong>：<code>list-dependencies</code></li>
-<li><strong>开机自启服务控制</strong>：<code>systemctl is-enabled &lt;service&gt;</code></li>
-</ul>
-<hr>
-<h2 id="journalctl用法"><a href="#journalctl用法" class="headerlink" title="journalctl用法"></a>journalctl用法</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/XAEyJ_LMXisHELcZO8jUpw">https://mp.weixin.qq.com/s/XAEyJ_LMXisHELcZO8jUpw</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/FpDcGtKMcyLKFyk3jxnjcg">https://mp.weixin.qq.com/s/FpDcGtKMcyLKFyk3jxnjcg</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#查看所有日志</span><br><span class="line">journalctl</span><br><span class="line"></span><br><span class="line">#查看实时日志</span><br><span class="line">journalctl -f   </span><br><span class="line"></span><br><span class="line">#查看指定服务的日志, -u 即 --unit</span><br><span class="line">journalctl -u nginx   </span><br><span class="line"></span><br><span class="line">#查看指定行数的日志</span><br><span class="line">journalctl -n 5000             # -n 即 --lines</span><br><span class="line"></span><br><span class="line">#查看指定启动会话的日志</span><br><span class="line"># 查看当前启动会话的日志</span><br><span class="line">journalctl -b                  # -b 即 --boot</span><br><span class="line"></span><br><span class="line"># 查看上次启动会话的日志</span><br><span class="line">journalctl -b -1               # 依此类推，-2 ...</span><br><span class="line"></span><br><span class="line">#查看指定时间的日志</span><br><span class="line"># 查看开始于某个时间的日志</span><br><span class="line">journalctl -S &quot;2024-04-14&quot;  # -S 即 --since</span><br><span class="line">journalctl -S &quot;1 hour ago&quot; # 也可以是相对时间</span><br><span class="line"></span><br><span class="line"># 查看截止到某个时间的日志</span><br><span class="line">journalctl -U &quot;2025-04-15&quot; # -U 即 --until</span><br><span class="line">journalctl -U &quot;yesterday&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看指定优先级的日志</span><br><span class="line">journalctl -p 3 # -P 即 --priority</span><br><span class="line">journalctl -p 2..4</span><br><span class="line"></span><br><span class="line"># 查看多个优先级</span><br><span class="line"># O 或 emerg：系统不可用 （Emergency） </span><br><span class="line"># 1 或 alert： 需要立即采取行动 （Alert） </span><br><span class="line"># 2 或 crit：严重情况 （Critical） </span><br><span class="line"># 3 或 err： 错误情况 （Error）</span><br><span class="line"># 4 或 warning：警告情况 （Warning） </span><br><span class="line"># 5 或 notice： 正常但重要的情况 （Notice） </span><br><span class="line"># 6 或 info：一般信息 （Informational） </span><br><span class="line"># 7或 debug：调试信息 （Debug）</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看内核日志</span><br><span class="line">journalctl -k   # -k 即 --dmesg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#指定日志输出格式</span><br><span class="line">journalctl -o json-pretty # -o 即 --output</span><br><span class="line"># 可选short、short-precise、short-iso、short-iso-precise、short-full、short-monotonic、short-unix、verbose、export、json、json-pretty、json-sse、json-seq、cat、with-unit</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1555,7 +1559,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-count">115</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1568,7 +1572,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
