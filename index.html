@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-06-09 17:51:48 / 修改时间：18:00:41" itemprop="dateCreated datePublished" datetime="2025-06-09T17:51:48+08:00">2025-06-09</time>
+              <time title="创建时间：2025-06-09 17:51:48 / 修改时间：18:04:52" itemprop="dateCreated datePublished" datetime="2025-06-09T17:51:48+08:00">2025-06-09</time>
             </span>
 
           
@@ -228,245 +228,74 @@
 
 <h2 id="docker-compose-yaml"><a href="#docker-compose-yaml" class="headerlink" title="docker-compose.yaml"></a>docker-compose.yaml</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">version: &#x27;3.5&#x27;</span><br><span class="line">services:</span><br><span class="line">  postgres:</span><br><span class="line">    container_name: postgresql</span><br><span class="line">    image: bitnami/postgresql:latest</span><br><span class="line">    environment:</span><br><span class="line">      POSTGRES_USER: $&#123;POSTGRES_USER:-admin&#125;</span><br><span class="line">      POSTGRES_PASSWORD: $&#123;POSTGRES_PASSWORD:-admin123&#125;</span><br><span class="line">      POSTGRES_DB: $&#123;POSTGRES_DB:-admin&#125;</span><br><span class="line">      POSTGRES_INITDB_ARGS: &quot;--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8&quot;</span><br><span class="line">      TZ: Asia/Shanghai</span><br><span class="line">      LANG: en_US.UTF-8</span><br><span class="line">    privileged: true</span><br><span class="line">    env_file:</span><br><span class="line">      - ./.env</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;$&#123;POSTGRES_PORT&#125;:5432&quot;</span><br><span class="line">    volumes:</span><br><span class="line">      - $&#123;PWD&#125;pgdata:/var/lib/postgresql/data:z</span><br><span class="line">      - /etc/localtime:/etc/localtime:ro</span><br><span class="line">      - $&#123;PWD&#125;/tablespace:/tablespace_location:z</span><br><span class="line">      - $&#123;PWD&#125;/log:/var/log/postgresql</span><br><span class="line">    networks:</span><br><span class="line">      - postgres</span><br><span class="line">    restart: always</span><br><span class="line">    hostname: postgresql</span><br><span class="line">networks:</span><br><span class="line">  postgres:</span><br><span class="line">    driver: bridge</span><br></pre></td></tr></table></figure>
 <hr>
-<h2 id="🧭-MySQL-→-PostgreSQL-迁移速查手册"><a href="#🧭-MySQL-→-PostgreSQL-迁移速查手册" class="headerlink" title="🧭 MySQL → PostgreSQL 迁移速查手册"></a>🧭 MySQL → PostgreSQL 迁移速查手册</h2><table>
+<h2 id="🧭-PostgreSQL-与-MySQL-对比表（操作-概念）"><a href="#🧭-PostgreSQL-与-MySQL-对比表（操作-概念）" class="headerlink" title="🧭 PostgreSQL 与 MySQL 对比表（操作&#x2F;概念）"></a>🧭 PostgreSQL 与 MySQL 对比表（操作&#x2F;概念）</h2><table>
 <thead>
 <tr>
 <th>类别</th>
-<th>MySQL 示例</th>
-<th>PostgreSQL 示例</th>
+<th>PostgreSQL</th>
+<th>MySQL</th>
 <th>差异说明</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>连接</strong></td>
-<td><code>mysql -u root -p</code></td>
-<td><code>psql -U postgres -d mydb</code></td>
-<td><code>psql</code> 连接使用 <code>-d</code> 指定数据库</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>CLI 工具</td>
+<td><code>psql</code></td>
+<td><code>mysql</code></td>
+<td>使用方式相似，但命令格式略有不同</td>
 </tr>
 <tr>
-<td><strong>字符串连接</strong></td>
-<td><code>CONCAT(&#39;a&#39;, &#39;b&#39;)</code></td>
-<td>`‘a’</td>
-<td></td>
-<td>‘b’`</td>
-<td>使用 `</td>
-<td></td>
-<td>` 而不是函数</td>
+<td>查看数据库</td>
+<td><code>\l</code></td>
+<td><code>SHOW DATABASES;</code></td>
+<td>PostgreSQL 使用 <code>\</code> 开头的元命令</td>
 </tr>
 <tr>
-<td><strong>自增字段</strong></td>
-<td><code>id INT AUTO_INCREMENT</code></td>
-<td><code>id SERIAL</code> 或 <code>GENERATED ALWAYS AS IDENTITY</code></td>
-<td><code>SERIAL</code> 简洁；新项目推荐用 <code>IDENTITY</code></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>引号类型</strong></td>
-<td>反引号 <code>`id`</code></td>
-<td>双引号 <code>&quot;id&quot;</code></td>
-<td>PostgreSQL 使用双引号标识大小写敏感字段</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>LIMIT 分页</strong></td>
-<td><code>LIMIT 10 OFFSET 20</code></td>
-<td><code>LIMIT 10 OFFSET 20</code></td>
-<td>一致，语义相同</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>字符串比较</strong></td>
-<td>默认不区分大小写</td>
-<td>默认区分大小写</td>
-<td>PostgreSQL 可用 <code>ILIKE</code> 替代</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>布尔类型</strong></td>
-<td>无 <code>BOOLEAN</code>，用 <code>TINYINT(1)</code></td>
-<td>有原生 <code>BOOLEAN</code> 类型</td>
-<td><code>true</code>&#x2F;<code>false</code> 是关键字</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>默认引擎</strong></td>
-<td><code>InnoDB</code></td>
-<td><code>无引擎概念</code></td>
-<td>PostgreSQL 不需要指定存储引擎</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>批量插入</strong></td>
-<td><code>INSERT INTO t VALUES (...), (...);</code></td>
-<td>一致支持</td>
-<td>PostgreSQL &gt;&#x3D; 8.2 支持</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>CURRENT_TIMESTAMP</strong></td>
-<td>默认值 <code>DEFAULT CURRENT_TIMESTAMP</code></td>
-<td>相同语法</td>
-<td>支持一致</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>时间类型</strong></td>
-<td><code>DATETIME</code>, <code>TIMESTAMP</code></td>
-<td><code>TIMESTAMP</code>, <code>TIMESTAMPTZ</code></td>
-<td><code>TIMESTAMPTZ</code> 支持时区</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>文本类型</strong></td>
-<td><code>TEXT</code>, <code>VARCHAR(n)</code></td>
-<td>一致支持</td>
-<td><code>TEXT</code> 无长度限制</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>IF&#x2F;ELSE</strong></td>
-<td><code>IF(condition, a, b)</code></td>
-<td><code>CASE WHEN ... THEN ... ELSE ... END</code></td>
-<td>PostgreSQL 没有 <code>IF()</code> 函数</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>NULL 判定</strong></td>
-<td><code>IFNULL(a, b)</code></td>
-<td><code>COALESCE(a, b)</code></td>
-<td><code>COALESCE</code> 更强大</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>JSON 支持</strong></td>
-<td><code>JSON</code>，功能有限</td>
-<td><code>JSON</code> &#x2F; <code>JSONB</code>，原生操作</td>
-<td>PostgreSQL 拥有 JSON 索引、函数支持更完善</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>全文索引</strong></td>
-<td><code>FULLTEXT</code></td>
-<td><code>GIN</code> + <code>to_tsvector()</code></td>
-<td>PostgreSQL 内置强大的全文检索</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>SHOW 命令</strong></td>
+<td>查看表</td>
+<td><code>\dt</code></td>
 <td><code>SHOW TABLES;</code></td>
-<td><code>\dt</code> 或查询 <code>pg_catalog</code></td>
-<td><code>psql</code> 使用元命令</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>MySQL 更偏向 SQL 语句</td>
 </tr>
 <tr>
-<td><strong>权限管理</strong></td>
-<td><code>GRANT SELECT ON db.* TO &#39;user&#39;@&#39;host&#39;;</code></td>
-<td><code>GRANT SELECT ON ALL TABLES IN SCHEMA public TO user;</code></td>
-<td>PostgreSQL 更强调 schema 权限管理</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>查看建表语句</td>
+<td><code>pg_dump -s -t 表名</code> 或 <code>\d+ 表名</code></td>
+<td><code>SHOW CREATE TABLE 表名;</code></td>
+<td>PostgreSQL 没有直接 <code>SHOW CREATE</code> 语法</td>
 </tr>
 <tr>
-<td><strong>默认排序</strong></td>
-<td>不保证</td>
-<td>不保证</td>
-<td>二者都需要 <code>ORDER BY</code> 明确指定</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="🛠️-常用迁移建议（最佳实践）"><a href="#🛠️-常用迁移建议（最佳实践）" class="headerlink" title="🛠️ 常用迁移建议（最佳实践）"></a>🛠️ 常用迁移建议（最佳实践）</h2><table>
-<thead>
-<tr>
-<th>场景</th>
-<th>建议做法</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>自增主键</td>
-<td>使用 <code>GENERATED ALWAYS AS IDENTITY</code> 替代 <code>SERIAL</code></td>
+<td>切换数据库</td>
+<td><code>\c</code></td>
+<td><code>USE 数据库名;</code></td>
+<td>语法不同</td>
 </tr>
 <tr>
-<td>时间字段</td>
-<td>使用 <code>TIMESTAMPTZ</code>，统一处理时区问题</td>
+<td>分隔符设置</td>
+<td><code>\pset format</code></td>
+<td>无等价命令</td>
+<td>PostgreSQL CLI 更强大</td>
 </tr>
 <tr>
-<td>字符集</td>
-<td>PostgreSQL 默认支持 UTF-8，无需额外配置</td>
+<td>默认字符集</td>
+<td><code>UTF-8</code></td>
+<td><code>latin1</code>（可改）</td>
+<td>PostgreSQL 默认更现代</td>
 </tr>
 <tr>
-<td>JSON 数据</td>
-<td>使用 <code>JSONB</code>，并配合 <code>GIN</code> 索引提高性能</td>
+<td>JSON 支持</td>
+<td>强，原生 JSON、JSONB 类型</td>
+<td>有 JSON 类型，但功能弱很多</td>
+<td>PostgreSQL 更适合结构+非结构混合存储</td>
 </tr>
 <tr>
-<td>枚举字段</td>
-<td>使用 <code>CHECK</code> 或自定义 <code>ENUM</code> 类型</td>
+<td>权限模型</td>
+<td>支持角色&#x2F;继承&#x2F;细粒度权限</td>
+<td>用户权限简单</td>
+<td>PostgreSQL 适合大型多租户</td>
 </tr>
 <tr>
-<td>存储过程</td>
-<td>PostgreSQL 使用 <code>DO $$ BEGIN ... END; $$ LANGUAGE plpgsql;</code> 或 <code>CREATE FUNCTION</code></td>
-</tr>
-<tr>
-<td>MySQL 特有语法（如 <code>REPLACE INTO</code>）</td>
-<td>转换为 <code>INSERT ... ON CONFLICT ... DO UPDATE</code></td>
+<td>存储引擎</td>
+<td>只有 <code>heap</code>（可选 WAL 日志）</td>
+<td>多引擎（默认 InnoDB）</td>
+<td>MySQL 更灵活但容易不一致</td>
 </tr>
 </tbody></table>
 <hr>
