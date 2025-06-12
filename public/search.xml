@@ -7243,4 +7243,15 @@ validate</p>
         <tag>postgres</tag>
       </tags>
   </entry>
+  <entry>
+    <title>dlv调试</title>
+    <url>/2025/06/12/dlv%E8%B0%83%E8%AF%95/</url>
+    <content><![CDATA[<h2 id="编译调试"><a href="#编译调试" class="headerlink" title="编译调试"></a>编译调试</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#编译二进制</span><br><span class="line">go build -gcflags &quot;all=-N -l&quot; -o main ./main.go</span><br><span class="line">#开启调试</span><br><span class="line">dlv exec ./main</span><br><span class="line">(dlv) break /home/xxx/xxx.go:206</span><br><span class="line">(dlv) continue</span><br><span class="line">(dlv) print ingress</span><br><span class="line">(dlv) locals</span><br><span class="line">(dlv) args</span><br><span class="line">(dlv) exit</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="调试命令"><a href="#调试命令" class="headerlink" title="调试命令"></a>调试命令</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250612160657.png" alt="这是图片" title="dlv"></p>
+]]></content>
+      <tags>
+        <tag>go</tag>
+      </tags>
+  </entry>
 </search>
