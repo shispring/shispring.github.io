@@ -184,6 +184,97 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/27/vscode%E9%85%8D%E7%BD%AEtips/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/09/27/vscode%E9%85%8D%E7%BD%AEtips/" class="post-title-link" itemprop="url">vscode配置tips</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-09-27 18:51:03" itemprop="dateCreated datePublished" datetime="2024-09-27T18:51:03+08:00">2024-09-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-11-29 12:08:37" itemprop="dateModified" datetime="2024-11-29T12:08:37+08:00">2024-11-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/IDE/" itemprop="url" rel="index"><span itemprop="name">IDE</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="配置文件差异"><a href="#配置文件差异" class="headerlink" title="配置文件差异"></a>配置文件差异</h3><p>远程开发时切换go版本，影响go tools安装。注意配置settings.json里的go root、path路径</p>
+<ol>
+<li>.vscode-server&#x2F;data&#x2F;Machine&#x2F;settings.json</li>
+</ol>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">这个配置文件包含了 <span class="title class_">VSCode</span> 服务器的全局设置，这些设置会影响所有打开的工作区。</span><br><span class="line">它通常不由用户直接编辑，而是由 <span class="title class_">VSCode</span> 根据用户在 <span class="variable constant_">UI</span> 中的操作自动管理。</span><br><span class="line">这些设置包括了对所有工作区都有效的配置，比如插件的启用、禁用状态等。</span><br><span class="line"></span><br><span class="line">#远程开发机路径：~<span class="regexp">/.vscode-server/</span>data/<span class="title class_">Machine</span>/settings.<span class="property">json</span></span><br><span class="line"><span class="string">&quot;go.goroot&quot;</span>: <span class="string">&quot;~/.gvm/gos/go1.23.0&quot;</span>,</span><br><span class="line"><span class="string">&quot;go.gopath&quot;</span>: <span class="string">&quot;~/.gvm/pkgsets/go1.23.0/global&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>.vscode&#x2F;settings.json</li>
+</ol>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">这个文件是特定于项目的，只影响当前项目的配置。</span><br><span class="line">用户可以在这个文件中自定义设置，比如自定义任务、调试配置、文件关联等。</span><br><span class="line">这些设置在工作区打开时会被应用，并且会覆盖 .<span class="property">vscode</span>-server/data/<span class="title class_">Machine</span>/settings.<span class="property">json</span> 中的同名设置。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="mac下快捷命令"><a href="#mac下快捷命令" class="headerlink" title="mac下快捷命令"></a>mac下快捷命令</h3><ul>
+<li>打开终端：ctrl + &#96;</li>
+<li>跳到具体行：ctrl + g</li>
+<li>打开所有配置面板：cmd + ,</li>
+<li>显示命令行面板：cmd + shift + p</li>
+</ul>
+<h2 id="常用插件"><a href="#常用插件" class="headerlink" title="常用插件"></a>常用插件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Remote - SSH</span><br><span class="line">Go</span><br><span class="line"></span><br><span class="line">vscode-icons</span><br><span class="line">GitHub Theme</span><br><span class="line">Dracula Theme Officia</span><br><span class="line"></span><br><span class="line">Better Comments</span><br><span class="line">Comment Translate : 1、配置翻译源 2、配置翻译目标语言 （cmd + shift + p : 输入translate）</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/27/nice-blog/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1084,79 +1175,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/08/28/linux%E5%AE%89%E8%A3%85%E5%A4%9A%E7%89%88%E6%9C%ACgo%E7%8E%AF%E5%A2%83/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/08/28/linux%E5%AE%89%E8%A3%85%E5%A4%9A%E7%89%88%E6%9C%ACgo%E7%8E%AF%E5%A2%83/" class="post-title-link" itemprop="url">linux安装多版本go环境</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-08-28 10:13:27" itemprop="dateCreated datePublished" datetime="2024-08-28T10:13:27+08:00">2024-08-28</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-05-15 18:52:10" itemprop="dateModified" datetime="2025-05-15T18:52:10+08:00">2025-05-15</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="gvm安装多版本go环境"><a href="#gvm安装多版本go环境" class="headerlink" title="gvm安装多版本go环境"></a>gvm安装多版本go环境</h2><ul>
-<li>参考地址：<a target="_blank" rel="noopener" href="https://github.com/moovweb/gvm">https://github.com/moovweb/gvm</a></li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#执行shell安装gvm</span></span><br><span class="line">bash &lt; &lt;(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看所有可安装go版本</span></span><br><span class="line">gvm listall</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装高版本go环境顺序</span></span><br><span class="line">gvm install go1.4 -B</span><br><span class="line">gvm use go1.4</span><br><span class="line"><span class="built_in">export</span> GOROOT_BOOTSTRAP=<span class="variable">$GOROOT</span></span><br><span class="line">gvm install go1.17.13</span><br><span class="line">gvm use go1.17.13</span><br><span class="line"><span class="built_in">export</span> GOROOT_BOOTSTRAP=<span class="variable">$GOROOT</span></span><br><span class="line">gvm install go1.20</span><br><span class="line">gvm use go1.20 --default</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看安装的go版本</span></span><br><span class="line">gvm list</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看环境变量</span></span><br><span class="line">go <span class="built_in">env</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="go-module与vendor"><a href="#go-module与vendor" class="headerlink" title="go module与vendor"></a>go module与vendor</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#引入新的包时，强制启用Go Modules模式</span></span><br><span class="line">go <span class="built_in">env</span> -w GO111MODULE=<span class="string">&quot;on&quot;</span> GOFLAGS=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#项目自带vendor目录，强制 Go 使用 vendor 目录中的依赖包,而不是从网络上下载依赖。这在项目中已经存在 vendor 目录的情况下非常有用，因为它可以避免重新下载依赖，节省时间和带宽</span></span><br><span class="line">go <span class="built_in">env</span> -w GO111MODULE=<span class="string">&quot;auto&quot;</span> GOFLAGS=<span class="string">&quot;-mod=vendor&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置代理</span></span><br><span class="line">go <span class="built_in">env</span> -w GOPROXY=<span class="string">&quot;https://goproxy.cn,https://goproxy.io,direct&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#新项目初始化模块</span></span><br><span class="line">go mod init</span><br><span class="line"><span class="comment">#确认依赖关系</span></span><br><span class="line">go mod verify</span><br><span class="line"><span class="comment">#解释为什么需要包和模块</span></span><br><span class="line">go mod why</span><br><span class="line"><span class="comment">#下载模块到本地缓存</span></span><br><span class="line">go mod download</span><br><span class="line"><span class="comment">#把模块之间的依赖图显示出来</span></span><br><span class="line">go mod graph</span><br><span class="line"><span class="comment">#增加缺失的包，移除没用的包</span></span><br><span class="line">go mod tidy</span><br><span class="line"><span class="comment">#把依赖拷贝到vendor目录下,更新依赖包</span></span><br><span class="line">go mod vendor</span><br><span class="line"></span><br><span class="line"><span class="comment">#部署和发布：</span></span><br><span class="line"><span class="comment">#在部署时，如果希望避免依赖在网络上的可用性（例如，因防火墙或网络问题），建议使用 vendor 目录。#将最终的二进制文件和 vendor 目录（如果使用）一起部署。</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="安装tcping"><a href="#安装tcping" class="headerlink" title="安装tcping"></a>安装tcping</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">gvm install go1.23.9</span><br><span class="line">gvm use go1.23.9 </span><br><span class="line"></span><br><span class="line">#查看环境变量</span><br><span class="line">go env | grep -E &#x27;GOPATH|GOBIN&#x27;</span><br><span class="line"></span><br><span class="line">#安装最新版本</span><br><span class="line">go install github.com/pouriyajamshidi/tcping/v2@latest</span><br><span class="line"></span><br><span class="line">或者</span><br><span class="line">wget https://github.com/pouriyajamshidi/tcping/releases/download/v2.7.1/tcping-linux-amd64-static.tar.gz</span><br><span class="line">tar zxvf tcping-linux-amd64-static.tar.gz</span><br><span class="line">#tcping 端口</span><br><span class="line">./tcping $&#123;ip&#125; $&#123;port&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1228,7 +1246,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">118</span>
+          <span class="site-state-item-count">119</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1241,7 +1259,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
