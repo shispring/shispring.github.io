@@ -184,6 +184,202 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/10/docker-ctr-crictl%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/01/10/docker-ctr-crictl%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">docker ctr crictl nerdctl命令使用</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-10 18:01:54" itemprop="dateCreated datePublished" datetime="2025-01-10T18:01:54+08:00">2025-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-04-14 14:43:31" itemprop="dateModified" datetime="2025-04-14T14:43:31+08:00">2025-04-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker/" itemprop="url" rel="index"><span itemprop="name">docker</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="命令对比"><a href="#命令对比" class="headerlink" title="命令对比"></a>命令对比</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>docker</th>
+<th>ctr（containerd）</th>
+<th>crictl（kubernetes）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>查看运行的容器</td>
+<td>docker ps</td>
+<td>ctr task ls &#x2F; ctr container ls</td>
+<td>crictl ps</td>
+</tr>
+<tr>
+<td>查看镜像</td>
+<td>docker images</td>
+<td>ctr image ls &#x2F; ctr i ls</td>
+<td>crictl images</td>
+</tr>
+<tr>
+<td>查看容器日志</td>
+<td>docker logs</td>
+<td>无</td>
+<td>crictl logs</td>
+</tr>
+<tr>
+<td>查看容器信息</td>
+<td>docker inspect</td>
+<td>ctr container info</td>
+<td>crictl inspect</td>
+</tr>
+<tr>
+<td>查看容器资源</td>
+<td>docker stats</td>
+<td>无</td>
+<td>crictl stats</td>
+</tr>
+<tr>
+<td>启动&#x2F;关闭已有的容器</td>
+<td>docker start&#x2F;stop</td>
+<td>ctr task start&#x2F;kill</td>
+<td>crictl start&#x2F;stop</td>
+</tr>
+<tr>
+<td>运行一个新的容器</td>
+<td>docker run</td>
+<td>ctr run</td>
+<td>无（最小单元为 Pod）</td>
+</tr>
+<tr>
+<td>修改镜像标签</td>
+<td>docker tag</td>
+<td>ctr image tag</td>
+<td>无</td>
+</tr>
+<tr>
+<td>创建一个新的容器</td>
+<td>docker create</td>
+<td>ctr container create</td>
+<td>crictl create</td>
+</tr>
+<tr>
+<td>导入镜像</td>
+<td>docker load</td>
+<td>ctr image import</td>
+<td>无</td>
+</tr>
+<tr>
+<td>导出镜像</td>
+<td>docker save</td>
+<td>ctr image export</td>
+<td>无</td>
+</tr>
+<tr>
+<td>删除容器</td>
+<td>docker rm</td>
+<td>ctr container rm</td>
+<td>crictl rm</td>
+</tr>
+<tr>
+<td>删除镜像</td>
+<td>docker rmi</td>
+<td>ctr image rm</td>
+<td>crictl rmi</td>
+</tr>
+<tr>
+<td>拉取镜像</td>
+<td>docker pull</td>
+<td>ctr image pull</td>
+<td>crictl pull</td>
+</tr>
+<tr>
+<td>推送镜像</td>
+<td>docker push</td>
+<td>ctr image push</td>
+<td>无</td>
+</tr>
+<tr>
+<td>在容器内部执行命令</td>
+<td>docker exec</td>
+<td>无</td>
+<td>crictl exec</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="docker清理资源"><a href="#docker清理资源" class="headerlink" title="docker清理资源"></a>docker清理资源</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">#查看停止的容器</span><br><span class="line">docker ps --filter status=exited --filter status=dead -q</span><br><span class="line">docker ps --filter status=exited --filter status=dead -s</span><br><span class="line">#停止所有容器</span><br><span class="line">#docker stop $(docker ps -q)</span><br><span class="line"></span><br><span class="line">#清理停止的容器</span><br><span class="line">docker container prune -f</span><br><span class="line"></span><br><span class="line">#列出所有悬空镜像</span><br><span class="line">docker images -f &quot;dangling=true&quot;</span><br><span class="line">#清理未使用的镜像（悬空或无标签）</span><br><span class="line">docker image prune -a -f</span><br><span class="line"></span><br><span class="line">#清除默认构建缓存</span><br><span class="line">docker buildx prune -f</span><br><span class="line"></span><br><span class="line">#清理未使用的卷</span><br><span class="line">docker volume prune -f</span><br><span class="line"></span><br><span class="line">#清理未使用的网络</span><br><span class="line">docker network prune -f</span><br><span class="line"></span><br><span class="line">#查看容器、镜像、卷等资源的占用情况</span><br><span class="line">docker system df</span><br><span class="line"></span><br><span class="line">#综合清理所有未使用的数据，所有废弃镜像与Build Cache</span><br><span class="line">docker system prune -a -f --volumes</span><br><span class="line"></span><br><span class="line">#查看磁盘使用情况</span><br><span class="line">df -lh</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="ctr"><a href="#ctr" class="headerlink" title="ctr"></a>ctr</h2><blockquote>
+<p>ctr 是一个不受支持的，用于与 containerd 守护进程交互的调试和管理客户端 </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- 查看containerd命名空间：ctr namespace ls</span><br><span class="line">- 查看containerd的镜像：ctr images ls（可指定命名空间，如ctr -n k8s.io images ls）</span><br><span class="line">- 拉取containerd的镜像：ctr -n k8s.io images pull &lt;image&gt;</span><br><span class="line">- 删除containerd的镜像：ctr -n k8s.io images rm &lt;image&gt;</span><br><span class="line">- 导出containerd的镜像：ctr -n k8s.io images export &lt;image&gt;</span><br><span class="line">- 导入containerd的镜像：ctr -n k8s.io image import &lt;image&gt;</span><br><span class="line">- 标记containerd的镜像（起别名）：ctr -n k8s.io images tag &lt;image&gt; &lt;alias&gt;</span><br><span class="line">- 运行containerd的容器：ctr -n k8s.io run &lt;container&gt;</span><br><span class="line">- 查看运行容器的task：ctr -n k8s.io task ls</span><br><span class="line">- 启动指定容器的task：ctr -n k8s.io task start &lt;container&gt;</span><br><span class="line">- 进入指定容器的task：ctr -n k8s.io task exec --exec-id &lt;id&gt; -t &lt;container&gt; /bin/bash</span><br><span class="line">- 删除指定容器的task：ctr -n k8s.io task rm -f &lt;container&gt;</span><br><span class="line">- 停止指定容器的task：ctr -n k8s.io task kill --signal &lt;signal&gt; &lt;container&gt;</span><br><span class="line">- 查看容器：ctr -n k8s.io c list</span><br><span class="line">- 删除容器：ctr -n k8s.io c rm &lt;container&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="crictl"><a href="#crictl" class="headerlink" title="crictl"></a>crictl</h2><blockquote>
+<p>crictl 是一个符合 CRI 接口规范的命令行工具，通常用于检查和管理 kubelet 节点上的容器运行时和镜像</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">- 取消DEBUG信息：crictl --debug=false xxx</span><br><span class="line">- 查看镜像：crictl images</span><br><span class="line">- 拉取镜像：crictl pull &lt;image-name&gt;:&lt;tag&gt;</span><br><span class="line">- 删除镜像：crictl rmi &lt;image-id&gt;</span><br><span class="line">- 列出当前运行的容器：crictl ps</span><br><span class="line">- 列出所有容器（包括已停止的）：crictl ps -a</span><br><span class="line">- 查看指定容器的详细信息：crictl inspect &lt;container-id&gt;</span><br><span class="line">- 停止指定ID的容器：crictl stop &lt;container-id&gt;</span><br><span class="line">- 删除指定ID的容器：crictl rm &lt;container-id&gt;</span><br><span class="line">- 列出当前运行的Pod：crictl pods</span><br><span class="line">- 查看指定Pod的详细信息：crictl inspectp &lt;pod-id&gt;</span><br><span class="line">- 停止指定ID的Pod：crictl stopp &lt;pod-id&gt;</span><br><span class="line">- 删除指定ID的Pod：crictl rmp &lt;pod-id&gt;</span><br><span class="line">- 获取指定容器的日志输出：crictl logs &lt;container-id&gt;</span><br><span class="line">- 列出指定容器的资源使用统计信息：crictl stats &lt;container-id&gt;</span><br><span class="line">- 列出指定Pod的资源使用统计信息：crictl statsp &lt;pod-id&gt;</span><br><span class="line">- 显示crictl和容器运行时的版本信息：crictl version</span><br><span class="line">- 在运行的容器中执行指定的命令：crictl exec -it &lt;container-id&gt; -- &lt;command&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="nerdctl"><a href="#nerdctl" class="headerlink" title="nerdctl"></a>nerdctl</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/containerd/nerdctl/releases">https://github.com/containerd/nerdctl/releases</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- nerdctl run：在新容器中运行命令</span><br><span class="line">- nerdctl exec：在正在运行的容器中运行命令</span><br><span class="line">- nerdctl create : 创建一个新容器</span><br><span class="line">- nerdctl logs : 获取容器日志</span><br><span class="line">- nerdctl start：启动一个或多个正在运行的容器。</span><br><span class="line">- nerdctl stop：停止一个或多个正在运行的容器。</span><br><span class="line">- nerdctl restart：重启一个或多个正在运行的容器。</span><br><span class="line">- nerdctl rm/rmi：删除一个或多个容器/图像。</span><br><span class="line">- nerdctl container prune：删除所有停止的容器。</span><br><span class="line">- nerdctl build：从 Dockerfile 构建图像。</span><br><span class="line">- nerdctl pull/push：从注册表中拉取/推送图像。</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/09/linux%E8%B4%9F%E8%BD%BD%E8%BE%83%E9%AB%98%E6%8E%92%E6%9F%A5%E6%AD%A5%E9%AA%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1879,91 +2075,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/26/useful-tools/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/26/useful-tools/" class="post-title-link" itemprop="url">useful tools</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-12-26 22:06:03" itemprop="dateCreated datePublished" datetime="2024-12-26T22:06:03+08:00">2024-12-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-03-12 15:33:49" itemprop="dateModified" datetime="2025-03-12T15:33:49+08:00">2025-03-12</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="termtosvg-录制终端会话"><a href="#termtosvg-录制终端会话" class="headerlink" title="termtosvg : 录制终端会话"></a>termtosvg : 录制终端会话</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#使用pyenv安装多版本python</span><br><span class="line">which python</span><br><span class="line"></span><br><span class="line">pip3 install termtosvg</span><br><span class="line"></span><br><span class="line">#使用</span><br><span class="line">termtosvg</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line">#可以使用浏览器打开生成的svg</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="asciinema-录制终端会话"><a href="#asciinema-录制终端会话" class="headerlink" title="asciinema : 录制终端会话"></a>asciinema : 录制终端会话</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">brew install asciinema </span><br><span class="line"></span><br><span class="line">asciinema rec session.cast</span><br><span class="line">asciinema play session.cast</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#brew install agg</span><br><span class="line">agg session.cast first.gif</span><br></pre></td></tr></table></figure>
-
-<h2 id="lolcat-彩虹🌈输出"><a href="#lolcat-彩虹🌈输出" class="headerlink" title="lolcat (彩虹🌈输出)"></a>lolcat (彩虹🌈输出)</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brew install lolcat</span><br><span class="line"></span><br><span class="line">#lolcat --help</span><br></pre></td></tr></table></figure>
-
-<h2 id="inkscape-：-svg转png"><a href="#inkscape-：-svg转png" class="headerlink" title="inkscape ： svg转png"></a>inkscape ： svg转png</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">brew install --cask inkscape</span><br><span class="line">#或者</span><br><span class="line">#brew install librsvg</span><br><span class="line"></span><br><span class="line">inkscape 1.svg --export-type=png --export-filename=1.png</span><br><span class="line">inkscape 2.svg --export-type=png --export-filename=2.png</span><br><span class="line">inkscape 3.svg --export-type=png --export-filename=3.png</span><br><span class="line"></span><br><span class="line">#rsvg-convert 1.svg -o 1.png</span><br><span class="line">#rsvg-convert 2.svg -o 2.png</span><br><span class="line">#rsvg-convert 3.svg -o 3.png</span><br><span class="line"></span><br><span class="line">#svg转gif</span><br><span class="line">magick -delay 100 1.png 2.png 3.png output.gif</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="cloc-统计代码"><a href="#cloc-统计代码" class="headerlink" title="cloc 统计代码"></a>cloc 统计代码</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#github地址</span><br><span class="line">https://github.com/AlDanial/cloc</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="kyanos"><a href="#kyanos" class="headerlink" title="kyanos"></a>kyanos</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Kyanos 是一个网络流量采集和分析工具</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="远程桌面rustdesk"><a href="#远程桌面rustdesk" class="headerlink" title="远程桌面rustdesk"></a>远程桌面rustdesk</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/rustdesk/rustdesk</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2035,7 +2146,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">119</span>
+          <span class="site-state-item-count">120</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2048,7 +2159,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
