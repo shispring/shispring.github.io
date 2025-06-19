@@ -7448,4 +7448,77 @@ validate</p>
         <tag>https</tag>
       </tags>
   </entry>
+  <entry>
+    <title>curl网络请求耗时</title>
+    <url>/2025/06/19/curl%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E8%80%97%E6%97%B6/</url>
+    <content><![CDATA[<h2 id="配置输出格式"><a href="#配置输出格式" class="headerlink" title="配置输出格式"></a>配置输出格式</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#步骤1配置参数</span><br><span class="line">cat &gt; curl-format.txt &lt;&lt; &#x27;EOF&#x27;</span><br><span class="line">=============== HTTPS 性能分析报告 ===============\n</span><br><span class="line">请求 URL（url_effective）      : %&#123;url_effective&#125;\n</span><br><span class="line">HTTP 状态码（http_code）       : %&#123;http_code&#125;\n</span><br><span class="line">Content-Type（content_type）   : %&#123;content_type&#125;\n</span><br><span class="line">\n</span><br><span class="line">========== 时间分析（单位: 秒） ==========\n</span><br><span class="line">DNS 解析时间（time_namelookup）      : %&#123;time_namelookup&#125;\n</span><br><span class="line">TCP 连接建立（time_connect）         : %&#123;time_connect&#125;\n</span><br><span class="line">TLS/SSL 握手（time_appconnect）      : %&#123;time_appconnect&#125;\n</span><br><span class="line">传输准备完成（time_pretransfer）     : %&#123;time_pretransfer&#125;\n</span><br><span class="line">重定向耗时（time_redirect）          : %&#123;time_redirect&#125;\n</span><br><span class="line">首字节接收 TTFB（time_starttransfer）: %&#123;time_starttransfer&#125;\n</span><br><span class="line">总请求时间（time_total）             : %&#123;time_total&#125;\n</span><br><span class="line">\n</span><br><span class="line">========== 数据传输分析 ==========\n</span><br><span class="line">下载数据大小（size_download）      : %&#123;size_download&#125; bytes\n</span><br><span class="line">上传数据大小（size_upload）        : %&#123;size_upload&#125; bytes\n</span><br><span class="line">请求大小（size_request）           : %&#123;size_request&#125; bytes\n</span><br><span class="line">响应头大小（size_header）          : %&#123;size_header&#125; bytes\n</span><br><span class="line">平均下载速度（speed_download）     : %&#123;speed_download&#125; bytes/sec\n</span><br><span class="line">平均上传速度（speed_upload）       : %&#123;speed_upload&#125; bytes/sec\n</span><br><span class="line">\n</span><br><span class="line">========== 连接信息 ==========\n</span><br><span class="line">远程 IP（remote_ip）               : %&#123;remote_ip&#125;\n</span><br><span class="line">远程端口（remote_port）            : %&#123;remote_port&#125;\n</span><br><span class="line">本地 IP（local_ip）                : %&#123;local_ip&#125;\n</span><br><span class="line">本地端口（local_port）             : %&#123;local_port&#125;\n</span><br><span class="line">\n</span><br><span class="line">========== SSL 相关 ==========\n</span><br><span class="line">SSL 验证结果（ssl_verify_result） : %&#123;ssl_verify_result&#125;\n</span><br><span class="line">==================================================\n</span><br><span class="line">EOF</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="请求"><a href="#请求" class="headerlink" title="请求"></a>请求</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -w &quot;@curl-format.txt&quot; -o /dev/null -s http://baidu.com</span><br><span class="line"></span><br><span class="line">#curl -w &quot;@curl-format.txt&quot; -o /dev/null -s -k -H &quot;Host: test.xxx.net&quot; https://10.100.100.100:443</span><br></pre></td></tr></table></figure>
+
+<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h2><ul>
+<li>ssl_verify_result: SSL&#x2F;TLS 证书验证的结果代码（return code）<table>
+<thead>
+<tr>
+<th>值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code></td>
+<td>✅ <strong>验证通过（OK）</strong>：证书合法、链条完整、受信任</td>
+</tr>
+<tr>
+<td>非 0</td>
+<td>❌ <strong>验证失败</strong>：证书不合法、不受信、链不完整等原因</td>
+</tr>
+</tbody></table>
+</li>
+<li>常见非零错误代码<table>
+<thead>
+<tr>
+<th>错误码</th>
+<th>含义（简述）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>2</code></td>
+<td>无法获取发行者证书（链不完整）</td>
+</tr>
+<tr>
+<td><code>10</code></td>
+<td>证书过期</td>
+</tr>
+<tr>
+<td><code>18</code></td>
+<td>无法验证证书链</td>
+</tr>
+<tr>
+<td><code>19</code></td>
+<td>自签名证书</td>
+</tr>
+<tr>
+<td><code>20</code></td>
+<td>无法解析本地证书</td>
+</tr>
+<tr>
+<td><code>21</code></td>
+<td>无法验证根证书</td>
+</tr>
+<tr>
+<td><code>27</code></td>
+<td>主体和颁发者不匹配</td>
+</tr>
+<tr>
+<td><code>62</code></td>
+<td>主机名不匹配（证书 CN&#x2F;SAN 与域名不同）</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h2 id="验证证书链是否完整"><a href="#验证证书链是否完整" class="headerlink" title="验证证书链是否完整"></a>验证证书链是否完整</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#方法1</span><br><span class="line">curl -v https://baidu.com</span><br><span class="line">成功：SSL certificate verify ok.</span><br><span class="line">如果失败返回：SSL certificate problem: unable to verify the first certificate</span><br><span class="line"></span><br><span class="line">#方法2</span><br><span class="line">openssl s_client -connect baidu.com:443 -showcerts</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
 </search>
