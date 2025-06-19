@@ -7576,4 +7576,36 @@ validate</p>
         <tag>linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>cAdvisor初探</title>
+    <url>/2025/06/19/cAdvisor%E5%88%9D%E6%8E%A2/</url>
+    <content><![CDATA[<h2 id="cgroup-namespace"><a href="#cgroup-namespace" class="headerlink" title="cgroup &amp; namespace"></a>cgroup &amp; namespace</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>含义</th>
+<th>示例作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cgroup</code></td>
+<td>控制组，限制容器的 CPU、内存等</td>
+<td><code>cpu.shares</code>, <code>memory.limit_in_bytes</code></td>
+</tr>
+<tr>
+<td><code>namespace</code></td>
+<td>名字空间，隔离容器运行环境</td>
+<td><code>net</code>, <code>pid</code>, <code>mnt</code>, <code>ipc</code>, <code>uts</code>, <code>user</code></td>
+</tr>
+</tbody></table>
+<h2 id="cAdvisor"><a href="#cAdvisor" class="headerlink" title="cAdvisor"></a>cAdvisor</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cAdvisor 直接读取:</span><br><span class="line">• /sys/fs/cgroup（CPU、memory、blkio）</span><br><span class="line">• /proc/&lt;pid&gt;/net/dev（网络）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="cAdvisor-读取磁盘-I-O-指标的原理"><a href="#cAdvisor-读取磁盘-I-O-指标的原理" class="headerlink" title="cAdvisor 读取磁盘 I&#x2F;O 指标的原理"></a>cAdvisor 读取磁盘 I&#x2F;O 指标的原理</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. 从 cgroup blkio 子系统读取 I/O 限制与统计数据</span><br><span class="line">/sys/fs/cgroup/blkio/docker/&lt;container-id&gt;/</span><br><span class="line"></span><br><span class="line">2. 通过 /proc/&lt;pid&gt;/io 读取进程级磁盘数据</span><br><span class="line">/proc/&lt;container-pid&gt;/io</span><br><span class="line"></span><br><span class="line">cAdvisor 会汇总属于某个容器所有进程的 /proc/&lt;pid&gt;/io 统计。</span><br></pre></td></tr></table></figure>
+
+<h2 id="模拟-cAdvisor-的行为"><a href="#模拟-cAdvisor-的行为" class="headerlink" title="模拟 cAdvisor 的行为"></a>模拟 cAdvisor 的行为</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker ps | grep kubelet</span><br><span class="line"></span><br><span class="line">docker inspect f965002cb995 | grep -w &quot;Id&quot;</span><br><span class="line">或</span><br><span class="line">docker inspect f965002cb995 | jq &#x27;.[].Id&#x27;</span><br><span class="line"></span><br><span class="line">#查看容器 blkio 数据</span><br><span class="line">cat /sys/fs/cgroup/blkio/docker/f965002cb995390b763ab8abacd86cc987d223101ace612a9e16c3bac9767a80/blkio.throttle.io_service_bytes</span><br><span class="line"></span><br><span class="line">查看某容器主进程的 PID：</span><br><span class="line">docker inspect f965002cb995 | grep -w &quot;Pid&quot;</span><br><span class="line">或</span><br><span class="line">docker inspect f965002cb995 | jq &#x27;.[].State.Pid&#x27;</span><br><span class="line"></span><br><span class="line">cat /proc/6687/io</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
 </search>
