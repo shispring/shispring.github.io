@@ -7516,6 +7516,61 @@ validate</p>
 </li>
 </ul>
 <h2 id="验证证书链是否完整"><a href="#验证证书链是否完整" class="headerlink" title="验证证书链是否完整"></a>验证证书链是否完整</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#方法1</span><br><span class="line">curl -v https://baidu.com</span><br><span class="line">成功：SSL certificate verify ok.</span><br><span class="line">如果失败返回：SSL certificate problem: unable to verify the first certificate</span><br><span class="line"></span><br><span class="line">#方法2</span><br><span class="line">openssl s_client -connect baidu.com:443 -showcerts</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>最佳实践建议</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>目标</th>
+<th>建议命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>证书域名是否正确 + 证书链是否完整</td>
+<td><code>curl -v --resolve your.domain.com:443:IP https://your.domain.com/</code></td>
+</tr>
+<tr>
+<td>服务端返回的证书详情</td>
+<td><code>openssl s_client -connect IP:443 -servername your.domain.com -showcerts</code></td>
+</tr>
+<tr>
+<td>临时跳过验证测试 HTTP 响应</td>
+<td><code>curl -k -H &quot;Host: ...&quot; https://IP:443</code>（调试专用）</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>是否验证证书</th>
+<th>是否验证链完整性</th>
+<th>SNI 正确</th>
+<th>推荐用于生产验证？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>curl --resolve</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ 强烈推荐</td>
+</tr>
+<tr>
+<td><code>curl -H &quot;Host:...&quot;</code></td>
+<td>✅（但会失败）</td>
+<td>❌（因证书链不完整）</td>
+<td>❌</td>
+<td>❌ 不建议</td>
+</tr>
+<tr>
+<td><code>curl -H &quot;Host:...&quot; -k</code></td>
+<td>❌（跳过验证）</td>
+<td>❌</td>
+<td>❌</td>
+<td>🚫 不推荐，仅调试用</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>linux</tag>
