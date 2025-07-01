@@ -7634,6 +7634,10 @@ validate</p>
 <td>Docker + cri-dockerd</td>
 <td><code>/var/run/cri-dockerd.sock</code></td>
 </tr>
+<tr>
+<td>Dockershim</td>
+<td><code>/var/run/dockershim.sock</code></td>
+</tr>
 </tbody></table>
 <hr>
 <h2 id="crictl-WARN-解决办法"><a href="#crictl-WARN-解决办法" class="headerlink" title="crictl WARN 解决办法"></a>crictl WARN 解决办法</h2><ul>
