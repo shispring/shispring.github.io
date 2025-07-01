@@ -184,6 +184,155 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/28/informer-%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/28/informer-%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">informer 核心机制</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-11-28 18:18:05" itemprop="dateCreated datePublished" datetime="2024-11-28T18:18:05+08:00">2024-11-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-01-15 18:16:45" itemprop="dateModified" datetime="2025-01-15T18:16:45+08:00">2025-01-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Kubernetes 的 <code>client-go</code> 中，Informer 的队列机制是控制器实现异步事件处理的核心部分。主要通过 <strong>工作队列 (WorkQueue)</strong> 实现，用于协调资源对象的事件处理，确保高效、可靠和去重的处理流程。</p>
+<p>以下是 <code>client-go</code> 中工作队列的核心机制：</p>
+<hr>
+<h3 id="1-Queue-机制的核心组件"><a href="#1-Queue-机制的核心组件" class="headerlink" title="1. Queue 机制的核心组件"></a><strong>1. Queue 机制的核心组件</strong></h3><p><code>client-go</code> 的队列机制主要由以下组件组成：</p>
+<ol>
+<li><p><strong><code>WorkQueue</code> 接口</strong>  </p>
+<ul>
+<li><code>client-go</code> 提供了一种高效的事件队列实现：<code>rateLimitingQueue</code>。</li>
+<li>常见接口包括：<code>Add</code>、<code>Get</code>、<code>Done</code>、<code>Forget</code> 和 <code>ShutDown</code>。</li>
+</ul>
+</li>
+<li><p><strong><code>rateLimitingQueue</code></strong>  </p>
+<ul>
+<li>一种带速率限制的队列，用于在失败时控制重试的速率，防止频繁的事件触发导致资源占用过高。</li>
+<li>内部通过 <code>DelayingQueue</code> 和 <code>DefaultControllerRateLimiter</code> 实现重试和延迟处理。</li>
+</ul>
+</li>
+<li><p><strong>队列与同步机制</strong>  </p>
+<ul>
+<li><code>Informer</code> 监听到资源变化后，通过回调函数 (<code>AddEventHandler</code>) 将事件放入队列。</li>
+<li>控制器从队列中读取事件并处理，每次处理后需调用 <code>Done</code> 标记完成。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="2-队列的处理逻辑"><a href="#2-队列的处理逻辑" class="headerlink" title="2. 队列的处理逻辑"></a><strong>2. 队列的处理逻辑</strong></h3><h4 id="核心流程："><a href="#核心流程：" class="headerlink" title="核心流程："></a>核心流程：</h4><ol>
+<li><p><strong>资源事件入队</strong>：</p>
+<ul>
+<li>当 <code>Informer</code> 侦听到资源对象的 <code>Add</code>、<code>Update</code> 或 <code>Delete</code> 事件时，会通过回调将资源标识符（如名字或键）加入队列。</li>
+<li>示例代码：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">queue.Add(objKey)</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>事件出队并处理</strong>：</p>
+<ul>
+<li>控制器通过 <code>Get</code> 方法从队列取出事件，处理完成后调用 <code>Done</code>。</li>
+<li>示例代码：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    obj, shutdown := queue.Get()</span><br><span class="line">    <span class="keyword">if</span> shutdown &#123;</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 处理逻辑</span></span><br><span class="line">    handleErr(err, obj)</span><br><span class="line">    queue.Done(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>错误处理与重试</strong>：</p>
+<ul>
+<li>如果处理失败，可以调用 <code>AddRateLimited</code> 重新将事件入队，触发限速重试。</li>
+<li>如果确定不再重试，调用 <code>Forget</code> 移除事件。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="3-核心功能特性"><a href="#3-核心功能特性" class="headerlink" title="3. 核心功能特性"></a><strong>3. 核心功能特性</strong></h3><ol>
+<li><p><strong>去重</strong>：</p>
+<ul>
+<li>队列内对象使用唯一键（通常是 <code>namespace/name</code> 格式）标识，避免重复处理同一资源事件。</li>
+</ul>
+</li>
+<li><p><strong>速率限制</strong>：</p>
+<ul>
+<li>内置的速率限制器（<code>RateLimiter</code>）控制失败重试的频率，防止集群压力过大。</li>
+<li>常用速率限制器：<ul>
+<li><code>BucketRateLimiter</code>: 令牌桶算法。</li>
+<li><code>ItemExponentialFailureRateLimiter</code>: 指数增长重试间隔。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>延迟处理</strong>：</p>
+<ul>
+<li>支持延迟任务，适用于需要等待某些条件满足后再处理的场景。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="4-示例代码"><a href="#4-示例代码" class="headerlink" title="4. 示例代码"></a><strong>4. 示例代码</strong></h3><p>以下是使用 <code>WorkQueue</code> 的典型控制器实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">enqueue</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    key, err := cache.MetaNamespaceKeyFunc(obj)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    queue.Add(key)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    obj, shutdown := queue.Get()</span><br><span class="line">    <span class="keyword">if</span> shutdown &#123;</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key := obj.(<span class="type">string</span>) <span class="comment">// 处理对象的唯一标识符</span></span><br><span class="line">    err := syncHandler(key)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        queue.AddRateLimited(key)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        queue.Forget(key)</span><br><span class="line">    &#125;</span><br><span class="line">    queue.Done(key)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5. 参考文档"></a><strong>5. 参考文档</strong></h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/kubernetes/client-go/tree/master/util/workqueue">client-go WorkQueue 实现</a></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/25/kubeadm-containerd-calico-%E9%83%A8%E7%BD%B2k8s-1-28/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1149,117 +1298,6 @@ validate</p>
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">k8s最佳实践(-)</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-11-08 10:21:21 / 修改时间：10:22:06" itemprop="dateCreated datePublished" datetime="2024-11-08T10:21:21+08:00">2024-11-08</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Kubernetes（K8s）开发涉及到大量的组件和细节性问题。以下是 Kubernetes 开发中的最佳实践，以及需要关注的组件、调度算法、资源管理等关键内容，以便全面掌握 Kubernetes 开发过程的方方面面。</p>
-<ol>
-<li><p>核心组件的理解与设计最佳实践</p>
-<p> •	API Server：作为 Kubernetes 的控制平面，API Server 处理所有集群内部组件与用户的请求。对于 API Server 的开发，要关注认证（Authentication）、授权（Authorization）、准入控制（Admission Control）等机制，并确保集群资源的安全性和权限管理。<br> •	etcd：Kubernetes 中的键值存储数据库，保存所有集群的状态。高可用和数据一致性对 etcd 来说尤为重要。推荐使用备份机制，并在多节点集群中启用 etcd 集群来提高可靠性。<br> •	Controller Manager：控制循环是 Kubernetes 的核心概念之一，Controller Manager 中负责资源调节和自动化的各种控制器。理解控制器如何检测和纠正状态差异，对于开发新的控制器有很大帮助。<br> •	Scheduler：负责将 Pod 分配到适当的节点上。在 Scheduler 中，需注意如何使用优先级函数、过滤策略（Predicates）、得分策略（Scores）等，确保 Pod 的资源需求与节点资源的最佳匹配。<br> •	Kubelet：运行在每个节点上的核心代理，负责管理 Pod 生命周期和容器运行。Kubelet 需要频繁与 API Server 通信，因此需要特别注意网络连接和性能优化。</p>
-</li>
-<li><p>调度器（Scheduler）的关键算法和优化</p>
-</li>
-</ol>
-<p>Kubernetes 调度器的调度过程分为预选（Predicates）和优选（Priorities）两部分：</p>
-<pre><code>•	预选（Predicates）：在调度开始时，通过过滤节点资源（如 CPU、内存、地域等条件），排除不适合的节点。这包括以下关键算法：
-•	PodFitsResources：判断节点是否有足够资源满足 Pod 的需求。
-•	PodFitsHost：适合具有特定节点需求的 Pod。
-•	PodFitsTopology：检查拓扑需求，例如反亲和性（Anti-Affinity）规则。
-•	优选（Priorities）：选择预选中最合适的节点。优选算法会为每个节点打分并选择得分最高的节点。常见优选算法包括：
-•	LeastRequestedPriority：优先选择资源使用率低的节点。
-•	BalancedResourceAllocation：尽量将 Pod 分配到资源分布均匀的节点上。
-•	InterPodAffinityPriority：根据 Pod 的亲和性或反亲和性需求打分。
-</code></pre>
-<p>调度器的调优在大型集群中尤为重要。例如，可以通过 自定义调度策略 来满足业务需求，或者增加 多调度器 支持不同业务的多种调度策略。</p>
-<ol start="3">
-<li><p>资源管理和扩展性</p>
-<p> •	资源请求和限制（Requests &amp; Limits）：在 Pod 中设置合理的资源请求和限制，确保系统组件和业务组件的资源隔离。对于 CPU 密集型或内存密集型应用，调整资源请求和限制能够避免资源争用。<br> •	节点自动扩展（Cluster Autoscaler）：在集群中启用 Cluster Autoscaler，可以根据 Pod 的 Pending 状态自动增加节点。结合 Horizontal Pod Autoscaler（HPA），可以根据流量自动扩展 Pod。<br> •	资源配额（Resource Quotas）和限制（LimitRanges）：在命名空间中设置资源配额，避免某一命名空间资源消耗过多而影响集群整体可用性。</p>
-</li>
-<li><p>安全性与认证</p>
-<p> •	RBAC（Role-Based Access Control）：为用户、服务账户分配适当的权限。使用 RBAC 可以细粒度地控制 API 访问权限，保护集群安全。<br> •	Network Policies：定义 Pod 网络流量的访问控制策略，确保集群网络安全。合理的 Network Policies 可以隔离不同应用之间的通信。<br> •	Admission Controller：准入控制器可以用来在资源创建、更新等过程中进行动态策略检查，如 Pod 安全策略（PodSecurityPolicy）、限制异常配置等。</p>
-</li>
-<li><p>性能优化</p>
-<p> •	容器和镜像优化：避免在容器中运行不必要的进程。使用更小的基础镜像（如 Alpine）能有效减少镜像大小，提升镜像的拉取速度。<br> •	缓存和存储：配置合理的存储类，选择适合应用需求的存储系统（如 NFS、Ceph）。对于高频读写应用，使用缓存策略可以提升存储性能。<br> •	监控与日志：利用 Prometheus 和 Grafana 监控集群资源状态，及时发现性能瓶颈。使用 Fluentd 等工具集中收集日志，便于快速排查问题。</p>
-</li>
-<li><p>开发调试和测试</p>
-<p> •	开发环境搭建：使用 minikube、kind 等工具可以快速搭建本地开发环境；在本地模拟生产环境，减少上线前的测试成本。<br> •	Kubectl Debug：使用 kubectl debug 可以快速进入故障容器环境，查看运行状态。<br> •	CI&#x2F;CD 集成：结合 GitLab CI、Jenkins 等 CI&#x2F;CD 工具自动部署测试，确保每次代码变更自动触发测试和部署流程。</p>
-</li>
-<li><p>Kubernetes 扩展性设计</p>
-<p> •	Operator 模式：使用 Operator 可以将 Kubernetes 的声明式 API 扩展到管理复杂应用的生命周期。例如，可以使用 Operator 实现应用的自动备份、恢复和扩展。<br> •	CRD（Custom Resource Definitions）：CRD 允许开发者定义自定义资源类型，扩展 Kubernetes 的 API，为特定业务逻辑定制资源对象。<br> •	Webhooks：使用 Admission Webhook 可用于在资源创建或修改时进行额外校验，Mutation Webhook 则用于自动填充或修改资源字段。</p>
-</li>
-<li><p>日志与监控实践</p>
-<p> •	Prometheus 和 Grafana：利用 Prometheus 采集资源指标，使用 Grafana 创建可视化仪表盘实时监控集群资源状态。<br> •	ELK Stack（Elasticsearch、Logstash、Kibana）：用于集中式日志收集和分析，可以帮助快速定位集群故障原因。<br> •	Alertmanager：结合 Prometheus 的 Alertmanager 设置告警，确保在节点故障或资源紧张时能及时响应。</p>
-</li>
-<li><p>调度优化与高可用</p>
-<p> •	节点分配策略：通过节点池和亲和性策略，合理分配工作负载，保证关键业务的高可用性。<br> •	Pod 优先级与抢占：使用 Pod 优先级和抢占策略，确保高优先级的工作负载有资源调度保证。<br> •	分区容错：通过 TopologySpreadConstraints 设置不同区域的容错策略，增强跨可用区的容灾能力。</p>
-</li>
-</ol>
-<p>总结</p>
-<p>Kubernetes 开发中的最佳实践涵盖了从资源管理、性能调优、安全性到监控和扩展等多方面内容。理解 Kubernetes 核心组件和调度机制，合理设计 CRD 和 Operator，以及使用 CI&#x2F;CD 和监控系统，能显著提升开发和运维的效率。同时，关注网络和资源隔离、权限管理，能帮助在大规模环境中实现高可用、安全的 Kubernetes 集群。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1331,7 +1369,7 @@ validate</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">122</span>
+          <span class="site-state-item-count">123</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1344,7 +1382,7 @@ validate</p>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

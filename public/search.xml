@@ -7608,4 +7608,41 @@ validate</p>
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>常见runtime socket</title>
+    <url>/2025/07/01/%E5%B8%B8%E8%A7%81runtime-socket/</url>
+    <content><![CDATA[<h2 id="常见-runtime-socket-路径"><a href="#常见-runtime-socket-路径" class="headerlink" title="常见 runtime socket 路径"></a>常见 runtime socket 路径</h2><table>
+<thead>
+<tr>
+<th>CRI 实现</th>
+<th>Socket 路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>containerd（K3s）</td>
+<td><code>/run/k3s/containerd/containerd.sock</code></td>
+</tr>
+<tr>
+<td>containerd（非 K3s）</td>
+<td><code>/run/containerd/containerd.sock</code></td>
+</tr>
+<tr>
+<td>cri-o</td>
+<td><code>/run/crio/crio.sock</code></td>
+</tr>
+<tr>
+<td>Docker + cri-dockerd</td>
+<td><code>/var/run/cri-dockerd.sock</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="crictl-WARN-解决办法"><a href="#crictl-WARN-解决办法" class="headerlink" title="crictl WARN 解决办法"></a>crictl WARN 解决办法</h2><ul>
+<li>显式指定 –runtime-endpoint 参数<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#命令中指定 --runtime-endpoint,使用 K3s 时 containerd 的默认 socket 路径</span><br><span class="line">crictl --runtime-endpoint unix:///run/k3s/containerd/containerd.sock images</span><br></pre></td></tr></table></figure></li>
+<li>设置配置文件<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat &gt; /etc/crictl.yaml &lt;&lt; EOF</span><br><span class="line">runtime-endpoint: unix:///run/k3s/containerd/containerd.sock</span><br><span class="line">image-endpoint: unix:///run/k3s/containerd/containerd.sock</span><br><span class="line">timeout: 10</span><br><span class="line">debug: false</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">crictl images</span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>runtime</tag>
+      </tags>
+  </entry>
 </search>
