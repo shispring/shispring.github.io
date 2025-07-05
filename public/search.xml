@@ -3608,7 +3608,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -bordercolor red -border 5x5 output.jpg</span><br></pre></td></tr></table></figure>
 
 <h3 id="9-转换-PDF-为图像"><a href="#9-转换-PDF-为图像" class="headerlink" title="9. 转换 PDF 为图像"></a>9. 转换 PDF 为图像</h3><p>将 PDF 页面转换为 PNG 格式，指定分辨率（如 300 dpi）。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -density 300 input.pdf output.png</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#ImageMagick 在处理 PDF 文件时依赖于 Ghostscript (gs) 来进行 PDF 的渲染和转换</span></span><br><span class="line"><span class="comment">#brew install ghostscript</span></span><br><span class="line"></span><br><span class="line">magick -density 300 input.pdf output.png</span><br></pre></td></tr></table></figure>
 <p>如果需要将 PDF 中的每一页保存为单独的 PNG 图像，可以使用如下命令：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -density 300 input.pdf page_%03d.png</span><br></pre></td></tr></table></figure>
 
