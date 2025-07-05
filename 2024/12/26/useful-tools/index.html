@@ -22,13 +22,13 @@
 
   <meta name="description" content="termtosvg : 录制终端会话1234567891011121314#使用pyenv安装多版本pythonwhich pythonpip3 install termtosvg#使用termtosvg...exit#可以使用浏览器打开生成的svg  asciinema : 录制终端会话12345678brew install asciinema asciinema rec session.ca">
 <meta property="og:type" content="article">
-<meta property="og:title" content="useful tools &amp;&amp; tips">
+<meta property="og:title" content="tools">
 <meta property="og:url" content="https://shispring.github.io/2024/12/26/useful-tools/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="termtosvg : 录制终端会话1234567891011121314#使用pyenv安装多版本pythonwhich pythonpip3 install termtosvg#使用termtosvg...exit#可以使用浏览器打开生成的svg  asciinema : 录制终端会话12345678brew install asciinema asciinema rec session.ca">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-12-26T14:06:03.000Z">
-<meta property="article:modified_time" content="2025-07-05T02:38:05.270Z">
+<meta property="article:modified_time" content="2025-07-05T02:40:35.385Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>useful tools && tips | Hexo</title>
+  <title>tools | Hexo</title>
   
 
 
@@ -202,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          useful tools && tips
+          tools
         </h1>
 
         <div class="post-meta">
@@ -219,7 +219,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-07-05 10:38:05" itemprop="dateModified" datetime="2025-07-05T10:38:05+08:00">2025-07-05</time>
+                <time title="修改时间：2025-07-05 10:40:35" itemprop="dateModified" datetime="2025-07-05T10:40:35+08:00">2025-07-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -228,6 +228,10 @@
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/tools/mac/" itemprop="url" rel="index"><span itemprop="name">mac</span></a>
                 </span>
             </span>
 
@@ -262,7 +266,7 @@
 
 <h2 id="远程桌面rustdesk"><a href="#远程桌面rustdesk" class="headerlink" title="远程桌面rustdesk"></a>远程桌面rustdesk</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/rustdesk/rustdesk</span><br></pre></td></tr></table></figure>
 
-<h2 id="mac-拆分及合成pdf"><a href="#mac-拆分及合成pdf" class="headerlink" title="mac 拆分及合成pdf"></a>mac 拆分及合成pdf</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">又用了别的办法：</span><br><span class="line">1、安装pdf拆分工具</span><br><span class="line">brew install qpdf</span><br><span class="line">2、拆分成单个pdf</span><br><span class="line">qpdf --split-pages original.pdf page_.pdf</span><br><span class="line">3、删除不要的pdf文件，合成最终pdf</span><br><span class="line">qpdf --empty --pages page_*.pdf -- final.pdf</span><br></pre></td></tr></table></figure>
+<h2 id="mac-拆分及合成pdf"><a href="#mac-拆分及合成pdf" class="headerlink" title="mac 拆分及合成pdf"></a>mac 拆分及合成pdf</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1、安装pdf拆分工具</span><br><span class="line">brew install qpdf</span><br><span class="line">2、拆分成单个pdf</span><br><span class="line">qpdf --split-pages original.pdf page_.pdf</span><br><span class="line">3、删除不要的pdf文件，合成最终pdf</span><br><span class="line">qpdf --empty --pages page_*.pdf -- final.pdf</span><br></pre></td></tr></table></figure>
 
 
     </div>
@@ -367,7 +371,7 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

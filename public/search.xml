@@ -4603,7 +4603,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
       </categories>
   </entry>
   <entry>
-    <title>useful tools &amp;&amp; tips</title>
+    <title>tools</title>
     <url>/2024/12/26/useful-tools/</url>
     <content><![CDATA[<h2 id="termtosvg-录制终端会话"><a href="#termtosvg-录制终端会话" class="headerlink" title="termtosvg : 录制终端会话"></a>termtosvg : 录制终端会话</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#使用pyenv安装多版本python</span><br><span class="line">which python</span><br><span class="line"></span><br><span class="line">pip3 install termtosvg</span><br><span class="line"></span><br><span class="line">#使用</span><br><span class="line">termtosvg</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line">#可以使用浏览器打开生成的svg</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
@@ -4618,11 +4618,12 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 
 <h2 id="远程桌面rustdesk"><a href="#远程桌面rustdesk" class="headerlink" title="远程桌面rustdesk"></a>远程桌面rustdesk</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/rustdesk/rustdesk</span><br></pre></td></tr></table></figure>
 
-<h2 id="mac-拆分及合成pdf"><a href="#mac-拆分及合成pdf" class="headerlink" title="mac 拆分及合成pdf"></a>mac 拆分及合成pdf</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">又用了别的办法：</span><br><span class="line">1、安装pdf拆分工具</span><br><span class="line">brew install qpdf</span><br><span class="line">2、拆分成单个pdf</span><br><span class="line">qpdf --split-pages original.pdf page_.pdf</span><br><span class="line">3、删除不要的pdf文件，合成最终pdf</span><br><span class="line">qpdf --empty --pages page_*.pdf -- final.pdf</span><br></pre></td></tr></table></figure>
+<h2 id="mac-拆分及合成pdf"><a href="#mac-拆分及合成pdf" class="headerlink" title="mac 拆分及合成pdf"></a>mac 拆分及合成pdf</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、安装pdf拆分工具</span><br><span class="line">brew install qpdf</span><br><span class="line">2、拆分成单个pdf</span><br><span class="line">qpdf --split-pages original.pdf page_.pdf</span><br><span class="line">3、删除不要的pdf文件，合成最终pdf</span><br><span class="line">qpdf --empty --pages page_*.pdf -- final.pdf</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
         <category>tools</category>
+        <category>mac</category>
       </categories>
   </entry>
   <entry>
