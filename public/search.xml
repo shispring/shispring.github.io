@@ -7682,4 +7682,137 @@ validate</p>
         <tag>runtime</tag>
       </tags>
   </entry>
+  <entry>
+    <title>关于FQDN</title>
+    <url>/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/</url>
+    <content><![CDATA[<p>这是个很有技术深度的问题。在 Kubernetes 的网络架构中，<strong>FQDN（Fully Qualified Domain Name，完全限定域名）</strong> 是集群内部和外部通信中非常关键的一环。你提到的 <code>FQDN</code> 和 <code>RQDN</code>（可能是 Relative Qualified Domain Name 的意思，见下文）概念，都可以围绕 DNS 来系统理解。</p>
+<hr>
+<h2 id="✅-一、什么是-FQDN？"><a href="#✅-一、什么是-FQDN？" class="headerlink" title="✅ 一、什么是 FQDN？"></a>✅ 一、什么是 FQDN？</h2><p><strong>FQDN（Fully Qualified Domain Name）</strong> 是指一个完全的、绝对的 DNS 名字，它<strong>从主机名开始，一直到根域（<code>.</code>）结束</strong>。</p>
+<h3 id="🔹-举例："><a href="#🔹-举例：" class="headerlink" title="🔹 举例："></a>🔹 举例：</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>my-service.default.svc.cluster.local.</code></td>
+<td>✅ FQDN，在 K8s 中完整的 service 解析域名</td>
+</tr>
+<tr>
+<td><code>my-service.default.svc.cluster.local</code></td>
+<td>✅ 几乎等价（根 <code>.</code> 可省略）</td>
+</tr>
+<tr>
+<td><code>my-service</code></td>
+<td>❌ 不是 FQDN，属于相对域名（可解析依赖 search 域）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="✅-二、Kubernetes-中的-FQDN-使用场景"><a href="#✅-二、Kubernetes-中的-FQDN-使用场景" class="headerlink" title="✅ 二、Kubernetes 中的 FQDN 使用场景"></a>✅ 二、Kubernetes 中的 FQDN 使用场景</h2><p>在 Kubernetes 内部，所有服务、Pod 都可以通过 DNS 名称访问，而 <strong>KubeDNS&#x2F;CoreDNS</strong> 按如下规则拼接域名：</p>
+<h3 id="🚀-Service-默认-FQDN："><a href="#🚀-Service-默认-FQDN：" class="headerlink" title="🚀 Service 默认 FQDN："></a>🚀 Service 默认 FQDN：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>svc.cluster.local</code> 是 service 的默认 DNS 域名后缀，定义在 kubelet 或 CoreDNS 配置中。</p>
+</blockquote>
+<p>比如你有一个 service 叫 <code>nginx</code> 在 <code>prod</code> 命名空间，那么它的 FQDN 是：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nginx.prod.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<p>可以从任何命名空间使用这个 FQDN 访问该服务。</p>
+<hr>
+<h2 id="✅-三、FQDN-与非-FQDN-的区别"><a href="#✅-三、FQDN-与非-FQDN-的区别" class="headerlink" title="✅ 三、FQDN 与非 FQDN 的区别"></a>✅ 三、FQDN 与非 FQDN 的区别</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>示例</th>
+<th>是否全局唯一</th>
+<th>是否依赖 search 域</th>
+<th>是否推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FQDN</td>
+<td><code>nginx.prod.svc.cluster.local</code></td>
+<td>✅ 是</td>
+<td>❌ 不依赖</td>
+<td>✅ 推荐</td>
+</tr>
+<tr>
+<td>非 FQDN（短域名）</td>
+<td><code>nginx</code> 或 <code>nginx.prod</code></td>
+<td>❌ 可能冲突</td>
+<td>✅ 依赖</td>
+<td>❌ 不推荐跨命名空间</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="✅-四、使用-FQDN-的好处"><a href="#✅-四、使用-FQDN-的好处" class="headerlink" title="✅ 四、使用 FQDN 的好处"></a>✅ 四、使用 FQDN 的好处</h2><ol>
+<li><p><strong>跨命名空间通信稳定</strong></p>
+<ul>
+<li>使用完整域名 <code>svc.ns.svc.cluster.local</code> 不依赖 DNS search path</li>
+</ul>
+</li>
+<li><p><strong>更高的安全性和确定性</strong></p>
+<ul>
+<li>避免访问到其他命名空间中重名的 service（比如 <code>nginx</code>）</li>
+</ul>
+</li>
+<li><p><strong>跨集群 DNS 联通（例如 Service Mesh、多集群）</strong></p>
+<ul>
+<li>多集群环境中可以借助 FQDN 显式指定服务源</li>
+</ul>
+</li>
+<li><p><strong>自动证书绑定（如 Istio、cert-manager）</strong></p>
+<ul>
+<li>证书签发常用 FQDN 作为 <code>CommonName</code> 或 <code>SAN</code></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="✅-五、K8s-真实案例"><a href="#✅-五、K8s-真实案例" class="headerlink" title="✅ 五、K8s 真实案例"></a>✅ 五、K8s 真实案例</h2><h3 id="🔸-kubectl-exec-调试时："><a href="#🔸-kubectl-exec-调试时：" class="headerlink" title="🔸 kubectl exec 调试时："></a>🔸 <code>kubectl exec</code> 调试时：</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl nginx.default.svc.cluster.local:80</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔸-Ingress、Istio-中配置主机名路由："><a href="#🔸-Ingress、Istio-中配置主机名路由：" class="headerlink" title="🔸 Ingress、Istio 中配置主机名路由："></a>🔸 Ingress、Istio 中配置主机名路由：</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">host:</span> <span class="string">my-app.dev.svc.cluster.local</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔸-cert-manager-Issuer-中的-DNS-SAN-配置："><a href="#🔸-cert-manager-Issuer-中的-DNS-SAN-配置：" class="headerlink" title="🔸 cert-manager Issuer 中的 DNS SAN 配置："></a>🔸 cert-manager Issuer 中的 DNS SAN 配置：</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">dnsNames:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">rancher.qihoo.net</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">harbor.qa.qihoo.net</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-六、如何查看当前集群-FQDN-后缀？"><a href="#✅-六、如何查看当前集群-FQDN-后缀？" class="headerlink" title="✅ 六、如何查看当前集群 FQDN 后缀？"></a>✅ 六、如何查看当前集群 FQDN 后缀？</h2><p>你可以查看 kubelet 或 CoreDNS 的 DNS 配置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">search default.svc.cluster.local svc.cluster.local cluster.local</span><br><span class="line">nameserver 10.43.0.10</span><br></pre></td></tr></table></figure>
+
+<p>这表示你在 <code>default</code> 命名空间时，短域名会自动补齐成：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;name&gt;.default.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-总结表格"><a href="#✅-总结表格" class="headerlink" title="✅ 总结表格"></a>✅ 总结表格</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>描述</th>
+<th>典型示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FQDN</td>
+<td>完全限定域名，从主机名到根域的全路径</td>
+<td><code>svc.ns.svc.cluster.local</code></td>
+</tr>
+<tr>
+<td>简短域名</td>
+<td>极简写法，仅用于当前 namespace 内</td>
+<td><code>svc</code></td>
+</tr>
+<tr>
+<td>推荐场景</td>
+<td>跨命名空间访问 &#x2F; TLS 绑定 &#x2F; 多集群 &#x2F; Istio 等</td>
+<td>必须使用 FQDN</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
 </search>

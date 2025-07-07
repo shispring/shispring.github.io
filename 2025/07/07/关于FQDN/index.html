@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="这是个很有技术深度的问题。在 Kubernetes 的网络架构中，FQDN（Fully Qualified Domain Name，完全限定域名） 是集群内部和外部通信中非常关键的一环。你提到的 FQDN 和 RQDN（可能是 Relative Qualified Domain Name 的意思，见下文）概念，都可以围绕 DNS 来系统理解。  ✅ 一、什么是 FQDN？FQDN（Fully Qu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于FQDN">
+<meta property="og:url" content="https://shispring.github.io/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="这是个很有技术深度的问题。在 Kubernetes 的网络架构中，FQDN（Fully Qualified Domain Name，完全限定域名） 是集群内部和外部通信中非常关键的一环。你提到的 FQDN 和 RQDN（可能是 Relative Qualified Domain Name 的意思，见下文）概念，都可以围绕 DNS 来系统理解。  ✅ 一、什么是 FQDN？FQDN（Fully Qu">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-07T07:23:24.000Z">
+<meta property="article:modified_time" content="2025-07-07T07:24:58.973Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>关于FQDN | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          关于FQDN
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-07-07 15:23:24 / 修改时间：15:24:58" itemprop="dateCreated datePublished" datetime="2025-07-07T15:23:24+08:00">2025-07-07</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这是个很有技术深度的问题。在 Kubernetes 的网络架构中，<strong>FQDN（Fully Qualified Domain Name，完全限定域名）</strong> 是集群内部和外部通信中非常关键的一环。你提到的 <code>FQDN</code> 和 <code>RQDN</code>（可能是 Relative Qualified Domain Name 的意思，见下文）概念，都可以围绕 DNS 来系统理解。</p>
+<hr>
+<h2 id="✅-一、什么是-FQDN？"><a href="#✅-一、什么是-FQDN？" class="headerlink" title="✅ 一、什么是 FQDN？"></a>✅ 一、什么是 FQDN？</h2><p><strong>FQDN（Fully Qualified Domain Name）</strong> 是指一个完全的、绝对的 DNS 名字，它<strong>从主机名开始，一直到根域（<code>.</code>）结束</strong>。</p>
+<h3 id="🔹-举例："><a href="#🔹-举例：" class="headerlink" title="🔹 举例："></a>🔹 举例：</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>my-service.default.svc.cluster.local.</code></td>
+<td>✅ FQDN，在 K8s 中完整的 service 解析域名</td>
+</tr>
+<tr>
+<td><code>my-service.default.svc.cluster.local</code></td>
+<td>✅ 几乎等价（根 <code>.</code> 可省略）</td>
+</tr>
+<tr>
+<td><code>my-service</code></td>
+<td>❌ 不是 FQDN，属于相对域名（可解析依赖 search 域）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="✅-二、Kubernetes-中的-FQDN-使用场景"><a href="#✅-二、Kubernetes-中的-FQDN-使用场景" class="headerlink" title="✅ 二、Kubernetes 中的 FQDN 使用场景"></a>✅ 二、Kubernetes 中的 FQDN 使用场景</h2><p>在 Kubernetes 内部，所有服务、Pod 都可以通过 DNS 名称访问，而 <strong>KubeDNS&#x2F;CoreDNS</strong> 按如下规则拼接域名：</p>
+<h3 id="🚀-Service-默认-FQDN："><a href="#🚀-Service-默认-FQDN：" class="headerlink" title="🚀 Service 默认 FQDN："></a>🚀 Service 默认 FQDN：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>svc.cluster.local</code> 是 service 的默认 DNS 域名后缀，定义在 kubelet 或 CoreDNS 配置中。</p>
+</blockquote>
+<p>比如你有一个 service 叫 <code>nginx</code> 在 <code>prod</code> 命名空间，那么它的 FQDN 是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx.prod.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<p>可以从任何命名空间使用这个 FQDN 访问该服务。</p>
+<hr>
+<h2 id="✅-三、FQDN-与非-FQDN-的区别"><a href="#✅-三、FQDN-与非-FQDN-的区别" class="headerlink" title="✅ 三、FQDN 与非 FQDN 的区别"></a>✅ 三、FQDN 与非 FQDN 的区别</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>示例</th>
+<th>是否全局唯一</th>
+<th>是否依赖 search 域</th>
+<th>是否推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FQDN</td>
+<td><code>nginx.prod.svc.cluster.local</code></td>
+<td>✅ 是</td>
+<td>❌ 不依赖</td>
+<td>✅ 推荐</td>
+</tr>
+<tr>
+<td>非 FQDN（短域名）</td>
+<td><code>nginx</code> 或 <code>nginx.prod</code></td>
+<td>❌ 可能冲突</td>
+<td>✅ 依赖</td>
+<td>❌ 不推荐跨命名空间</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="✅-四、使用-FQDN-的好处"><a href="#✅-四、使用-FQDN-的好处" class="headerlink" title="✅ 四、使用 FQDN 的好处"></a>✅ 四、使用 FQDN 的好处</h2><ol>
+<li><p><strong>跨命名空间通信稳定</strong></p>
+<ul>
+<li>使用完整域名 <code>svc.ns.svc.cluster.local</code> 不依赖 DNS search path</li>
+</ul>
+</li>
+<li><p><strong>更高的安全性和确定性</strong></p>
+<ul>
+<li>避免访问到其他命名空间中重名的 service（比如 <code>nginx</code>）</li>
+</ul>
+</li>
+<li><p><strong>跨集群 DNS 联通（例如 Service Mesh、多集群）</strong></p>
+<ul>
+<li>多集群环境中可以借助 FQDN 显式指定服务源</li>
+</ul>
+</li>
+<li><p><strong>自动证书绑定（如 Istio、cert-manager）</strong></p>
+<ul>
+<li>证书签发常用 FQDN 作为 <code>CommonName</code> 或 <code>SAN</code></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="✅-五、K8s-真实案例"><a href="#✅-五、K8s-真实案例" class="headerlink" title="✅ 五、K8s 真实案例"></a>✅ 五、K8s 真实案例</h2><h3 id="🔸-kubectl-exec-调试时："><a href="#🔸-kubectl-exec-调试时：" class="headerlink" title="🔸 kubectl exec 调试时："></a>🔸 <code>kubectl exec</code> 调试时：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl nginx.default.svc.cluster.local:80</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔸-Ingress、Istio-中配置主机名路由："><a href="#🔸-Ingress、Istio-中配置主机名路由：" class="headerlink" title="🔸 Ingress、Istio 中配置主机名路由："></a>🔸 Ingress、Istio 中配置主机名路由：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">host:</span> <span class="string">my-app.dev.svc.cluster.local</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔸-cert-manager-Issuer-中的-DNS-SAN-配置："><a href="#🔸-cert-manager-Issuer-中的-DNS-SAN-配置：" class="headerlink" title="🔸 cert-manager Issuer 中的 DNS SAN 配置："></a>🔸 cert-manager Issuer 中的 DNS SAN 配置：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">dnsNames:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">rancher.qihoo.net</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">harbor.qa.qihoo.net</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-六、如何查看当前集群-FQDN-后缀？"><a href="#✅-六、如何查看当前集群-FQDN-后缀？" class="headerlink" title="✅ 六、如何查看当前集群 FQDN 后缀？"></a>✅ 六、如何查看当前集群 FQDN 后缀？</h2><p>你可以查看 kubelet 或 CoreDNS 的 DNS 配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">search default.svc.cluster.local svc.cluster.local cluster.local</span><br><span class="line">nameserver 10.43.0.10</span><br></pre></td></tr></table></figure>
+
+<p>这表示你在 <code>default</code> 命名空间时，短域名会自动补齐成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;name&gt;.default.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-总结表格"><a href="#✅-总结表格" class="headerlink" title="✅ 总结表格"></a>✅ 总结表格</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>描述</th>
+<th>典型示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FQDN</td>
+<td>完全限定域名，从主机名到根域的全路径</td>
+<td><code>svc.ns.svc.cluster.local</code></td>
+</tr>
+<tr>
+<td>简短域名</td>
+<td>极简写法，仅用于当前 namespace 内</td>
+<td><code>svc</code></td>
+</tr>
+<tr>
+<td>推荐场景</td>
+<td>跨命名空间访问 &#x2F; TLS 绑定 &#x2F; 多集群 &#x2F; Istio 等</td>
+<td>必须使用 FQDN</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/07/01/%E5%B8%B8%E8%A7%81runtime-socket/" rel="prev" title="常见runtime socket">
+      <i class="fa fa-chevron-left"></i> 常见runtime socket
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%85-%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF-FQDN%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">✅ 一、什么是 FQDN？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E4%B8%BE%E4%BE%8B%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">🔹 举例：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%85-%E4%BA%8C%E3%80%81Kubernetes-%E4%B8%AD%E7%9A%84-FQDN-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">✅ 二、Kubernetes 中的 FQDN 使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%9A%80-Service-%E9%BB%98%E8%AE%A4-FQDN%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">🚀 Service 默认 FQDN：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%85-%E4%B8%89%E3%80%81FQDN-%E4%B8%8E%E9%9D%9E-FQDN-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">3.</span> <span class="nav-text">✅ 三、FQDN 与非 FQDN 的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%85-%E5%9B%9B%E3%80%81%E4%BD%BF%E7%94%A8-FQDN-%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">4.</span> <span class="nav-text">✅ 四、使用 FQDN 的好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%85-%E4%BA%94%E3%80%81K8s-%E7%9C%9F%E5%AE%9E%E6%A1%88%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">✅ 五、K8s 真实案例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B8-kubectl-exec-%E8%B0%83%E8%AF%95%E6%97%B6%EF%BC%9A"><span class="nav-number">5.1.</span> <span class="nav-text">🔸 kubectl exec 调试时：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B8-Ingress%E3%80%81Istio-%E4%B8%AD%E9%85%8D%E7%BD%AE%E4%B8%BB%E6%9C%BA%E5%90%8D%E8%B7%AF%E7%94%B1%EF%BC%9A"><span class="nav-number">5.2.</span> <span class="nav-text">🔸 Ingress、Istio 中配置主机名路由：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B8-cert-manager-Issuer-%E4%B8%AD%E7%9A%84-DNS-SAN-%E9%85%8D%E7%BD%AE%EF%BC%9A"><span class="nav-number">5.3.</span> <span class="nav-text">🔸 cert-manager Issuer 中的 DNS SAN 配置：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%85-%E5%85%AD%E3%80%81%E5%A6%82%E4%BD%95%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E9%9B%86%E7%BE%A4-FQDN-%E5%90%8E%E7%BC%80%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">✅ 六、如何查看当前集群 FQDN 后缀？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%85-%E6%80%BB%E7%BB%93%E8%A1%A8%E6%A0%BC"><span class="nav-number">7.</span> <span class="nav-text">✅ 总结表格</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
