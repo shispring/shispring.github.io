@@ -4407,9 +4407,9 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
       </categories>
   </entry>
   <entry>
-    <title>swagger部署k8s open api</title>
+    <title>swagger部署open api</title>
     <url>/2024/09/27/swagger%E9%83%A8%E7%BD%B2k8s-open-api/</url>
-    <content><![CDATA[<h3 id="一、导出k8s-API配置"><a href="#一、导出k8s-API配置" class="headerlink" title="一、导出k8s API配置"></a>一、导出k8s API配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#临时启动服务</span></span><br><span class="line">kubectl proxy --port=8082</span><br><span class="line"><span class="comment">#导出配置</span></span><br><span class="line">curl http://localhost:8082/openapi/v2 &gt; k8s-swagger.json</span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<h3 id="一、导出k8s-API配置"><a href="#一、导出k8s-API配置" class="headerlink" title="一、导出k8s API配置"></a>一、导出k8s API配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#临时启动服务</span></span><br><span class="line">kubectl proxy --port=8082</span><br><span class="line"><span class="comment">#导出配置</span></span><br><span class="line">curl http://localhost:8082/openapi/v2 &gt; k8s-swagger.json</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h3 id="二、启动服务"><a href="#二、启动服务" class="headerlink" title="二、启动服务"></a>二、启动服务</h3><ul>
 <li>docker启动</li>
@@ -4420,6 +4420,22 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 <li>docker-compose启动</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#vim docker-compose.yaml</span></span><br><span class="line"></span><br><span class="line">version: <span class="string">&quot;3&quot;</span></span><br><span class="line">services:</span><br><span class="line">  document:</span><br><span class="line">    environment:</span><br><span class="line">      - SWAGGER_JSON=/k8s-swagger.json</span><br><span class="line">    image: swaggerapi/swagger-ui</span><br><span class="line">    volumes:</span><br><span class="line">      - ./k8s-swagger.json:/k8s-swagger.json</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;8899:8080&quot;</span></span><br><span class="line">  editor:</span><br><span class="line">    image: swaggerapi/swagger-editor</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;9988:8080&quot;</span></span><br><span class="line">      </span><br><span class="line"> </span><br><span class="line"><span class="comment">#启动</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml up -d </span><br><span class="line"><span class="comment">#查看服务    </span></span><br><span class="line">docker-compose -f ./docker-compose.yaml ps</span><br><span class="line"><span class="comment">#停止服务</span></span><br><span class="line">docker-compose -f ./docker-compose.yaml down</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="harbor-openAPI-使用官方-Swagger-YAML-文件"><a href="#harbor-openAPI-使用官方-Swagger-YAML-文件" class="headerlink" title="harbor openAPI 使用官方 Swagger YAML 文件"></a>harbor openAPI 使用官方 Swagger YAML 文件</h2><p>访问 Harbor GitHub 仓库，下载最新的 <code>swagger.yaml</code>，然后本地加载：</p>
+<ul>
+<li><p>Harbor Swagger 定义文件：</p>
+<ul>
+<li>GitHub 地址（最新）：<br><a href="https://github.com/goharbor/harbor/blob/main/api/v2.0/swagger.yaml">https://github.com/goharbor/harbor/blob/main/api/v2.0/swagger.yaml</a></li>
+</ul>
+</li>
+<li><p>使用方式：</p>
+<ol>
+<li>下载 <code>swagger.yaml</code> 文件；</li>
+<li>打开 <a href="https://editor.swagger.io/">Swagger Editor 在线工具</a>；</li>
+<li>File → Import File → 加载该文件，即可获得可视化 API 文档。</li>
+</ol>
+</li>
+</ul>
 ]]></content>
       <categories>
         <category>k8s</category>
