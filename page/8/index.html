@@ -184,6 +184,95 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/04/%E5%88%A0%E9%99%A4Terminatin%E7%8A%B6%E6%80%81%E7%9A%84%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/04/%E5%88%A0%E9%99%A4Terminatin%E7%8A%B6%E6%80%81%E7%9A%84%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/" class="post-title-link" itemprop="url">删除Terminatin状态的命名空间</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-04 14:27:55" itemprop="dateCreated datePublished" datetime="2024-12-04T14:27:55+08:00">2024-12-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-21 16:45:45" itemprop="dateModified" datetime="2025-05-21T16:45:45+08:00">2025-05-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="命名空间一直处于Terminating问题分析"><a href="#命名空间一直处于Terminating问题分析" class="headerlink" title="命名空间一直处于Terminating问题分析"></a>命名空间一直处于Terminating问题分析</h2><ul>
+<li>报错 Error from server (MethodNotAllowed) 表示某些资源类型的操作（如 GET 或 DELETE）在命名空间中不被支持，可能是某些残留的自定义资源（CRD）或特殊系统资源导致。</li>
+<li>部分资源仍存在于命名空间中，但 Kubernetes 无法正确清理，命名空间因而停留在 Terminating 状态。</li>
+</ul>
+<h3 id="方法-1：逐步清理残留资源"><a href="#方法-1：逐步清理残留资源" class="headerlink" title="方法 1：逐步清理残留资源"></a>方法 1：逐步清理残留资源</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">1.列出命名空间中的资源：</span><br><span class="line">使用以下命令列出所有可能影响命名空间删除的资源：</span><br><span class="line">kubectl api-resources --namespaced=true -o name | xargs -n 1 kubectl -n jpshi-ca-test get --ignore-not-found</span><br><span class="line">如果某些资源显示报错（如 MethodNotAllowed），需要针对这些资源进一步操作。</span><br><span class="line"></span><br><span class="line">2.强制删除特定资源：</span><br><span class="line">对于残留资源，可以手动清理：</span><br><span class="line">kubectl delete &lt;resource-type&gt; &lt;resource-name&gt; -n jpshi-ca-test --force --grace-period=0</span><br><span class="line">如果资源类型无法直接删除，可能需要查看其定义并移除 finalizers。</span><br><span class="line"></span><br><span class="line">3.编辑特定资源的 Finalizers：</span><br><span class="line">kubectl edit &lt;resource-type&gt; &lt;resource-name&gt; -n jpshi-ca-test</span><br><span class="line">在资源定义中删除类似以下内容：</span><br><span class="line">metadata:</span><br><span class="line">  finalizers:</span><br><span class="line">  - example.finalizer.kubernetes.io</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法2：强制移除命名空间-Finalizers"><a href="#方法2：强制移除命名空间-Finalizers" class="headerlink" title="方法2：强制移除命名空间 Finalizers"></a>方法2：强制移除命名空间 Finalizers</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">命名空间未删除的核心问题通常是 finalizers 阻止删除。以下命令会直接移除命名空间的 finalizers，强制删除：</span><br><span class="line">1.编辑命名空间：</span><br><span class="line">kubectl edit namespace jpshi-ca-test</span><br><span class="line">删除以下字段：</span><br><span class="line">spec:</span><br><span class="line">  finalizers:</span><br><span class="line">  - kubernetes</span><br><span class="line"></span><br><span class="line">2.或通过命令强制移除 Finalizers：</span><br><span class="line">kubectl patch namespace jpshi-ca-test -p &#x27;&#123;&quot;metadata&quot;:&#123;&quot;finalizers&quot;:[]&#125;&#125;&#x27; --type=merge</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法-3：彻底清理命名空间及其关联资源"><a href="#方法-3：彻底清理命名空间及其关联资源" class="headerlink" title="方法 3：彻底清理命名空间及其关联资源"></a>方法 3：彻底清理命名空间及其关联资源</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1.使用 kubectl proxy 调试：</span><br><span class="line">kubectl proxy &amp;</span><br><span class="line">通过 Kubernetes API 调用直接操作命名空间：</span><br><span class="line">curl -k -H &quot;Content-Type: application/json&quot; -X PUT \</span><br><span class="line">--data &#x27;&#123;&quot;metadata&quot;:&#123;&quot;finalizers&quot;:[]&#125;&#125;&#x27; \</span><br><span class="line">http://localhost:8001/api/v1/namespaces/jpshi-ca-test/finalize</span><br><span class="line"></span><br><span class="line">2.删除命名空间及其资源：</span><br><span class="line">如果仍无法删除，可以使用以下命令强制清理：</span><br><span class="line">kubectl delete namespace jpshi-ca-test --force --grace-period=0</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法-4：排查-CRD-资源问题"><a href="#方法-4：排查-CRD-资源问题" class="headerlink" title="方法 4：排查 CRD 资源问题"></a>方法 4：排查 CRD 资源问题</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">如果命名空间中涉及 CRD（CustomResourceDefinitions），需要特别检查这些资源类型是否存在问题。</span><br><span class="line">1.列出所有 CRD 实例：</span><br><span class="line">kubectl get crd</span><br><span class="line"></span><br><span class="line">2.删除与命名空间相关的 CRD 实例：</span><br><span class="line">kubectl delete &lt;crd-name&gt; -n jpshi-ca-test --force --grace-period=0</span><br><span class="line"></span><br><span class="line">3.检查并清理 CRD Finalizers：</span><br><span class="line">kubectl patch &lt;crd-name&gt; -n jpshi-ca-test -p &#x27;&#123;&quot;metadata&quot;:&#123;&quot;finalizers&quot;:[]&#125;&#125;&#x27; --type=merge</span><br><span class="line">验证命名空间删除</span><br><span class="line"></span><br><span class="line">删除命名空间后，确认其状态：</span><br><span class="line">kubectl get namespaces</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>强制删除命名空间可能会导致资源不一致或孤立资源，请谨慎操作。</li>
+<li>如果问题持续未解决，可能需要检查 Kubernetes API Server 或 Controller Manager 的日志进行深入排查。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/29/k8s%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1203,76 +1292,6 @@ validate</p>
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/nginx-demo-service/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/08/nginx-demo-service/" class="post-title-link" itemprop="url">nginx demo service</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-11-08 20:13:31 / 修改时间：20:15:11" itemprop="dateCreated datePublished" datetime="2024-11-08T20:13:31+08:00">2024-11-08</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/nginx/" itemprop="url" rel="index"><span itemprop="name">nginx</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="配置nginx服务"><a href="#配置nginx服务" class="headerlink" title="配置nginx服务"></a>配置nginx服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOL &gt; /Users/xxx/share/nginx.conf</span><br><span class="line">events &#123;&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name localhost;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root /usr/share/nginx/html;</span><br><span class="line">            autoindex on; # 启用目录列表功能</span><br><span class="line">            autoindex_exact_size off; # 以KB或MB显示文件大小</span><br><span class="line">            autoindex_localtime on; # 以本地时间显示文件的修改时间</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOL</span><br></pre></td></tr></table></figure>
-
-<h2 id="启动docker服务"><a href="#启动docker服务" class="headerlink" title="启动docker服务"></a>启动docker服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx</span><br><span class="line"></span><br><span class="line">docker run --name nginx-share -d \</span><br><span class="line">    -p 8080:80 \</span><br><span class="line">    -v /Users/xxx/share:/usr/share/nginx/html \</span><br><span class="line">    -v /Users/xxx/share/nginx.conf:/etc/nginx/nginx.conf:ro \</span><br><span class="line">    nginx</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1344,7 +1363,7 @@ validate</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-count">125</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1357,7 +1376,7 @@ validate</p>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
