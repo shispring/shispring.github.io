@@ -8784,4 +8784,15 @@ validate</p>
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>zap日志级别</title>
+    <url>/2025/08/05/zap%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB/</url>
+    <content><![CDATA[<h2 id="zap调试"><a href="#zap调试" class="headerlink" title="zap调试"></a>zap调试</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;flag&quot;</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">	ctrl &quot;sigs.k8s.io/controller-runtime&quot;</span><br><span class="line">	&quot;sigs.k8s.io/controller-runtime/pkg/log/zap&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var opts zap.Options</span><br><span class="line">	opts.BindFlags(flag.CommandLine)</span><br><span class="line">	flag.Parse()</span><br><span class="line"></span><br><span class="line">	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&amp;opts)))</span><br><span class="line">	log := ctrl.Log.WithName(&quot;TestLogger&quot;)</span><br><span class="line"></span><br><span class="line">	fmt.Println(&quot;Testing different log levels:&quot;)</span><br><span class="line"></span><br><span class="line">	log.Info(&quot;This is Info level&quot;)</span><br><span class="line">	log.V(1).Info(&quot;This is V(1) level&quot;)</span><br><span class="line">	log.V(2).Info(&quot;This is V(2) level&quot;)</span><br><span class="line">	log.V(3).Info(&quot;This is V(3) level&quot;)</span><br><span class="line"></span><br><span class="line">	fmt.Println(&quot;Test completed&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="运行方式"><a href="#运行方式" class="headerlink" title="运行方式"></a>运行方式</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">go run test-zap-levels.go --zap-log-level=1</span><br><span class="line">go run test-zap-levels.go --zap-log-level=debug</span><br><span class="line">go run test-zap-levels.go --zap-log-level=9</span><br><span class="line"></span><br><span class="line">V(1) → 显示为 debug 级别</span><br><span class="line">V(2) → 显示为 Level(-2) 级别</span><br><span class="line">V(3) → 显示为 Level(-3) 级别</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>go</tag>
+      </tags>
+  </entry>
 </search>
