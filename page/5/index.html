@@ -184,6 +184,131 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/10/kubectl-rollout-%E5%91%BD%E4%BB%A4%E7%9A%84%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/10/kubectl-rollout-%E5%91%BD%E4%BB%A4%E7%9A%84%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C/" class="post-title-link" itemprop="url">kubectl rollout 命令的常见操作</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-02-10 18:48:36 / 修改时间：18:49:35" itemprop="dateCreated datePublished" datetime="2025-02-10T18:48:36+08:00">2025-02-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="kubectl-rollout-命令的常见操作"><a href="#kubectl-rollout-命令的常见操作" class="headerlink" title="kubectl rollout 命令的常见操作"></a><strong><code>kubectl rollout</code> 命令的常见操作</strong></h3><p><code>kubectl rollout</code> 主要用于管理 <strong>Deployment、DaemonSet 和 StatefulSet</strong> 等控制器的 <strong>更新、回滚和状态查询</strong>。以下是常见用法汇总：</p>
+<h4 id="1-滚动重启-Deployment"><a href="#1-滚动重启-Deployment" class="headerlink" title="1. 滚动重启 Deployment"></a><strong>1. 滚动重启 Deployment</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout restart deployment &lt;deployment-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：逐步终止并重新创建 Pod，适用于配置变更但未修改 <code>image</code> 时。</li>
+</ul>
+<h4 id="2-查看-Deployment-DaemonSet-StatefulSet-的更新状态"><a href="#2-查看-Deployment-DaemonSet-StatefulSet-的更新状态" class="headerlink" title="2. 查看 Deployment&#x2F;DaemonSet&#x2F;StatefulSet 的更新状态"></a><strong>2. 查看 Deployment&#x2F;DaemonSet&#x2F;StatefulSet 的更新状态</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout status deployment &lt;deployment-name&gt; -n &lt;namespace&gt;</span><br><span class="line">kubectl rollout status daemonset &lt;daemonset-name&gt; -n &lt;namespace&gt;</span><br><span class="line">kubectl rollout status statefulset &lt;statefulset-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：检查滚动更新的状态，确保 Pod 更新完成。</li>
+</ul>
+<h4 id="3-进行版本回滚"><a href="#3-进行版本回滚" class="headerlink" title="3. 进行版本回滚"></a><strong>3. 进行版本回滚</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout undo deployment &lt;deployment-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：回滚到上一个版本，适用于错误的更新。</li>
+</ul>
+<h4 id="4-指定回滚到某个历史版本"><a href="#4-指定回滚到某个历史版本" class="headerlink" title="4. 指定回滚到某个历史版本"></a><strong>4. 指定回滚到某个历史版本</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout undo deployment &lt;deployment-name&gt; --to-revision=&lt;revision-number&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：回滚到指定的历史版本。</li>
+</ul>
+<h4 id="5-查看-Deployment-的修订历史"><a href="#5-查看-Deployment-的修订历史" class="headerlink" title="5. 查看 Deployment 的修订历史"></a><strong>5. 查看 Deployment 的修订历史</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout <span class="built_in">history</span> deployment &lt;deployment-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：列出所有历史版本，方便回滚。</li>
+</ul>
+<h4 id="6-暂停-Deployment-的更新"><a href="#6-暂停-Deployment-的更新" class="headerlink" title="6. 暂停 Deployment 的更新"></a><strong>6. 暂停 Deployment 的更新</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout pause deployment &lt;deployment-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：暂停滚动更新，适用于批量修改多个参数但不立即生效。</li>
+</ul>
+<h4 id="7-继续-Deployment-的更新"><a href="#7-继续-Deployment-的更新" class="headerlink" title="7. 继续 Deployment 的更新"></a><strong>7. 继续 Deployment 的更新</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout resume deployment &lt;deployment-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：恢复之前暂停的 Deployment 更新。</li>
+</ul>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>kubectl rollout restart</code></td>
+<td>重新启动 Pod（滚动重启）</td>
+</tr>
+<tr>
+<td><code>kubectl rollout status</code></td>
+<td>查看更新状态</td>
+</tr>
+<tr>
+<td><code>kubectl rollout undo</code></td>
+<td>版本回滚</td>
+</tr>
+<tr>
+<td><code>kubectl rollout undo --to-revision=X</code></td>
+<td>回滚到指定版本</td>
+</tr>
+<tr>
+<td><code>kubectl rollout history</code></td>
+<td>查看修订历史</td>
+</tr>
+<tr>
+<td><code>kubectl rollout pause</code></td>
+<td>暂停滚动更新</td>
+</tr>
+<tr>
+<td><code>kubectl rollout resume</code></td>
+<td>继续滚动更新</td>
+</tr>
+</tbody></table>
+<p>这些命令在 Kubernetes <strong>CI&#x2F;CD 更新、问题回滚、版本控制</strong> 等场景中非常常用。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/10/k8s%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%B1%BB%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1248,202 +1373,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/10/docker-ctr-crictl%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/01/10/docker-ctr-crictl%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">docker ctr crictl nerdctl命令使用</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-01-10 18:01:54" itemprop="dateCreated datePublished" datetime="2025-01-10T18:01:54+08:00">2025-01-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-04-14 14:43:31" itemprop="dateModified" datetime="2025-04-14T14:43:31+08:00">2025-04-14</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/docker/" itemprop="url" rel="index"><span itemprop="name">docker</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="命令对比"><a href="#命令对比" class="headerlink" title="命令对比"></a>命令对比</h2><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>docker</th>
-<th>ctr（containerd）</th>
-<th>crictl（kubernetes）</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>查看运行的容器</td>
-<td>docker ps</td>
-<td>ctr task ls &#x2F; ctr container ls</td>
-<td>crictl ps</td>
-</tr>
-<tr>
-<td>查看镜像</td>
-<td>docker images</td>
-<td>ctr image ls &#x2F; ctr i ls</td>
-<td>crictl images</td>
-</tr>
-<tr>
-<td>查看容器日志</td>
-<td>docker logs</td>
-<td>无</td>
-<td>crictl logs</td>
-</tr>
-<tr>
-<td>查看容器信息</td>
-<td>docker inspect</td>
-<td>ctr container info</td>
-<td>crictl inspect</td>
-</tr>
-<tr>
-<td>查看容器资源</td>
-<td>docker stats</td>
-<td>无</td>
-<td>crictl stats</td>
-</tr>
-<tr>
-<td>启动&#x2F;关闭已有的容器</td>
-<td>docker start&#x2F;stop</td>
-<td>ctr task start&#x2F;kill</td>
-<td>crictl start&#x2F;stop</td>
-</tr>
-<tr>
-<td>运行一个新的容器</td>
-<td>docker run</td>
-<td>ctr run</td>
-<td>无（最小单元为 Pod）</td>
-</tr>
-<tr>
-<td>修改镜像标签</td>
-<td>docker tag</td>
-<td>ctr image tag</td>
-<td>无</td>
-</tr>
-<tr>
-<td>创建一个新的容器</td>
-<td>docker create</td>
-<td>ctr container create</td>
-<td>crictl create</td>
-</tr>
-<tr>
-<td>导入镜像</td>
-<td>docker load</td>
-<td>ctr image import</td>
-<td>无</td>
-</tr>
-<tr>
-<td>导出镜像</td>
-<td>docker save</td>
-<td>ctr image export</td>
-<td>无</td>
-</tr>
-<tr>
-<td>删除容器</td>
-<td>docker rm</td>
-<td>ctr container rm</td>
-<td>crictl rm</td>
-</tr>
-<tr>
-<td>删除镜像</td>
-<td>docker rmi</td>
-<td>ctr image rm</td>
-<td>crictl rmi</td>
-</tr>
-<tr>
-<td>拉取镜像</td>
-<td>docker pull</td>
-<td>ctr image pull</td>
-<td>crictl pull</td>
-</tr>
-<tr>
-<td>推送镜像</td>
-<td>docker push</td>
-<td>ctr image push</td>
-<td>无</td>
-</tr>
-<tr>
-<td>在容器内部执行命令</td>
-<td>docker exec</td>
-<td>无</td>
-<td>crictl exec</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="docker清理资源"><a href="#docker清理资源" class="headerlink" title="docker清理资源"></a>docker清理资源</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">#查看停止的容器</span><br><span class="line">docker ps --filter status=exited --filter status=dead -q</span><br><span class="line">docker ps --filter status=exited --filter status=dead -s</span><br><span class="line">#停止所有容器</span><br><span class="line">#docker stop $(docker ps -q)</span><br><span class="line"></span><br><span class="line">#清理停止的容器</span><br><span class="line">docker container prune -f</span><br><span class="line"></span><br><span class="line">#列出所有悬空镜像</span><br><span class="line">docker images -f &quot;dangling=true&quot;</span><br><span class="line">#清理未使用的镜像（悬空或无标签）</span><br><span class="line">docker image prune -a -f</span><br><span class="line"></span><br><span class="line">#清除默认构建缓存</span><br><span class="line">docker buildx prune -f</span><br><span class="line"></span><br><span class="line">#清理未使用的卷</span><br><span class="line">docker volume prune -f</span><br><span class="line"></span><br><span class="line">#清理未使用的网络</span><br><span class="line">docker network prune -f</span><br><span class="line"></span><br><span class="line">#查看容器、镜像、卷等资源的占用情况</span><br><span class="line">docker system df</span><br><span class="line"></span><br><span class="line">#综合清理所有未使用的数据，所有废弃镜像与Build Cache</span><br><span class="line">docker system prune -a -f --volumes</span><br><span class="line"></span><br><span class="line">#查看磁盘使用情况</span><br><span class="line">df -lh</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="ctr"><a href="#ctr" class="headerlink" title="ctr"></a>ctr</h2><blockquote>
-<p>ctr 是一个不受支持的，用于与 containerd 守护进程交互的调试和管理客户端 </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- 查看containerd命名空间：ctr namespace ls</span><br><span class="line">- 查看containerd的镜像：ctr images ls（可指定命名空间，如ctr -n k8s.io images ls）</span><br><span class="line">- 拉取containerd的镜像：ctr -n k8s.io images pull &lt;image&gt;</span><br><span class="line">- 删除containerd的镜像：ctr -n k8s.io images rm &lt;image&gt;</span><br><span class="line">- 导出containerd的镜像：ctr -n k8s.io images export &lt;image&gt;</span><br><span class="line">- 导入containerd的镜像：ctr -n k8s.io image import &lt;image&gt;</span><br><span class="line">- 标记containerd的镜像（起别名）：ctr -n k8s.io images tag &lt;image&gt; &lt;alias&gt;</span><br><span class="line">- 运行containerd的容器：ctr -n k8s.io run &lt;container&gt;</span><br><span class="line">- 查看运行容器的task：ctr -n k8s.io task ls</span><br><span class="line">- 启动指定容器的task：ctr -n k8s.io task start &lt;container&gt;</span><br><span class="line">- 进入指定容器的task：ctr -n k8s.io task exec --exec-id &lt;id&gt; -t &lt;container&gt; /bin/bash</span><br><span class="line">- 删除指定容器的task：ctr -n k8s.io task rm -f &lt;container&gt;</span><br><span class="line">- 停止指定容器的task：ctr -n k8s.io task kill --signal &lt;signal&gt; &lt;container&gt;</span><br><span class="line">- 查看容器：ctr -n k8s.io c list</span><br><span class="line">- 删除容器：ctr -n k8s.io c rm &lt;container&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="crictl"><a href="#crictl" class="headerlink" title="crictl"></a>crictl</h2><blockquote>
-<p>crictl 是一个符合 CRI 接口规范的命令行工具，通常用于检查和管理 kubelet 节点上的容器运行时和镜像</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">- 取消DEBUG信息：crictl --debug=false xxx</span><br><span class="line">- 查看镜像：crictl images</span><br><span class="line">- 拉取镜像：crictl pull &lt;image-name&gt;:&lt;tag&gt;</span><br><span class="line">- 删除镜像：crictl rmi &lt;image-id&gt;</span><br><span class="line">- 列出当前运行的容器：crictl ps</span><br><span class="line">- 列出所有容器（包括已停止的）：crictl ps -a</span><br><span class="line">- 查看指定容器的详细信息：crictl inspect &lt;container-id&gt;</span><br><span class="line">- 停止指定ID的容器：crictl stop &lt;container-id&gt;</span><br><span class="line">- 删除指定ID的容器：crictl rm &lt;container-id&gt;</span><br><span class="line">- 列出当前运行的Pod：crictl pods</span><br><span class="line">- 查看指定Pod的详细信息：crictl inspectp &lt;pod-id&gt;</span><br><span class="line">- 停止指定ID的Pod：crictl stopp &lt;pod-id&gt;</span><br><span class="line">- 删除指定ID的Pod：crictl rmp &lt;pod-id&gt;</span><br><span class="line">- 获取指定容器的日志输出：crictl logs &lt;container-id&gt;</span><br><span class="line">- 列出指定容器的资源使用统计信息：crictl stats &lt;container-id&gt;</span><br><span class="line">- 列出指定Pod的资源使用统计信息：crictl statsp &lt;pod-id&gt;</span><br><span class="line">- 显示crictl和容器运行时的版本信息：crictl version</span><br><span class="line">- 在运行的容器中执行指定的命令：crictl exec -it &lt;container-id&gt; -- &lt;command&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="nerdctl"><a href="#nerdctl" class="headerlink" title="nerdctl"></a>nerdctl</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/containerd/nerdctl/releases">https://github.com/containerd/nerdctl/releases</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- nerdctl run：在新容器中运行命令</span><br><span class="line">- nerdctl exec：在正在运行的容器中运行命令</span><br><span class="line">- nerdctl create : 创建一个新容器</span><br><span class="line">- nerdctl logs : 获取容器日志</span><br><span class="line">- nerdctl start：启动一个或多个正在运行的容器。</span><br><span class="line">- nerdctl stop：停止一个或多个正在运行的容器。</span><br><span class="line">- nerdctl restart：重启一个或多个正在运行的容器。</span><br><span class="line">- nerdctl rm/rmi：删除一个或多个容器/图像。</span><br><span class="line">- nerdctl container prune：删除所有停止的容器。</span><br><span class="line">- nerdctl build：从 Dockerfile 构建图像。</span><br><span class="line">- nerdctl pull/push：从注册表中拉取/推送图像。</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1515,7 +1444,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">129</span>
+          <span class="site-state-item-count">130</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
