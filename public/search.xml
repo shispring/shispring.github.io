@@ -8847,7 +8847,7 @@ validate</p>
 <li><strong>确保goroutine终止</strong>：为长时间运行的goroutine提供退出机制，如done通道</li>
 <li><strong>使用<code>context</code>包</strong>：管理goroutine的生命周期和传递截止时间、取消信号</li>
 <li><strong>关闭输入通道</strong>：作为通知goroutine停止工作的信号</li>
-<li>**使用<code>sync.WaitGroup</code>**：等待一组goroutine完成</li>
+<li>**使用<code>sync.WaitGroup</code> **：等待一组goroutine完成</li>
 <li><strong>限制goroutine数量</strong>：使用工作池或信号量控制并发度</li>
 </ul>
 <h3 id="3-并发安全"><a href="#3-并发安全" class="headerlink" title="3. 并发安全"></a>3. 并发安全</h3><ul>
@@ -8873,7 +8873,7 @@ validate</p>
 <h3 id="6-测试和调试"><a href="#6-测试和调试" class="headerlink" title="6. 测试和调试"></a>6. 测试和调试</h3><ul>
 <li><strong>使用竞态检测器</strong>：<code>go test -race</code>或<code>go build -race</code></li>
 <li><strong>编写并发测试</strong>：确保并发代码在各种竞争条件下正确工作</li>
-<li>**使用<code>runtime/pprof</code>**：分析goroutine的性能和使用情况</li>
+<li>**使用<code>runtime/pprof</code> **：分析goroutine的性能和使用情况</li>
 <li><strong>限制测试并发度</strong>：测试时可控制并发数量以重现问题</li>
 </ul>
 <h3 id="7-并发模式"><a href="#7-并发模式" class="headerlink" title="7. 并发模式"></a>7. 并发模式</h3><ul>
