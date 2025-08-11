@@ -8915,7 +8915,7 @@ validate</p>
 
 <h3 id="4-会话流分析"><a href="#4-会话流分析" class="headerlink" title="4. 会话流分析"></a>4. 会话流分析</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 追踪特定TCP会话</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn -A <span class="string">&#x27;host 192.168.1.1 and host 192.168.1.2 and port 80&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看握手包的时间差（延迟分析）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nntt <span class="string">&#x27;tcp[13] &amp; 2 != 0 or tcp[13] &amp; 16 != 0&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="其他有用的网络分析工具"><a href="#其他有用的网络分析工具" class="headerlink" title="其他有用的网络分析工具"></a>其他有用的网络分析工具</h2><h3 id="1-tshark-Wireshark的命令行版本"><a href="#1-tshark-Wireshark的命令行版本" class="headerlink" title="1. tshark (Wireshark的命令行版本)"></a>1. tshark (Wireshark的命令行版本)</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># linux下安装</span></span><br><span class="line">yum install -y wireshark</span><br><span class="line"><span class="comment"># 基本使用方法</span></span><br><span class="line">tshark -r 文件名.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取HTTP请求</span></span><br><span class="line">tshark -r 文件名.pcap -Y http -T fields -e http.request.method -e http.request.uri -e http.response.code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成对话统计</span></span><br><span class="line">tshark -r 文件名.pcap -q -z conv,tcp</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#termshark GUI</span></span><br><span class="line">https://github.com/gcla/termshark</span><br></pre></td></tr></table></figure>
+<h2 id="其他有用的网络分析工具"><a href="#其他有用的网络分析工具" class="headerlink" title="其他有用的网络分析工具"></a>其他有用的网络分析工具</h2><h3 id="1-tshark-Wireshark的命令行版本"><a href="#1-tshark-Wireshark的命令行版本" class="headerlink" title="1. tshark (Wireshark的命令行版本)"></a>1. tshark (Wireshark的命令行版本)</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># linux下安装</span></span><br><span class="line">yum install -y wireshark</span><br><span class="line"><span class="comment"># 基本使用方法</span></span><br><span class="line">tshark -r 文件名.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取HTTP请求</span></span><br><span class="line">tshark -r 文件名.pcap -Y http -T fields -e http.request.method -e http.request.uri -e http.response.code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成对话统计</span></span><br><span class="line">tshark -r 文件名.pcap -q -z conv,tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取并解码特定序号的HTTP响应内容：</span></span><br><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;frame.number==6&quot;</span> -T fields -e tcp.payload | xxd -r -p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有HTTP响应内容（JSON格式）：</span></span><br><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;tcp.srcport == 8080&quot;</span> -T fields -e tcp.payload | xxd -r -p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 过滤特定HTTP流中的所有包：</span></span><br><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;http.request or http.response&quot;</span> -z follow,http,ascii,0</span><br><span class="line"></span><br><span class="line">tshark -r xxx.pcap -Y <span class="string">&quot;http&quot;</span> -V</span><br><span class="line">tshark -r xxx.pcap -Y <span class="string">&quot;http&quot;</span> -T fields -e frame.number -e http.response.code -e http.content_type -e http.content_length</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#termshark GUI</span></span><br><span class="line">https://github.com/gcla/termshark</span><br></pre></td></tr></table></figure>
 
 <h3 id="2-ngrep-网络grep"><a href="#2-ngrep-网络grep" class="headerlink" title="2. ngrep (网络grep)"></a>2. ngrep (网络grep)</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 在pcap文件中搜索字符串</span></span><br><span class="line">ngrep -I 文件名.pcap <span class="string">&quot;HTTP&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 匹配特定主机和端口</span></span><br><span class="line">ngrep -I 文件名.pcap -q <span class="string">&quot;GET&quot;</span> host 192.168.1.1 and port 80</span><br></pre></td></tr></table></figure>
 
@@ -8928,10 +8928,916 @@ validate</p>
 <h2 id="实用一行命令"><a href="#实用一行命令" class="headerlink" title="实用一行命令"></a>实用一行命令</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找Top Talkers (通信最频繁的主机)</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | <span class="built_in">cut</span> -d. -f1-4 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找最常用的服务</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $5&#125;&#x27;</span> | <span class="built_in">cut</span> -d. -f5 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有URL</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn -A | grep -oE <span class="string">&#x27;(GET|POST|HEAD) .* HTTP/[0-9.]+&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检测SYN Flood攻击</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp[13] &amp; 2 != 0&#x27;</span> | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有邮箱地址</span></span><br><span class="line">tcpdump -r 文件名.pcap -A | grep -oE <span class="string">&#x27;[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]&#123;2,6&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="实时捕获命令参考"><a href="#实时捕获命令参考" class="headerlink" title="实时捕获命令参考"></a>实时捕获命令参考</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 捕获指定接口的流量</span></span><br><span class="line">tcpdump -i eth0 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定主机的流量</span></span><br><span class="line">tcpdump -i eth0 host 192.168.1.1 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定端口的流量</span></span><br><span class="line">tcpdump -i eth0 port 80 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制捕获包的数量或大小</span></span><br><span class="line">tcpdump -i eth0 -c 1000 -w 输出文件.pcap  <span class="comment"># 捕获1000个包后停止</span></span><br><span class="line">tcpdump -i eth0 -C 10 -w 输出文件.pcap    <span class="comment"># 每个文件限制为10MB</span></span><br></pre></td></tr></table></figure>
-
+<hr>
+<h2 id="最佳实践：TCP-异常分析流程"><a href="#最佳实践：TCP-异常分析流程" class="headerlink" title="最佳实践：TCP 异常分析流程"></a>最佳实践：TCP 异常分析流程</h2><ol>
+<li><strong>先看连接是否建立</strong>（SYN→SYN&#x2F;ACK→ACK）</li>
+<li><strong>检查是否有重传</strong>（<code>tcp.analysis.retransmission</code>）</li>
+<li><strong>看是否有 RST&#x2F;FIN 提前关闭</strong></li>
+<li><strong>分析延迟&#x2F;窗口问题</strong>（<code>tcp.analysis.window_full</code>、<code>tcp.analysis.zero_window</code>）</li>
+<li><strong>抓取完整 TCP 流</strong>（用 <code>-z follow,tcp,ascii</code>）</li>
+</ol>
 ]]></content>
-      <tags>
-        <tag>tcpdump</tag>
-      </tags>
+  </entry>
+  <entry>
+    <title>tshark分析包</title>
+    <url>/2025/08/11/tshark%E5%88%86%E6%9E%90%E5%8C%85/</url>
+    <content><![CDATA[<h2 id="tshark常用方法排查-TCP-异常包"><a href="#tshark常用方法排查-TCP-异常包" class="headerlink" title="tshark常用方法排查 TCP 异常包"></a>tshark常用方法排查 TCP 异常包</h2><h3 id="1-查找连接建立（SYN-包）"><a href="#1-查找连接建立（SYN-包）" class="headerlink" title="1. 查找连接建立（SYN 包）"></a>1. 查找连接建立（SYN 包）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;tcp.flags.syn==1 and tcp.flags.ack==0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>用来找三次握手的第一个包。</p>
+<h3 id="2-查找连接重置（RST-包）"><a href="#2-查找连接重置（RST-包）" class="headerlink" title="2. 查找连接重置（RST 包）"></a>2. 查找连接重置（RST 包）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;tcp.flags.reset==1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以定位连接被强制中断的地方。</p>
+<h3 id="3-查找连接关闭（FIN-包）"><a href="#3-查找连接关闭（FIN-包）" class="headerlink" title="3. 查找连接关闭（FIN 包）"></a>3. 查找连接关闭（FIN 包）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;tcp.flags.fin==1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>用来分析正常关闭的 TCP 会话。</p>
+<h3 id="4-查找异常-TCP-包（重传、乱序、窗口问题）"><a href="#4-查找异常-TCP-包（重传、乱序、窗口问题）" class="headerlink" title="4. 查找异常 TCP 包（重传、乱序、窗口问题）"></a>4. 查找异常 TCP 包（重传、乱序、窗口问题）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;tcp.analysis.flags&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>tshark</code> 会自动解析并标记重传、丢包、乱序等问题。</p>
+<h3 id="5-按-TCP-流分析"><a href="#5-按-TCP-流分析" class="headerlink" title="5. 按 TCP 流分析"></a>5. 按 TCP 流分析</h3><p>先列出所有 TCP 流 ID：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tshark -r tcp_connection_20250811_180802.pcap -T fields -e tcp.stream | <span class="built_in">sort</span> -n | <span class="built_in">uniq</span></span><br></pre></td></tr></table></figure>
+
+<p>然后针对某个流 ID（比如 3）分析：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tshark -r tcp_connection_20250811_180802.pcap -Y <span class="string">&quot;tcp.stream eq 3 and (tcp.flags.syn==1 or tcp.flags.reset==1 or tcp.flags.fin==1)&quot;</span></span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
+  <entry>
+    <title>网络故障排查指南（使用tcpdump和tshark）</title>
+    <url>/2025/08/11/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97%EF%BC%88%E4%BD%BF%E7%94%A8tcpdump%E5%92%8Ctshark%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="网络故障排查指南（使用tcpdump和tshark）"><a href="#网络故障排查指南（使用tcpdump和tshark）" class="headerlink" title="网络故障排查指南（使用tcpdump和tshark）"></a>网络故障排查指南（使用tcpdump和tshark）</h1><p>本指南提供参考表格和命令，用于分析数据包捕获以识别网络问题。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#http%E7%8A%B6%E6%80%81%E7%A0%81">HTTP状态码</a></li>
+<li><a href="#%E5%93%8D%E5%BA%94%E6%97%B6%E9%97%B4%E5%88%86%E6%9E%90">响应时间分析</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E6%8C%87%E6%A0%87">数据传输指标</a></li>
+<li><a href="#%E8%BF%9E%E6%8E%A5%E4%BF%A1%E6%81%AF">连接信息</a></li>
+<li><a href="#%E5%86%85%E5%AE%B9%E7%BC%96%E7%A0%81">内容编码</a></li>
+<li><a href="#%E4%BC%9A%E8%AF%9D%E7%8A%B6%E6%80%81%E4%BF%A1%E6%81%AF">会话状态信息</a></li>
+<li><a href="#tcp%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B">TCP连接建立</a></li>
+<li><a href="#tcp%E9%87%8D%E4%BC%A0">TCP重传</a></li>
+<li><a href="#%E8%BF%9E%E6%8E%A5%E5%85%B3%E9%97%AD%E5%88%86%E6%9E%90">连接关闭分析</a></li>
+<li><a href="#tcp%E7%AA%97%E5%8F%A3%E9%97%AE%E9%A2%98">TCP窗口问题</a></li>
+<li><a href="#%E6%8D%95%E8%8E%B7%E5%AE%8C%E6%95%B4tcp%E6%B5%81">捕获完整TCP流</a></li>
+<li><a href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E7%A4%BA%E4%BE%8B">常用命令示例</a></li>
+</ul>
+<h2 id="HTTP状态码"><a href="#HTTP状态码" class="headerlink" title="HTTP状态码"></a>HTTP状态码</h2><table>
+<thead>
+<tr>
+<th>状态码范围</th>
+<th>类别</th>
+<th>描述</th>
+<th>常见代码</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1xx</td>
+<td>信息性</td>
+<td>请求已接收，继续处理</td>
+<td>100 Continue, 101 Switching Protocols</td>
+<td><code>http.response.code &gt;= 100 and http.response.code &lt; 200</code></td>
+</tr>
+<tr>
+<td>2xx</td>
+<td>成功</td>
+<td>请求已成功接收、理解并接受</td>
+<td>200 OK, 201 Created, 204 No Content</td>
+<td><code>http.response.code &gt;= 200 and http.response.code &lt; 300</code></td>
+</tr>
+<tr>
+<td>3xx</td>
+<td>重定向</td>
+<td>需要进一步操作才能完成请求</td>
+<td>301 Moved Permanently, 302 Found, 304 Not Modified</td>
+<td><code>http.response.code &gt;= 300 and http.response.code &lt; 400</code></td>
+</tr>
+<tr>
+<td>4xx</td>
+<td>客户端错误</td>
+<td>请求包含错误语法或无法完成</td>
+<td>400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found</td>
+<td><code>http.response.code &gt;= 400 and http.response.code &lt; 500</code></td>
+</tr>
+<tr>
+<td>5xx</td>
+<td>服务器错误</td>
+<td>服务器未能完成有效请求</td>
+<td>500 Internal Server Error, 502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout</td>
+<td><code>http.response.code &gt;= 500 and http.response.code &lt; 600</code></td>
+</tr>
+</tbody></table>
+<h3 id="具体HTTP状态码排障"><a href="#具体HTTP状态码排障" class="headerlink" title="具体HTTP状态码排障"></a>具体HTTP状态码排障</h3><table>
+<thead>
+<tr>
+<th>状态码</th>
+<th>描述</th>
+<th>潜在问题</th>
+<th>调查步骤</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td>错误请求</td>
+<td>请求语法格式错误</td>
+<td>检查请求头和请求体格式</td>
+</tr>
+<tr>
+<td>401</td>
+<td>未授权</td>
+<td>需要身份验证</td>
+<td>验证授权令牌&#x2F;请求头</td>
+</tr>
+<tr>
+<td>403</td>
+<td>禁止访问</td>
+<td>服务器理解但拒绝执行</td>
+<td>检查权限和IP限制</td>
+</tr>
+<tr>
+<td>404</td>
+<td>未找到</td>
+<td>资源不存在</td>
+<td>验证URL路径和资源是否存在</td>
+</tr>
+<tr>
+<td>408</td>
+<td>请求超时</td>
+<td>服务器等待超时</td>
+<td>检查网络延迟和服务器负载</td>
+</tr>
+<tr>
+<td>413</td>
+<td>负载过大</td>
+<td>请求实体过大</td>
+<td>检查文件大小限制</td>
+</tr>
+<tr>
+<td>429</td>
+<td>请求过多</td>
+<td>超出速率限制</td>
+<td>实施退避策略</td>
+</tr>
+<tr>
+<td>500</td>
+<td>服务器内部错误</td>
+<td>通用服务器错误</td>
+<td>检查服务器日志中的异常</td>
+</tr>
+<tr>
+<td>502</td>
+<td>网关错误</td>
+<td>上游服务器返回无效响应</td>
+<td>检查上游服务器健康状况</td>
+</tr>
+<tr>
+<td>503</td>
+<td>服务不可用</td>
+<td>服务器暂时不可用</td>
+<td>检查维护状态或过载情况</td>
+</tr>
+<tr>
+<td>504</td>
+<td>网关超时</td>
+<td>网关超时</td>
+<td>检查上游服务器响应时间</td>
+</tr>
+</tbody></table>
+<h3 id="HTTP状态分析的tshark命令"><a href="#HTTP状态分析的tshark命令" class="headerlink" title="HTTP状态分析的tshark命令"></a>HTTP状态分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 统计HTTP响应码</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.response&quot;</span> -T fields -e http.response.code | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 过滤HTTP错误（4xx和5xx）</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.response.code &gt;= 400&quot;</span> -T fields -e frame.time -e ip.src -e ip.dst -e http.request.uri -e http.response.code -e http.response.phrase</span><br></pre></td></tr></table></figure>
+
+<h2 id="响应时间分析"><a href="#响应时间分析" class="headerlink" title="响应时间分析"></a>响应时间分析</h2><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>描述</th>
+<th>计算方法</th>
+<th>正常范围</th>
+<th>调查触发点</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>请求-响应时间</td>
+<td>请求与响应之间的时间</td>
+<td>响应时间 - 请求时间</td>
+<td>&lt;500ms</td>
+<td>&gt;1s</td>
+<td>见下方命令</td>
+</tr>
+<tr>
+<td>首字节时间(TTFB)</td>
+<td>从请求到响应第一个字节的时间</td>
+<td>首个响应包时间 - 请求时间</td>
+<td>&lt;200ms</td>
+<td>&gt;500ms</td>
+<td>见下方命令</td>
+</tr>
+<tr>
+<td>服务器处理时间</td>
+<td>服务器处理请求所需时间</td>
+<td>首个响应包 - 最后请求包</td>
+<td>&lt;200ms</td>
+<td>&gt;500ms</td>
+<td>从捕获中手动计算</td>
+</tr>
+<tr>
+<td>总事务时间</td>
+<td>完整HTTP事务时间</td>
+<td>最后响应包 - 首个请求包</td>
+<td>&lt;1s</td>
+<td>&gt;3s</td>
+<td>从捕获中手动计算</td>
+</tr>
+</tbody></table>
+<h3 id="响应时间分析的tshark命令"><a href="#响应时间分析的tshark命令" class="headerlink" title="响应时间分析的tshark命令"></a>响应时间分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 计算HTTP请求-响应时间</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.request or http.response&quot;</span> -T fields -e frame.number -e frame.time_epoch -e http.request.method -e http.request.uri -e http.response.code | awk <span class="string">&#x27;BEGIN &#123;OFS=&quot;\t&quot;; print &quot;Frame&quot;, &quot;Time&quot;, &quot;Method/Code&quot;, &quot;URI/Reason&quot;&#125; &#123;print $1, $2, $3, $4&#125;&#x27;</span> | <span class="built_in">sort</span> -n</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算TCP连接时间</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1&quot;</span> -T fields -e frame.number -e frame.time_epoch -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport | <span class="built_in">sort</span> -n</span><br><span class="line"></span><br><span class="line"><span class="comment"># 高级响应时间分析（需要tshark 3.0+）</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;io,stat,0.001,COUNT(http.request)http.request,COUNT(http.response)http.response,SUM(tcp.analysis.ack_rtt)tcp.analysis.ack_rtt/COUNT(tcp.analysis.ack_rtt)tcp.analysis.ack_rtt&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="数据传输指标"><a href="#数据传输指标" class="headerlink" title="数据传输指标"></a>数据传输指标</h2><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>描述</th>
+<th>计算方法</th>
+<th>正常范围</th>
+<th>调查触发点</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>响应大小</td>
+<td>HTTP响应体大小</td>
+<td>所有HTTP响应数据包总和</td>
+<td>因内容而异</td>
+<td>异常大或小</td>
+<td><code>http.content_length</code></td>
+</tr>
+<tr>
+<td>吞吐量</td>
+<td>数据传输速率</td>
+<td>总字节数 &#x2F; 时间段</td>
+<td>&gt;1 MB&#x2F;s</td>
+<td>&lt;100 KB&#x2F;s</td>
+<td>从捕获中计算</td>
+</tr>
+<tr>
+<td>HTTP内容长度</td>
+<td>声明的HTTP实体大小</td>
+<td>Content-Length头的值</td>
+<td>因内容而异</td>
+<td>与实际大小不匹配</td>
+<td><code>http.content_length</code></td>
+</tr>
+<tr>
+<td>数据包大小</td>
+<td>单个数据包的大小</td>
+<td>数据包头中的大小字段</td>
+<td>≤MTU（通常1500字节）</td>
+<td>分片或极小包</td>
+<td><code>frame.len</code></td>
+</tr>
+<tr>
+<td>传输编码</td>
+<td>用于传输实体的方法</td>
+<td>检查分块或压缩</td>
+<td>动态内容通常使用分块</td>
+<td>大型静态文件的原始传输</td>
+<td><code>http.transfer_encoding</code></td>
+</tr>
+</tbody></table>
+<h3 id="数据传输分析的tshark命令"><a href="#数据传输分析的tshark命令" class="headerlink" title="数据传输分析的tshark命令"></a>数据传输分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 分析HTTP响应大小</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.response&quot;</span> -T fields -e http.response.code -e http.content_length -e http.content_type</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算吞吐量随时间变化</span></span><br><span class="line">tshark -r capture.pcap -q -z io,<span class="built_in">stat</span>,1,<span class="string">&quot;SUM(frame.len)frame.len&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析数据包大小</span></span><br><span class="line">tshark -r capture.pcap -T fields -e frame.number -e frame.len -e frame.time_relative | <span class="built_in">sort</span> -n</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找潜在的分片数据包</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;ip.flags.mf == 1 or ip.frag_offset &gt; 0&quot;</span> -T fields -e frame.number -e ip.src -e ip.dst -e frame.len</span><br></pre></td></tr></table></figure>
+
+<h2 id="连接信息"><a href="#连接信息" class="headerlink" title="连接信息"></a>连接信息</h2><table>
+<thead>
+<tr>
+<th>连接类型</th>
+<th>描述</th>
+<th>预期行为</th>
+<th>潜在问题</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP Keep-Alive</td>
+<td>复用TCP连接处理多个HTTP请求</td>
+<td>请求头中包含<code>Connection: keep-alive</code></td>
+<td>连接提前关闭</td>
+<td><code>http.connection contains &quot;keep-alive&quot;</code></td>
+</tr>
+<tr>
+<td>HTTP连接关闭</td>
+<td>响应后关闭TCP连接</td>
+<td>请求头中包含<code>Connection: close</code></td>
+<td>连接仍在保持</td>
+<td><code>http.connection contains &quot;close&quot;</code></td>
+</tr>
+<tr>
+<td>持久连接</td>
+<td>同一TCP连接上的多个请求&#x2F;响应对</td>
+<td>相同5元组上有多个HTTP交换</td>
+<td>短请求的高连接开销</td>
+<td><code>tcp.stream eq X</code></td>
+</tr>
+<tr>
+<td>连接池</td>
+<td>客户端维护服务器连接池</td>
+<td>与同一服务器建立多个并行连接</td>
+<td>连接限制问题</td>
+<td>检查唯一流计数</td>
+</tr>
+<tr>
+<td>连接复用</td>
+<td>为新请求重用现有连接</td>
+<td>降低TCP握手开销</td>
+<td>竞态条件，过期连接</td>
+<td>请求间的时间分析</td>
+</tr>
+</tbody></table>
+<h3 id="连接分析的tshark命令"><a href="#连接分析的tshark命令" class="headerlink" title="连接分析的tshark命令"></a>连接分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 检查HTTP连接头</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.connection&quot;</span> -T fields -e frame.number -e http.connection</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算唯一TCP流数量</span></span><br><span class="line">tshark -r capture.pcap -T fields -e tcp.stream | <span class="built_in">sort</span> -n | <span class="built_in">uniq</span> | <span class="built_in">wc</span> -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析连接持续时间</span></span><br><span class="line">tshark -r capture.pcap -q -z conv,tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找短暂连接（&lt;3个数据包）</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;conv,tcp&quot;</span> | grep <span class="string">&quot;&lt;3&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="内容编码"><a href="#内容编码" class="headerlink" title="内容编码"></a>内容编码</h2><table>
+<thead>
+<tr>
+<th>编码类型</th>
+<th>描述</th>
+<th>头部</th>
+<th>优势</th>
+<th>潜在问题</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Gzip</td>
+<td>使用gzip算法压缩</td>
+<td><code>Content-Encoding: gzip</code></td>
+<td>减少带宽使用</td>
+<td>CPU开销，故障排除难度</td>
+<td><code>http.content_encoding contains &quot;gzip&quot;</code></td>
+</tr>
+<tr>
+<td>Deflate</td>
+<td>使用deflate算法压缩</td>
+<td><code>Content-Encoding: deflate</code></td>
+<td>减少带宽使用</td>
+<td>不太常见，兼容性问题</td>
+<td><code>http.content_encoding contains &quot;deflate&quot;</code></td>
+</tr>
+<tr>
+<td>Brotli</td>
+<td>更新的压缩算法</td>
+<td><code>Content-Encoding: br</code></td>
+<td>比gzip更好的压缩</td>
+<td>并非所有客户端都支持</td>
+<td><code>http.content_encoding contains &quot;br&quot;</code></td>
+</tr>
+<tr>
+<td>分块传输</td>
+<td>数据以块形式发送</td>
+<td><code>Transfer-Encoding: chunked</code></td>
+<td>不知道最终大小的流数据</td>
+<td>手动解析更困难</td>
+<td><code>http.transfer_encoding contains &quot;chunked&quot;</code></td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>不应用编码</td>
+<td><code>Content-Encoding: identity</code>或缺席</td>
+<td>简单性，无需解码</td>
+<td>更大的传输大小</td>
+<td><code>!(http.content_encoding)</code></td>
+</tr>
+<tr>
+<td>Compressed</td>
+<td>通用压缩</td>
+<td><code>Content-Encoding: compressed</code></td>
+<td>传统指示器</td>
+<td>模糊的压缩方法</td>
+<td><code>http.content_encoding contains &quot;compressed&quot;</code></td>
+</tr>
+</tbody></table>
+<h3 id="内容编码分析的tshark命令"><a href="#内容编码分析的tshark命令" class="headerlink" title="内容编码分析的tshark命令"></a>内容编码分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 检查内容编码头</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.content_encoding&quot;</span> -T fields -e frame.number -e http.content_encoding</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查传输编码头</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.transfer_encoding&quot;</span> -T fields -e frame.number -e http.transfer_encoding</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算压缩比（需要手动分析）</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.response and http.content_encoding&quot;</span> -T fields -e http.content_length -e http.content_encoding</span><br></pre></td></tr></table></figure>
+
+<h2 id="会话状态信息"><a href="#会话状态信息" class="headerlink" title="会话状态信息"></a>会话状态信息</h2><table>
+<thead>
+<tr>
+<th>会话机制</th>
+<th>描述</th>
+<th>查找位置</th>
+<th>正常行为</th>
+<th>潜在问题</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cookies</td>
+<td>客户端状态存储</td>
+<td><code>Cookie</code>和<code>Set-Cookie</code>头</td>
+<td>在请求之间保持持久性</td>
+<td>丢失、过期或格式错误的cookies</td>
+<td><code>http.cookie or http.set_cookie</code></td>
+</tr>
+<tr>
+<td>会话ID</td>
+<td>服务器分配的标识符</td>
+<td>URL参数、cookie或头部</td>
+<td>在用户会话中保持一致</td>
+<td>会话中途更改，无效格式</td>
+<td><code>http.cookie contains &quot;sessionid&quot;</code></td>
+</tr>
+<tr>
+<td>JWT令牌</td>
+<td>用于认证的JSON Web令牌</td>
+<td>带<code>Bearer</code>的<code>Authorization</code>头</td>
+<td>有效的、未过期的令牌</td>
+<td>令牌验证失败，令牌过期</td>
+<td><code>http.authorization contains &quot;Bearer&quot;</code></td>
+</tr>
+<tr>
+<td>OAuth令牌</td>
+<td>授权令牌</td>
+<td><code>Authorization</code>头</td>
+<td>具有适当范围的有效令牌</td>
+<td>无效令牌，权限不足</td>
+<td><code>http.authorization</code></td>
+</tr>
+<tr>
+<td>本地存储</td>
+<td>浏览器存储（不在数据包中）</td>
+<td>JavaScript交互</td>
+<td>不适用 - 仅客户端</td>
+<td>不适用</td>
+<td>不适用</td>
+</tr>
+<tr>
+<td>CSRF令牌</td>
+<td>跨站请求伪造保护</td>
+<td>表单字段，自定义头部</td>
+<td>令牌匹配服务器预期</td>
+<td>丢失或不匹配的令牌</td>
+<td>自定义头部过滤器</td>
+</tr>
+</tbody></table>
+<h3 id="会话分析的tshark命令"><a href="#会话分析的tshark命令" class="headerlink" title="会话分析的tshark命令"></a>会话分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 分析cookie使用情况</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.cookie or http.set_cookie&quot;</span> -T fields -e frame.number -e http.cookie -e http.set_cookie</span><br><span class="line"></span><br><span class="line"><span class="comment"># 跟踪授权头</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.authorization&quot;</span> -T fields -e frame.number -e http.authorization</span><br><span class="line"></span><br><span class="line"><span class="comment"># 跟踪HTTP流以查看完整会话</span></span><br><span class="line">tshark -r capture.pcap -q -z follow,http,ascii,0</span><br></pre></td></tr></table></figure>
+
+<h2 id="TCP连接建立"><a href="#TCP连接建立" class="headerlink" title="TCP连接建立"></a>TCP连接建立</h2><table>
+<thead>
+<tr>
+<th>连接阶段</th>
+<th>预期数据包</th>
+<th>正常行为</th>
+<th>潜在问题</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SYN</td>
+<td>客户端 → 服务器</td>
+<td>初始连接请求</td>
+<td>无响应（黑洞），多次重试</td>
+<td><code>tcp.flags.syn==1 and tcp.flags.ack==0</code></td>
+</tr>
+<tr>
+<td>SYN-ACK</td>
+<td>服务器 → 客户端</td>
+<td>服务器确认连接</td>
+<td>延迟响应，无响应</td>
+<td><code>tcp.flags.syn==1 and tcp.flags.ack==1</code></td>
+</tr>
+<tr>
+<td>ACK</td>
+<td>客户端 → 服务器</td>
+<td>客户端确认连接已建立</td>
+<td>缺少ACK，延迟ACK</td>
+<td><code>tcp.flags.syn==0 and tcp.flags.ack==1 and tcp.len==0</code></td>
+</tr>
+<tr>
+<td>完整握手</td>
+<td>SYN → SYN-ACK → ACK</td>
+<td>连接在&lt;1s内建立</td>
+<td>不完整握手，过度延迟</td>
+<td>见下方命令</td>
+</tr>
+</tbody></table>
+<h3 id="连接建立分析表"><a href="#连接建立分析表" class="headerlink" title="连接建立分析表"></a>连接建立分析表</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>症状</th>
+<th>可能原因</th>
+<th>调查步骤</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>连接超时</td>
+<td>发送SYN，未收到SYN-ACK</td>
+<td>防火墙阻止，服务器宕机，网络问题</td>
+<td>检查防火墙规则，服务器状态，网络路径</td>
+</tr>
+<tr>
+<td>慢连接</td>
+<td>SYN与SYN-ACK之间延迟长</td>
+<td>服务器过载，网络拥塞</td>
+<td>检查服务器负载，网络延迟</td>
+</tr>
+<tr>
+<td>SYN泛洪</td>
+<td>客户端发送多个SYN</td>
+<td>DoS攻击，客户端应用问题</td>
+<td>检查客户端行为，实施SYN cookies</td>
+</tr>
+<tr>
+<td>连接重置</td>
+<td>SYN后RST</td>
+<td>服务不可用，端口关闭</td>
+<td>验证服务是否在预期端口运行</td>
+</tr>
+</tbody></table>
+<h3 id="连接建立分析的tshark命令"><a href="#连接建立分析的tshark命令" class="headerlink" title="连接建立分析的tshark命令"></a>连接建立分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 识别TCP握手</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e tcp.flags</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找不完整握手</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;follow,tcp,ascii&quot;</span> | grep -i <span class="string">&quot;reassembled tcp\|connection\|handshake&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析TCP连接建立时间</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;io,stat,0.1,COUNT(tcp.analysis.ack_rtt)tcp.analysis.ack_rtt/COUNT(tcp.analysis.ack_rtt)tcp.analysis.ack_rtt&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="TCP重传"><a href="#TCP重传" class="headerlink" title="TCP重传"></a>TCP重传</h2><table>
+<thead>
+<tr>
+<th>重传类型</th>
+<th>描述</th>
+<th>症状</th>
+<th>潜在原因</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>快速重传</td>
+<td>收到重复ACK后快速重发</td>
+<td>多个重复ACK后跟重传</td>
+<td>数据包丢失，网络拥塞</td>
+<td><code>tcp.analysis.fast_retransmission</code></td>
+</tr>
+<tr>
+<td>超时重传</td>
+<td>超时后重发数据包</td>
+<td>重发前长时间延迟</td>
+<td>高延迟，严重数据包丢失</td>
+<td><code>tcp.analysis.retransmission</code></td>
+</tr>
+<tr>
+<td>虚假重传</td>
+<td>不必要的重传</td>
+<td>原始数据包实际已收到</td>
+<td>延迟ACK，网络重排序</td>
+<td><code>tcp.analysis.spurious_retransmission</code></td>
+</tr>
+<tr>
+<td>乱序</td>
+<td>数据包接收顺序混乱</td>
+<td>TCP序列号不按顺序</td>
+<td>网络路径差异，负载均衡</td>
+<td><code>tcp.analysis.out_of_order</code></td>
+</tr>
+<tr>
+<td>重复ACK</td>
+<td>多次发送相同ACK</td>
+<td>具有相同序列号的多个ACK</td>
+<td>数据包丢失，重排序</td>
+<td><code>tcp.analysis.duplicate_ack</code></td>
+</tr>
+</tbody></table>
+<h3 id="重传分析表"><a href="#重传分析表" class="headerlink" title="重传分析表"></a>重传分析表</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>症状</th>
+<th>可能原因</th>
+<th>调查步骤</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>高重传率</td>
+<td>&gt;1%的数据包被重传</td>
+<td>网络拥塞，硬件问题</td>
+<td>检查网络设备，链路利用率</td>
+</tr>
+<tr>
+<td>重复超时重传</td>
+<td>同一段的多次超时重传</td>
+<td>严重拥塞，防火墙丢包</td>
+<td>检查防火墙规则，网络路径</td>
+</tr>
+<tr>
+<td>非对称重传</td>
+<td>只有一个方向显示重传</td>
+<td>单向拥塞或过滤</td>
+<td>检查有问题方向的网络路径</td>
+</tr>
+<tr>
+<td>突发重传</td>
+<td>短时间内多次重传</td>
+<td>临时网络问题，微突发</td>
+<td>检查模式（一天中的时间，特定流量）</td>
+</tr>
+</tbody></table>
+<h3 id="重传分析的tshark命令"><a href="#重传分析的tshark命令" class="headerlink" title="重传分析的tshark命令"></a>重传分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找所有重传</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.analysis.retransmission or tcp.analysis.fast_retransmission&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算重传率</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;io,stat,1,COUNT(tcp.analysis.retransmission)tcp.analysis.retransmission,COUNT(tcp.analysis.fast_retransmission)tcp.analysis.fast_retransmission,COUNT(tcp)tcp&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找重复ACK</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.analysis.duplicate_ack&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e tcp.ack</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析有问题的特定TCP流</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.stream eq X and (tcp.analysis.retransmission or tcp.analysis.duplicate_ack)&quot;</span> -T fields -e frame.number -e frame.time_relative -e tcp.analysis.flags</span><br></pre></td></tr></table></figure>
+
+<h2 id="连接关闭分析"><a href="#连接关闭分析" class="headerlink" title="连接关闭分析"></a>连接关闭分析</h2><table>
+<thead>
+<tr>
+<th>关闭类型</th>
+<th>描述</th>
+<th>预期数据包</th>
+<th>潜在问题</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>正常关闭</td>
+<td>正确的4次挥手</td>
+<td>FIN → ACK → FIN → ACK</td>
+<td>延迟关闭，悬挂连接</td>
+<td><code>tcp.flags.fin==1</code></td>
+</tr>
+<tr>
+<td>RST关闭</td>
+<td>突然终止连接</td>
+<td>RST数据包</td>
+<td>应用错误，超时，强制关闭</td>
+<td><code>tcp.flags.reset==1</code></td>
+</tr>
+<tr>
+<td>半关闭</td>
+<td>一方关闭，另一方保持开放</td>
+<td>仅一方发送FIN</td>
+<td>应用协议错误，悬挂连接</td>
+<td>见下方命令</td>
+</tr>
+<tr>
+<td>超时关闭</td>
+<td>连接因不活动而关闭</td>
+<td>最后数据包后长时间静默</td>
+<td>资源泄漏，僵尸连接</td>
+<td>需要时间分析</td>
+</tr>
+</tbody></table>
+<h3 id="连接关闭分析表"><a href="#连接关闭分析表" class="headerlink" title="连接关闭分析表"></a>连接关闭分析表</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>症状</th>
+<th>可能原因</th>
+<th>调查步骤</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>过早连接关闭</td>
+<td>事务完成前RST</td>
+<td>服务器超时，应用错误</td>
+<td>检查服务器超时设置，应用日志</td>
+</tr>
+<tr>
+<td>客户端重置连接</td>
+<td>客户端发送RST</td>
+<td>客户端应用崩溃，超时</td>
+<td>检查客户端应用行为</td>
+</tr>
+<tr>
+<td>服务器重置连接</td>
+<td>服务器发送RST</td>
+<td>服务器过载，安全策略</td>
+<td>检查服务器日志，安全策略</td>
+</tr>
+<tr>
+<td>悬挂连接</td>
+<td>无关闭数据包，连接空闲</td>
+<td>应用错误，keep-alive问题</td>
+<td>检查应用超时处理</td>
+</tr>
+<tr>
+<td>不正确连接关闭</td>
+<td>缺少FIN或ACK数据包</td>
+<td>应用或库错误</td>
+<td>检查应用的连接处理代码</td>
+</tr>
+</tbody></table>
+<h3 id="连接关闭分析的tshark命令"><a href="#连接关闭分析的tshark命令" class="headerlink" title="连接关闭分析的tshark命令"></a>连接关闭分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找所有连接关闭</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.fin==1 or tcp.flags.reset==1&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e tcp.flags</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找RST数据包</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.reset==1&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e tcp.flags.reset -e tcp.flags.ack</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析连接拆除序列</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.stream eq X and (tcp.flags.fin==1 or tcp.flags.reset==1)&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e ip.dst -e tcp.flags</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找半关闭连接（需要手动分析）</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;follow,tcp,ascii&quot;</span> | grep -i <span class="string">&quot;fin\|reset\|close&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="TCP窗口问题"><a href="#TCP窗口问题" class="headerlink" title="TCP窗口问题"></a>TCP窗口问题</h2><table>
+<thead>
+<tr>
+<th>窗口问题</th>
+<th>描述</th>
+<th>症状</th>
+<th>潜在原因</th>
+<th>tshark过滤器示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>零窗口</td>
+<td>接收方无法接受更多数据</td>
+<td><code>tcp.analysis.zero_window</code>标志</td>
+<td>接收方缓冲区已满，应用未读取</td>
+<td><code>tcp.analysis.zero_window</code></td>
+</tr>
+<tr>
+<td>零窗口探测</td>
+<td>发送方检查窗口是否重新打开</td>
+<td>零窗口期间发送小数据包</td>
+<td>长时间零窗口条件</td>
+<td><code>tcp.analysis.zero_window_probe</code></td>
+</tr>
+<tr>
+<td>窗口已满</td>
+<td>发送方填满接收窗口</td>
+<td><code>tcp.analysis.window_full</code>标志</td>
+<td>发送方传输过快</td>
+<td><code>tcp.analysis.window_full</code></td>
+</tr>
+<tr>
+<td>窗口更新</td>
+<td>窗口大小变更通知</td>
+<td>零&#x2F;小窗口后窗口大小增加</td>
+<td>应用处理积压</td>
+<td><code>tcp.analysis.window_update</code></td>
+</tr>
+<tr>
+<td>窗口缩放</td>
+<td>增加最大窗口大小</td>
+<td>SYN包中的<code>tcp.options.wscale</code></td>
+<td>不是问题，但对性能重要</td>
+<td><code>tcp.options.wscale</code></td>
+</tr>
+</tbody></table>
+<h3 id="窗口大小分析表"><a href="#窗口大小分析表" class="headerlink" title="窗口大小分析表"></a>窗口大小分析表</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>症状</th>
+<th>可能原因</th>
+<th>调查步骤</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>持续零窗口</td>
+<td>多次零窗口通知</td>
+<td>接收方应用不读取数据</td>
+<td>检查接收方应用性能</td>
+</tr>
+<tr>
+<td>频繁窗口已满</td>
+<td>多个窗口已满指示符</td>
+<td>发送方传输过快，接收方过慢</td>
+<td>检查带宽不匹配，应用处理</td>
+</tr>
+<tr>
+<td>小窗口大小</td>
+<td>窗口大小始终较小</td>
+<td>应用以小块读取数据</td>
+<td>优化应用缓冲</td>
+</tr>
+<tr>
+<td>窗口缩放不匹配</td>
+<td>不同的缩放因子，性能不佳</td>
+<td>中间设备干扰，操作系统配置</td>
+<td>检查端到端路径协议干扰</td>
+</tr>
+</tbody></table>
+<h3 id="窗口分析的tshark命令"><a href="#窗口分析的tshark命令" class="headerlink" title="窗口分析的tshark命令"></a>窗口分析的tshark命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找零窗口条件</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.analysis.zero_window&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e tcp.window_size</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找窗口已满条件</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.analysis.window_full&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e tcp.window_size</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析窗口大小随时间变化</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.stream eq X&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.window_size -e tcp.analysis.window_update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查窗口缩放选项</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1 and tcp.options.wscale&quot;</span> -T fields -e frame.number -e ip.src -e ip.dst -e tcp.options.wscale</span><br></pre></td></tr></table></figure>
+
+<h2 id="捕获完整TCP流"><a href="#捕获完整TCP流" class="headerlink" title="捕获完整TCP流"></a>捕获完整TCP流</h2><h3 id="如何捕获和分析完整TCP流"><a href="#如何捕获和分析完整TCP流" class="headerlink" title="如何捕获和分析完整TCP流"></a>如何捕获和分析完整TCP流</h3><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>命令语法</th>
+<th>描述</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>tcpdump</td>
+<td><code>tcpdump -i &lt;接口&gt; -s 0 -w capture.pcap host &lt;ip&gt; and port &lt;端口&gt;</code></td>
+<td>将完整数据包捕获到文件</td>
+<td>初始捕获</td>
+</tr>
+<tr>
+<td>tshark流</td>
+<td><code>tshark -r capture.pcap -q -z follow,tcp,ascii,&lt;流ID&gt;</code></td>
+<td>提取TCP流的ASCII表示</td>
+<td>基于文本的协议(HTTP, SMTP)</td>
+</tr>
+<tr>
+<td>tshark流(十六进制)</td>
+<td><code>tshark -r capture.pcap -q -z follow,tcp,hex,&lt;流ID&gt;</code></td>
+<td>提取TCP流的十六进制转储</td>
+<td>二进制协议</td>
+</tr>
+<tr>
+<td>Wireshark</td>
+<td>GUI: 统计 &gt; 会话 &gt; TCP &gt; 跟随流</td>
+<td>交互式流跟踪</td>
+<td>详细的可视化分析</td>
+</tr>
+<tr>
+<td>tshark过滤器</td>
+<td><code>tshark -r capture.pcap -Y &quot;tcp.stream eq &lt;ID&gt;&quot;</code></td>
+<td>过滤特定流的数据包</td>
+<td>集中分析</td>
+</tr>
+</tbody></table>
+<h3 id="TCP流分析最佳实践"><a href="#TCP流分析最佳实践" class="headerlink" title="TCP流分析最佳实践"></a>TCP流分析最佳实践</h3><table>
+<thead>
+<tr>
+<th>实践</th>
+<th>描述</th>
+<th>好处</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>捕获完整数据包</td>
+<td>使用tcpdump的<code>-s 0</code></td>
+<td>确保捕获所有协议数据</td>
+</tr>
+<tr>
+<td>使用BPF过滤器</td>
+<td><code>host &lt;ip&gt; and port &lt;端口&gt;</code></td>
+<td>减少捕获大小，专注于相关流量</td>
+</tr>
+<tr>
+<td>存储到文件</td>
+<td><code>-w capture.pcap</code></td>
+<td>允许多次分析</td>
+</tr>
+<tr>
+<td>环形缓冲区</td>
+<td><code>-W 10 -C 100</code>（10个文件，每个100MB）</td>
+<td>防止长时间捕获磁盘溢出</td>
+</tr>
+<tr>
+<td>流枚举</td>
+<td>首先识别流，然后分析每个流</td>
+<td>复杂捕获的系统方法</td>
+</tr>
+<tr>
+<td>协议解码</td>
+<td><code>-d tcp.port==8080,http</code></td>
+<td>正确的协议解释</td>
+</tr>
+</tbody></table>
+<h3 id="常用tcpdump捕获命令"><a href="#常用tcpdump捕获命令" class="headerlink" title="常用tcpdump捕获命令"></a>常用tcpdump捕获命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 捕获特定端口上的所有TCP流量</span></span><br><span class="line">tcpdump -i eth0 -s 0 -w capture.pcap tcp port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定客户端-服务器通信的流量</span></span><br><span class="line">tcpdump -i eth0 -s 0 -w capture.pcap host 192.168.1.10 and host 192.168.1.20 and tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用5元组过滤器捕获（协议，源IP，源端口，目标IP，目标端口）</span></span><br><span class="line">tcpdump -i eth0 -s 0 -w capture.pcap tcp and host 192.168.1.10 and port 80 and host 192.168.1.20 and port 12345</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用轮换文件捕获（10个文件，每个100MB）</span></span><br><span class="line">tcpdump -i eth0 -s 0 -W 10 -C 100 -w capture.pcap tcp port 80</span><br></pre></td></tr></table></figure>
+
+<h3 id="常用tshark分析命令"><a href="#常用tshark分析命令" class="headerlink" title="常用tshark分析命令"></a>常用tshark分析命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 列出捕获中的所有TCP流</span></span><br><span class="line">tshark -r capture.pcap -q -z conv,tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取特定TCP流的ASCII表示</span></span><br><span class="line">tshark -r capture.pcap -q -z follow,tcp,ascii,0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有HTTP请求和响应</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport -e http.request.method -e http.request.uri -e http.response.code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析特定流的TCP序列号</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.stream eq 0&quot;</span> -T fields -e frame.number -e frame.time_relative -e tcp.seq -e tcp.ack -e tcp.len</span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令示例"><a href="#常用命令示例" class="headerlink" title="常用命令示例"></a>常用命令示例</h2><p>本节提供常见故障排查场景的即用命令模板。</p>
+<h3 id="一般网络故障排查"><a href="#一般网络故障排查" class="headerlink" title="一般网络故障排查"></a>一般网络故障排查</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 捕获eth0接口上的所有流量</span></span><br><span class="line">tcpdump -i eth0 -s 0 -w capture.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 仅捕获端口80（HTTP）或443（HTTPS）上的TCP流量</span></span><br><span class="line">tcpdump -i eth0 -s 0 -w capture.pcap <span class="string">&#x27;tcp port 80 or tcp port 443&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定主机的流量</span></span><br><span class="line">tcpdump -i eth0 -s 0 -w capture.pcap host 192.168.1.10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析数据包长度分布</span></span><br><span class="line">tshark -r capture.pcap -q -z plen,tree</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示所有IP会话</span></span><br><span class="line">tshark -r capture.pcap -q -z conv,ip</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示HTTP响应时间统计</span></span><br><span class="line">tshark -r capture.pcap -q -z http,tree</span><br></pre></td></tr></table></figure>
+
+<h3 id="性能故障排查"><a href="#性能故障排查" class="headerlink" title="性能故障排查"></a>性能故障排查</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找缓慢的HTTP响应（&gt;500ms）</span></span><br><span class="line">tshark -r capture.pcap -q -z io,<span class="built_in">stat</span>,0.5,<span class="string">&quot;COUNT(http.time) http.time&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析TCP吞吐量随时间变化（1秒间隔）</span></span><br><span class="line">tshark -r capture.pcap -q -z io,<span class="built_in">stat</span>,1,<span class="string">&quot;SUM(frame.len)frame.len&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找数据包丢失指标</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.analysis.retransmission or tcp.analysis.duplicate_ack&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e ip.dst</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检测网络延迟问题</span></span><br><span class="line">tshark -r capture.pcap -q -z io,<span class="built_in">stat</span>,1,<span class="string">&quot;AVG(tcp.analysis.ack_rtt)tcp.analysis.ack_rtt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找TCP窗口限制</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.analysis.window_full or tcp.analysis.zero_window&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e ip.dst -e tcp.window_size</span><br></pre></td></tr></table></figure>
+
+<h3 id="HTTP错误故障排查"><a href="#HTTP错误故障排查" class="headerlink" title="HTTP错误故障排查"></a>HTTP错误故障排查</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找所有HTTP错误</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.response.code &gt;= 400&quot;</span> -T fields -e frame.number -e frame.time_relative -e http.response.code -e http.request.uri</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取有错误的完整HTTP会话</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.response.code &gt;= 400&quot;</span> -T fields -e frame.number -e tcp.stream | awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> -u | xargs -I&#123;&#125; tshark -r capture.pcap -Y <span class="string">&quot;tcp.stream eq &#123;&#125;&quot;</span> -T fields -e frame.number -e frame.time_relative -e http.request.method -e http.request.uri -e http.response.code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查HTTP协议违规</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.response.code == 400&quot;</span> -T fields -e tcp.stream | <span class="built_in">sort</span> -u | xargs -I&#123;&#125; tshark -r capture.pcap -q -z follow,tcp,ascii,&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析特定请求的HTTP头</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;http.request.uri contains \&quot;/api/resource\&quot;&quot;</span> -T fields -e http.request.full_uri -e http.request.method -e http.user_agent -e http.authorization -e http.cookie</span><br></pre></td></tr></table></figure>
+
+<h3 id="TCP连接问题"><a href="#TCP连接问题" class="headerlink" title="TCP连接问题"></a>TCP连接问题</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找失败的连接尝试</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1 and !tcp.flags.ack==1 and !(tcp.flags.syn==1 and tcp.flags.ack==1)&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找连接重置</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.reset==1&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析TCP连接状态</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;conv,tcp&quot;</span> | <span class="built_in">sort</span> -n -r -k 11</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查半开放连接</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1 and !tcp.ack&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport | awk <span class="string">&#x27;&#123;print $4,$6&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找异常终止的连接</span></span><br><span class="line">tshark -r capture.pcap -q -z <span class="string">&quot;follow,tcp,ascii&quot;</span> | grep -i <span class="string">&quot;reset\|refused\|aborted&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="高级协议分析"><a href="#高级协议分析" class="headerlink" title="高级协议分析"></a>高级协议分析</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 分析TLS握手问题</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;ssl.handshake.type == 2 or ssl.handshake.type == 11 or ssl.alert&quot;</span> -T fields -e frame.number -e frame.time_relative -e ssl.handshake.type -e ssl.alert_message</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找DNS解析问题</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;dns.flags.rcode != 0&quot;</span> -T fields -e frame.number -e frame.time_relative -e dns.qry.name -e dns.flags.rcode</span><br><span class="line"></span><br><span class="line"><span class="comment"># 识别分片问题</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;ip.flags.mf == 1 or ip.frag_offset &gt; 0&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e ip.dst -e ip.frag_offset -e ip.flags.mf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查TCP时间戳（对性能很重要）</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;tcp.options.timestamp.tsval&quot;</span> -T fields -e frame.number -e tcp.options.timestamp.tsval -e tcp.options.timestamp.tsecr | <span class="built_in">head</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找带IP选项的数据包（潜在网络问题）</span></span><br><span class="line">tshark -r capture.pcap -Y <span class="string">&quot;ip.options&quot;</span> -T fields -e frame.number -e frame.time_relative -e ip.src -e ip.dst -e ip.options</span><br></pre></td></tr></table></figure>
+
+<h2 id="故障排查方法论"><a href="#故障排查方法论" class="headerlink" title="故障排查方法论"></a>故障排查方法论</h2><ol>
+<li><p><strong>捕获正确的数据</strong>:</p>
+<ul>
+<li>识别受影响的主机&#x2F;服务</li>
+<li>使用适当的BPF过滤器专注于相关流量</li>
+<li>确保使用<code>-s 0</code>进行完整数据包捕获</li>
+<li>在问题发生期间进行捕获</li>
+</ul>
+</li>
+<li><p><strong>初步分析</strong>:</p>
+<ul>
+<li>检查HTTP错误（4xx&#x2F;5xx状态码）</li>
+<li>查找TCP连接问题（建立失败，重置）</li>
+<li>识别重传和重复ACK</li>
+<li>检查响应时间和吞吐量</li>
+</ul>
+</li>
+<li><p><strong>深入具体问题</strong>:</p>
+<ul>
+<li>按发生问题的特定TCP流进行过滤</li>
+<li>分析完整的请求&#x2F;响应周期</li>
+<li>检查窗口大小和缩放因子</li>
+<li>查找应用层错误</li>
+</ul>
+</li>
+<li><p><strong>性能分析</strong>:</p>
+<ul>
+<li>计算关键数据包之间的响应时间</li>
+<li>测量吞吐量随时间变化</li>
+<li>检查窗口限制</li>
+<li>查找协议低效情况</li>
+</ul>
+</li>
+<li><p><strong>记录发现</strong>:</p>
+<ul>
+<li>记录关键事件的数据包编号和时间戳</li>
+<li>记录正常与异常行为</li>
+<li>将网络观察与应用症状相关联</li>
+<li>基于发现提出具体解决方案</li>
+</ul>
+</li>
+</ol>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.tcpdump.org/manpages/tcpdump.1.html">tcpdump手册</a></li>
+<li><a href="https://www.wireshark.org/docs/man-pages/tshark.html">tshark手册</a></li>
+<li><a href="https://www.wireshark.org/docs/man-pages/wireshark-filter.html">Wireshark显示过滤器</a></li>
+<li><a href="https://biot.com/capstats/bpf.html">Berkeley数据包过滤器语法</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">HTTP状态码</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol#Protocol_operation">TCP状态机</a></li>
+</ul>
+]]></content>
   </entry>
 </search>

@@ -184,6 +184,322 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/" class="post-title-link" itemprop="url">hpa pod计算</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-21 17:10:38 / 修改时间：17:12:39" itemprop="dateCreated datePublished" datetime="2024-10-21T17:10:38+08:00">2024-10-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Kubernetes 中配置基于 CPU 利用率的 Horizontal Pod Autoscaler (HPA) 策略时，扩展的 Pod 数量根据以下公式计算：</p>
+<h3 id="HPA-计算扩展-Pod-数量的公式："><a href="#HPA-计算扩展-Pod-数量的公式：" class="headerlink" title="HPA 计算扩展 Pod 数量的公式："></a>HPA 计算扩展 Pod 数量的公式：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desiredReplicas = ceil[currentReplicas * (currentMetricValue / targetMetricValue)]</span><br></pre></td></tr></table></figure>
+
+<p>具体来说：</p>
+<ol>
+<li><strong>currentReplicas</strong>：当前正在运行的 Pod 数量。</li>
+<li><strong>currentMetricValue</strong>：当前的 CPU 使用率，通常是所有 Pod 的 CPU 使用情况的平均值（例如 75%）。</li>
+<li><strong>targetMetricValue</strong>：你在 HPA 配置中指定的目标 CPU 利用率（例如 65%）。</li>
+</ol>
+<h3 id="例子："><a href="#例子：" class="headerlink" title="例子："></a>例子：</h3><p>假设：</p>
+<ul>
+<li>当前有 <strong>4 个 Pod</strong>。</li>
+<li>目标 CPU 利用率为 **65%**。</li>
+<li>当前的平均 CPU 利用率为 **80%**。</li>
+</ul>
+<p>计算公式为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desiredReplicas = ceil[4 * (80 / 65)] = ceil[4 * 1.23] = ceil[4.92] = 5</span><br></pre></td></tr></table></figure>
+<p>因此，HPA 将扩展至 <strong>5 个 Pod</strong>，以保证 CPU 利用率降到你设置的目标值附近。</p>
+<h3 id="扩展和缩容过程："><a href="#扩展和缩容过程：" class="headerlink" title="扩展和缩容过程："></a>扩展和缩容过程：</h3><ul>
+<li><strong>扩展</strong>：当当前的 CPU 使用率高于目标值时，HPA 会增加 Pod 数量。</li>
+<li><strong>缩容</strong>：如果当前的 CPU 使用率低于目标值，HPA 会减少 Pod 数量，但缩容通常有冷却时间，避免频繁调整。</li>
+</ul>
+<h3 id="配置示例："><a href="#配置示例：" class="headerlink" title="配置示例："></a>配置示例：</h3><p>在 HPA 配置文件中，设置 <code>targetCPUUtilizationPercentage</code>，例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">autoscaling/v2</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">HorizontalPodAutoscaler</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-hpa</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">scaleTargetRef:</span></span><br><span class="line">    <span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">my-deployment</span></span><br><span class="line">  <span class="attr">minReplicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">maxReplicas:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">metrics:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">Resource</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">cpu</span></span><br><span class="line">      <span class="attr">target:</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">Utilization</span></span><br><span class="line">        <span class="attr">averageUtilization:</span> <span class="number">65</span>  <span class="comment"># 目标 CPU 利用率</span></span><br></pre></td></tr></table></figure>
+<p>此配置将基于 CPU 利用率，动态调整 Pod 数量，使整体利用率保持在 65% 附近。</p>
+<p>这种机制确保集群资源得到充分利用，同时避免单个 Pod 过载或资源浪费。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/21/nmap%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/21/nmap%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">nmap常用命令解析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-10-21 10:11:15" itemprop="dateCreated datePublished" datetime="2024-10-21T10:11:15+08:00">2024-10-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-01-24 09:48:41" itemprop="dateModified" datetime="2025-01-24T09:48:41+08:00">2025-01-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、常见用法及命令"><a href="#一、常见用法及命令" class="headerlink" title="一、常见用法及命令"></a><strong>一、常见用法及命令</strong></h2><ol>
+<li>   <strong>扫描主机是否在线</strong>（Ping 扫描）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：检查 192.168.1.0&#x2F;24 网段内哪些主机在线。</li>
+<li><strong>解释</strong>：-sn 参数禁用端口扫描，只进行主机发现。</li>
+</ul>
+<ol start="2">
+<li>   <strong>端口扫描</strong>（默认 TCP 扫描）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：扫描主机常用端口（1-1024），检查哪些端口开放。</li>
+<li><strong>默认行为</strong>：使用 TCP 连接进行扫描。</li>
+</ul>
+<ol start="3">
+<li>   <strong>扫描指定端口范围</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -p 22-80 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：扫描 192.168.1.1 上 22 到 80 端口的状态。</li>
+</ul>
+<ol start="4">
+<li>   <strong>服务与版本检测</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sV 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：检测开放端口上运行的服务及版本信息。</li>
+<li><strong>解释</strong>：-sV 参数用于版本探测。</li>
+</ul>
+<ol start="5">
+<li>   <strong>操作系统识别</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -O 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：分析目标主机的操作系统类型及版本。</li>
+<li><strong>解释</strong>：-O 参数用于启用操作系统检测。</li>
+</ul>
+<ol start="6">
+<li>   <strong>检测网络中的所有设备</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.1.0/24 -oG - | grep Up</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：列出 192.168.1.0&#x2F;24 网段内在线的设备。</li>
+</ul>
+<ol start="7">
+<li>   <strong>UDP 扫描</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sU -p 53,123 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：检测目标主机上的 UDP 端口，如 DNS（53）和 NTP（123）。</li>
+<li><strong>解释</strong>：-sU 启用 UDP 扫描。</li>
+</ul>
+<p><strong>Nmap 脚本：针对 IP 进行一系列扫描</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用方法：./nmap_scan.sh &lt;IP地址&gt;</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="string">&quot;<span class="variable">$1</span>&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;请提供目标 IP 地址作为参数。&quot;</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;示例： ./nmap_scan.sh 192.168.1.1&quot;</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">TARGET_IP=<span class="variable">$1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;正在探测目标主机是否在线...&quot;</span></span><br><span class="line">nmap -sn <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;执行端口扫描...&quot;</span></span><br><span class="line">nmap -p 1-1000 <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;检测服务版本...&quot;</span></span><br><span class="line">nmap -sV <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;检测操作系统类型...&quot;</span></span><br><span class="line">nmap -O <span class="variable">$TARGET_IP</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;扫描完成！&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、Nmap-的-NSE-脚本功能及-SSL-TLS-扫描用法"><a href="#二、Nmap-的-NSE-脚本功能及-SSL-TLS-扫描用法" class="headerlink" title="二、Nmap 的 NSE 脚本功能及 SSL&#x2F;TLS 扫描用法"></a><strong>二、Nmap 的 NSE 脚本功能及 SSL&#x2F;TLS 扫描用法</strong></h2><p>Nmap 支持通过 <strong>NSE（Nmap Scripting Engine）脚本</strong> 执行更复杂的扫描任务，例如检测 <strong>TLS&#x2F;SSL 版本、加密算法的强度</strong>、服务漏洞扫描等。这些脚本可以帮助用户深入分析网络安全情况，尤其是检测服务的 SSL&#x2F;TLS 配置是否符合最佳实践。</p>
+<p><strong>TLS&#x2F;SSL 检测的常见命令</strong></p>
+<p><strong>1. 使用 ssl-enum-ciphers 检测支持的 TLS 版本及加密算法</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap --script ssl-enum-ciphers -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：列出目标主机（example.com）在 443 端口上启用的 TLS 版本（如 TLS 1.0&#x2F;1.2&#x2F;1.3），以及支持的加密套件和密钥交换算法。</p>
+<p>•	<strong>使用场景</strong>：验证服务器是否启用了弱 TLS 版本（如 TLS 1.0&#x2F;1.1）或不安全的加密算法。</p>
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PORT    STATE SERVICE</span><br><span class="line">443/tcp open  https</span><br><span class="line">| ssl-enum-ciphers:</span><br><span class="line">|   TLSv1.2:</span><br><span class="line">|     ciphers:</span><br><span class="line">|       TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 - strong</span><br><span class="line">|     compressors: NONE</span><br><span class="line">|_  least strength: strong</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 检测证书信息（ssl-cert 脚本）</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap --script ssl-cert -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：显示目标服务器 SSL 证书的详细信息，包括：</p>
+<p>•	证书的有效期、颁发机构（CA）。</p>
+<p>•	证书链中是否有不信任的证书。</p>
+<p>•	<strong>使用场景</strong>：检查证书是否即将到期，或是否使用了自签名证书。</p>
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PORT    STATE SERVICE</span><br><span class="line">443/tcp open  https</span><br><span class="line">| ssl-cert: Subject: commonName=example.com</span><br><span class="line">| Issuer: commonName=Let<span class="string">&#x27;s Encrypt Authority</span></span><br><span class="line"><span class="string">| Public Key type: RSA</span></span><br><span class="line"><span class="string">| Public Key bits: 2048</span></span><br><span class="line"><span class="string">| Signature Algorithm: sha256WithRSAEncryption</span></span><br><span class="line"><span class="string">| Not valid before: 2024-01-01T00:00:00</span></span><br><span class="line"><span class="string">|_Not valid after: 2024-04-01T00:00:00</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 检查是否支持心脏滴血漏洞（Heartbleed - ssl-heartbleed）</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap --script ssl-heartbleed -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：检测目标服务器是否存在 <strong>Heartbleed 漏洞</strong>（CVE-2014-0160）。</p>
+<p>•	<strong>使用场景</strong>：验证服务器是否使用了存在此漏洞的 OpenSSL 版本。</p>
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PORT    STATE SERVICE</span><br><span class="line">443/tcp open  https</span><br><span class="line">| ssl-heartbleed:</span><br><span class="line">|   VULNERABLE:</span><br><span class="line">|   The Heartbleed Bug is a serious vulnerability <span class="keyword">in</span> the popular OpenSSL cryptographic software library.</span><br><span class="line">|_  See: http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160</span><br></pre></td></tr></table></figure>
+
+<p><strong>其他常用 SSL&#x2F;TLS 相关 NSE 脚本</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>脚本名</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ssl-cert</td>
+<td>获取并显示服务器的 SSL 证书详细信息。</td>
+</tr>
+<tr>
+<td>ssl-enum-ciphers</td>
+<td>列出所有启用的 TLS 版本及加密套件。</td>
+</tr>
+<tr>
+<td>ssl-heartbleed</td>
+<td>检查服务器是否存在 Heartbleed 漏洞。</td>
+</tr>
+<tr>
+<td>ssl-poodle</td>
+<td>检查是否存在 POODLE 漏洞（针对 SSL 3.0）。</td>
+</tr>
+<tr>
+<td>ssl-dh-params</td>
+<td>检测 Diffie-Hellman 参数的强度，检查是否易受 Logjam 攻击。</td>
+</tr>
+</tbody></table>
+<p><strong>NSE 脚本的其他用法</strong></p>
+<ol>
+<li>   <strong>扫描所有常见 SSL&#x2F;TLS 相关漏洞：</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap --script ssl-* -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：一次性运行所有与 SSL 相关的脚本，检测各种安全问题。</p>
+<ol start="2">
+<li>   <strong>组合多个脚本扫描：</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap --script <span class="string">&quot;ssl-cert,ssl-enum-ciphers&quot;</span> -p 443 example.com</span><br></pre></td></tr></table></figure>
+
+<p>•	<strong>作用</strong>：同时执行多个特定脚本，节省时间。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -p 22 --script ssh2-enum-algos &lt;ip_addr&gt;</span><br></pre></td></tr></table></figure>
+
+<p>• <strong>作用</strong> ：检查机器ssh版本</p>
+<p><strong>总结与学习建议</strong></p>
+<ol>
+<li><p>   ssl-enum-ciphers <strong>和</strong> ssl-cert 是日常检测 SSL&#x2F;TLS 配置的必备工具，可帮助管理员发现不安全的协议或证书问题。</p>
+</li>
+<li><p>   使用 NSE 脚本时，需要了解网络环境的具体需求，选择适合的脚本组合。</p>
+</li>
+<li><p>   <strong>学习路径</strong>：</p>
+</li>
+</ol>
+<p>•	先熟悉基础的 Nmap 端口扫描命令。</p>
+<p>•	探索 NSE 脚本的使用，逐步了解 TLS&#x2F;SSL 配置。</p>
+<p>•	定期检查官方文档和社区，了解最新的安全漏洞和 Nmap 新增脚本。</p>
+<p>通过以上命令与脚本，Nmap 能够帮助你快速分析 TLS&#x2F;SSL 配置是否存在问题，为网络安全提供重要保障。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/18/OpenSSL-%E6%94%AF%E6%8C%81%E7%9A%84%E5%AF%86%E9%92%A5%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%A0%BC%E5%BC%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1341,223 +1657,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/29/k8s-api-server%E6%8E%A5%E5%8F%A3%E4%BA%A4%E4%BA%92/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/09/29/k8s-api-server%E6%8E%A5%E5%8F%A3%E4%BA%A4%E4%BA%92/" class="post-title-link" itemprop="url">k8s api server接口交互</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-09-29 12:15:44" itemprop="dateCreated datePublished" datetime="2024-09-29T12:15:44+08:00">2024-09-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-01-15 18:52:03" itemprop="dateModified" datetime="2025-01-15T18:52:03+08:00">2025-01-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="apiserver"><a href="#apiserver" class="headerlink" title="apiserver"></a>apiserver</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://wghdr.top/?p=335</span><br></pre></td></tr></table></figure>
-
-<h3 id="查看api方法："><a href="#查看api方法：" class="headerlink" title="查看api方法："></a>查看api方法：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw /</span><br><span class="line">kubectl get --raw /apis/apps/v1 | jq .resources[].name</span><br><span class="line"></span><br><span class="line">或者开启apiserver</span><br><span class="line">kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line"><span class="comment">#默认资源</span></span><br><span class="line">curl 127.0.0.1:8000/apis/v1</span><br><span class="line">curl http://127.0.0.1:8080/apis/batch/v1</span><br><span class="line"></span><br><span class="line"><span class="comment">#扩展资源</span></span><br><span class="line">curl 127.0.0.1:8001/apis/apps/v1</span><br><span class="line"></span><br><span class="line"><span class="comment">#通过kubectl获取url请求</span></span><br><span class="line">kubectl get pod &#123;podName&#125; -v=9</span><br><span class="line"></span><br><span class="line"><span class="comment">#短连接</span></span><br><span class="line">- kubectl get xxx</span><br><span class="line"><span class="comment">#长连接</span></span><br><span class="line">- watch接口是对list接口的一种改进，在调用watch接口后，首先会一次性返回list的数据，同时会保持会话连接，后续的接口对象的curd，都会产生事件由apiserver将变更数据推送给调用端，调用端接收数据后，再</span><br><span class="line">更新初始接收到的list的全量数据以及其他操作</span><br><span class="line"><span class="comment">#client-go informer机制</span></span><br><span class="line">- watch依然比较麻烦，毕竟list获取的数据以及后续watch到的数据，需要调用端在内部处理和更新缓存。</span><br></pre></td></tr></table></figure>
-
-<h3 id="api结构及原理"><a href="#api结构及原理" class="headerlink" title="api结构及原理"></a>api结构及原理</h3><p><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/55.jpg?raw=true"><br><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/87.jpg?raw=true"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/29/jq%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/09/29/jq%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">jq常见用法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-09-29 12:06:38" itemprop="dateCreated datePublished" datetime="2024-09-29T12:06:38+08:00">2024-09-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-10-31 12:10:41" itemprop="dateModified" datetime="2024-10-31T12:10:41+08:00">2024-10-31</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><code>jq</code> 是一个非常强大的命令行 JSON 处理工具，它可以帮助您快速地查询、过滤、映射和转换 JSON 数据。</p>
-<ol>
-<li><p><strong>查看特定字段</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.fieldName&#x27;</span><br></pre></td></tr></table></figure>
-<p> 替换 <code>fieldName</code> 为您想要查询的字段名。</p>
-</li>
-<li><p><strong>查看数组中的特定元素</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.fieldName[0]&#x27;  # 获取数组的第一个元素</span><br><span class="line">jq &#x27;.fieldName[-1]&#x27; # 获取数组的最后一个元素</span><br><span class="line">jq &#x27;.fieldName[]&#x27;   # 遍历数组的所有元素</span><br></pre></td></tr></table></figure>
-<p> 数组索引从 0 开始。</p>
-</li>
-<li><p><strong>过滤数组元素</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.fieldName[] | select(.condition)&#x27;</span><br></pre></td></tr></table></figure>
-<p> 替换 <code>condition</code> 为过滤条件，例如 <code>.name == &quot;desiredName&quot;</code>。</p>
-</li>
-<li><p><strong>获取嵌套字段</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.parentFieldName[].childFieldName&#x27;</span><br></pre></td></tr></table></figure>
-<p> 如果 <code>parentFieldName</code> 是一个数组，这将获取每个元素的 <code>childFieldName</code> 字段。</p>
-</li>
-<li><p><strong>获取多个字段</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;&#123;field1, field2&#125;&#x27;</span><br></pre></td></tr></table></figure>
-<p> 这将创建一个包含 <code>field1</code> 和 <code>field2</code> 的对象。</p>
-</li>
-<li><p><strong>提取键值对</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;to_entries[] | &#123;key, value&#125;&#x27;</span><br></pre></td></tr></table></figure>
-<p> 将 JSON 对象转换为键值对数组。</p>
-</li>
-<li><p><strong>合并多个字段</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.fieldName as $item ireduce . as $acc + &#123;($item): $item&#125; &#x27;</span><br></pre></td></tr></table></figure>
-<p> 这将合并多个字段到一个对象中。</p>
-</li>
-<li><p><strong>格式化输出</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.&#x27;  # 默认输出</span><br><span class="line">jq &#x27;.pretty&#x27;  # 格式化输出</span><br><span class="line">jq &#x27;.compact&#x27;  # 压缩输出</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>条件表达式</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;if .condition then &quot;true&quot; else &quot;false&quot; end&#x27;</span><br></pre></td></tr></table></figure>
-<p> 使用条件表达式来输出不同的结果。</p>
-</li>
-<li><p><strong>数组操作</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.arrayField + [newItem]&#x27;  # 添加新元素到数组</span><br><span class="line">jq &#x27;.arrayField - [index]&#x27;    # 从数组中删除元素</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>统计数组元素数量</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.arrayField | length&#x27;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>排序数组</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.arrayField | sort&#x27;  # 默认升序排序</span><br><span class="line">jq &#x27;.arrayField | sort_by(-&amp;value)&#x27;  # 降序排序</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>搜索和替换</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.arrayField[] | select(.field == &quot;value&quot;) | .field = &quot;newValue&quot;&#x27;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>从 JSON 字符串中解析</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;.fromJSON&#x27;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>将 JSON 对象转换为数组</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jq &#x27;to_entries[] | .value&#x27;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>使用管道</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods --output=json | jq &#x27;.items[] | .metadata.name&#x27;</span><br></pre></td></tr></table></figure></li>
-<li><p><strong>实践</strong>：</p>
-<pre><code>直接输出为完整的 JSON 格式
-jq &#39;.[] | &#123;address: .address, weight: .weight&#125;&#39; &lt;&lt;&lt; &#39;[&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;,&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;]&#39;
-#输出为表格格式：
-jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;,&#123;&quot;protocol_port&quot;:80,&quot;address&quot;:&quot;10.xxx&quot;,&quot;port_id&quot;:&quot;&quot;,&quot;weight&quot;:1&#125;]&#39; | column -t
-</code></pre>
-<p>这将获取所有 pod 的名称。</p>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1629,7 +1728,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">131</span>
+          <span class="site-state-item-count">133</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1642,7 +1741,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
