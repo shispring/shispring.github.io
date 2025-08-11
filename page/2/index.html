@@ -184,6 +184,184 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/19/curl%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E8%80%97%E6%97%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/06/19/curl%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E8%80%97%E6%97%B6/" class="post-title-link" itemprop="url">curl网络请求耗时</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-19 10:22:30 / 修改时间：10:47:51" itemprop="dateCreated datePublished" datetime="2025-06-19T10:22:30+08:00">2025-06-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="配置输出格式"><a href="#配置输出格式" class="headerlink" title="配置输出格式"></a>配置输出格式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#步骤1配置参数</span><br><span class="line">cat &gt; curl-format.txt &lt;&lt; &#x27;EOF&#x27;</span><br><span class="line">=============== HTTPS 性能分析报告 ===============\n</span><br><span class="line">请求 URL（url_effective）      : %&#123;url_effective&#125;\n</span><br><span class="line">HTTP 状态码（http_code）       : %&#123;http_code&#125;\n</span><br><span class="line">Content-Type（content_type）   : %&#123;content_type&#125;\n</span><br><span class="line">\n</span><br><span class="line">========== 时间分析（单位: 秒） ==========\n</span><br><span class="line">DNS 解析时间（time_namelookup）      : %&#123;time_namelookup&#125;\n</span><br><span class="line">TCP 连接建立（time_connect）         : %&#123;time_connect&#125;\n</span><br><span class="line">TLS/SSL 握手（time_appconnect）      : %&#123;time_appconnect&#125;\n</span><br><span class="line">传输准备完成（time_pretransfer）     : %&#123;time_pretransfer&#125;\n</span><br><span class="line">重定向耗时（time_redirect）          : %&#123;time_redirect&#125;\n</span><br><span class="line">首字节接收 TTFB（time_starttransfer）: %&#123;time_starttransfer&#125;\n</span><br><span class="line">总请求时间（time_total）             : %&#123;time_total&#125;\n</span><br><span class="line">\n</span><br><span class="line">========== 数据传输分析 ==========\n</span><br><span class="line">下载数据大小（size_download）      : %&#123;size_download&#125; bytes\n</span><br><span class="line">上传数据大小（size_upload）        : %&#123;size_upload&#125; bytes\n</span><br><span class="line">请求大小（size_request）           : %&#123;size_request&#125; bytes\n</span><br><span class="line">响应头大小（size_header）          : %&#123;size_header&#125; bytes\n</span><br><span class="line">平均下载速度（speed_download）     : %&#123;speed_download&#125; bytes/sec\n</span><br><span class="line">平均上传速度（speed_upload）       : %&#123;speed_upload&#125; bytes/sec\n</span><br><span class="line">\n</span><br><span class="line">========== 连接信息 ==========\n</span><br><span class="line">远程 IP（remote_ip）               : %&#123;remote_ip&#125;\n</span><br><span class="line">远程端口（remote_port）            : %&#123;remote_port&#125;\n</span><br><span class="line">本地 IP（local_ip）                : %&#123;local_ip&#125;\n</span><br><span class="line">本地端口（local_port）             : %&#123;local_port&#125;\n</span><br><span class="line">\n</span><br><span class="line">========== SSL 相关 ==========\n</span><br><span class="line">SSL 验证结果（ssl_verify_result） : %&#123;ssl_verify_result&#125;\n</span><br><span class="line">==================================================\n</span><br><span class="line">EOF</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="请求"><a href="#请求" class="headerlink" title="请求"></a>请求</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -w &quot;@curl-format.txt&quot; -o /dev/null -s http://baidu.com</span><br><span class="line"></span><br><span class="line">#curl -w &quot;@curl-format.txt&quot; -o /dev/null -s -k -H &quot;Host: test.xxx.net&quot; https://10.100.100.100:443</span><br></pre></td></tr></table></figure>
+
+<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h2><ul>
+<li>ssl_verify_result: SSL&#x2F;TLS 证书验证的结果代码（return code）<table>
+<thead>
+<tr>
+<th>值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code></td>
+<td>✅ <strong>验证通过（OK）</strong>：证书合法、链条完整、受信任</td>
+</tr>
+<tr>
+<td>非 0</td>
+<td>❌ <strong>验证失败</strong>：证书不合法、不受信、链不完整等原因</td>
+</tr>
+</tbody></table>
+</li>
+<li>常见非零错误代码<table>
+<thead>
+<tr>
+<th>错误码</th>
+<th>含义（简述）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>2</code></td>
+<td>无法获取发行者证书（链不完整）</td>
+</tr>
+<tr>
+<td><code>10</code></td>
+<td>证书过期</td>
+</tr>
+<tr>
+<td><code>18</code></td>
+<td>无法验证证书链</td>
+</tr>
+<tr>
+<td><code>19</code></td>
+<td>自签名证书</td>
+</tr>
+<tr>
+<td><code>20</code></td>
+<td>无法解析本地证书</td>
+</tr>
+<tr>
+<td><code>21</code></td>
+<td>无法验证根证书</td>
+</tr>
+<tr>
+<td><code>27</code></td>
+<td>主体和颁发者不匹配</td>
+</tr>
+<tr>
+<td><code>62</code></td>
+<td>主机名不匹配（证书 CN&#x2F;SAN 与域名不同）</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h2 id="验证证书链是否完整"><a href="#验证证书链是否完整" class="headerlink" title="验证证书链是否完整"></a>验证证书链是否完整</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#方法1</span><br><span class="line">curl -v https://baidu.com</span><br><span class="line">成功：SSL certificate verify ok.</span><br><span class="line">如果失败返回：SSL certificate problem: unable to verify the first certificate</span><br><span class="line"></span><br><span class="line">#方法2</span><br><span class="line">openssl s_client -connect baidu.com:443 -showcerts</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>最佳实践建议</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>目标</th>
+<th>建议命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>证书域名是否正确 + 证书链是否完整</td>
+<td><code>curl -v --resolve your.domain.com:443:IP https://your.domain.com/</code></td>
+</tr>
+<tr>
+<td>服务端返回的证书详情</td>
+<td><code>openssl s_client -connect IP:443 -servername your.domain.com -showcerts</code></td>
+</tr>
+<tr>
+<td>临时跳过验证测试 HTTP 响应</td>
+<td><code>curl -k -H &quot;Host: ...&quot; https://IP:443</code>（调试专用）</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>是否验证证书</th>
+<th>是否验证链完整性</th>
+<th>SNI 正确</th>
+<th>推荐用于生产验证？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>curl --resolve</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ 强烈推荐</td>
+</tr>
+<tr>
+<td><code>curl -H &quot;Host:...&quot;</code></td>
+<td>✅（但会失败）</td>
+<td>❌（因证书链不完整）</td>
+<td>❌</td>
+<td>❌ 不建议</td>
+</tr>
+<tr>
+<td><code>curl -H &quot;Host:...&quot; -k</code></td>
+<td>❌（跳过验证）</td>
+<td>❌</td>
+<td>❌</td>
+<td>🚫 不推荐，仅调试用</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/18/https%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1163,69 +1341,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/05/14/%E8%87%AA%E5%8A%A8%E9%80%89%E6%8B%A9%E9%83%A8%E7%BD%B2%E6%B5%8B%E8%AF%95job/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/05/14/%E8%87%AA%E5%8A%A8%E9%80%89%E6%8B%A9%E9%83%A8%E7%BD%B2%E6%B5%8B%E8%AF%95job/" class="post-title-link" itemprop="url">自动选择部署测试job</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-05-14 18:38:07 / 修改时间：18:46:48" itemprop="dateCreated datePublished" datetime="2025-05-14T18:38:07+08:00">2025-05-14</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="shell脚本"><a href="#shell脚本" class="headerlink" title="shell脚本"></a>shell脚本</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># Color definitions</span><br><span class="line">RED=&#x27;\033[0;31m&#x27;</span><br><span class="line">GREEN=&#x27;\033[0;32m&#x27;</span><br><span class="line">YELLOW=&#x27;\033[0;33m&#x27;</span><br><span class="line">BLUE=&#x27;\033[0;34m&#x27;</span><br><span class="line">CYAN=&#x27;\033[0;36m&#x27;</span><br><span class="line">NC=&#x27;\033[0m&#x27; # No Color</span><br><span class="line"></span><br><span class="line"># ======================</span><br><span class="line"># 镜像菜单</span><br><span class="line"># 镜像加速： https://github.com/DaoCloud/public-image-mirror</span><br><span class="line"># ======================</span><br><span class="line"></span><br><span class="line">sleepTime=3600</span><br><span class="line"></span><br><span class="line">options=(</span><br><span class="line">    &quot;netshoot&quot;</span><br><span class="line">    &quot;busybox&quot;</span><br><span class="line">    &quot;dnstools&quot;</span><br><span class="line">    &quot;退出&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">context=`kubectl config current-context`</span><br><span class="line">namespace=`kubectl config view --minify --output &quot;jsonpath=&#123;..namespace&#125;&quot;`</span><br><span class="line">echo -e &quot;$&#123;YELLOW&#125;Notice: 当前集群为：$&#123;context&#125; $&#123;NC&#125;&quot;</span><br><span class="line">echo -e &quot;$&#123;YELLOW&#125;Notice: 当前namespace为：$&#123;namespace&#125; $&#123;NC&#125;&quot;</span><br><span class="line"></span><br><span class="line">echo -e &quot;$&#123;CYAN&#125;ℹ️ 请选择要部署的测试 Job：$&#123;NC&#125;&quot;</span><br><span class="line"></span><br><span class="line">for i in &quot;$&#123;!options[@]&#125;&quot;; do</span><br><span class="line">    echo &quot;$((i+1)). $&#123;options[i]&#125;&quot;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">read -p &quot;请输入选项编号: &quot; choice</span><br><span class="line"></span><br><span class="line">case $choice in</span><br><span class="line">  1)</span><br><span class="line">    NAME=&quot;netshoot-test&quot;</span><br><span class="line">    IMAGE=&quot;docker.m.daocloud.io/docker.io/nicolaka/netshoot:latest&quot;</span><br><span class="line">    ;;</span><br><span class="line">  2)</span><br><span class="line">    NAME=&quot;dnstools-test&quot;</span><br><span class="line">    IMAGE=&quot;docker.m.daocloud.io/docker.io/infoblox/dnstools:latest&quot;</span><br><span class="line">    ;;</span><br><span class="line">  3)</span><br><span class="line">    NAME=&quot;busybox-test&quot;</span><br><span class="line">    IMAGE=&quot;docker.m.daocloud.io/docker.io/library/busybox:latest&quot;</span><br><span class="line">    ;;</span><br><span class="line">  *)</span><br><span class="line">    echo -e &quot;$&#123;RED&#125;❌ 无效选项$&#123;NC&#125;&quot; ; exit 1;</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># ======================</span><br><span class="line"># 应用 Job YAML</span><br><span class="line"># ======================</span><br><span class="line">echo -e &quot;$&#123;GREEN&#125;正在创建 Job：$&#123;NAME&#125; $&#123;NC&#125;&quot;</span><br><span class="line"></span><br><span class="line">cat &lt;&lt;EOF | kubectl apply -f -</span><br><span class="line">apiVersion: batch/v1</span><br><span class="line">kind: Job</span><br><span class="line">metadata:</span><br><span class="line">  name: $&#123;NAME&#125;</span><br><span class="line">spec:</span><br><span class="line">  ttlSecondsAfterFinished: 300  # ✅ Job 成功后 5 分钟自动清理</span><br><span class="line">  template:</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: $&#123;NAME&#125;</span><br><span class="line">        image: $&#123;IMAGE&#125;</span><br><span class="line">        command: [&quot;sh&quot;, &quot;-c&quot;, &quot;echo &#x27;Running $&#123;sleepTime&#125; seconds ...&#x27; &amp;&amp; sleep $&#123;sleepTime&#125; &quot;]</span><br><span class="line">        resources:</span><br><span class="line">          limits:</span><br><span class="line">            cpu: &quot;1&quot;</span><br><span class="line">            memory: 1Gi</span><br><span class="line">          requests:</span><br><span class="line">            cpu: 100m</span><br><span class="line">            memory: 100Mi</span><br><span class="line">      restartPolicy: Never</span><br><span class="line">      dnsPolicy: ClusterFirst</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">echo -e &quot;$&#123;GREEN&#125;✅ Job 创建成功。当运行 $&#123;sleepTime&#125; 秒后，会在5分钟后自动清理 ... $&#123;NC&#125;&quot;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1293,7 +1412,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">130</span>
+          <span class="site-state-item-count">131</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1306,7 +1425,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

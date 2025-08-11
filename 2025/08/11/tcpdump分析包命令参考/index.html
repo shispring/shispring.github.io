@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="tcpdump数据包分析命令参考基础tcpdump分析命令1. 查看数据包的基本信息1234567891011# 查看pcap文件的前20条记录tcpdump -r 文件名.pcap -qnv | head -20# 统计数据包总数tcpdump -r 文件名.pcap -qn | wc -l# 查看捕获的第一个数据包时间tcpdump -r 文件名.pcap -qn | head -1# 查看捕">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tcpdump分析包命令参考">
+<meta property="og:url" content="https://shispring.github.io/2025/08/11/tcpdump%E5%88%86%E6%9E%90%E5%8C%85%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="tcpdump数据包分析命令参考基础tcpdump分析命令1. 查看数据包的基本信息1234567891011# 查看pcap文件的前20条记录tcpdump -r 文件名.pcap -qnv | head -20# 统计数据包总数tcpdump -r 文件名.pcap -qn | wc -l# 查看捕获的第一个数据包时间tcpdump -r 文件名.pcap -qn | head -1# 查看捕">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-11T09:14:44.000Z">
+<meta property="article:modified_time" content="2025-08-11T09:21:32.777Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="tcpdump">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/08/11/tcpdump%E5%88%86%E6%9E%90%E5%8C%85%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>tcpdump分析包命令参考 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/11/tcpdump%E5%88%86%E6%9E%90%E5%8C%85%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          tcpdump分析包命令参考
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-08-11 17:14:44 / 修改时间：17:21:32" itemprop="dateCreated datePublished" datetime="2025-08-11T17:14:44+08:00">2025-08-11</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="tcpdump数据包分析命令参考"><a href="#tcpdump数据包分析命令参考" class="headerlink" title="tcpdump数据包分析命令参考"></a>tcpdump数据包分析命令参考</h1><h2 id="基础tcpdump分析命令"><a href="#基础tcpdump分析命令" class="headerlink" title="基础tcpdump分析命令"></a>基础tcpdump分析命令</h2><h3 id="1-查看数据包的基本信息"><a href="#1-查看数据包的基本信息" class="headerlink" title="1. 查看数据包的基本信息"></a>1. 查看数据包的基本信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看pcap文件的前20条记录</span></span><br><span class="line">tcpdump -r 文件名.pcap -qnv | <span class="built_in">head</span> -20</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计数据包总数</span></span><br><span class="line">tcpdump -r 文件名.pcap -qn | <span class="built_in">wc</span> -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看捕获的第一个数据包时间</span></span><br><span class="line">tcpdump -r 文件名.pcap -qn | <span class="built_in">head</span> -1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看捕获的最后一个数据包时间</span></span><br><span class="line">tcpdump -r 文件名.pcap -qn | <span class="built_in">tail</span> -1</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-分析协议和流量分布"><a href="#2-分析协议和流量分布" class="headerlink" title="2. 分析协议和流量分布"></a>2. 分析协议和流量分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看协议分布</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看数据包大小分布</span></span><br><span class="line">tcpdump -r 文件名.pcap -nq | awk <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span> | <span class="built_in">sort</span> -n | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-分析TCP连接"><a href="#3-分析TCP连接" class="headerlink" title="3. 分析TCP连接"></a>3. 分析TCP连接</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看TCP SYN包（连接建立）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[S&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看TCP FIN包（连接终止）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[F&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看TCP RST包（连接重置）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[R&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有带P标志的包（数据推送）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[P&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-HTTP流量分析"><a href="#4-HTTP流量分析" class="headerlink" title="4. HTTP流量分析"></a>4. HTTP流量分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看HTTP请求</span></span><br><span class="line">tcpdump -r 文件名.pcap -A | grep -i <span class="string">&quot;HTTP\|GET\|POST&quot;</span> | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看HTTP响应状态</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnn -A | grep -i <span class="string">&quot;HTTP/&quot;</span> | <span class="built_in">head</span> -5</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看请求和响应的内容类型</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnn -A | grep -i <span class="string">&quot;Accept\|Content-Type&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看HTTP请求的User-Agent</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnA | grep -i <span class="string">&quot;User-Agent&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-安全和异常分析"><a href="#5-安全和异常分析" class="headerlink" title="5. 安全和异常分析"></a>5. 安全和异常分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找错误或异常信息</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnA | grep -i <span class="string">&quot;error\|failure\|denied\|attack\|malicious\|failed&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找可疑的HTTP请求（如SQL注入、XSS攻击）</span></span><br><span class="line">tcpdump -r 文件名.pcap -A | grep -i <span class="string">&quot;select\|union\|insert\|delete\|&lt;script&gt;\|eval(&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找端口扫描行为（大量SYN包）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp[13] &amp; 2 != 0&#x27;</span> | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br></pre></td></tr></table></figure>
+
+<h2 id="高级tcpdump分析技巧"><a href="#高级tcpdump分析技巧" class="headerlink" title="高级tcpdump分析技巧"></a>高级tcpdump分析技巧</h2><h3 id="1-按IP地址和端口过滤"><a href="#1-按IP地址和端口过滤" class="headerlink" title="1. 按IP地址和端口过滤"></a>1. 按IP地址和端口过滤</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看特定源IP的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn src host 192.168.1.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定目标IP的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn dst host 192.168.1.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定端口的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定IP和端口组合的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;host 192.168.1.1 and port 80&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-按协议过滤"><a href="#2-按协议过滤" class="headerlink" title="2. 按协议过滤"></a>2. 按协议过滤</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只查看TCP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只查看UDP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn udp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只查看ICMP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn icmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看非HTTP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp and not port 80 and not port 443&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-数据包内容分析"><a href="#3-数据包内容分析" class="headerlink" title="3. 数据包内容分析"></a>3. 数据包内容分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以十六进制和ASCII格式显示完整数据包内容</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvXX</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示数据包头部</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvv</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示特定字节偏移量的内容</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp[20:4] = 0x47455420&#x27;</span>  <span class="comment"># 查找&quot;GET &quot;开头的数据包</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-会话流分析"><a href="#4-会话流分析" class="headerlink" title="4. 会话流分析"></a>4. 会话流分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 追踪特定TCP会话</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn -A <span class="string">&#x27;host 192.168.1.1 and host 192.168.1.2 and port 80&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看握手包的时间差（延迟分析）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nntt <span class="string">&#x27;tcp[13] &amp; 2 != 0 or tcp[13] &amp; 16 != 0&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="其他有用的网络分析工具"><a href="#其他有用的网络分析工具" class="headerlink" title="其他有用的网络分析工具"></a>其他有用的网络分析工具</h2><h3 id="1-tshark-Wireshark的命令行版本"><a href="#1-tshark-Wireshark的命令行版本" class="headerlink" title="1. tshark (Wireshark的命令行版本)"></a>1. tshark (Wireshark的命令行版本)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本使用方法</span></span><br><span class="line">tshark -r 文件名.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取HTTP请求</span></span><br><span class="line">tshark -r 文件名.pcap -Y http -T fields -e http.request.method -e http.request.uri -e http.response.code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析DNS查询</span></span><br><span class="line">tshark -r 文件名.pcap -Y dns -T fields -e frame.time -e dns.qry.name -e dns.resp.addr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成对话统计</span></span><br><span class="line">tshark -r 文件名.pcap -q -z conv,tcp</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-ngrep-网络grep"><a href="#2-ngrep-网络grep" class="headerlink" title="2. ngrep (网络grep)"></a>2. ngrep (网络grep)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在pcap文件中搜索字符串</span></span><br><span class="line">ngrep -I 文件名.pcap <span class="string">&quot;HTTP&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 匹配特定主机和端口</span></span><br><span class="line">ngrep -I 文件名.pcap -q <span class="string">&quot;GET&quot;</span> host 192.168.1.1 and port 80</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-tcpflow-TCP流重组"><a href="#3-tcpflow-TCP流重组" class="headerlink" title="3. tcpflow (TCP流重组)"></a>3. tcpflow (TCP流重组)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重组TCP会话</span></span><br><span class="line">tcpflow -r 文件名.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定输出目录</span></span><br><span class="line">tcpflow -r 文件名.pcap -o 输出目录</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-p0f-被动操作系统指纹识别"><a href="#4-p0f-被动操作系统指纹识别" class="headerlink" title="4. p0f (被动操作系统指纹识别)"></a>4. p0f (被动操作系统指纹识别)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析pcap文件中的操作系统指纹</span></span><br><span class="line">p0f -r 文件名.pcap</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-BRO-Zeek-网络安全监控"><a href="#5-BRO-Zeek-网络安全监控" class="headerlink" title="5. BRO&#x2F;Zeek (网络安全监控)"></a>5. BRO&#x2F;Zeek (网络安全监控)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析pcap文件</span></span><br><span class="line">zeek -r 文件名.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用特定脚本分析</span></span><br><span class="line">zeek -r 文件名.pcap protocols/http/detection</span><br></pre></td></tr></table></figure>
+
+<h2 id="实用一行命令"><a href="#实用一行命令" class="headerlink" title="实用一行命令"></a>实用一行命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找Top Talkers (通信最频繁的主机)</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | <span class="built_in">cut</span> -d. -f1-4 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找最常用的服务</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $5&#125;&#x27;</span> | <span class="built_in">cut</span> -d. -f5 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有URL</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn -A | grep -oE <span class="string">&#x27;(GET|POST|HEAD) .* HTTP/[0-9.]+&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检测SYN Flood攻击</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp[13] &amp; 2 != 0&#x27;</span> | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有邮箱地址</span></span><br><span class="line">tcpdump -r 文件名.pcap -A | grep -oE <span class="string">&#x27;[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]&#123;2,6&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实时捕获命令参考"><a href="#实时捕获命令参考" class="headerlink" title="实时捕获命令参考"></a>实时捕获命令参考</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 捕获指定接口的流量</span></span><br><span class="line">tcpdump -i eth0 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定主机的流量</span></span><br><span class="line">tcpdump -i eth0 host 192.168.1.1 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定端口的流量</span></span><br><span class="line">tcpdump -i eth0 port 80 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制捕获包的数量或大小</span></span><br><span class="line">tcpdump -i eth0 -c 1000 -w 输出文件.pcap  <span class="comment"># 捕获1000个包后停止</span></span><br><span class="line">tcpdump -i eth0 -C 10 -w 输出文件.pcap    <span class="comment"># 每个文件限制为10MB</span></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/tcpdump/" rel="tag"><i class="fa fa-tag"></i> tcpdump</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/09/go%E5%B9%B6%E5%8F%91%E5%AE%9E%E8%B7%B5/" rel="prev" title="go并发实践">
+      <i class="fa fa-chevron-left"></i> go并发实践
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#tcpdump%E6%95%B0%E6%8D%AE%E5%8C%85%E5%88%86%E6%9E%90%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83"><span class="nav-number">1.</span> <span class="nav-text">tcpdump数据包分析命令参考</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80tcpdump%E5%88%86%E6%9E%90%E5%91%BD%E4%BB%A4"><span class="nav-number">1.1.</span> <span class="nav-text">基础tcpdump分析命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9F%A5%E7%9C%8B%E6%95%B0%E6%8D%AE%E5%8C%85%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.1.</span> <span class="nav-text">1. 查看数据包的基本信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%88%86%E6%9E%90%E5%8D%8F%E8%AE%AE%E5%92%8C%E6%B5%81%E9%87%8F%E5%88%86%E5%B8%83"><span class="nav-number">1.1.2.</span> <span class="nav-text">2. 分析协议和流量分布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%88%86%E6%9E%90TCP%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.1.3.</span> <span class="nav-text">3. 分析TCP连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-HTTP%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90"><span class="nav-number">1.1.4.</span> <span class="nav-text">4. HTTP流量分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%AE%89%E5%85%A8%E5%92%8C%E5%BC%82%E5%B8%B8%E5%88%86%E6%9E%90"><span class="nav-number">1.1.5.</span> <span class="nav-text">5. 安全和异常分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7tcpdump%E5%88%86%E6%9E%90%E6%8A%80%E5%B7%A7"><span class="nav-number">1.2.</span> <span class="nav-text">高级tcpdump分析技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8C%89IP%E5%9C%B0%E5%9D%80%E5%92%8C%E7%AB%AF%E5%8F%A3%E8%BF%87%E6%BB%A4"><span class="nav-number">1.2.1.</span> <span class="nav-text">1. 按IP地址和端口过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8C%89%E5%8D%8F%E8%AE%AE%E8%BF%87%E6%BB%A4"><span class="nav-number">1.2.2.</span> <span class="nav-text">2. 按协议过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%95%B0%E6%8D%AE%E5%8C%85%E5%86%85%E5%AE%B9%E5%88%86%E6%9E%90"><span class="nav-number">1.2.3.</span> <span class="nav-text">3. 数据包内容分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BC%9A%E8%AF%9D%E6%B5%81%E5%88%86%E6%9E%90"><span class="nav-number">1.2.4.</span> <span class="nav-text">4. 会话流分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%9C%89%E7%94%A8%E7%9A%84%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7"><span class="nav-number">1.3.</span> <span class="nav-text">其他有用的网络分析工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-tshark-Wireshark%E7%9A%84%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%89%88%E6%9C%AC"><span class="nav-number">1.3.1.</span> <span class="nav-text">1. tshark (Wireshark的命令行版本)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-ngrep-%E7%BD%91%E7%BB%9Cgrep"><span class="nav-number">1.3.2.</span> <span class="nav-text">2. ngrep (网络grep)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-tcpflow-TCP%E6%B5%81%E9%87%8D%E7%BB%84"><span class="nav-number">1.3.3.</span> <span class="nav-text">3. tcpflow (TCP流重组)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-p0f-%E8%A2%AB%E5%8A%A8%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB"><span class="nav-number">1.3.4.</span> <span class="nav-text">4. p0f (被动操作系统指纹识别)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-BRO-Zeek-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E7%9B%91%E6%8E%A7"><span class="nav-number">1.3.5.</span> <span class="nav-text">5. BRO&#x2F;Zeek (网络安全监控)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%94%A8%E4%B8%80%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="nav-number">1.4.</span> <span class="nav-text">实用一行命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E6%8D%95%E8%8E%B7%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83"><span class="nav-number">1.5.</span> <span class="nav-text">实时捕获命令参考</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">131</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
