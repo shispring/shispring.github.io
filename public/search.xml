@@ -8930,7 +8930,7 @@ validate</p>
 </tr>
 <tr>
 <td>抓取并保存到文件</td>
-<td><code>tcpdump -i eth0 -w output.pcap</code></td>
+<td><code>tcpdump -i eth0 -w output_$(date +%Y%m%d_%H%M%S).pcap</code></td>
 </tr>
 <tr>
 <td>从文件读取包</td>
