@@ -10253,4 +10253,54 @@ validate</p>
 </ol>
 ]]></content>
   </entry>
+  <entry>
+    <title>tcpkill工作原理</title>
+    <url>/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/</url>
+    <content><![CDATA[<h2 id="tcpkill-工作原理"><a href="#tcpkill-工作原理" class="headerlink" title="tcpkill 工作原理"></a>tcpkill 工作原理</h2><p><code>tcpkill</code> 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：</p>
+<ol>
+<li><strong>监听网络流量</strong>：在指定网络接口上监听符合过滤条件的数据包</li>
+<li><strong>伪造 RST 包</strong>：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包</li>
+<li><strong>双向发送</strong>：同时向连接的两端发送 RST 包，确保连接被彻底终止</li>
+</ol>
+<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-i eth0</code>：在 eth0 网络接口上监听</li>
+<li><code>host 11.123.253.133 and port 80</code>：过滤条件，只处理涉及 IP 11.123.253.133 且端口为 80 的连接</li>
+</ul>
+<h2 id="tcpkill-输出解释"><a href="#tcpkill-输出解释" class="headerlink" title="tcpkill 输出解释"></a>tcpkill 输出解释</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">tcpkill: listening on eth0 [host 11.123.253.133 and port 80]</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434213725:434213725(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434214227:434214227(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434215231:434215231(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599879870:599879870(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599880372:599880372(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599881376:599881376(0) win 0</span><br></pre></td></tr></table></figure>
+
+<p>每行格式：<code>源IP:端口 &gt; 目标IP:端口: R 序列号:序列号(数据长度) win 窗口大小</code></p>
+<ul>
+<li><code>R</code>：表示 RST（Reset）标志位</li>
+<li>序列号：TCP 序列号，tcpkill 会尝试不同的序列号以确保 RST 包被接受</li>
+<li><code>(0)</code>：数据长度为 0</li>
+<li><code>win 0</code>：窗口大小为 0</li>
+</ul>
+<h2 id="抓包分析"><a href="#抓包分析" class="headerlink" title="抓包分析"></a>抓包分析</h2><p>从您提供的抓包数据可以看出完整的攻击过程：</p>
+<h3 id="1-正常通信阶段"><a href="#1-正常通信阶段" class="headerlink" title="1. 正常通信阶段"></a>1. 正常通信阶段</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">11:40:00.911181 - 服务器发送 HTTP 数据 (73 字节)</span><br><span class="line">11:40:00.911221 - 客户端发送 ACK 确认</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-RST-攻击阶段"><a href="#2-RST-攻击阶段" class="headerlink" title="2. RST 攻击阶段"></a>2. RST 攻击阶段</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">11:40:01.310146 开始 - tcpkill 发送多个 RST 包</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键观察点</strong>：</p>
+<ol>
+<li><strong>TTL 变化</strong>：正常包 TTL&#x3D;51，RST 包 TTL&#x3D;64，说明 RST 包是本地伪造的</li>
+<li><strong>序列号策略</strong>：tcpkill 发送多个不同序列号的 RST 包，增加成功率</li>
+<li><strong>双向攻击</strong>：既伪造服务器向客户端发送 RST，也伪造客户端向服务器发送 RST</li>
+<li><strong>时间差</strong>：RST 包在正常通信后约 0.4 秒发送</li>
+</ol>
+<h2 id="技术细节"><a href="#技术细节" class="headerlink" title="技术细节"></a>技术细节</h2><p><strong>为什么发送多个 RST 包？</strong></p>
+<ul>
+<li>TCP 只接受序列号在有效窗口范围内的 RST 包</li>
+<li>tcpkill 通过发送不同序列号的 RST 包来提高成功概率</li>
+<li>从抓包可见，序列号呈递增趋势（434213725 → 434214227 → 434215231）</li>
+</ul>
+<p><strong>双向攻击的意义</strong>：</p>
+<ul>
+<li>确保连接两端都收到 RST 包</li>
+<li>即使一方的 RST 包被过滤，另一方仍可能生效</li>
+<li>提高攻击成功率</li>
+</ul>
+]]></content>
+  </entry>
 </search>
