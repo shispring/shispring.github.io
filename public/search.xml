@@ -8914,7 +8914,7 @@ validate</p>
 </thead>
 <tbody><tr>
 <td>抓取指定接口的所有包</td>
-<td><code>tcpdump -i eth0</code></td>
+<td><code>tcpdump -i eth0  -nn -tttt -vvv -s 0 </code></td>
 </tr>
 <tr>
 <td>抓取指定主机的包</td>

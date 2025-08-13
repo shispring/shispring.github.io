@@ -28,7 +28,7 @@
 <meta property="og:description" content="tcpdump网络抓包与分析速查笔记最佳实践：TCP 异常分析流程 先看连接是否建立（SYN→SYN&#x2F;ACK→ACK） 检查是否有重传（tcp.analysis.retransmission） 看是否有 RST&#x2F;FIN 提前关闭 分析延迟&#x2F;窗口问题（tcp.analysis.window_full、tcp.analysis.zero_window） 抓取完整 TCP">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-08-11T09:14:44.000Z">
-<meta property="article:modified_time" content="2025-08-13T02:08:28.154Z">
+<meta property="article:modified_time" content="2025-08-13T03:22:34.835Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -219,7 +219,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-08-13 10:08:28" itemprop="dateModified" datetime="2025-08-13T10:08:28+08:00">2025-08-13</time>
+                <time title="修改时间：2025-08-13 11:22:34" itemprop="dateModified" datetime="2025-08-13T11:22:34+08:00">2025-08-13</time>
               </span>
 
           
@@ -257,7 +257,7 @@
 </thead>
 <tbody><tr>
 <td>抓取指定接口的所有包</td>
-<td><code>tcpdump -i eth0</code></td>
+<td><code>tcpdump -i eth0  -nn -tttt -vvv -s 0 </code></td>
 </tr>
 <tr>
 <td>抓取指定主机的包</td>
