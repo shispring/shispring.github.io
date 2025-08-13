@@ -28,7 +28,7 @@
 <meta property="og:description" content="网络故障模拟工具与常用命令本文档提供了一系列网络故障模拟工具和常用命令，用于测试应用程序在各种网络条件下的行为，特别是长连接（如SSE、WebSocket）的稳定性测试。 1. 常用网络故障模拟工具对比   工具名称 主要功能 优势 局限性 适用场景    tc&#x2F;netem 延迟、丢包、重排、复制、损坏 内置Linux内核，精确控制 配置较复杂 全面的网络条件模拟   iptables">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-08-13T04:09:51.000Z">
-<meta property="article:modified_time" content="2025-08-13T04:10:19.907Z">
+<meta property="article:modified_time" content="2025-08-13T04:17:56.000Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-08-13 12:09:51 / 修改时间：12:10:19" itemprop="dateCreated datePublished" datetime="2025-08-13T12:09:51+08:00">2025-08-13</time>
+              <time title="创建时间：2025-08-13 12:09:51 / 修改时间：12:17:56" itemprop="dateCreated datePublished" datetime="2025-08-13T12:09:51+08:00">2025-08-13</time>
             </span>
 
           
@@ -296,7 +296,7 @@
 </tr>
 </tbody></table>
 <h2 id="2-tc-Traffic-Control-详解"><a href="#2-tc-Traffic-Control-详解" class="headerlink" title="2. tc (Traffic Control) 详解"></a>2. tc (Traffic Control) 详解</h2><p><code>tc</code>是Linux内核的流量控制工具，通过<code>netem</code>模块可以模拟各种网络条件。这是最强大、最灵活的网络故障模拟工具。</p>
-<h3 id="基本使用模式"><a href="#基本使用模式" class="headerlink" title="基本使用模式"></a>基本使用模式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tc qdisc add dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换现有规则</span></span><br><span class="line">tc qdisc change dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除规则</span></span><br><span class="line">tc qdisc del dev INTERFACE root</span><br></pre></td></tr></table></figure>
+<h3 id="基本使用模式"><a href="#基本使用模式" class="headerlink" title="基本使用模式"></a>基本使用模式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查找 dnf search iproute</span></span><br><span class="line"><span class="built_in">sudo</span> dnf install iproute-tc -y</span><br><span class="line">tc -V</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tc qdisc add dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换现有规则</span></span><br><span class="line">tc qdisc change dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除规则</span></span><br><span class="line">tc qdisc del dev INTERFACE root</span><br></pre></td></tr></table></figure>
 
 <h3 id="模拟常见网络问题的命令"><a href="#模拟常见网络问题的命令" class="headerlink" title="模拟常见网络问题的命令"></a>模拟常见网络问题的命令</h3><h4 id="1-延迟模拟"><a href="#1-延迟模拟" class="headerlink" title="1. 延迟模拟"></a>1. 延迟模拟</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加固定延迟(100ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟及抖动(100ms ±10ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加正态分布的延迟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 20ms distribution normal</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加相关性延迟(上一个包的延迟对当前包有25%影响)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms 25%</span><br></pre></td></tr></table></figure>
 
