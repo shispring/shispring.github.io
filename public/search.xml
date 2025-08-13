@@ -10262,7 +10262,7 @@ validate</p>
 <li><strong>伪造 RST 包</strong>：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包</li>
 <li><strong>双向发送</strong>：同时向连接的两端发送 RST 包，确保连接被彻底终止</li>
 </ol>
-<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
+<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#安装 sudo yun install -y dsniff</span></span><br><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><code>-i eth0</code>：在 eth0 网络接口上监听</li>

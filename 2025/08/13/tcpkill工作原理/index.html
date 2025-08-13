@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="tcpkill 工作原理tcpkill 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：  监听网络流量：在指定网络接口上监听符合过滤条件的数据包 伪造 RST 包：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包 双向发送：同时向连接的两端发送 RST 包，确保连接被彻底终止  命令解析1sudo tcpkill -i eth0 host 11.123.253.1">
+  <meta name="description" content="tcpkill 工作原理tcpkill 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：  监听网络流量：在指定网络接口上监听符合过滤条件的数据包 伪造 RST 包：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包 双向发送：同时向连接的两端发送 RST 包，确保连接被彻底终止  命令解析12#安装 sudo yun install -y dsniffsudo tc">
 <meta property="og:type" content="article">
 <meta property="og:title" content="tcpkill工作原理">
 <meta property="og:url" content="https://shispring.github.io/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="tcpkill 工作原理tcpkill 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：  监听网络流量：在指定网络接口上监听符合过滤条件的数据包 伪造 RST 包：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包 双向发送：同时向连接的两端发送 RST 包，确保连接被彻底终止  命令解析1sudo tcpkill -i eth0 host 11.123.253.1">
+<meta property="og:description" content="tcpkill 工作原理tcpkill 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：  监听网络流量：在指定网络接口上监听符合过滤条件的数据包 伪造 RST 包：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包 双向发送：同时向连接的两端发送 RST 包，确保连接被彻底终止  命令解析12#安装 sudo yun install -y dsniffsudo tc">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-08-13T03:51:41.000Z">
-<meta property="article:modified_time" content="2025-08-13T03:53:46.390Z">
+<meta property="article:modified_time" content="2025-08-13T03:54:31.509Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -213,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-08-13 11:51:41 / 修改时间：11:53:46" itemprop="dateCreated datePublished" datetime="2025-08-13T11:51:41+08:00">2025-08-13</time>
+              <time title="创建时间：2025-08-13 11:51:41 / 修改时间：11:54:31" itemprop="dateCreated datePublished" datetime="2025-08-13T11:51:41+08:00">2025-08-13</time>
             </span>
 
           
@@ -240,7 +240,7 @@
 <li><strong>伪造 RST 包</strong>：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包</li>
 <li><strong>双向发送</strong>：同时向连接的两端发送 RST 包，确保连接被彻底终止</li>
 </ol>
-<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
+<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装 sudo yun install -y dsniff</span></span><br><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><code>-i eth0</code>：在 eth0 网络接口上监听</li>
