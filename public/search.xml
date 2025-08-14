@@ -10732,4 +10732,61 @@ validate</p>
         <tag>http</tag>
       </tags>
   </entry>
+  <entry>
+    <title>常见流程图类型及用途</title>
+    <url>/2025/08/14/%E5%B8%B8%E8%A7%81%E6%B5%81%E7%A8%8B%E5%9B%BE%E7%B1%BB%E5%9E%8B%E5%8F%8A%E7%94%A8%E9%80%94/</url>
+    <content><![CDATA[<h2 id="流程图类型及用途"><a href="#流程图类型及用途" class="headerlink" title="流程图类型及用途"></a>流程图类型及用途</h2><table>
+<thead>
+<tr>
+<th>图类型</th>
+<th>适用场景</th>
+<th>是否常用</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>时序图（Sequence Diagram）</strong></td>
+<td>展示系统组件之间随时间推移的交互</td>
+<td>✅ 非常常用</td>
+<td>强调<strong>时间顺序</strong>和消息流</td>
+</tr>
+<tr>
+<td><strong>流程图（Flowchart）</strong></td>
+<td>展示操作&#x2F;决策的逻辑流程</td>
+<td>✅ 最常见</td>
+<td>适合描述<strong>决策逻辑</strong></td>
+</tr>
+<tr>
+<td><strong>活动图（Activity Diagram）</strong></td>
+<td>类似流程图，更关注流程中的并发与分支</td>
+<td>✅ 常用</td>
+<td>更偏向于<strong>行为建模</strong></td>
+</tr>
+<tr>
+<td><strong>状态图（State Machine Diagram）</strong></td>
+<td>展示对象状态随事件变化</td>
+<td>⚠️ 特定场景</td>
+<td>适用于<strong>有限状态机</strong>描述</td>
+</tr>
+<tr>
+<td><strong>组件图（Component Diagram）</strong></td>
+<td>展示系统结构及组件依赖</td>
+<td>✅ 架构设计常用</td>
+<td>显示模块、接口和依赖</td>
+</tr>
+<tr>
+<td><strong>部署图（Deployment Diagram）</strong></td>
+<td>展示物理部署架构</td>
+<td>✅ DevOps 场景常见</td>
+<td>描述服务器、容器部署</td>
+</tr>
+<tr>
+<td><strong>时序交互图（Interaction Overview Diagram）</strong></td>
+<td>结合流程图和时序图</td>
+<td>⚠️ 较少用</td>
+<td>适合大系统多子流程交互</td>
+</tr>
+</tbody></table>
+]]></content>
+  </entry>
 </search>
