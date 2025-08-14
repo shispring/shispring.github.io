@@ -184,6 +184,67 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/12/dlv%E8%B0%83%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/06/12/dlv%E8%B0%83%E8%AF%95/" class="post-title-link" itemprop="url">dlv调试</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-12 16:03:13 / 修改时间：16:08:08" itemprop="dateCreated datePublished" datetime="2025-06-12T16:03:13+08:00">2025-06-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="编译调试"><a href="#编译调试" class="headerlink" title="编译调试"></a>编译调试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#编译二进制</span><br><span class="line">go build -gcflags &quot;all=-N -l&quot; -o main ./main.go</span><br><span class="line">#开启调试</span><br><span class="line">dlv exec ./main</span><br><span class="line">(dlv) break /home/xxx/xxx.go:206</span><br><span class="line">(dlv) continue</span><br><span class="line">(dlv) print ingress</span><br><span class="line">(dlv) locals</span><br><span class="line">(dlv) args</span><br><span class="line">(dlv) exit</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="调试命令"><a href="#调试命令" class="headerlink" title="调试命令"></a>调试命令</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250612160657.png" alt="这是图片" title="dlv"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/09/docker-compose%E9%83%A8%E7%BD%B2postgres%E6%B5%8B%E8%AF%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1022,72 +1083,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/22/ffmpeg%E5%A4%84%E7%90%86%E8%A7%86%E9%A2%91tips/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/04/22/ffmpeg%E5%A4%84%E7%90%86%E8%A7%86%E9%A2%91tips/" class="post-title-link" itemprop="url">ffmpeg处理视频tips</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-04-22 10:29:45 / 修改时间：10:33:28" itemprop="dateCreated datePublished" datetime="2025-04-22T10:29:45+08:00">2025-04-22</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="查看视频总帧数"><a href="#查看视频总帧数" class="headerlink" title="查看视频总帧数"></a>查看视频总帧数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 your_video.mp4</span><br></pre></td></tr></table></figure>
-
-<h3 id="导出视频的每一帧为图片"><a href="#导出视频的每一帧为图片" class="headerlink" title="导出视频的每一帧为图片"></a>导出视频的每一帧为图片</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i your_video.mp4 -q:v 1 output/frame_%05d.jpg</span><br><span class="line">参数含义</span><br><span class="line">-i your_video.mp4 : 输入文件</span><br><span class="line">-q:v 1 : 设置输出图像质量，1 是最高（1~31）</span><br><span class="line">output/frame_%05d.jpg : 输出路径和命名格式（5位数字序号）</span><br></pre></td></tr></table></figure>
-
-<h3 id="制作正向视频"><a href="#制作正向视频" class="headerlink" title="制作正向视频"></a>制作正向视频</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; frames.txt</span><br><span class="line">file &#x27;frame_00076.jpg&#x27;</span><br><span class="line">file &#x27;frame_00077.jpg&#x27;</span><br><span class="line">file &#x27;frame_00078.jpg&#x27;</span><br><span class="line">file &#x27;frame_00079.jpg&#x27;</span><br><span class="line">file &#x27;frame_00080.jpg&#x27;</span><br><span class="line">file &#x27;frame_00081.jpg&#x27;</span><br><span class="line">file &#x27;frame_00082.jpg&#x27;</span><br><span class="line">file &#x27;frame_00083.jpg&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -r 25 -i frames.txt -c:v libx264 -pix_fmt yuv420p forward.mp4</span><br><span class="line"></span><br><span class="line">解释：</span><br><span class="line">-framerate 25: 设置帧率为25（可按需调整）</span><br><span class="line">-i frame_%05d.jpg: 匹配 frame_00076.jpg 至 frame_00083.jpg（确保目录下这些帧是连续命名的）</span><br><span class="line">-vframes 8: 指定只使用8帧</span><br><span class="line">-c:v libx264: 使用 H.264 编码</span><br><span class="line">-pix_fmt yuv420p: 保证兼容性（尤其是网页或播放器）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="制作倒序视频"><a href="#制作倒序视频" class="headerlink" title="制作倒序视频"></a>制作倒序视频</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; reverse.txt</span><br><span class="line">file &#x27;frame_00082.jpg&#x27;</span><br><span class="line">file &#x27;frame_00081.jpg&#x27;</span><br><span class="line">file &#x27;frame_00080.jpg&#x27;</span><br><span class="line">file &#x27;frame_00079.jpg&#x27;</span><br><span class="line">file &#x27;frame_00078.jpg&#x27;</span><br><span class="line">file &#x27;frame_00077.jpg&#x27;</span><br><span class="line">file &#x27;frame_00076.jpg&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -r 25 -i reverse.txt -c:v libx264 -pix_fmt yuv420p reverse.mp4</span><br></pre></td></tr></table></figure>
-<h3 id="拼接正向-反向-视频"><a href="#拼接正向-反向-视频" class="headerlink" title="拼接正向 + 反向 视频"></a>拼接正向 + 反向 视频</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; concat.txt</span><br><span class="line">file &#x27;forward.mp4&#x27;</span><br><span class="line">file &#x27;reverse.mp4&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -i concat.txt -r 25 -c:v libx264 -pix_fmt yuv420p looped.mp4</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1159,7 +1154,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1172,7 +1167,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

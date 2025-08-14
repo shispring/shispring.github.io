@@ -184,6 +184,251 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/24/pod%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%A7%AF%E7%B4%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/24/pod%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%A7%AF%E7%B4%AF/" class="post-title-link" itemprop="url">pod优雅关闭与问题排查</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-24 10:31:23" itemprop="dateCreated datePublished" datetime="2024-12-24T10:31:23+08:00">2024-12-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-02-17 19:10:55" itemprop="dateModified" datetime="2025-02-17T19:10:55+08:00">2025-02-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="1-Linux-信号与服务优雅停止"><a href="#1-Linux-信号与服务优雅停止" class="headerlink" title="1. Linux 信号与服务优雅停止"></a><strong>1. Linux 信号与服务优雅停止</strong></h2><p>服务在停止前需要收到信号通知以进行资源释放、关闭连接等清理操作。以下是常见信号及其特性：</p>
+<h3 id="常见信号"><a href="#常见信号" class="headerlink" title="常见信号"></a><strong>常见信号</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">kill</span> -l</span><br><span class="line">HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ...</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**SIGKILL (9)**：<ul>
+<li>强制结束程序，无法捕获、阻塞或忽略。</li>
+<li><strong>退出状态码</strong>：<code>128 + 9 = 137</code>。</li>
+</ul>
+</li>
+<li>**SIGTERM (15)**：<ul>
+<li>可被程序捕获，用于优雅停止。</li>
+<li><strong>退出状态码</strong>：<code>128 + 15 = 143</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="退出状态码范围"><a href="#退出状态码范围" class="headerlink" title="退出状态码范围"></a><strong>退出状态码范围</strong></h3><ul>
+<li><strong>0</strong>：正常退出。</li>
+<li><strong>1-128</strong>：程序自身异常退出。</li>
+<li><strong>129-255</strong>：外部信号导致退出。</li>
+</ul>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a><strong>注意</strong></h3><ul>
+<li><code>systemctl reload docker</code>：重新加载 Docker 配置文件，不中断运行中的容器。</li>
+<li><code>systemctl restart docker</code>：重启 Docker 服务，会停止并重新启动所有容器。</li>
+</ul>
+<hr>
+<h2 id="2-Pod-优雅关闭"><a href="#2-Pod-优雅关闭" class="headerlink" title="2. Pod 优雅关闭"></a><strong>2. Pod 优雅关闭</strong></h2><p>优雅关闭确保 Pod 在终止时不会中断服务、影响数据一致性或浪费资源。</p>
+<h3 id="优雅关闭的作用"><a href="#优雅关闭的作用" class="headerlink" title="优雅关闭的作用"></a><strong>优雅关闭的作用</strong></h3><ol>
+<li><strong>避免服务中断</strong>：完成当前请求后再终止。</li>
+<li><strong>确保数据一致性</strong>：允许数据持久化或事务处理。</li>
+<li><strong>最小化用户影响</strong>：避免流量路由到已删除的 Pod。</li>
+<li><strong>提高资源利用率</strong>：释放资源，避免泄露。</li>
+</ol>
+<h3 id="优雅关闭时间线"><a href="#优雅关闭时间线" class="headerlink" title="优雅关闭时间线"></a><strong>优雅关闭时间线</strong></h3><h3 id="时间线-1：网络层面的优雅关闭"><a href="#时间线-1：网络层面的优雅关闭" class="headerlink" title="时间线 1：网络层面的优雅关闭"></a><strong>时间线 1：网络层面的优雅关闭</strong></h3><ol>
+<li><p><strong>Service Endpoint 移除</strong>：</p>
+<ul>
+<li><p>Pod 进入 <code>Terminating</code> 状态后，从 Service 的 Endpoint 列表中移除。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get endpoints &lt;service-name&gt; -o yaml</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>NetworkPolicy 规则清理</strong>：</p>
+<ul>
+<li>清理与 Pod 相关的网络规则。</li>
+<li><strong>检查点</strong>：CNI 插件日志（如 Calico、Cilium）。</li>
+</ul>
+</li>
+<li><p><strong>负载均衡器更新</strong>：</p>
+<ul>
+<li><p>从后端池中移除 Pod 地址。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe ingress &lt;ingress-name&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<h3 id="时间线-2：Pod-的关闭步骤"><a href="#时间线-2：Pod-的关闭步骤" class="headerlink" title="时间线 2：Pod 的关闭步骤"></a><strong>时间线 2：Pod 的关闭步骤</strong></h3><ol>
+<li><p><strong>SIGTERM 信号发送</strong>：</p>
+<ul>
+<li><p>通知容器内应用进行清理。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>PreStop Hook 执行</strong>：</p>
+<ul>
+<li>执行清理脚本。</li>
+<li><strong>检查点</strong>：查看容器日志。</li>
+</ul>
+</li>
+<li><p><strong>容器优雅退出</strong>：</p>
+<ul>
+<li>处理 SIGTERM 信号。</li>
+<li><strong>检查点</strong>：确认长连接或挂起任务是否处理。</li>
+</ul>
+</li>
+<li><p>**强制终止 (SIGKILL)**：</p>
+<ul>
+<li>超过 <code>terminationGracePeriodSeconds</code> 后，发送 SIGKILL。</li>
+<li><strong>检查点</strong>：查看 kubelet 日志。</li>
+</ul>
+</li>
+<li><p><strong>资源清理</strong>：</p>
+<ul>
+<li><p>卸载存储卷，释放网络资源。</p>
+</li>
+<li><p><strong>检查点</strong>：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pv,pvc</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="3-Pod-删除原理"><a href="#3-Pod-删除原理" class="headerlink" title="3. Pod 删除原理"></a><strong>3. Pod 删除原理</strong></h2><h3 id="触发-Pod-删除的场景"><a href="#触发-Pod-删除的场景" class="headerlink" title="触发 Pod 删除的场景"></a><strong>触发 Pod 删除的场景</strong></h3><ol>
+<li><strong>手动删除</strong>：<code>kubectl delete pod</code>。</li>
+<li><strong>控制器策略</strong>：如 Deployment 缩减副本数。</li>
+<li><strong>节点故障</strong>：节点失效后重新调度。</li>
+<li><strong>资源限制</strong>：节点资源不足时删除低优先级 Pod。</li>
+<li><strong>健康检查失败</strong>：探针连续失败。</li>
+<li><strong>优先级抢占</strong>：释放资源给高优先级 Pod。</li>
+<li><strong>更新策略</strong>：滚动更新替换旧 Pod。</li>
+<li><strong>自动缩放</strong>：集群缩小时删除 Pod。</li>
+</ol>
+<hr>
+<h2 id="4-Pod-长时间处于-Terminating-状态的原因"><a href="#4-Pod-长时间处于-Terminating-状态的原因" class="headerlink" title="4. Pod 长时间处于 Terminating 状态的原因"></a><strong>4. Pod 长时间处于 Terminating 状态的原因</strong></h2><ol>
+<li><strong>存储未卸载</strong>：持久卷未成功释放。</li>
+<li><strong>容器未终止</strong>：未正确响应 SIGTERM。</li>
+<li><strong>Finalizer 阻塞</strong>：清理任务未完成。</li>
+<li><strong>网络或 API Server 问题</strong>：通信异常。</li>
+<li><strong>节点异常</strong>：节点不可用。</li>
+</ol>
+<h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a><strong>排查思路</strong></h3><ol>
+<li><p><strong>查看 Pod 信息</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#检查 Pod 的 Finalizer</span></span><br><span class="line">kubectl get pod &lt;pod-name&gt; -n &lt;namespace&gt; -o jsonpath=<span class="string">&#x27;&#123;.metadata.finalizers&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>检查容器状态</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod &lt;pod-name&gt; -o jsonpath=<span class="string">&#x27;&#123;.status.containerStatuses[*].state&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>检查节点状态</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>检查存储状态</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pvc</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>强制删除 Pod</strong>：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; --force --grace-period=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#发送 SIGTERM 信号的几种方式</span></span><br><span class="line"><span class="built_in">kill</span> -15 &lt;container-id&gt;</span><br><span class="line">docker <span class="built_in">kill</span> --signal=SIGTERM &lt;container-id&gt;</span><br><span class="line"><span class="comment">#如果使用 crictl： crictl stop &lt;container-id&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#强制重新触发优雅终止,例如，将宽限期设置为 10 秒：</span></span><br><span class="line">kubectl delete pod &lt;pod-name&gt; -n &lt;namespace&gt; --grace-period=10</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="5-Docker-与-Containerd-的日志排查"><a href="#5-Docker-与-Containerd-的日志排查" class="headerlink" title="5. Docker 与 Containerd 的日志排查"></a><strong>5. Docker 与 Containerd 的日志排查</strong></h2><h3 id="检查-Docker-日志"><a href="#检查-Docker-日志" class="headerlink" title="检查 Docker 日志"></a><strong>检查 Docker 日志</strong></h3><ol>
+<li><p>查看 Docker 守护进程日志：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u docker | grep &lt;docker_id&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>检查 kubelet 清理失败记录：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u kubelet | grep <span class="string">&quot;cleanup&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="清理-Docker-残留资源"><a href="#清理-Docker-残留资源" class="headerlink" title="清理 Docker 残留资源"></a><strong>清理 Docker 残留资源</strong></h3><ol>
+<li><p>删除退出的容器：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container prune -f</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除未使用的镜像：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -a</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>清理未使用的网络和卷：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker network prune -f</span><br><span class="line">docker volume prune -f</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="清理-Containerd-残留资源"><a href="#清理-Containerd-残留资源" class="headerlink" title="清理 Containerd 残留资源"></a><strong>清理 Containerd 残留资源</strong></h3><ol>
+<li><p>删除残留容器：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crictl <span class="built_in">rm</span> $(crictl ps -a -q)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除未使用的镜像：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crictl rmi &lt;image-id&gt;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="6-最佳实践"><a href="#6-最佳实践" class="headerlink" title="6. 最佳实践"></a><strong>6. 最佳实践</strong></h2><ol>
+<li><strong>配置优雅终止</strong>：<ul>
+<li>设置 <code>terminationGracePeriodSeconds</code>。</li>
+<li>配置 PreStop Hook。</li>
+</ul>
+</li>
+<li><strong>监控和告警</strong>：<ul>
+<li>使用 Prometheus 检测 <code>Terminating</code> 状态 Pod。</li>
+</ul>
+</li>
+<li><strong>避免 Finalizer 阻塞</strong>：<ul>
+<li>确保 Finalizer 正常完成任务。</li>
+</ul>
+</li>
+<li><strong>定期清理残留资源</strong>：<ul>
+<li>检查并清理未使用的容器、镜像和存储。</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/23/terminating%E7%9A%84pod%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1230,114 +1475,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">k8s event controller工作原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-12-08 13:45:33" itemprop="dateCreated datePublished" datetime="2024-12-08T13:45:33+08:00">2024-12-08</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-06-05 15:50:43" itemprop="dateModified" datetime="2025-06-05T15:50:43+08:00">2025-06-05</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://silenceper.com/blog/202003/kubernetes-event/">https://silenceper.com/blog/202003/kubernetes-event/</a></p>
-</blockquote>
-<p>在 Kubernetes 中，Event Controller 是集群内部的一部分，用于管理事件资源（Event 对象）。它的主要职责是监听、存储和处理集群中的事件，这些事件是 Kubernetes 中其他组件和用户操作的结果。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get events --sort-by=<span class="string">&#x27;&#123;.metadata.creationTimestamp&#125;&#x27;</span> -n default</span><br><span class="line">kubectl get events --sort-by=<span class="string">&#x27;&#123;.metadata.creationTimestamp&#125;&#x27;</span> -o jsonpath=<span class="string">&#x27;&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;&quot;\n&quot;&#125;&#123;end&#125;&#x27;</span> -n default</span><br><span class="line">kubectl get events xxxx.182de6068e2be852 -n default -o yaml </span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>Event 的定义与来源</li>
-</ol>
-<p>Event 是 Kubernetes 中的一个核心资源，表示集群中发生的一个操作或状态变更。每个 Event 都是一个短期的记录，包含以下信息：<br>•涉及的对象（involvedObject）：与事件相关的资源（Pod、Node、Deployment 等）。<br>•类型：事件类型是 Normal（正常）或 Warning（警告）。<br>•原因：事件的简短描述（如 BackOff、Scheduled）。<br>•消息：事件的详细信息。<br>•时间戳：事件发生的时间。<br>•事件源：触发事件的组件（如 kubelet、scheduler、controller-manager 等）。</p>
-<ol start="2">
-<li>Event Controller 的作用</li>
-</ol>
-<p>Event Controller 的核心功能是：<br>•监听事件源：通过 API Server 监控事件的发生（使用 Kubernetes 的 Watch 机制）。<br>•记录事件：将事件持久化存储到 etcd 中。<br>•清理旧事件：定期清理超出 TTL（默认 1 小时）的事件，确保事件系统不会无限制地占用资源。</p>
-<p>事件驱动机制的工作原理</p>
-<p>Kubernetes 是基于 事件驱动模型 的，这体现在以下几个方面：</p>
-<ol>
-<li>事件的传播与通知</li>
-</ol>
-<p>事件是通过 Watch&#x2F;Informer 机制传播的：<br>•组件监听 API Server：Kubernetes 中的 Controller（如 Deployment Controller、Node Controller）通过 Watch 机制实时监听资源对象的变更。<br>•产生事件：当资源对象状态发生变化时，组件会向 API Server 报告事件。例如，Pod 被调度到一个节点后，Scheduler 会产生一个事件 Scheduled。<br>•事件流转：事件被写入 API Server，Event Controller 和其他监听组件（如自定义 Controller）会收到通知。</p>
-<ol start="2">
-<li>事件类型<br>•Normal 事件：表示系统的正常行为，例如 Pod 被成功调度。<br>•Warning 事件：表示可能的异常情况，例如 Pod 无法拉取镜像或节点不可用。</li>
-</ol>
-<p>Event Controller 对 CRD 自定义 Controller 的影响</p>
-<ol>
-<li>事件触发 CRD Controller 的动作<br>•Informer 的事件驱动机制：CRD 自定义 Controller 使用 Kubernetes 提供的 Informer 来监听 CRD 对象的创建、更新和删除事件。Informer 会从 API Server 获取事件并调用相应的处理逻辑。<br>•队列机制：事件触发后，CRD Controller 通常将事件加入队列（如 workqueue），并异步执行对应的操作。</li>
-</ol>
-<p>例如：<br>•用户创建一个自定义资源（CRD 实例）。<br>•Informer 监听到该事件，并将事件加入工作队列。<br>•自定义 Controller 的 Reconcile Loop 被触发，执行相应的逻辑。</p>
-<ol start="2">
-<li><p>使用事件进行调试与可观察性<br>•CRD 自定义 Controller 通常会创建 Event 对象记录操作结果（如更新资源状态）。<br>•这些事件便于管理员调试和观察 CRD Controller 的行为。</p>
-</li>
-<li><p>事件的级联影响<br>•自定义 Controller 的行为可能引发新的事件。例如，Controller 更新一个 Pod 的 Label，会触发 Deployment Controller 产生新事件 Updated.</p>
-</li>
-</ol>
-<p>事件对系统整体的影响<br>1.调度与控制的基础：<br>•Scheduler 监听 Pod 的创建事件来决定调度策略。<br>•Deployment Controller 监听 Pod 的状态事件来决定扩容或重建策略。</p>
-<p>2.系统状态的监控与追踪：<br>•事件为集群提供了一个透明的状态变更历史。<br>•运维人员可以通过 kubectl describe 查看事件记录。</p>
-<p>3.问题的根因分析：<br>•事件链可以帮助快速定位问题。例如，Pod 创建失败的原因通常可以通过查看相关的事件找到。</p>
-<p>实践中如何生成和使用事件<br>1.生成自定义事件<br>自定义 Controller 可以通过 Kubernetes 提供的 EventRecorder 接口生成事件：</p>
-<p>eventRecorder.Event(resource, “Warning”, “CustomReason”, “Custom message”)</p>
-<p>2.监控事件<br>通过 kubectl 查看事件：</p>
-<p>kubectl get events –all-namespaces</p>
-<p>3.分析与排查问题</p>
-<p>•Warning 事件通常是问题的直接表现。<br>•结合事件时间顺序，可以追踪操作的完整链路。</p>
-<p>通过事件驱动机制，Kubernetes 提供了强大的异步处理能力和可观察性，能够支撑复杂的分布式系统操作逻辑。自定义的 CRD Controller 充分利用这一机制，可以实现动态、灵活的资源管理和协调。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1409,7 +1546,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1422,7 +1559,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
