@@ -10806,4 +10806,62 @@ validate</p>
         <tag>prometheus</tag>
       </tags>
   </entry>
+  <entry>
+    <title>内存回写/脏页/回收/OOM</title>
+    <url>/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/</url>
+    <content><![CDATA[<h1 id="内存回写-脏页-回收-OOM-—-全流程说明与排查指南"><a href="#内存回写-脏页-回收-OOM-—-全流程说明与排查指南" class="headerlink" title="内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南"></a>内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南</h1><h2 id="概览（一句话）"><a href="#概览（一句话）" class="headerlink" title="概览（一句话）"></a>概览（一句话）</h2><p>用户进程写数据 → 数据先写入页缓存（page cache）成为 <em>dirty pages</em> → 内核异步回写（writeback）到磁盘 → 若磁盘&#x2F;后端慢或写入速率低于生成速率，dirty 将积累 → 内存回收（kswapd）尝试回收或触发写回并阻塞写者 → 若回收失败并耗尽内存，OOM killer 根据策略选择并杀死进程 &#x2F; cgroup。</p>
+<hr>
+<h2 id="一、关键概念（快速回顾）"><a href="#一、关键概念（快速回顾）" class="headerlink" title="一、关键概念（快速回顾）"></a>一、关键概念（快速回顾）</h2><ul>
+<li>**页缓存 (page cache)**：文件&#x2F;块 IO 的缓存层，存储在内存中 <code>struct page</code>。</li>
+<li><strong>Dirty pages</strong>：已修改但尚未写回到磁盘的页（占用内存，可写回）。</li>
+<li><strong>Writeback</strong>：内核将 dirty page 写回存储（由 writeback kthreads &#x2F; flush workers 执行）。</li>
+<li><strong>kswapd &#x2F; page reclaim</strong>：当内存紧张时回收可回收页（包括触发 writeback）。</li>
+<li><strong>OOM killer</strong>：当内核无法满足分配且无法回收，选择进程作为牺牲者（基于 <code>oom_score</code>、<code>oom_score_adj</code>、cgroup）并终止之。</li>
+<li><strong>cgroup v1&#x2F;v2</strong>：容器资源限制机制，内存超限会触发 cgroup OOM 行为。</li>
+</ul>
+<hr>
+<h2 id="二、典型触发路径（更详细）"><a href="#二、典型触发路径（更详细）" class="headerlink" title="二、典型触发路径（更详细）"></a>二、典型触发路径（更详细）</h2><ol>
+<li><p><strong>用户进程 write()</strong>  </p>
+<ul>
+<li>内核在 page cache 分配&#x2F;获取 page，复制数据到 page，然后标记为 <code>dirty</code>。</li>
+<li>write 返回快（写入内存），不等磁盘写完 -&gt; 写入吞吐高但延迟低。</li>
+</ul>
+</li>
+<li><p><strong>后台 writeback</strong>  </p>
+<ul>
+<li>内核周期性&#x2F;阈值触发 writeback（<code>vm.dirty_background_ratio</code> &#x2F; <code>vm.dirty_ratio</code> 或绝对量 <code>vm.dirty_bytes</code>）。</li>
+<li>writeback 由内核 kthreads 执行，异步把页写到块设备或通过 NFS&#x2F;CIFS&#x2F;CSI 等上游。</li>
+</ul>
+</li>
+<li><p><strong>当 writeback 跟不上</strong>  </p>
+<ul>
+<li>若产生 dirty 的速度 &gt; 写回速度（例如磁盘慢&#x2F;IO 卡住），dirty 会累积。</li>
+<li>一旦达到 <code>vm.dirty_ratio</code>，写者可能被强制阻塞（同步地 flush），导致大量进程阻塞在 D (uninterruptible sleep) 状态。</li>
+<li>IO 长时间阻塞会使系统响应变差（ssh 卡、syscalls 卡）。</li>
+</ul>
+</li>
+<li><p><strong>内存回收与 OOM</strong>  </p>
+<ul>
+<li>kswapd&#x2F;直接分配者触发回收，回收优先回收可回收的缓存页或回写脏页。</li>
+<li>如果回收仍然不能满足内存请求，内核触发 OOM killer，选择最合适的 victim（参考 oom_score, oom_score_adj, oom_badness 以及 cgroup 权重），并杀掉进程。</li>
+<li>在 cgroup v2 下，若 cgroup 达到 <code>memory.max</code>，可能只杀该 cgroup 内的进程（cgroup OOM）。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="三、和-buff-cache-MemAvailable-的常见误解"><a href="#三、和-buff-cache-MemAvailable-的常见误解" class="headerlink" title="三、和 buff/cache &#x2F; MemAvailable 的常见误解"></a>三、和 <code>buff/cache</code> &#x2F; <code>MemAvailable</code> 的常见误解</h2><ul>
+<li><code>buff/cache</code> 高 <strong>不等于</strong> 可用性低；<code>buff/cache</code> 是可回收的（通常）。  </li>
+<li>但当脏页非常多或 slab（内核对象）泄漏时，内存是“不可回收”的 → 即便 <code>MemAvailable</code> 暂时显示不是 0，也可能回收失败导致假死。  </li>
+<li>区分点：看 <code>Dirty</code>&#x2F;<code>Writeback</code> 与 <code>SReclaimable</code> &#x2F; <code>SUnreclaim</code>（<code>/proc/meminfo</code> 与 <code>slabtop</code>）。</li>
+</ul>
+<hr>
+<h2 id="四、实操排查清单（从轻到重）"><a href="#四、实操排查清单（从轻到重）" class="headerlink" title="四、实操排查清单（从轻到重）"></a>四、实操排查清单（从轻到重）</h2><h3 id="1-快速查看内存-脏页-回写"><a href="#1-快速查看内存-脏页-回写" class="headerlink" title="1) 快速查看内存&#x2F;脏页&#x2F;回写"></a>1) 快速查看内存&#x2F;脏页&#x2F;回写</h3><pre><code class="bash">free -h
+cat /proc/meminfo | egrep &#39;Dirty|Writeback|MemAvailable|Cached|Buffers|SUnreclaim|Slab|Swap&#39;
+cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writeback&#39;
+</code></pre>
+]]></content>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
 </search>

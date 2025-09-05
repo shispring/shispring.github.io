@@ -20,19 +20,20 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="关于 Metrics 的常用命令 查看 Kubelet 的指标： 1kubectl get --raw &quot;&#x2F;metrics&quot;  返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。   查看节点的 cAdvisor 指标： 1kubectl get --raw &quot;&#x2F;api&#x2F;v1&#x2F;nodes&#x2F;&lt;nodeName&gt;&#x2F;proxy&#x2F;metrics&#x2F;">
+  <meta name="description" content="内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南概览（一句话）用户进程写数据 → 数据先写入页缓存（page cache）成为 dirty pages → 内核异步回写（writeback）到磁盘 → 若磁盘&#x2F;后端慢或写入速率低于生成速率，dirty 将积累 → 内存回收（kswapd）尝试回收或触发写回并阻塞写者 → 若回收失败并耗尽内存">
 <meta property="og:type" content="article">
-<meta property="og:title" content="metrics的常用命令">
-<meta property="og:url" content="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:title" content="内存回写&#x2F;脏页&#x2F;回收&#x2F;OOM">
+<meta property="og:url" content="https://shispring.github.io/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="关于 Metrics 的常用命令 查看 Kubelet 的指标： 1kubectl get --raw &quot;&#x2F;metrics&quot;  返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。   查看节点的 cAdvisor 指标： 1kubectl get --raw &quot;&#x2F;api&#x2F;v1&#x2F;nodes&#x2F;&lt;nodeName&gt;&#x2F;proxy&#x2F;metrics&#x2F;">
+<meta property="og:description" content="内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南概览（一句话）用户进程写数据 → 数据先写入页缓存（page cache）成为 dirty pages → 内核异步回写（writeback）到磁盘 → 若磁盘&#x2F;后端慢或写入速率低于生成速率，dirty 将积累 → 内存回收（kswapd）尝试回收或触发写回并阻塞写者 → 若回收失败并耗尽内存">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-12-09T08:34:29.000Z">
-<meta property="article:modified_time" content="2024-12-09T08:38:04.995Z">
+<meta property="article:published_time" content="2025-09-05T02:47:51.000Z">
+<meta property="article:modified_time" content="2025-09-05T02:48:07.385Z">
 <meta property="article:author" content="shispring">
+<meta property="article:tag" content="linux">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+<link rel="canonical" href="https://shispring.github.io/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/">
 
 
 <script id="page-configurations">
@@ -45,7 +46,7 @@
   };
 </script>
 
-  <title>metrics的常用命令 | Hexo</title>
+  <title>内存回写/脏页/回收/OOM | Hexo</title>
   
 
 
@@ -189,7 +190,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -202,7 +203,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          metrics的常用命令
+          内存回写/脏页/回收/OOM
         </h1>
 
         <div class="post-meta">
@@ -213,16 +214,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-12-09 16:34:29 / 修改时间：16:38:04" itemprop="dateCreated datePublished" datetime="2024-12-09T16:34:29+08:00">2024-12-09</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
+              <time title="创建时间：2025-09-05 10:47:51 / 修改时间：10:48:07" itemprop="dateCreated datePublished" datetime="2025-09-05T10:47:51+08:00">2025-09-05</time>
             </span>
 
           
@@ -243,82 +235,56 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="关于-Metrics-的常用命令"><a href="#关于-Metrics-的常用命令" class="headerlink" title="关于 Metrics 的常用命令"></a>关于 Metrics 的常用命令</h3><ol>
-<li><p><strong>查看 Kubelet 的指标</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span></span><br></pre></td></tr></table></figure>
+        <h1 id="内存回写-脏页-回收-OOM-—-全流程说明与排查指南"><a href="#内存回写-脏页-回收-OOM-—-全流程说明与排查指南" class="headerlink" title="内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南"></a>内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南</h1><h2 id="概览（一句话）"><a href="#概览（一句话）" class="headerlink" title="概览（一句话）"></a>概览（一句话）</h2><p>用户进程写数据 → 数据先写入页缓存（page cache）成为 <em>dirty pages</em> → 内核异步回写（writeback）到磁盘 → 若磁盘&#x2F;后端慢或写入速率低于生成速率，dirty 将积累 → 内存回收（kswapd）尝试回收或触发写回并阻塞写者 → 若回收失败并耗尽内存，OOM killer 根据策略选择并杀死进程 &#x2F; cgroup。</p>
+<hr>
+<h2 id="一、关键概念（快速回顾）"><a href="#一、关键概念（快速回顾）" class="headerlink" title="一、关键概念（快速回顾）"></a>一、关键概念（快速回顾）</h2><ul>
+<li>**页缓存 (page cache)**：文件&#x2F;块 IO 的缓存层，存储在内存中 <code>struct page</code>。</li>
+<li><strong>Dirty pages</strong>：已修改但尚未写回到磁盘的页（占用内存，可写回）。</li>
+<li><strong>Writeback</strong>：内核将 dirty page 写回存储（由 writeback kthreads &#x2F; flush workers 执行）。</li>
+<li><strong>kswapd &#x2F; page reclaim</strong>：当内存紧张时回收可回收页（包括触发 writeback）。</li>
+<li><strong>OOM killer</strong>：当内核无法满足分配且无法回收，选择进程作为牺牲者（基于 <code>oom_score</code>、<code>oom_score_adj</code>、cgroup）并终止之。</li>
+<li><strong>cgroup v1&#x2F;v2</strong>：容器资源限制机制，内存超限会触发 cgroup OOM 行为。</li>
+</ul>
+<hr>
+<h2 id="二、典型触发路径（更详细）"><a href="#二、典型触发路径（更详细）" class="headerlink" title="二、典型触发路径（更详细）"></a>二、典型触发路径（更详细）</h2><ol>
+<li><p><strong>用户进程 write()</strong>  </p>
 <ul>
-<li>返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。</li>
+<li>内核在 page cache 分配&#x2F;获取 page，复制数据到 page，然后标记为 <code>dirty</code>。</li>
+<li>write 返回快（写入内存），不等磁盘写完 -&gt; 写入吞吐高但延迟低。</li>
 </ul>
 </li>
-<li><p><strong>查看节点的 cAdvisor 指标</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/api/v1/nodes/&lt;nodeName&gt;/proxy/metrics/cadvisor&quot;</span></span><br></pre></td></tr></table></figure>
+<li><p><strong>后台 writeback</strong>  </p>
 <ul>
-<li>获取容器级别的详细性能指标。</li>
+<li>内核周期性&#x2F;阈值触发 writeback（<code>vm.dirty_background_ratio</code> &#x2F; <code>vm.dirty_ratio</code> 或绝对量 <code>vm.dirty_bytes</code>）。</li>
+<li>writeback 由内核 kthreads 执行，异步把页写到块设备或通过 NFS&#x2F;CIFS&#x2F;CSI 等上游。</li>
 </ul>
 </li>
-<li><p><strong>查看 API Server 的指标</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span> | grep apiserver</span><br></pre></td></tr></table></figure>
+<li><p><strong>当 writeback 跟不上</strong>  </p>
 <ul>
-<li>返回 API Server 的性能指标。</li>
+<li>若产生 dirty 的速度 &gt; 写回速度（例如磁盘慢&#x2F;IO 卡住），dirty 会累积。</li>
+<li>一旦达到 <code>vm.dirty_ratio</code>，写者可能被强制阻塞（同步地 flush），导致大量进程阻塞在 D (uninterruptible sleep) 状态。</li>
+<li>IO 长时间阻塞会使系统响应变差（ssh 卡、syscalls 卡）。</li>
 </ul>
 </li>
-<li><p><strong>查看 Controller Manager 的指标</strong>：<br>在 Controller Manager 所在的节点运行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10252/metrics</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查看 Scheduler 的指标</strong>：<br>在 Scheduler 所在的节点运行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10251/metrics</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查看 Metrics Server 的 API</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/nodes&quot;</span></span><br></pre></td></tr></table></figure>
-<p>或查看 Pod 的指标：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/pods&quot;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>Prometheus 拉取指标</strong>：<br>如果集群中部署了 Prometheus，可以直接通过其 UI 或 API 获取指标，使用 PromQL 查询资源利用率。</p>
+<li><p><strong>内存回收与 OOM</strong>  </p>
+<ul>
+<li>kswapd&#x2F;直接分配者触发回收，回收优先回收可回收的缓存页或回写脏页。</li>
+<li>如果回收仍然不能满足内存请求，内核触发 OOM killer，选择最合适的 victim（参考 oom_score, oom_score_adj, oom_badness 以及 cgroup 权重），并杀掉进程。</li>
+<li>在 cgroup v2 下，若 cgroup 达到 <code>memory.max</code>，可能只杀该 cgroup 内的进程（cgroup OOM）。</li>
+</ul>
 </li>
 </ol>
 <hr>
-<h3 id="Kubernetes-Metrics-的整体知识架构"><a href="#Kubernetes-Metrics-的整体知识架构" class="headerlink" title="Kubernetes Metrics 的整体知识架构"></a>Kubernetes Metrics 的整体知识架构</h3><h4 id="1-数据来源"><a href="#1-数据来源" class="headerlink" title="1. 数据来源"></a><strong>1. 数据来源</strong></h4><ul>
-<li><strong>Kubelet cAdvisor</strong>：提供节点和容器的资源使用数据。</li>
-<li><strong>Metrics Server</strong>：聚合来自 Kubelet 的指标，用于 Horizontal Pod Autoscaler（HPA）等。</li>
-<li><strong>Prometheus</strong>：一个全面的监控解决方案，用于存储和查询集群中所有相关的指标数据。</li>
-<li><strong>API Server 和 Controller 指标</strong>：暴露组件性能。</li>
+<h2 id="三、和-buff-cache-MemAvailable-的常见误解"><a href="#三、和-buff-cache-MemAvailable-的常见误解" class="headerlink" title="三、和 buff/cache &#x2F; MemAvailable 的常见误解"></a>三、和 <code>buff/cache</code> &#x2F; <code>MemAvailable</code> 的常见误解</h2><ul>
+<li><code>buff/cache</code> 高 <strong>不等于</strong> 可用性低；<code>buff/cache</code> 是可回收的（通常）。  </li>
+<li>但当脏页非常多或 slab（内核对象）泄漏时，内存是“不可回收”的 → 即便 <code>MemAvailable</code> 暂时显示不是 0，也可能回收失败导致假死。  </li>
+<li>区分点：看 <code>Dirty</code>&#x2F;<code>Writeback</code> 与 <code>SReclaimable</code> &#x2F; <code>SUnreclaim</code>（<code>/proc/meminfo</code> 与 <code>slabtop</code>）。</li>
 </ul>
-<h4 id="2-相关工具"><a href="#2-相关工具" class="headerlink" title="2. 相关工具"></a><strong>2. 相关工具</strong></h4><ul>
-<li><strong>kubectl top</strong>：快速查看节点和 Pod 的资源使用：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl top nodes</span><br><span class="line">kubectl top pods --namespace=&lt;namespace&gt;</span><br></pre></td></tr></table></figure></li>
-<li><strong>Prometheus&#x2F;Grafana</strong>：用于可视化和分析。</li>
-<li><strong>Custom Metrics Adapter</strong>：支持自定义指标。</li>
-</ul>
-<h4 id="3-最佳实践"><a href="#3-最佳实践" class="headerlink" title="3. 最佳实践"></a><strong>3. 最佳实践</strong></h4><ol>
-<li><strong>启用 Metrics Server</strong>：用于 HPA 和基本资源监控。</li>
-<li><strong>使用 Prometheus</strong>：集中化收集和存储指标。</li>
-<li><strong>建立告警系统</strong>：通过 Alertmanager 或其他工具设置告警。</li>
-<li><strong>分析指标覆盖范围</strong>：确保所有重要组件和工作负载都有相关指标暴露。</li>
-<li><strong>优化监控开销</strong>：根据需要采样和聚合数据，避免监控开销过大。</li>
-</ol>
 <hr>
-<h3 id="推荐文档与资源"><a href="#推荐文档与资源" class="headerlink" title="推荐文档与资源"></a>推荐文档与资源</h3><ol>
-<li><p><strong>Kubernetes 官方文档</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics/">Metrics for Kubernetes Components</a></li>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/cluster-administration/monitoring/">Monitoring Architecture</a></li>
-</ul>
-</li>
-<li><p><strong>Prometheus 官方文档</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://prometheus.io/docs/">Prometheus Documentation</a></li>
-</ul>
-</li>
-<li><p><strong>社区工具</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/prometheus-operator/kube-prometheus">Kube-prometheus-stack</a><br>一个推荐的 Prometheus Operator 部署方案。</li>
-</ul>
-</li>
-<li><p><strong>博客与案例</strong>：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://www.cncf.io/">CNCF Metrics Best Practices</a><br>关于监控和指标的实践指导。</li>
-</ul>
-</li>
-</ol>
+<h2 id="四、实操排查清单（从轻到重）"><a href="#四、实操排查清单（从轻到重）" class="headerlink" title="四、实操排查清单（从轻到重）"></a>四、实操排查清单（从轻到重）</h2><h3 id="1-快速查看内存-脏页-回写"><a href="#1-快速查看内存-脏页-回写" class="headerlink" title="1) 快速查看内存&#x2F;脏页&#x2F;回写"></a>1) 快速查看内存&#x2F;脏页&#x2F;回写</h3><pre><code class="bash">free -h
+cat /proc/meminfo | egrep &#39;Dirty|Writeback|MemAvailable|Cached|Buffers|SUnreclaim|Slab|Swap&#39;
+cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writeback&#39;
+</code></pre>
 
     </div>
 
@@ -327,6 +293,10 @@
     
 
       <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+          </div>
 
         
 
@@ -334,13 +304,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" rel="prev" title="k8s event controller工作原理">
-      <i class="fa fa-chevron-left"></i> k8s event controller工作原理
+    <a href="/2025/09/01/%E9%83%A8%E7%BD%B2kube-prometheus-stack/" rel="prev" title="部署kube-prometheus-stack">
+      <i class="fa fa-chevron-left"></i> 部署kube-prometheus-stack
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/12/10/vim%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/" rel="next" title="vim基础配置">
-      vim基础配置 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -399,7 +366,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-Metrics-%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">关于 Metrics 的常用命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes-Metrics-%E7%9A%84%E6%95%B4%E4%BD%93%E7%9F%A5%E8%AF%86%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes Metrics 的整体知识架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%95%B0%E6%8D%AE%E6%9D%A5%E6%BA%90"><span class="nav-number">2.1.</span> <span class="nav-text">1. 数据来源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7"><span class="nav-number">2.2.</span> <span class="nav-text">2. 相关工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">2.3.</span> <span class="nav-text">3. 最佳实践</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E6%96%87%E6%A1%A3%E4%B8%8E%E8%B5%84%E6%BA%90"><span class="nav-number">3.</span> <span class="nav-text">推荐文档与资源</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM-%E2%80%94-%E5%85%A8%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E%E4%B8%8E%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97"><span class="nav-number">1.</span> <span class="nav-text">内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88%EF%BC%88%E4%B8%80%E5%8F%A5%E8%AF%9D%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">概览（一句话）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5%EF%BC%88%E5%BF%AB%E9%80%9F%E5%9B%9E%E9%A1%BE%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">一、关键概念（快速回顾）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%85%B8%E5%9E%8B%E8%A7%A6%E5%8F%91%E8%B7%AF%E5%BE%84%EF%BC%88%E6%9B%B4%E8%AF%A6%E7%BB%86%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">二、典型触发路径（更详细）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%92%8C-buff-cache-MemAvailable-%E7%9A%84%E5%B8%B8%E8%A7%81%E8%AF%AF%E8%A7%A3"><span class="nav-number">1.4.</span> <span class="nav-text">三、和 buff&#x2F;cache &#x2F; MemAvailable 的常见误解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AE%9E%E6%93%8D%E6%8E%92%E6%9F%A5%E6%B8%85%E5%8D%95%EF%BC%88%E4%BB%8E%E8%BD%BB%E5%88%B0%E9%87%8D%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">四、实操排查清单（从轻到重）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%BF%AB%E9%80%9F%E6%9F%A5%E7%9C%8B%E5%86%85%E5%AD%98-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E5%86%99"><span class="nav-number">1.5.1.</span> <span class="nav-text">1) 快速查看内存&#x2F;脏页&#x2F;回写</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

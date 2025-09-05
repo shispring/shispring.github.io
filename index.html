@@ -184,6 +184,114 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/" class="post-title-link" itemprop="url">内存回写/脏页/回收/OOM</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-05 10:47:51 / 修改时间：10:48:07" itemprop="dateCreated datePublished" datetime="2025-09-05T10:47:51+08:00">2025-09-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="内存回写-脏页-回收-OOM-—-全流程说明与排查指南"><a href="#内存回写-脏页-回收-OOM-—-全流程说明与排查指南" class="headerlink" title="内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南"></a>内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南</h1><h2 id="概览（一句话）"><a href="#概览（一句话）" class="headerlink" title="概览（一句话）"></a>概览（一句话）</h2><p>用户进程写数据 → 数据先写入页缓存（page cache）成为 <em>dirty pages</em> → 内核异步回写（writeback）到磁盘 → 若磁盘&#x2F;后端慢或写入速率低于生成速率，dirty 将积累 → 内存回收（kswapd）尝试回收或触发写回并阻塞写者 → 若回收失败并耗尽内存，OOM killer 根据策略选择并杀死进程 &#x2F; cgroup。</p>
+<hr>
+<h2 id="一、关键概念（快速回顾）"><a href="#一、关键概念（快速回顾）" class="headerlink" title="一、关键概念（快速回顾）"></a>一、关键概念（快速回顾）</h2><ul>
+<li>**页缓存 (page cache)**：文件&#x2F;块 IO 的缓存层，存储在内存中 <code>struct page</code>。</li>
+<li><strong>Dirty pages</strong>：已修改但尚未写回到磁盘的页（占用内存，可写回）。</li>
+<li><strong>Writeback</strong>：内核将 dirty page 写回存储（由 writeback kthreads &#x2F; flush workers 执行）。</li>
+<li><strong>kswapd &#x2F; page reclaim</strong>：当内存紧张时回收可回收页（包括触发 writeback）。</li>
+<li><strong>OOM killer</strong>：当内核无法满足分配且无法回收，选择进程作为牺牲者（基于 <code>oom_score</code>、<code>oom_score_adj</code>、cgroup）并终止之。</li>
+<li><strong>cgroup v1&#x2F;v2</strong>：容器资源限制机制，内存超限会触发 cgroup OOM 行为。</li>
+</ul>
+<hr>
+<h2 id="二、典型触发路径（更详细）"><a href="#二、典型触发路径（更详细）" class="headerlink" title="二、典型触发路径（更详细）"></a>二、典型触发路径（更详细）</h2><ol>
+<li><p><strong>用户进程 write()</strong>  </p>
+<ul>
+<li>内核在 page cache 分配&#x2F;获取 page，复制数据到 page，然后标记为 <code>dirty</code>。</li>
+<li>write 返回快（写入内存），不等磁盘写完 -&gt; 写入吞吐高但延迟低。</li>
+</ul>
+</li>
+<li><p><strong>后台 writeback</strong>  </p>
+<ul>
+<li>内核周期性&#x2F;阈值触发 writeback（<code>vm.dirty_background_ratio</code> &#x2F; <code>vm.dirty_ratio</code> 或绝对量 <code>vm.dirty_bytes</code>）。</li>
+<li>writeback 由内核 kthreads 执行，异步把页写到块设备或通过 NFS&#x2F;CIFS&#x2F;CSI 等上游。</li>
+</ul>
+</li>
+<li><p><strong>当 writeback 跟不上</strong>  </p>
+<ul>
+<li>若产生 dirty 的速度 &gt; 写回速度（例如磁盘慢&#x2F;IO 卡住），dirty 会累积。</li>
+<li>一旦达到 <code>vm.dirty_ratio</code>，写者可能被强制阻塞（同步地 flush），导致大量进程阻塞在 D (uninterruptible sleep) 状态。</li>
+<li>IO 长时间阻塞会使系统响应变差（ssh 卡、syscalls 卡）。</li>
+</ul>
+</li>
+<li><p><strong>内存回收与 OOM</strong>  </p>
+<ul>
+<li>kswapd&#x2F;直接分配者触发回收，回收优先回收可回收的缓存页或回写脏页。</li>
+<li>如果回收仍然不能满足内存请求，内核触发 OOM killer，选择最合适的 victim（参考 oom_score, oom_score_adj, oom_badness 以及 cgroup 权重），并杀掉进程。</li>
+<li>在 cgroup v2 下，若 cgroup 达到 <code>memory.max</code>，可能只杀该 cgroup 内的进程（cgroup OOM）。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="三、和-buff-cache-MemAvailable-的常见误解"><a href="#三、和-buff-cache-MemAvailable-的常见误解" class="headerlink" title="三、和 buff/cache &#x2F; MemAvailable 的常见误解"></a>三、和 <code>buff/cache</code> &#x2F; <code>MemAvailable</code> 的常见误解</h2><ul>
+<li><code>buff/cache</code> 高 <strong>不等于</strong> 可用性低；<code>buff/cache</code> 是可回收的（通常）。  </li>
+<li>但当脏页非常多或 slab（内核对象）泄漏时，内存是“不可回收”的 → 即便 <code>MemAvailable</code> 暂时显示不是 0，也可能回收失败导致假死。  </li>
+<li>区分点：看 <code>Dirty</code>&#x2F;<code>Writeback</code> 与 <code>SReclaimable</code> &#x2F; <code>SUnreclaim</code>（<code>/proc/meminfo</code> 与 <code>slabtop</code>）。</li>
+</ul>
+<hr>
+<h2 id="四、实操排查清单（从轻到重）"><a href="#四、实操排查清单（从轻到重）" class="headerlink" title="四、实操排查清单（从轻到重）"></a>四、实操排查清单（从轻到重）</h2><h3 id="1-快速查看内存-脏页-回写"><a href="#1-快速查看内存-脏页-回写" class="headerlink" title="1) 快速查看内存&#x2F;脏页&#x2F;回写"></a>1) 快速查看内存&#x2F;脏页&#x2F;回写</h3><pre><code class="bash">free -h
+cat /proc/meminfo | egrep &#39;Dirty|Writeback|MemAvailable|Cached|Buffers|SUnreclaim|Slab|Swap&#39;
+cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writeback&#39;
+</code></pre>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/01/%E9%83%A8%E7%BD%B2kube-prometheus-stack/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2519,149 +2627,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/09/go%E5%B9%B6%E5%8F%91%E5%AE%9E%E8%B7%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/09/go%E5%B9%B6%E5%8F%91%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">go并发实践</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-09 19:37:32 / 修改时间：19:52:01" itemprop="dateCreated datePublished" datetime="2025-08-09T19:37:32+08:00">2025-08-09</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Worker-Pool模式"><a href="#Worker-Pool模式" class="headerlink" title="Worker Pool模式"></a>Worker Pool模式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    &quot;fmt&quot;</span><br><span class="line">    &quot;sync&quot;</span><br><span class="line">    &quot;time&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">// worker 是我们的“工人”，负责处理具体的任务</span><br><span class="line">func worker(id int, tasks &lt;-chan int, wg *sync.WaitGroup) &#123;</span><br><span class="line">    defer wg.Done()</span><br><span class="line">    for taskID := range tasks &#123;</span><br><span class="line">        fmt.Printf(&quot;工人 %d 开始处理任务 %d\n&quot;, id, taskID)</span><br><span class="line">        time.Sleep(time.Second) // 模拟耗时</span><br><span class="line">        fmt.Printf(&quot;工人 %d 完成了任务 %d\n&quot;, id, taskID)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">    const numTasks = 100    // 总任务数</span><br><span class="line">    const numWorkers = 5    // 工人数量（并发度）</span><br><span class="line"></span><br><span class="line">    tasks := make(chan int, numTasks)</span><br><span class="line">    var wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">    // 启动固定数量的工人</span><br><span class="line">    for i := 1; i &lt;= numWorkers; i++ &#123;</span><br><span class="line">        wg.Add(1)</span><br><span class="line">        go worker(i, tasks, &amp;wg)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 分配任务</span><br><span class="line">    for i := 1; i &lt;= numTasks; i++ &#123;</span><br><span class="line">        tasks &lt;- i</span><br><span class="line">    &#125;</span><br><span class="line">    close(tasks) // 所有任务分配完毕，关闭任务通道</span><br><span class="line"></span><br><span class="line">    // 等待所有工人完成工作</span><br><span class="line">    wg.Wait()</span><br><span class="line">    fmt.Println(&quot;所有任务处理完毕！&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="1-工作池模式（Worker-Pool-Pattern）"><a href="#1-工作池模式（Worker-Pool-Pattern）" class="headerlink" title="1. 工作池模式（Worker Pool Pattern）"></a>1. 工作池模式（Worker Pool Pattern）</h2><p><strong>分析</strong>：<br>这个文件实现了一个典型的工作池模式，通过固定数量的goroutine处理来自通道的任务。</p>
-<p><strong>关键特点</strong>：</p>
-<ul>
-<li>创建固定数量（5个）的工作goroutine</li>
-<li>使用带缓冲的通道分发任务</li>
-<li>使用<code>sync.WaitGroup</code>等待所有工作完成</li>
-<li>工作者在通道关闭后自动退出</li>
-</ul>
-<p><strong>图例说明</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">                    +------------------+</span><br><span class="line">                    |    任务通道       |</span><br><span class="line">                    |  (tasks channel) |</span><br><span class="line">                    +------------------+</span><br><span class="line">                            |</span><br><span class="line">                            v</span><br><span class="line">+----------+  +----------+  +----------+  +----------+  +----------+</span><br><span class="line">| 工人 1   |  | 工人 2   |  | 工人 3   |  | 工人 4   |  | 工人 5   |</span><br><span class="line">| goroutine|  | goroutine|  | goroutine|  | goroutine|  | goroutine|</span><br><span class="line">+----------+  +----------+  +----------+  +----------+  +----------+</span><br><span class="line">      |             |             |             |             |</span><br><span class="line">      v             v             v             v             v</span><br><span class="line">   处理任务      处理任务      处理任务      处理任务      处理任务</span><br><span class="line"></span><br><span class="line">                            |</span><br><span class="line">                            v</span><br><span class="line">                    +------------------+</span><br><span class="line">                    |   WaitGroup      |</span><br><span class="line">                    | 等待所有工作完成  |</span><br><span class="line">                    +------------------+</span><br></pre></td></tr></table></figure>
-
-
-<hr>
-<h2 id="pipline-模式"><a href="#pipline-模式" class="headerlink" title="pipline 模式"></a>pipline 模式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    &quot;fmt&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">// 第一个阶段：生成数字</span><br><span class="line">func generator(nums ...int) &lt;-chan int &#123;</span><br><span class="line">    out := make(chan int)</span><br><span class="line">    go func() &#123;</span><br><span class="line">        for _, n := range nums &#123;</span><br><span class="line">            out &lt;- n</span><br><span class="line">        &#125;</span><br><span class="line">        close(out)</span><br><span class="line">    &#125;()</span><br><span class="line">    return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 第二个阶段：计算平方</span><br><span class="line">func square(in &lt;-chan int) &lt;-chan int &#123;</span><br><span class="line">    out := make(chan int)</span><br><span class="line">    go func() &#123;</span><br><span class="line">        for n := range in &#123;</span><br><span class="line">            out &lt;- n * n</span><br><span class="line">        &#125;</span><br><span class="line">        close(out)</span><br><span class="line">    &#125;()</span><br><span class="line">    return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 第三个阶段：加倍</span><br><span class="line">func double(in &lt;-chan int) &lt;-chan int &#123;</span><br><span class="line">    out := make(chan int)</span><br><span class="line">    go func() &#123;</span><br><span class="line">        for n := range in &#123;</span><br><span class="line">            out &lt;- n * 2</span><br><span class="line">        &#125;</span><br><span class="line">        close(out)</span><br><span class="line">    &#125;()</span><br><span class="line">    return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">    // 构建流水线</span><br><span class="line">    nums := []int&#123;1, 2, 3, 4, 5&#125;</span><br><span class="line">    stage1 := generator(nums...)</span><br><span class="line">    stage2 := square(stage1)</span><br><span class="line">    stage3 := double(stage2)</span><br><span class="line"></span><br><span class="line">    // 消费最终结果</span><br><span class="line">    for result := range stage3 &#123;</span><br><span class="line">        fmt.Println(result)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-流水线模式（Pipeline-Pattern）"><a href="#2-流水线模式（Pipeline-Pattern）" class="headerlink" title="2. 流水线模式（Pipeline Pattern）"></a>2. 流水线模式（Pipeline Pattern）</h2><p><strong>分析</strong>：<br>这个文件实现了一个简单的数据处理流水线，数据通过多个处理阶段依次传递。</p>
-<p><strong>关键特点</strong>：</p>
-<ul>
-<li>每个阶段都在独立的goroutine中运行</li>
-<li>通过通道连接各个处理阶段</li>
-<li>每个处理函数接收输入通道并返回输出通道</li>
-<li>流水线按顺序执行：生成数字 -&gt; 计算平方 -&gt; 加倍</li>
-</ul>
-<p><strong>图例说明</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">+------------+      +------------+      +------------+</span><br><span class="line">|            |      |            |      |            |</span><br><span class="line">| 生成阶段    | ---&gt; | 平方阶段    | ---&gt; | 加倍阶段    |</span><br><span class="line">| (generator)|      | (square)   |      | (double)   |</span><br><span class="line">|            |      |            |      |            |</span><br><span class="line">+------------+      +------------+      +------------+</span><br><span class="line">    1,2,3,4,5  --&gt;   1,4,9,16,25  --&gt;  2,8,18,32,50</span><br><span class="line"></span><br><span class="line">    goroutine 1      goroutine 2        goroutine 3</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="扇出-扇入模式"><a href="#扇出-扇入模式" class="headerlink" title="扇出&#x2F;扇入模式"></a>扇出&#x2F;扇入模式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    &quot;fmt&quot;</span><br><span class="line">    &quot;sync&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">// generator 和 double 函数与上例相同...</span><br><span class="line">func generator(nums ...int) &lt;-chan int &#123;</span><br><span class="line">    out := make(chan int)</span><br><span class="line">    go func() &#123;</span><br><span class="line">        for _, n := range nums &#123;</span><br><span class="line">            out &lt;- n</span><br><span class="line">        &#125;</span><br><span class="line">        close(out)</span><br><span class="line">    &#125;()</span><br><span class="line">    return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func double(in &lt;-chan int) &lt;-chan int &#123;</span><br><span class="line">    out := make(chan int)</span><br><span class="line">    go func() &#123;</span><br><span class="line">        for n := range in &#123;</span><br><span class="line">            out &lt;- n * 2</span><br><span class="line">        &#125;</span><br><span class="line">        close(out)</span><br><span class="line">    &#125;()</span><br><span class="line">    return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 扇出：启动多个 square worker</span><br><span class="line">func squareFanOut(in &lt;-chan int, numWorkers int) []&lt;-chan int &#123;</span><br><span class="line">    outs := make([]&lt;-chan int, numWorkers)</span><br><span class="line">    for i := 0; i &lt; numWorkers; i++ &#123;</span><br><span class="line">        out := make(chan int)</span><br><span class="line">        go func() &#123;</span><br><span class="line">            for n := range in &#123;</span><br><span class="line">                // 模拟复杂计算</span><br><span class="line">                // time.Sleep(time.Millisecond * 500)</span><br><span class="line">                out &lt;- n * n</span><br><span class="line">            &#125;</span><br><span class="line">            close(out)</span><br><span class="line">        &#125;()</span><br><span class="line">        outs[i] = out</span><br><span class="line">    &#125;</span><br><span class="line">    return outs</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 扇入：将多个 channel 的结果合并到一个 channel</span><br><span class="line">func fanIn(ins ...&lt;-chan int) &lt;-chan int &#123;</span><br><span class="line">    var wg sync.WaitGroup</span><br><span class="line">    out := make(chan int)</span><br><span class="line"></span><br><span class="line">    // 为每个输入 channel 启动一个 goroutine</span><br><span class="line">    for _, in := range ins &#123;</span><br><span class="line">        wg.Add(1)</span><br><span class="line">        go func(ch &lt;-chan int) &#123;</span><br><span class="line">            defer wg.Done()</span><br><span class="line">            for n := range ch &#123;</span><br><span class="line">                out &lt;- n</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;(in)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 启动一个 goroutine，在所有输入 channel 都关闭后，关闭输出 channel</span><br><span class="line">    go func() &#123;</span><br><span class="line">        wg.Wait()</span><br><span class="line">        close(out)</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    return out</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">    nums := []int&#123;1, 2, 3, 4, 5, 6, 7, 8, 9, 10&#125;</span><br><span class="line"></span><br><span class="line">    // 构建流水线</span><br><span class="line">    stage1 := generator(nums...)</span><br><span class="line"></span><br><span class="line">    // 扇出到3个 square worker</span><br><span class="line">    squareChannels := squareFanOut(stage1, 3)</span><br><span class="line"></span><br><span class="line">    // 扇入合并结果</span><br><span class="line">    stage2 := fanIn(squareChannels...)</span><br><span class="line"></span><br><span class="line">    stage3 := double(stage2)</span><br><span class="line"></span><br><span class="line">    // 消费最终结果</span><br><span class="line">    for result := range stage3 &#123;</span><br><span class="line">        fmt.Println(result)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-扇入扇出模式（Fan-in-Fan-out-Pattern）"><a href="#3-扇入扇出模式（Fan-in-Fan-out-Pattern）" class="headerlink" title="3. 扇入扇出模式（Fan-in Fan-out Pattern）"></a>3. 扇入扇出模式（Fan-in Fan-out Pattern）</h2><p><strong>分析</strong>：<br>这个文件结合了流水线模式，并添加了扇出（将工作分配给多个worker）和扇入（收集多个worker的结果）功能。</p>
-<p><strong>关键特点</strong>：</p>
-<ul>
-<li>扇出：将单个输入通道的数据分配给多个并行工作的goroutine</li>
-<li>扇入：将多个通道的输出合并到单个通道</li>
-<li>使用<code>sync.WaitGroup</code>确保所有数据处理完毕后关闭输出通道</li>
-<li>主流水线：生成数字 -&gt; [多个平方计算并行处理] -&gt; 合并结果 -&gt; 加倍</li>
-</ul>
-<h2 id="图例说明："><a href="#图例说明：" class="headerlink" title="图例说明："></a><strong>图例说明</strong>：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">             +----------------+</span><br><span class="line">             |                |</span><br><span class="line">             |  生成阶段       |</span><br><span class="line">             | (generator)    |</span><br><span class="line">             |                |</span><br><span class="line">             +----------------+</span><br><span class="line">                     |</span><br><span class="line">                     | 扇出 (Fan-out)</span><br><span class="line">                     v</span><br><span class="line">+----------------+  +----------------+  +----------------+</span><br><span class="line">|                |  |                |  |                |</span><br><span class="line">|  平方计算 1     |  |  平方计算 2     |  |  平方计算 3     |</span><br><span class="line">| (square 1)     |  | (square 2)     |  | (square 3)     |</span><br><span class="line">|                |  |                |  |                |</span><br><span class="line">+----------------+  +----------------+  +----------------+</span><br><span class="line">            |                |                |</span><br><span class="line">            |     扇入 (Fan-in)               |</span><br><span class="line">            v                v                v</span><br><span class="line">                   +----------------+</span><br><span class="line">                   |                |</span><br><span class="line">                   |  合并结果       |</span><br><span class="line">                   | (fanIn)        |</span><br><span class="line">                   |                |</span><br><span class="line">                   +----------------+</span><br><span class="line">                            |</span><br><span class="line">                            v</span><br><span class="line">                   +----------------+</span><br><span class="line">                   |                |</span><br><span class="line">                   |  加倍阶段       |</span><br><span class="line">                   | (double)       |</span><br><span class="line">                   |                |</span><br><span class="line">                   +----------------+</span><br></pre></td></tr></table></figure></h2><h2 id="Go并发最佳实践"><a href="#Go并发最佳实践" class="headerlink" title="Go并发最佳实践"></a>Go并发最佳实践</h2><h3 id="1-通道（Channel）使用原则"><a href="#1-通道（Channel）使用原则" class="headerlink" title="1. 通道（Channel）使用原则"></a>1. 通道（Channel）使用原则</h3><ul>
-<li><strong>谁创建，谁关闭</strong>：只在生产者端关闭通道，避免向已关闭的通道发送数据</li>
-<li><strong>使用带缓冲的通道</strong>：当知道要发送的元素数量时，设置适当的缓冲大小以提高性能</li>
-<li><strong>优先使用无缓冲通道</strong>：对于需要严格同步的场景，无缓冲通道提供了更好的保证</li>
-<li><strong>使用<code>for range</code>循环</strong>：优雅地从通道接收数据直至通道关闭</li>
-<li><strong>使用<code>select</code>处理多通道</strong>：避免在单个goroutine中阻塞</li>
-</ul>
-<h3 id="2-资源管理和泄漏预防"><a href="#2-资源管理和泄漏预防" class="headerlink" title="2. 资源管理和泄漏预防"></a>2. 资源管理和泄漏预防</h3><ul>
-<li><strong>确保goroutine终止</strong>：为长时间运行的goroutine提供退出机制，如done通道</li>
-<li><strong>使用<code>context</code>包</strong>：管理goroutine的生命周期和传递截止时间、取消信号</li>
-<li><strong>关闭输入通道</strong>：作为通知goroutine停止工作的信号</li>
-<li><strong>使用sync.WaitGroup</strong>：等待一组goroutine完成</li>
-<li><strong>限制goroutine数量</strong>：使用工作池或信号量控制并发度</li>
-</ul>
-<h3 id="3-并发安全"><a href="#3-并发安全" class="headerlink" title="3. 并发安全"></a>3. 并发安全</h3><ul>
-<li><strong>避免共享内存</strong>：优先通过通道通信而非共享内存</li>
-<li><strong>使用互斥锁</strong>：当必须共享内存时，使用<code>sync.Mutex</code>或<code>sync.RWMutex</code>保护</li>
-<li><strong>使用原子操作</strong>：对于简单的计数器或标志，使用<code>sync/atomic</code>包</li>
-<li><strong>不要复制互斥锁</strong>：互斥锁不应该被复制，应该通过指针传递</li>
-<li><strong>避免竞态条件</strong>：使用<code>go build -race</code>或<code>go test -race</code>检测竞态条件</li>
-</ul>
-<h3 id="4-性能优化"><a href="#4-性能优化" class="headerlink" title="4. 性能优化"></a>4. 性能优化</h3><ul>
-<li><strong>使用并发数量上限</strong>：通常设置为<code>runtime.NumCPU()</code>或略高</li>
-<li><strong>避免过度goroutine</strong>：每个goroutine消耗内存，创建过多会导致性能下降</li>
-<li><strong>批量处理</strong>：当可能时，批量发送数据而非单个发送</li>
-<li><strong>使用适当的通道缓冲</strong>：根据吞吐量和延迟要求调整缓冲大小</li>
-<li><strong>注意内存局部性</strong>：分散数据访问可能导致缓存未命中</li>
-</ul>
-<h3 id="5-错误处理"><a href="#5-错误处理" class="headerlink" title="5. 错误处理"></a>5. 错误处理</h3><ul>
-<li><strong>传播错误</strong>：使用专门的错误通道或包含错误的结果结构体</li>
-<li><strong>优雅处理panic</strong>：使用<code>recover()</code>在goroutine中捕获panic</li>
-<li><strong>超时处理</strong>：使用<code>context</code>或<code>select</code>与<code>time.After</code>组合处理超时</li>
-<li><strong>取消操作</strong>：提供取消机制，允许提前终止长时间运行的操作</li>
-</ul>
-<h3 id="6-测试和调试"><a href="#6-测试和调试" class="headerlink" title="6. 测试和调试"></a>6. 测试和调试</h3><ul>
-<li><strong>使用竞态检测器</strong>：<code>go test -race</code>或<code>go build -race</code></li>
-<li><strong>编写并发测试</strong>：确保并发代码在各种竞争条件下正确工作</li>
-<li><strong>使用runtime&#x2F;pprof</strong>：分析goroutine的性能和使用情况</li>
-<li><strong>限制测试并发度</strong>：测试时可控制并发数量以重现问题</li>
-</ul>
-<h3 id="7-并发模式"><a href="#7-并发模式" class="headerlink" title="7. 并发模式"></a>7. 并发模式</h3><ul>
-<li><strong>工作池模式</strong>：限制并发goroutine数量处理大量任务</li>
-<li><strong>流水线模式</strong>：将任务分解为连续的阶段，每个阶段在单独的goroutine中执行</li>
-<li><strong>扇入扇出模式</strong>：将工作分配给多个goroutine，然后收集结果</li>
-<li><strong>定时器模式</strong>：使用<code>time.Ticker</code>和<code>time.Timer</code>处理定时任务</li>
-<li><strong>发布订阅模式</strong>：将消息从发布者分发给多个订阅者</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2733,7 +2698,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">139</span>
+          <span class="site-state-item-count">140</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
