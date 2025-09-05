@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-09-05 11:03:32 / 修改时间：17:00:27" itemprop="dateCreated datePublished" datetime="2025-09-05T11:03:32+08:00">2025-09-05</time>
+              <time title="创建时间：2025-09-05 11:03:32 / 修改时间：17:01:58" itemprop="dateCreated datePublished" datetime="2025-09-05T11:03:32+08:00">2025-09-05</time>
             </span>
 
           
@@ -223,7 +223,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="cgroup-namespace-vs-Kata"><a href="#cgroup-namespace-vs-Kata" class="headerlink" title="cgroup &#x2F; namespace vs Kata"></a>cgroup &#x2F; namespace vs Kata</h1><h2 id="概念快速梳理"><a href="#概念快速梳理" class="headerlink" title="概念快速梳理"></a>概念快速梳理</h2><ul>
+          <h2 id="概念快速梳理"><a href="#概念快速梳理" class="headerlink" title="概念快速梳理"></a>概念快速梳理</h2><ul>
 <li>namespace (PID&#x2F;NET&#x2F;IPC&#x2F;UTS&#x2F;MNT&#x2F;USER&#x2F;…) ：Linux 提供的进程隔离机制（名字空间），用于隔离进程视角（PID、网络命名空间等）。</li>
 <li>cgroup (control groups) ：Linux 提供的资源控制（CPU&#x2F;memory&#x2F;io&#x2F;pids），用于限制与计量资源消耗。</li>
 <li>传统容器 (Docker&#x2F;runc etc.) ：基于单一宿主机内核 + namespaces + cgroups，为应用提供轻量隔离。</li>
