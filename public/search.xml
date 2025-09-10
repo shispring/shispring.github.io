@@ -10966,4 +10966,22 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </ul>
 ]]></content>
   </entry>
+  <entry>
+    <title>内存相关信息整理</title>
+    <url>/2025/09/10/%E5%86%85%E5%AD%98%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%E6%95%B4%E7%90%86/</url>
+    <content><![CDATA[<h2 id="slab"><a href="#slab" class="headerlink" title="slab"></a>slab</h2><ul>
+<li>SUnreclaim（非可回收 slab）</li>
+<li>SReclaimable（可回收 slab, 如 inode&#x2F;dentry cache）<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#几个计算关系</span><br><span class="line">#Slab = 内核维护对象的缓存（inode、dentry、socket buffer 等）</span><br><span class="line">Slab = SReclaimable + SUnreclaim</span><br><span class="line">#含义</span><br><span class="line">SUnreclaim – Non-reclaimable slab memory (kernel objects) 占比稳定，内核不可回收部分</span><br><span class="line">SReclaimable – Potentially reclaimable slab memory (e.g., inode cache) 占比较高，内核可回收部分</span><br><span class="line"></span><br><span class="line"># buff/cache 可回收内存，SReclaimable高、回收慢可持续增高，从而出现“可回收但实际上回收不掉” </span><br><span class="line">buff/cache ≈ Buffers + Cached + SReclaimable</span><br><span class="line"></span><br><span class="line">#MemAvailable</span><br><span class="line">MemAvailable ≈ MemFree + Buffers + Cached + SReclaimable - 一些不可回收部分</span><br><span class="line"></span><br><span class="line">#观察方式：</span><br><span class="line">top</span><br><span class="line">watch -n1 &quot;grep -E &#x27;MemTotal|MemFree|MemAvailable|Cached|Slab|SReclaimable|SUnreclaim&#x27; /proc/meminfo&quot;</span><br><span class="line"></span><br><span class="line">#查看内核内存参数</span><br><span class="line">sysctl -a | grep vm</span><br><span class="line"></span><br><span class="line">#查看slab信息: cat /proc/slabinfo</span><br><span class="line">#看具体哪些 slab 类型涨得多,如果 top 几项是 dentry/inode_cache → 说明 VFS 元数据。</span><br><span class="line">cat /proc/slabinfo | egrep -i &#x27;dentry|inode|path|ext4|xfs&#x27; </span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="内存回收-vfs-cache-pressure"><a href="#内存回收-vfs-cache-pressure" class="headerlink" title="内存回收:vfs_cache_pressure"></a>内存回收:vfs_cache_pressure</h2><blockquote>
+<p>参考：<a href="https://blog.csdn.net/ygq13572549874/article/details/148332587">https://blog.csdn.net/ygq13572549874/article/details/148332587</a> </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#查看虚拟文件系统</span><br><span class="line">cat /proc/sys/vm/vfs_cache_pressure</span><br><span class="line"></span><br><span class="line">含义：控制内核回收 inode 和 dentry 缓存的倾向程度：</span><br><span class="line">- inode 缓存：存储文件系统的元数据（如文件权限、所有者、时间戳等）</span><br><span class="line">- dentry 缓存：存储目录项缓存（如文件名到 inode 的映射关系）</span><br><span class="line"></span><br><span class="line">参数值范围为 0-1000，默认值为 100：</span><br><span class="line">- 值越小：内核越倾向于保留 inode/dentry 缓存（即使内存紧张）</span><br><span class="line">- 值越大：内核越倾向于优先回收 inode/dentry 缓存</span><br><span class="line"></span><br><span class="line">当系统内存紧张时，内核需要决定如何平衡回收不同类型的缓存：</span><br><span class="line">- 页面缓存（page cache）：文件内容的缓存</span><br><span class="line">- inode/dentry 缓存：文件系统元数据的缓存</span><br><span class="line">-交换空间（swap）：内存到磁盘的交换</span><br></pre></td></tr></table></figure>
+
+<h2 id="drop-caches"><a href="#drop-caches" class="headerlink" title="drop caches"></a>drop caches</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#drop caches（测试是否可回收）</span><br><span class="line"># 1=pagecache, 2=dentries+inodes, 3=both</span><br><span class="line">sudo sync</span><br><span class="line">sudo sh -c &#x27;echo 2 &gt; /proc/sys/vm/drop_caches&#x27;</span><br><span class="line"># 之后重新检查 /proc/meminfo 的 Slab/SReclaimable 是否显著下降</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
 </search>

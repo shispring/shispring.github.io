@@ -184,6 +184,102 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/05/21/shell%E8%84%9A%E6%9C%AC%E5%8A%A0%E5%9B%BA%E5%8A%9E%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/05/21/shell%E8%84%9A%E6%9C%AC%E5%8A%A0%E5%9B%BA%E5%8A%9E%E6%B3%95/" class="post-title-link" itemprop="url">高质量shell脚本tips</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-05-21 10:44:55 / 修改时间：11:01:36" itemprop="dateCreated datePublished" datetime="2025-05-21T10:44:55+08:00">2025-05-21</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="shell-目标"><a href="#shell-目标" class="headerlink" title="shell 目标"></a>shell 目标</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">严谨、健壮、自检、自愈、可读</span><br></pre></td></tr></table></figure>
+<h3 id="首行加固"><a href="#首行加固" class="headerlink" title="首行加固"></a>首行加固</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set -euo pipefail</span><br></pre></td></tr></table></figure>
+
+<h3 id="安全读取变量"><a href="#安全读取变量" class="headerlink" title="安全读取变量"></a>安全读取变量</h3><table>
+<thead>
+<tr>
+<th>${VAR:-}</th>
+<th>如果未定义，返回空字符串</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>${VAR:&#x3D;默认}</td>
+<td>如果未定义，赋值为默认值</td>
+</tr>
+<tr>
+<td>${VAR:+替代}</td>
+<td>如果已定义，返回替代值</td>
+</tr>
+<tr>
+<td>${VAR:?错误信息}</td>
+<td>如果未定义，抛出指定错误</td>
+</tr>
+</tbody></table>
+<h3 id="让路径永远基于脚本本身，无论哪里执行都正确"><a href="#让路径永远基于脚本本身，无论哪里执行都正确" class="headerlink" title="让路径永远基于脚本本身，无论哪里执行都正确"></a>让路径永远基于脚本本身，无论哪里执行都正确</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;$&#123;BASH_SOURCE[0]&#125;&quot;)&quot; &amp;&amp; pwd)&quot;</span><br><span class="line">cd &quot;$SCRIPT_DIR&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="检查命令执行结果"><a href="#检查命令执行结果" class="headerlink" title="检查命令执行结果"></a>检查命令执行结果</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#优雅的写法</span><br><span class="line">wget xxx || &#123; echo &quot;下载失败&quot;; exit 1; &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="保持脚本输出清晰简洁，尤其是日志信息"><a href="#保持脚本输出清晰简洁，尤其是日志信息" class="headerlink" title="保持脚本输出清晰简洁，尤其是日志信息"></a>保持脚本输出清晰简洁，尤其是日志信息</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、打印正在做什么</span><br><span class="line">2、成功/失败都提示</span><br><span class="line">3、错误信息清晰</span><br></pre></td></tr></table></figure>
+
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/lBAsqOIB72FtawjckiVrDg">https://mp.weixin.qq.com/s/lBAsqOIB72FtawjckiVrDg</a> </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line">SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;$&#123;BASH_SOURCE[0]&#125;&quot;)&quot; &amp;&amp; pwd)&quot;</span><br><span class="line">cd &quot;$SCRIPT_DIR&quot;</span><br><span class="line"></span><br><span class="line"># 加载.env</span><br><span class="line">if [ -f &quot;.env&quot; ]; then</span><br><span class="line">    export $(grep -v &#x27;^#&#x27; .env | xargs)</span><br><span class="line">else</span><br><span class="line">    echo &quot;❌ .env文件不存在&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># 示例逻辑</span><br><span class="line">echo &quot;🚀 开始任务...&quot;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="颜色配置"><a href="#颜色配置" class="headerlink" title="颜色配置"></a>颜色配置</h3><ul>
+<li>mac下兼容 Bash 3 的方式：用 case + if else 实现颜色映射<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"># 颜色定义</span><br><span class="line">readonly RED=&#x27;\033[0;31m&#x27;</span><br><span class="line">readonly GREEN=&#x27;\033[0;32m&#x27;</span><br><span class="line">readonly YELLOW=&#x27;\033[0;33m&#x27;</span><br><span class="line">readonly BLUE=&#x27;\033[0;34m&#x27;</span><br><span class="line">readonly NC=&#x27;\033[0m&#x27; # No Color</span><br><span class="line"></span><br><span class="line"># 日志函数</span><br><span class="line">log() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    shift</span><br><span class="line">    local timestamp=$(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)</span><br><span class="line">    local message=&quot;[$&#123;timestamp&#125;] [$&#123;level&#125;] $*&quot;</span><br><span class="line"></span><br><span class="line">    case &quot;$level&quot; in</span><br><span class="line">        &quot;ERROR&quot;) color=$RED ;;</span><br><span class="line">        &quot;WARNING&quot;) color=$YELLOW ;;</span><br><span class="line">        &quot;INFO&quot;) color=$BLUE ;;</span><br><span class="line">        &quot;SUCCESS&quot;) color=$GREEN ;;</span><br><span class="line">        *) color=$NC ;;</span><br><span class="line">    esac</span><br><span class="line"></span><br><span class="line">    echo -e &quot;$&#123;color&#125;$&#123;message&#125;$&#123;NC&#125;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">log &quot;SUCCESS&quot; &quot;✅ All done.&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li>linux下<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line"># 颜色定义</span><br><span class="line">readonly RED=&#x27;\033[0;31m&#x27;</span><br><span class="line">readonly GREEN=&#x27;\033[0;32m&#x27;</span><br><span class="line">readonly YELLOW=&#x27;\033[0;33m&#x27;</span><br><span class="line">readonly BLUE=&#x27;\033[0;34m&#x27;</span><br><span class="line">readonly NC=&#x27;\033[0m&#x27;</span><br><span class="line"></span><br><span class="line"># 日志级别颜色映射</span><br><span class="line">declare -A LOG_COLORS=(</span><br><span class="line">    [&quot;ERROR&quot;]=&quot;$&#123;RED&#125;&quot;</span><br><span class="line">    [&quot;WARNING&quot;]=&quot;$&#123;YELLOW&#125;&quot;</span><br><span class="line">    [&quot;INFO&quot;]=&quot;$&#123;BLUE&#125;&quot;</span><br><span class="line">    [&quot;SUCCESS&quot;]=&quot;$&#123;GREEN&#125;&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 日志函数</span><br><span class="line">log() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    shift</span><br><span class="line">    local color=$&#123;LOG_COLORS[$level]:-$NC&#125;</span><br><span class="line">    local timestamp=$(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)</span><br><span class="line">    local message=&quot;[$&#123;timestamp&#125;] [$&#123;level&#125;] $*&quot;</span><br><span class="line">    echo -e &quot;$&#123;color&#125;$&#123;message&#125;$&#123;NC&#125;&quot; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">log INFO &quot;这是信息日志&quot;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/05/14/%E8%87%AA%E5%8A%A8%E9%80%89%E6%8B%A9%E9%83%A8%E7%BD%B2%E6%B5%8B%E8%AF%95job/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1144,358 +1240,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/24/%E4%BA%8B%E7%89%A9-%E8%AE%A4%E7%9F%A5-%E6%80%9D%E7%BB%B4%E6%96%B9%E6%B3%95%E8%AE%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/03/24/%E4%BA%8B%E7%89%A9-%E8%AE%A4%E7%9F%A5-%E6%80%9D%E7%BB%B4%E6%96%B9%E6%B3%95%E8%AE%BA/" class="post-title-link" itemprop="url">事物&认知&思维方法论</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-03-24 11:52:28 / 修改时间：12:06:43" itemprop="dateCreated datePublished" datetime="2025-03-24T11:52:28+08:00">2025-03-24</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-事物的对立性分类"><a href="#1-事物的对立性分类" class="headerlink" title="1. 事物的对立性分类"></a><strong>1. 事物的对立性分类</strong></h2><table>
-<thead>
-<tr>
-<th><strong>对立维度</strong></th>
-<th><strong>分类1</strong></th>
-<th><strong>分类2</strong></th>
-<th><strong>说明</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>存在形式</strong></td>
-<td>物质（Matter）</td>
-<td>能量（Energy）</td>
-<td>物理世界中，物质和能量的对立统一</td>
-</tr>
-<tr>
-<td><strong>抽象层次</strong></td>
-<td>具象（Concrete）</td>
-<td>抽象（Abstract）</td>
-<td>具象是可直接感知的，抽象则需要概念化</td>
-</tr>
-<tr>
-<td><strong>描述方式</strong></td>
-<td>结构（Structure）</td>
-<td>过程（Process）</td>
-<td>结构关注静态关系，过程关注动态演化</td>
-</tr>
-<tr>
-<td><strong>思维方式</strong></td>
-<td>直觉（Intuition）</td>
-<td>逻辑（Logic）</td>
-<td>直觉是一种快速、经验性的认知，逻辑基于推理</td>
-</tr>
-<tr>
-<td><strong>运动状态</strong></td>
-<td>静态（Static）</td>
-<td>动态（Dynamic）</td>
-<td>事物在时间维度上的存在状态</td>
-</tr>
-<tr>
-<td><strong>组织层级</strong></td>
-<td>局部（Local）</td>
-<td>整体（Global）</td>
-<td>个体与系统的对立统一</td>
-</tr>
-<tr>
-<td><strong>发展方向</strong></td>
-<td>简单（Simple）</td>
-<td>复杂（Complex）</td>
-<td>事物的演化可以是由简入繁，也可以是由繁入简</td>
-</tr>
-<tr>
-<td><strong>观测角度</strong></td>
-<td>客观（Objective）</td>
-<td>主观（Subjective）</td>
-<td>事物可以从客观的事实描述，也可以从主观的体验理解</td>
-</tr>
-</tbody></table>
-<p>这些对立性并不是绝对的，而是互相依存、动态转换的。例如，物质可以转化为能量，静态结构可以变成动态过程，整体由局部组成但又具有新的 emergent properties（涌现特性）。</p>
-<hr>
-<h2 id="2-认识事物本质的方法论"><a href="#2-认识事物本质的方法论" class="headerlink" title="2. 认识事物本质的方法论"></a><strong>2. 认识事物本质的方法论</strong></h2><p>不同的研究方法适用于不同类型的事物，以下是一些常见的认知方法论：</p>
-<table>
-<thead>
-<tr>
-<th><strong>方法论</strong></th>
-<th><strong>描述</strong></th>
-<th><strong>应用场景</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>归纳法（Inductive Reasoning）</strong></td>
-<td>通过观察个别事例，总结一般性规律</td>
-<td>经验科学、机器学习</td>
-</tr>
-<tr>
-<td><strong>演绎法（Deductive Reasoning）</strong></td>
-<td>通过已知的普遍原理，推导具体结论</td>
-<td>数学、形式逻辑</td>
-</tr>
-<tr>
-<td><strong>还原论（Reductionism）</strong></td>
-<td>把复杂系统拆解为更基本的部分进行研究</td>
-<td>物理学、生物学</td>
-</tr>
-<tr>
-<td><strong>整体论（Holism）</strong></td>
-<td>关注系统整体的性质和交互关系</td>
-<td>生态学、社会科学</td>
-</tr>
-<tr>
-<td><strong>系统思维（Systems Thinking）</strong></td>
-<td>研究事物的结构、功能及其相互作用</td>
-<td>复杂系统、企业管理</td>
-</tr>
-<tr>
-<td><strong>对立统一法（Dialectics）</strong></td>
-<td>通过矛盾分析事物的本质和发展</td>
-<td>哲学、社会学</td>
-</tr>
-<tr>
-<td><strong>第一性原理（First Principles Thinking）</strong></td>
-<td>追溯事物最基本的物理、数学或逻辑定律</td>
-<td>创新、科技研发</td>
-</tr>
-<tr>
-<td><strong>抽象与具象转换（Abstraction &amp; Concretization）</strong></td>
-<td>通过抽象化简事物，再还原到现实应用</td>
-<td>计算机科学、数学建模</td>
-</tr>
-<tr>
-<td><strong>层次分析法（Top-down &amp; Bottom-up）</strong></td>
-<td>自上而下（从整体到局部）、自下而上（从局部到整体）分析问题</td>
-<td>组织架构设计、问题求解</td>
-</tr>
-<tr>
-<td><strong>涌现分析（Emergent Analysis）</strong></td>
-<td>研究复杂系统中整体属性如何由局部交互产生</td>
-<td>人工智能、生命科学</td>
-</tr>
-<tr>
-<td><strong>黑箱思维（Black Box Thinking）</strong></td>
-<td>关注输入输出，而不研究内部机制</td>
-<td>工程学、人工智能</td>
-</tr>
-<tr>
-<td><strong>白箱思维（White Box Thinking）</strong></td>
-<td>研究内部结构和机制，以理解其运行方式</td>
-<td>物理学、软件开发</td>
-</tr>
-</tbody></table>
-<hr>
-<p>应试导向让很多人习惯了“标准答案”，缺乏系统性、灵活性、创造性的思维模式。为了长期提升思维能力，可以从以下几个方面进行系统训练：</p>
-<h2 id="长期思维培养方案"><a href="#长期思维培养方案" class="headerlink" title="长期思维培养方案"></a><strong>长期思维培养方案</strong></h2><h3 id="1-建立多元化思维模型"><a href="#1-建立多元化思维模型" class="headerlink" title="1. 建立多元化思维模型"></a><strong>1. 建立多元化思维模型</strong></h3><p>人的认知受限于经验和知识框架，要突破局限，就要有多种思维模型。这包括但不限于：</p>
-<table>
-<thead>
-<tr>
-<th><strong>思维模型</strong></th>
-<th><strong>核心特点</strong></th>
-<th><strong>代表书籍 &#x2F; 训练方式</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>第一性原理（First Principles Thinking）</strong></td>
-<td>追溯事物的最基本原理，避免因循守旧</td>
-<td>埃隆·马斯克的创新方法，《物理学的基本原理》</td>
-</tr>
-<tr>
-<td><strong>系统思维（Systems Thinking）</strong></td>
-<td>关注事物的整体结构、交互关系</td>
-<td>《第五项修炼》《系统思考》</td>
-</tr>
-<tr>
-<td><strong>逆向思维（Inversion Thinking）</strong></td>
-<td>从反面思考问题，预防风险</td>
-<td>查理·芒格的投资哲学</td>
-</tr>
-<tr>
-<td><strong>概率与统计思维（Probabilistic Thinking）</strong></td>
-<td>认识不确定性，避免确定性偏差</td>
-<td>《黑天鹅》《随机漫步的傻瓜》</td>
-</tr>
-<tr>
-<td><strong>博弈论（Game Theory）</strong></td>
-<td>理解人与人之间的策略互动</td>
-<td>《博弈论与经济行为》</td>
-</tr>
-<tr>
-<td><strong>计算思维（Computational Thinking）</strong></td>
-<td>用算法、建模、抽象的方法解决问题</td>
-<td>《算法之美》</td>
-</tr>
-<tr>
-<td><strong>历史视角（Historical Thinking）</strong></td>
-<td>从历史趋势预测未来，避免短视</td>
-<td>《枪炮、病菌与钢铁》《人类简史》</td>
-</tr>
-</tbody></table>
-<p>📌 <strong>实践方法</strong>：</p>
-<ul>
-<li>每月聚焦一个新的思维模型，尝试在日常决策、学习或工作中使用它。</li>
-<li>记录不同思维模型的应用案例，形成自己的<strong>思维工具箱</strong>。</li>
-</ul>
-<hr>
-<h3 id="2-训练认知弹性"><a href="#2-训练认知弹性" class="headerlink" title="2. 训练认知弹性"></a><strong>2. 训练认知弹性</strong></h3><p>思维的灵活性可以通过以下方式提升：</p>
-<table>
-<thead>
-<tr>
-<th><strong>训练方法</strong></th>
-<th><strong>具体实践</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>提问式思考（Socratic Questioning）</strong></td>
-<td>多问“为什么？”“有没有别的可能？”</td>
-</tr>
-<tr>
-<td><strong>多视角分析（Multiple Perspectives）</strong></td>
-<td>读不同立场的书籍，练习换位思考</td>
-</tr>
-<tr>
-<td><strong>跨学科学习（Interdisciplinary Learning）</strong></td>
-<td>结合数学、哲学、历史、心理学等多个领域</td>
-</tr>
-<tr>
-<td><strong>写作训练（Writing to Think）</strong></td>
-<td>通过写作理清复杂问题，如写长推文、博客</td>
-</tr>
-<tr>
-<td><strong>冥想与深度思考</strong></td>
-<td>训练自己的专注力，避免碎片化思维</td>
-</tr>
-</tbody></table>
-<p>📌 <strong>实践方法</strong>：</p>
-<ul>
-<li>每周选择一个观点，主动找不同角度的论据去反驳自己。</li>
-<li>练习写 <strong>“我对 X 事物的 3 个不同看法”</strong>。</li>
-<li>关注跨学科内容，如科技、经济、哲学等，训练自己在不同领域间建立联系。</li>
-</ul>
-<hr>
-<h3 id="3-习惯结构化思维"><a href="#3-习惯结构化思维" class="headerlink" title="3. 习惯结构化思维"></a><strong>3. 习惯结构化思维</strong></h3><p>许多人思维混乱，难以表达，最好的训练方式是<strong>结构化表达</strong>：</p>
-<table>
-<thead>
-<tr>
-<th><strong>思维方式</strong></th>
-<th><strong>特点</strong></th>
-<th><strong>实践方法</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>金字塔原理（Pyramid Principle）</strong></td>
-<td>结论先行，层次清晰</td>
-<td>用“总-分”结构表达观点</td>
-</tr>
-<tr>
-<td><strong>MECE 原则（Mutually Exclusive, Collectively Exhaustive）</strong></td>
-<td>不重不漏，全面分析问题</td>
-<td>练习用框架拆解问题（如 2×2 矩阵）</td>
-</tr>
-<tr>
-<td><strong>5W1H 分析法</strong></td>
-<td>通过6个基本问题深度思考</td>
-<td>训练问题拆解能力</td>
-</tr>
-</tbody></table>
-<p>📌 <strong>实践方法</strong>：</p>
-<ul>
-<li>每天总结当天的学习或工作，尝试用<strong>金字塔原理</strong>归纳核心信息。</li>
-<li>解决问题前，先画出<strong>思维导图</strong>，用 MECE 方法拆解。</li>
-</ul>
-<hr>
-<h3 id="4-设定长期成长路径"><a href="#4-设定长期成长路径" class="headerlink" title="4. 设定长期成长路径"></a><strong>4. 设定长期成长路径</strong></h3><p>长期培养思维能力，需要系统规划：</p>
-<table>
-<thead>
-<tr>
-<th><strong>阶段</strong></th>
-<th><strong>核心目标</strong></th>
-<th><strong>关键训练</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>1-3 个月（基础阶段）</strong></td>
-<td>打破旧思维模式，建立新框架</td>
-<td>了解 10 种以上思维模型，开始结构化表达</td>
-</tr>
-<tr>
-<td><strong>4-6 个月（强化阶段）</strong></td>
-<td>灵活运用不同思维模式</td>
-<td>用新思维模式解决现实问题</td>
-</tr>
-<tr>
-<td><strong>6-12 个月（应用阶段）</strong></td>
-<td>形成个人的独立认知体系</td>
-<td>写文章&#x2F;做分享，挑战复杂问题</td>
-</tr>
-<tr>
-<td><strong>1 年+（长期进阶）</strong></td>
-<td>持续优化认知模型</td>
-<td>参与高水平思维训练，如哲学&#x2F;数学研究</td>
-</tr>
-</tbody></table>
-<p>📌 <strong>实践方法</strong>：</p>
-<ul>
-<li>记录每周思维方式的应用案例，每月复盘优化。</li>
-<li>找到一位 mentor 或加入高质量思维社群，定期交流挑战自己。</li>
-</ul>
-<hr>
-<h2 id="长期培养思维能力的关键"><a href="#长期培养思维能力的关键" class="headerlink" title="长期培养思维能力的关键"></a><strong>长期培养思维能力的关键</strong></h2><ol>
-<li><strong>主动思考 vs. 被动接受</strong>：不要只是接受信息，而是要提问、拆解、重构。</li>
-<li><strong>跨学科 vs. 单一学科</strong>：用不同学科的思维方式解读同一问题。</li>
-<li><strong>输出倒逼输入</strong>：定期写作、分享、辩论，强化思维的清晰度。</li>
-<li><strong>挑战认知边界</strong>：刻意阅读不同观点，反思自己的偏见和盲区。</li>
-</ol>
-<hr>
-<h2 id="思维导图"><a href="#思维导图" class="headerlink" title="思维导图"></a><strong>思维导图</strong></h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/%E8%AE%A4%E7%9F%A5%E4%BA%8B%E7%89%A9%E6%9C%AC%E8%B4%A8%E7%9A%84%E6%96%B9%E6%B3%95%E8%AE%BA.jpg" alt="方法1" title="思维方法论"><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250324120027.png" alt="方法2"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1567,7 +1311,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">141</span>
+          <span class="site-state-item-count">142</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
