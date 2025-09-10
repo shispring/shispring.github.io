@@ -3328,6 +3328,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 </ul>
 </li>
 </ul>
+<h3 id="安装命令"><a href="#安装命令" class="headerlink" title="安装命令"></a>安装命令</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#安装iostat</span><br><span class="line">yum install -y  sysstat</span><br><span class="line"></span><br><span class="line">#安装dig</span><br><span class="line">yum install -y  bind-utils</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>linux</category>
