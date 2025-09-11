@@ -184,6 +184,211 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/24/k8s%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E6%83%B3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/03/24/k8s%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E6%83%B3/" class="post-title-link" itemprop="url">k8s系统设计涉及的思想</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-03-24 15:27:25 / 修改时间：15:28:09" itemprop="dateCreated datePublished" datetime="2025-03-24T15:27:25+08:00">2025-03-24</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Kubernetes-探针（Probes）的设计初衷"><a href="#Kubernetes-探针（Probes）的设计初衷" class="headerlink" title="Kubernetes 探针（Probes）的设计初衷"></a><strong>Kubernetes 探针（Probes）的设计初衷</strong></h2><p>在 Kubernetes 中，<strong>探针（Probes）</strong> 的核心目的是<strong>确保 Pod 及其内部的容器处于健康可用状态</strong>，并在出现异常时采取自动化措施（如重启容器、从服务端点中移除等），从而<strong>提高应用的可靠性和稳定性</strong>。主要探针类型及其设计初衷如下：  </p>
+<table>
+<thead>
+<tr>
+<th><strong>探针类型</strong></th>
+<th><strong>作用</strong></th>
+<th><strong>设计初衷（解决什么问题）</strong></th>
+<th><strong>典型应用场景</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>存活探针（Liveness Probe）</strong></td>
+<td>确保容器进程存活</td>
+<td>解决进程假死（进程仍在运行但已无响应）的情况</td>
+<td>长时间运行的应用，避免因死锁或异常导致长期不可用</td>
+</tr>
+<tr>
+<td><strong>就绪探针（Readiness Probe）</strong></td>
+<td>确保容器准备好对外提供服务</td>
+<td>解决应用启动慢或初始化未完成时被流量访问的问题</td>
+<td>数据库、依赖外部服务的应用，需等待资源准备完毕</td>
+</tr>
+<tr>
+<td><strong>启动探针（Startup Probe）</strong></td>
+<td>确保应用完成启动</td>
+<td>解决慢启动应用因 Liveness Probe 过早触发而被误杀的问题</td>
+<td>需要长时间初始化的应用，如 Java 应用（JVM 启动）</td>
+</tr>
+</tbody></table>
+<h3 id="为什么需要这些探针？"><a href="#为什么需要这些探针？" class="headerlink" title="为什么需要这些探针？"></a><strong>为什么需要这些探针？</strong></h3><ol>
+<li><strong>提升服务可用性</strong>：避免因进程假死导致服务长时间不可用，K8s 可以自动修复问题。  </li>
+<li><strong>降低运维成本</strong>：无需人工干预，系统可以自动发现并处理异常。  </li>
+<li><strong>优化负载均衡</strong>：结合就绪探针，确保负载均衡器只将流量分发到健康的 Pod。  </li>
+<li><strong>加快故障恢复</strong>：当探针检测到故障时，可快速触发自愈机制（如 Pod 重启）。</li>
+</ol>
+<hr>
+<h2 id="Kubernetes-的整体系统设计思想"><a href="#Kubernetes-的整体系统设计思想" class="headerlink" title="Kubernetes 的整体系统设计思想"></a><strong>Kubernetes 的整体系统设计思想</strong></h2><p>Kubernetes 作为一个分布式容器编排系统，其设计思想来源于<strong>分布式系统、面向声明式 API 设计、自愈架构、可扩展架构</strong>等核心理念。以下是 K8s 关键设计思想：</p>
+<table>
+<thead>
+<tr>
+<th><strong>设计思想</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>解决的问题</strong></th>
+<th><strong>对应的 K8s 组件或功能</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>声明式 API（Declarative API）</strong></td>
+<td>用户描述期望的最终状态，K8s 负责调和</td>
+<td>解决复杂系统管理难题，减少人为干预</td>
+<td><code>kubectl apply -f</code>，Deployment、Service</td>
+</tr>
+<tr>
+<td><strong>状态调谐（State Reconciliation）</strong></td>
+<td>控制器循环检查实际状态，并不断向期望状态收敛</td>
+<td>解决节点故障、Pod 丢失等问题，实现高可用</td>
+<td><code>kube-controller-manager</code> 负责管理状态</td>
+</tr>
+<tr>
+<td><strong>自愈机制（Self-Healing）</strong></td>
+<td>系统自动检测并修复异常</td>
+<td>解决容器崩溃、网络异常，提高可靠性</td>
+<td>Liveness&#x2F;Readiness Probe, ReplicaSet</td>
+</tr>
+<tr>
+<td><strong>可扩展架构（Extensible Architecture）</strong></td>
+<td>允许用户自定义资源和控制逻辑</td>
+<td>解决不同行业场景下的定制需求</td>
+<td>CRD（CustomResourceDefinition）、Operator</td>
+</tr>
+<tr>
+<td><strong>负载均衡（Load Balancing）</strong></td>
+<td>自动分配请求流量到健康 Pod</td>
+<td>解决应用高并发问题，提高系统稳定性</td>
+<td>Service、Ingress Controller</td>
+</tr>
+<tr>
+<td><strong>分布式调度（Distributed Scheduling）</strong></td>
+<td>根据资源情况自动调度 Pod</td>
+<td>解决资源利用率问题，提高计算效率</td>
+<td><code>kube-scheduler</code></td>
+</tr>
+<tr>
+<td><strong>服务发现（Service Discovery）</strong></td>
+<td>Pod 动态变化时，服务能自动发现</td>
+<td>解决容器弹性扩缩容带来的服务地址变化问题</td>
+<td>DNS 解析（CoreDNS）</td>
+</tr>
+<tr>
+<td><strong>滚动更新（Rolling Updates）</strong></td>
+<td>在不中断业务的情况下升级应用</td>
+<td>解决应用升级期间的可用性问题</td>
+<td>Deployment 的 <code>RollingUpdate</code></td>
+</tr>
+<tr>
+<td><strong>水平扩展（Horizontal Scaling）</strong></td>
+<td>根据负载情况自动扩容或缩容</td>
+<td>解决资源利用率问题，降低成本</td>
+<td>HPA（Horizontal Pod Autoscaler）</td>
+</tr>
+<tr>
+<td><strong>不可变基础设施（Immutable Infrastructure）</strong></td>
+<td>通过声明式配置管理系统，避免人工干预</td>
+<td>解决手动配置带来的不可预测性</td>
+<td>GitOps、Helm、ArgoCD</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="Kubernetes-解决问题的思维方式"><a href="#Kubernetes-解决问题的思维方式" class="headerlink" title="Kubernetes 解决问题的思维方式"></a><strong>Kubernetes 解决问题的思维方式</strong></h2><h3 id="1-声明式-vs-命令式"><a href="#1-声明式-vs-命令式" class="headerlink" title="1. 声明式 vs. 命令式"></a><strong>1. 声明式 vs. 命令式</strong></h3><ul>
+<li><strong>命令式（Imperative）</strong>：运维人员告诉系统“<strong>怎么做</strong>”，如 <code>kubectl create pod</code>。  </li>
+<li><strong>声明式（Declarative）</strong>：运维人员告诉系统“<strong>最终目标是什么</strong>”，K8s 自行调和，如 <code>kubectl apply -f deployment.yaml</code>。  </li>
+<li><strong>K8s 采用声明式管理</strong>，自动调和，降低人工维护成本，提高系统稳定性。</li>
+</ul>
+<h3 id="2-以控制环（Control-Loop）构建自治系统"><a href="#2-以控制环（Control-Loop）构建自治系统" class="headerlink" title="2. 以控制环（Control Loop）构建自治系统"></a><strong>2. 以控制环（Control Loop）构建自治系统</strong></h3><p>K8s 采用“<strong>观察-决策-执行</strong>”控制循环来管理系统：</p>
+<ul>
+<li><strong>观察（Observe）</strong>：监控当前集群状态（<code>kubelet</code>、Controller、Prometheus）  </li>
+<li><strong>决策（Decide）</strong>：判断当前状态与目标状态的偏差（<code>kube-controller-manager</code>）  </li>
+<li><strong>执行（Act）</strong>：采取措施纠正偏差（调度 Pod、重启 Pod、扩容等）</li>
+</ul>
+<p>这一设计<strong>确保了系统的自愈能力和高可用性</strong>。</p>
+<h3 id="3-以组件化和可扩展性降低复杂度"><a href="#3-以组件化和可扩展性降低复杂度" class="headerlink" title="3. 以组件化和可扩展性降低复杂度"></a><strong>3. 以组件化和可扩展性降低复杂度</strong></h3><p>K8s 采用<strong>组件化架构</strong>，核心组件职责分明：</p>
+<ul>
+<li><code>etcd</code>：存储集群状态</li>
+<li><code>kube-apiserver</code>：唯一入口，所有组件通过 API Server 交互</li>
+<li><code>kube-scheduler</code>：调度 Pod</li>
+<li><code>kubelet</code>：管理节点上的容器</li>
+<li><code>kube-proxy</code>：管理 Service 之间的流量</li>
+</ul>
+<p>这种分层架构使得 K8s 易于扩展（如 CRD、Operator）并适应不同业务需求。</p>
+<h3 id="4-通过不可变基础设施减少人为干预"><a href="#4-通过不可变基础设施减少人为干预" class="headerlink" title="4. 通过不可变基础设施减少人为干预"></a><strong>4. 通过不可变基础设施减少人为干预</strong></h3><ul>
+<li>K8s 采用“<strong>不可变基础设施</strong>”原则，所有部署都是<strong>通过声明式 YAML 定义</strong>，并使用 GitOps 进行管理，避免手动修改引起的不一致性。  </li>
+<li><strong>示例：</strong><ul>
+<li><strong>传统方式</strong>：SSH 进服务器手动改配置 -&gt; 易出错、难追踪  </li>
+<li><strong>K8s 方式</strong>：<code>kubectl apply -f my-deployment.yaml</code> -&gt; 可回滚、可审计、可追踪</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-通过幂等性提升系统稳定性"><a href="#5-通过幂等性提升系统稳定性" class="headerlink" title="5. 通过幂等性提升系统稳定性"></a><strong>5. 通过幂等性提升系统稳定性</strong></h3><ul>
+<li><strong>幂等性（Idempotency）</strong>：多次执行同一操作，系统最终状态不变。  </li>
+<li><strong>在 K8s 中的应用：</strong><ul>
+<li><code>kubectl apply -f</code>：无论执行多少次，状态都保持一致。</li>
+<li><code>kube-controller-manager</code> 反复检查资源状态，直到达到期望状态。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h2><p>Kubernetes 通过<strong>声明式 API、自愈能力、可扩展架构、分布式调度、不可变基础设施</strong>等核心设计，解决了<strong>资源管理复杂、系统不稳定、手动运维高成本、应用高可用性保障</strong>等问题。其整体架构和思维方式适用于<strong>大规模分布式系统管理</strong>，并提供了灵活的扩展能力，使其成为云原生时代的基础设施标准。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/24/%E4%BA%8B%E7%89%A9-%E8%AE%A4%E7%9F%A5-%E6%80%9D%E7%BB%B4%E6%96%B9%E6%B3%95%E8%AE%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1235,87 +1440,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/17/rke%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85k8s%E9%9B%86%E7%BE%A4%E9%95%9C%E5%83%8F%E5%88%97%E8%A1%A8%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/17/rke%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85k8s%E9%9B%86%E7%BE%A4%E9%95%9C%E5%83%8F%E5%88%97%E8%A1%A8%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">rke离线安装k8s集群镜像列表问题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-02-17 18:53:55" itemprop="dateCreated datePublished" datetime="2025-02-17T18:53:55+08:00">2025-02-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-03-10 15:57:56" itemprop="dateModified" datetime="2025-03-10T15:57:56+08:00">2025-03-10</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://www.rockylinux.cn/notes/deploying-k8s-cluster-with-rke.html">https://www.rockylinux.cn/notes/deploying-k8s-cluster-with-rke.html</a></p>
-</blockquote>
-<h2 id="一、rke工具（不同版本支持的k8s集群版本不同）"><a href="#一、rke工具（不同版本支持的k8s集群版本不同）" class="headerlink" title="一、rke工具（不同版本支持的k8s集群版本不同）"></a>一、rke工具（不同版本支持的k8s集群版本不同）</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/rancher/rke/releases">https://github.com/rancher/rke/releases</a></p>
-</blockquote>
-<h2 id="二、生成cluster-yml"><a href="#二、生成cluster-yml" class="headerlink" title="二、生成cluster.yml"></a>二、生成cluster.yml</h2><blockquote>
-<p>参考:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/jdbinfo/p/17476878.html">https://www.cnblogs.com/jdbinfo/p/17476878.html</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ hostname</span><br><span class="line">11.100.100.100</span><br><span class="line">$ rke config --name cluster.yml</span><br><span class="line">[+] Cluster Level SSH Private Key Path [~/.ssh/id_rsa]:</span><br><span class="line">[+] Number of Hosts [1]:</span><br><span class="line">[+] SSH Address of host (1) [none]: 11.100.100.100</span><br><span class="line">[+] SSH Port of host (1) [22]:</span><br><span class="line">[+] SSH Private Key Path of host (11.101.222.248) [none]: ~/.ssh/id_rsa</span><br><span class="line">[+] SSH User of host (11.101.222.248) [ubuntu]: stark</span><br><span class="line">[+] Is host (11.101.222.248) a Control Plane host (y/n)? [y]: y</span><br><span class="line">[+] Is host (11.101.222.248) a Worker host (y/n)? [n]: y</span><br><span class="line">[+] Is host (11.101.222.248) an etcd host (y/n)? [n]: y</span><br><span class="line">[+] Override Hostname of host (11.101.222.248) [none]:</span><br><span class="line">[+] Internal IP of host (11.101.222.248) [none]:</span><br><span class="line">[+] Docker socket path on host (11.101.222.248) [/var/run/docker.sock]:</span><br><span class="line">[+] Network Plugin Type (flannel, calico, weave, canal, aci) [canal]: calico</span><br><span class="line">[+] Authentication Strategy [x509]:</span><br><span class="line">[+] Authorization Mode (rbac, none) [rbac]:</span><br><span class="line">[+] Kubernetes Docker image [rancher/hyperkube:v1.28.13-rancher1]: rancher/hyperkube:v1.26.15-rancher1</span><br><span class="line">[+] Cluster domain [cluster.local]:</span><br><span class="line">[+] Service Cluster IP Range [10.43.0.0/16]:</span><br><span class="line">[+] Enable PodSecurityPolicy [n]:</span><br><span class="line">[+] Cluster Network CIDR [10.42.0.0/16]:</span><br><span class="line">[+] Cluster DNS Service IP [10.43.0.10]:</span><br><span class="line">[+] Add addon manifest URLs or YAML files [no]:</span><br></pre></td></tr></table></figure>
-
-<h2 id="三、需离线下载的镜像"><a href="#三、需离线下载的镜像" class="headerlink" title="三、需离线下载的镜像"></a>三、需离线下载的镜像</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ cat ./cluster.yml | grep &quot;rancher/&quot; | awk -F &quot;: &quot; &#x27;&#123;print $2&#125;&#x27; | sort | uniq | sort</span><br><span class="line">rancher/calico-cni:v3.27.4-rancher1</span><br><span class="line">rancher/flannel-cni:v0.3.0-rancher9</span><br><span class="line">rancher/hyperkube:v1.26.15-rancher1</span><br><span class="line">rancher/mirrored-calico-ctl:v3.27.4</span><br><span class="line">rancher/mirrored-calico-kube-controllers:v3.27.4</span><br><span class="line">rancher/mirrored-calico-node:v3.27.4</span><br><span class="line">rancher/mirrored-calico-pod2daemon-flexvol:v3.27.4</span><br><span class="line">rancher/mirrored-cluster-proportional-autoscaler:v1.8.9</span><br><span class="line">rancher/mirrored-coredns-coredns:1.10.1</span><br><span class="line">rancher/mirrored-coreos-etcd:v3.5.10</span><br><span class="line">rancher/mirrored-flannel-flannel:v0.24.2</span><br><span class="line">rancher/mirrored-ingress-nginx-kube-webhook-certgen:v20231226-1a7112e06</span><br><span class="line">rancher/mirrored-k8s-dns-dnsmasq-nanny:1.22.28</span><br><span class="line">rancher/mirrored-k8s-dns-kube-dns:1.22.28</span><br><span class="line">rancher/mirrored-k8s-dns-node-cache:1.22.28</span><br><span class="line">rancher/mirrored-k8s-dns-sidecar:1.22.28</span><br><span class="line">rancher/mirrored-metrics-server:v0.7.0</span><br><span class="line">rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1</span><br><span class="line">rancher/mirrored-pause:3.7</span><br><span class="line">rancher/nginx-ingress-controller:nginx-1.11.2-rancher1</span><br><span class="line">rancher/rke-tools:v0.1.102</span><br></pre></td></tr></table></figure>
-
-<h2 id="四、下载k8s所需镜像并导出"><a href="#四、下载k8s所需镜像并导出" class="headerlink" title="四、下载k8s所需镜像并导出"></a>四、下载k8s所需镜像并导出</h2><blockquote>
-<p>镜像加速：<br><a target="_blank" rel="noopener" href="https://docker.aityp.com/">https://docker.aityp.com/</a><br><a target="_blank" rel="noopener" href="https://www.coderjia.cn/archives/dba3f94c-a021-468a-8ac6-e840f85867ea">https://www.coderjia.cn/archives/dba3f94c-a021-468a-8ac6-e840f85867ea</a> </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">set -e  # 遇到错误就退出</span><br><span class="line">set -o pipefail  # 管道中任何命令失败都导致整个脚本失败</span><br><span class="line"></span><br><span class="line"># 镜像列表</span><br><span class="line">IMAGES=(</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/calico-cni:v3.27.4-rancher1&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/flannel-cni:v0.3.0-rancher9&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/hyperkube:v1.26.15-rancher1&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-calico-ctl:v3.27.4&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-calico-kube-controllers:v3.27.4&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-calico-node:v3.27.4&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-calico-pod2daemon-flexvol:v3.27.4&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-cluster-proportional-autoscaler:v1.8.9&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-coredns-coredns:1.10.1&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-coreos-etcd:v3.5.10&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-flannel-flannel:v0.24.2&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-ingress-nginx-kube-webhook-certgen:v20231226-1a7112e06&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-k8s-dns-dnsmasq-nanny:1.22.28&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-k8s-dns-kube-dns:1.22.28&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-k8s-dns-node-cache:1.22.28&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-k8s-dns-sidecar:1.22.28&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-metrics-server:v0.7.0&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-nginx-ingress-controller-defaultbackend:1.5-rancher1&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/mirrored-pause:3.7&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/nginx-ingress-controller:nginx-1.11.2-rancher1&quot;</span><br><span class="line">    &quot;hub.fast360.xyz/rancher/rke-tools:v0.1.102&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 下载并重新打 tag</span><br><span class="line">for IMAGE in &quot;$&#123;IMAGES[@]&#125;&quot;; do</span><br><span class="line">    echo &quot;Pulling $IMAGE ...&quot;</span><br><span class="line">    docker pull &quot;$IMAGE&quot;</span><br><span class="line"></span><br><span class="line">    # 去掉前缀 hub.fast360.xyz/</span><br><span class="line">    NEW_TAG=$(echo &quot;$IMAGE&quot; | sed &#x27;s|hub.fast360.xyz/||&#x27;)</span><br><span class="line"></span><br><span class="line">    echo &quot;Tagging $IMAGE as $NEW_TAG ...&quot;</span><br><span class="line">    docker tag &quot;$IMAGE&quot; &quot;$NEW_TAG&quot;</span><br><span class="line"></span><br><span class="line">    echo &quot;Removing original $IMAGE to save space ...&quot;</span><br><span class="line">    docker rmi &quot;$IMAGE&quot;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line"># 导出所有处理后的镜像</span><br><span class="line">echo &quot;Saving images to rke-images-1.26.15.tar ...&quot;</span><br><span class="line">docker save -o rke-images-1.26.15.tar $(docker images --format &quot;&#123;&#123;.Repository&#125;&#125;:&#123;&#123;.Tag&#125;&#125;&quot; | grep grep rancher)</span><br><span class="line"></span><br><span class="line">echo &quot;All images downloaded, tagged, and saved successfully!&quot;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1387,7 +1511,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-count">143</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

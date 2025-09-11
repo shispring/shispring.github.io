@@ -184,6 +184,97 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/01/%E5%B8%B8%E8%A7%81runtime-socket/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/07/01/%E5%B8%B8%E8%A7%81runtime-socket/" class="post-title-link" itemprop="url">常见runtime socket</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-07-01 14:15:10 / 修改时间：14:21:10" itemprop="dateCreated datePublished" datetime="2025-07-01T14:15:10+08:00">2025-07-01</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="常见-runtime-socket-路径"><a href="#常见-runtime-socket-路径" class="headerlink" title="常见 runtime socket 路径"></a>常见 runtime socket 路径</h2><table>
+<thead>
+<tr>
+<th>CRI 实现</th>
+<th>Socket 路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>containerd（K3s）</td>
+<td><code>/run/k3s/containerd/containerd.sock</code></td>
+</tr>
+<tr>
+<td>containerd（非 K3s）</td>
+<td><code>/run/containerd/containerd.sock</code></td>
+</tr>
+<tr>
+<td>cri-o</td>
+<td><code>/run/crio/crio.sock</code></td>
+</tr>
+<tr>
+<td>Docker + cri-dockerd</td>
+<td><code>/var/run/cri-dockerd.sock</code></td>
+</tr>
+<tr>
+<td>Dockershim</td>
+<td><code>/var/run/dockershim.sock</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="crictl-WARN-解决办法"><a href="#crictl-WARN-解决办法" class="headerlink" title="crictl WARN 解决办法"></a>crictl WARN 解决办法</h2><ul>
+<li>显式指定 –runtime-endpoint 参数<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#命令中指定 --runtime-endpoint,使用 K3s 时 containerd 的默认 socket 路径</span><br><span class="line">crictl --runtime-endpoint unix:///run/k3s/containerd/containerd.sock images</span><br></pre></td></tr></table></figure></li>
+<li>设置配置文件<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; /etc/crictl.yaml &lt;&lt; EOF</span><br><span class="line">runtime-endpoint: unix:///run/k3s/containerd/containerd.sock</span><br><span class="line">image-endpoint: unix:///run/k3s/containerd/containerd.sock</span><br><span class="line">timeout: 10</span><br><span class="line">debug: false</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">crictl images</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/19/cAdvisor%E5%88%9D%E6%8E%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1180,153 +1271,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/05/26/controller%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6%E6%9C%BA%E5%88%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/05/26/controller%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">controller工作机制</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-05-26 15:22:03 / 修改时间：15:23:24" itemprop="dateCreated datePublished" datetime="2025-05-26T15:22:03+08:00">2025-05-26</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Kubernetes-Controller-工作机制解析"><a href="#Kubernetes-Controller-工作机制解析" class="headerlink" title="Kubernetes Controller 工作机制解析"></a>Kubernetes Controller 工作机制解析</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go">https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go</a></p>
-</blockquote>
-<h2 id="控制器核心组件"><a href="#控制器核心组件" class="headerlink" title="控制器核心组件"></a>控制器核心组件</h2><h3 id="1-初始化配置-Configuration"><a href="#1-初始化配置-Configuration" class="headerlink" title="1. 初始化配置 (Configuration)"></a>1. 初始化配置 (Configuration)</h3><ul>
-<li>通过kubeconfig文件或in-cluster配置初始化与API Server的连接</li>
-<li>创建clientset用于与Kubernetes API交互</li>
-</ul>
-<h3 id="2-资源监听器设置-Resource-Watcher"><a href="#2-资源监听器设置-Resource-Watcher" class="headerlink" title="2. 资源监听器设置 (Resource Watcher)"></a>2. 资源监听器设置 (Resource Watcher)</h3><ul>
-<li>创建ListWatch，指定要监听的资源类型(如Pod)和范围(如命名空间)</li>
-<li>ListWatch负责与API Server建立连接，监听资源变化</li>
-</ul>
-<h3 id="3-工作队列创建-Workqueue"><a href="#3-工作队列创建-Workqueue" class="headerlink" title="3. 工作队列创建 (Workqueue)"></a>3. 工作队列创建 (Workqueue)</h3><ul>
-<li>创建RateLimitingQueue作为工作队列</li>
-<li>队列支持限速重试，防止资源过度消耗</li>
-<li>确保并发安全的事件处理</li>
-</ul>
-<h3 id="4-缓存和事件处理器配置-Cache-Informer"><a href="#4-缓存和事件处理器配置-Cache-Informer" class="headerlink" title="4. 缓存和事件处理器配置 (Cache &amp; Informer)"></a>4. 缓存和事件处理器配置 (Cache &amp; Informer)</h3><ul>
-<li>创建Indexer作为本地缓存，存储资源对象</li>
-<li>创建Informer监听资源变化并更新本地缓存</li>
-<li>设置事件处理函数(Add&#x2F;Update&#x2F;Delete)，将变化的资源键加入工作队列</li>
-</ul>
-<h3 id="5-控制器组装-Controller-Assembly"><a href="#5-控制器组装-Controller-Assembly" class="headerlink" title="5. 控制器组装 (Controller Assembly)"></a>5. 控制器组装 (Controller Assembly)</h3><ul>
-<li>将队列(queue)、缓存(indexer)和监听器(informer)组装成控制器</li>
-<li>形成完整的事件处理流水线</li>
-<li>控制器负责协调这些组件的工作</li>
-</ul>
-<h3 id="6-业务逻辑处理-Business-Logic"><a href="#6-业务逻辑处理-Business-Logic" class="headerlink" title="6. 业务逻辑处理 (Business Logic)"></a>6. 业务逻辑处理 (Business Logic)</h3><ul>
-<li>processNextItem不断从队列获取待处理项</li>
-<li>通过indexer从本地缓存获取最新的资源状态</li>
-<li>执行具体的业务逻辑(如本例中的打印资源信息)</li>
-<li>处理完成后从队列中移除，失败则重新入队</li>
-</ul>
-<h2 id="详细工作流程"><a href="#详细工作流程" class="headerlink" title="详细工作流程"></a>详细工作流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">                    ┌─── 1. List/Watch 请求 ───┐</span><br><span class="line">                    │                          ▼</span><br><span class="line">API Server ←──────► ListWatch ─────────► Informer</span><br><span class="line">                                          │</span><br><span class="line">                    ┌─────────────────────┘</span><br><span class="line">                    │</span><br><span class="line">                    ▼</span><br><span class="line">                2. 更新本地缓存</span><br><span class="line">                 Indexer</span><br><span class="line">                    │</span><br><span class="line">                    │                  4. 从缓存读取</span><br><span class="line">                    │                      ┌───────────────┐</span><br><span class="line">                    ▼                      │               │</span><br><span class="line">3. 触发 ────► EventHandler ────► Workqueue ────► Controller</span><br><span class="line">                                                Business Logic</span><br></pre></td></tr></table></figure>
-
-<h3 id="流程说明"><a href="#流程说明" class="headerlink" title="流程说明"></a>流程说明</h3><ol>
-<li><p><strong>Informer与API Server的交互</strong></p>
-<ul>
-<li>首先通过List获取资源的完整列表</li>
-<li>然后通过Watch监听资源的变化事件</li>
-</ul>
-</li>
-<li><p><strong>Informer更新本地缓存</strong></p>
-<ul>
-<li>收到List响应时，将资源列表存入Indexer</li>
-<li>收到Watch事件时，相应更新Indexer中的数据</li>
-<li>Indexer始终保持与服务器端数据的同步</li>
-</ul>
-</li>
-<li><p><strong>事件处理流程</strong></p>
-<ul>
-<li>当收到事件时，调用相应的EventHandler(Add&#x2F;Update&#x2F;Delete)</li>
-<li>EventHandler将资源的key放入WorkQueue</li>
-<li>EventHandler不直接操作Indexer</li>
-</ul>
-</li>
-<li><p><strong>控制器业务处理</strong></p>
-<ul>
-<li>从WorkQueue取出要处理的资源key</li>
-<li>通过key从Indexer(本地缓存)中获取资源的最新状态</li>
-<li>执行具体的业务逻辑</li>
-</ul>
-</li>
-</ol>
-<h2 id="设计优点"><a href="#设计优点" class="headerlink" title="设计优点"></a>设计优点</h2><ol>
-<li><p><strong>数据一致性</strong></p>
-<ul>
-<li>Indexer的更新由Informer直接负责</li>
-<li>确保缓存与服务器端的一致性</li>
-</ul>
-</li>
-<li><p><strong>职责分离</strong></p>
-<ul>
-<li>EventHandler只负责将事件对应的key放入队列</li>
-<li>各组件职责单一，界限清晰</li>
-</ul>
-</li>
-<li><p><strong>性能优化</strong></p>
-<ul>
-<li>业务逻辑通过Indexer读取数据</li>
-<li>避免频繁访问API Server</li>
-</ul>
-</li>
-<li><p><strong>可靠性</strong></p>
-<ul>
-<li>支持失败重试和限速机制</li>
-<li>确保资源状态的最终一致性</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1398,7 +1342,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-count">143</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

@@ -10988,4 +10988,160 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>基础镜像对比</title>
+    <url>/2025/09/11/%E5%9F%BA%E7%A1%80%E9%95%9C%E5%83%8F%E5%AF%B9%E6%AF%94/</url>
+    <content><![CDATA[<h1 id="📊-基础镜像对比（Debian-Ubuntu-Alpine-CentOS）"><a href="#📊-基础镜像对比（Debian-Ubuntu-Alpine-CentOS）" class="headerlink" title="📊 基础镜像对比（Debian &#x2F; Ubuntu &#x2F; Alpine &#x2F; CentOS）"></a>📊 基础镜像对比（Debian &#x2F; Ubuntu &#x2F; Alpine &#x2F; CentOS）</h1><table>
+<thead>
+<tr>
+<th>系统</th>
+<th>体积 (镜像大小)</th>
+<th>兼容性</th>
+<th>稳定性</th>
+<th>生态支持</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Debian</strong></td>
+<td><strong>中等</strong>（<code>slim</code> ~ 22MB，完整 ~ 124MB）</td>
+<td>与 Linux 主流发行版高度兼容（glibc）</td>
+<td>极高，长期支持 + 安全更新快</td>
+<td>Docker 官方推荐，文档丰富，CI&#x2F;CD 常用</td>
+<td>推荐大多数应用，稳定、安全、轻量</td>
+</tr>
+<tr>
+<td><strong>Ubuntu</strong></td>
+<td>中等偏大（<code>slim</code> ~ 29MB，完整 ~ 77MB）</td>
+<td>与 Debian 完全兼容，额外带 Canonical 支持</td>
+<td>高，LTS 版本支持 5 年</td>
+<td>最流行，社区 &amp; 企业文档最全，云原生生态好</td>
+<td>推荐需要 LTS 的场景，如微服务、企业应用</td>
+</tr>
+<tr>
+<td><strong>Alpine</strong></td>
+<td><strong>极小</strong>（5MB 左右）</td>
+<td>使用 <code>musl libc</code> 与 <code>busybox</code>，部分库兼容性差</td>
+<td>中等，滚动更新快但可能引入问题</td>
+<td>文档较少，调试工具缺失，构建复杂</td>
+<td>适合极简应用，静态编译 Go &#x2F; Rust &#x2F; Java 镜像</td>
+</tr>
+<tr>
+<td><strong>CentOS</strong>（含 Rocky&#x2F;Alma）</td>
+<td>大（200MB+）</td>
+<td>与 RHEL 完全兼容，适合企业 RHEL 环境</td>
+<td>高，企业级，生命周期长（取决于版本）</td>
+<td>传统企业用得多，但云原生社区热度下降</td>
+<td>适合对 <strong>RHEL 兼容性</strong> 有强需求的环境</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="🏷-Debian-镜像-tag-说明"><a href="#🏷-Debian-镜像-tag-说明" class="headerlink" title="🏷 Debian 镜像 tag 说明"></a>🏷 Debian 镜像 tag 说明</h1><p>Debian 的 tag 比较多，我帮你分类整理：</p>
+<table>
+<thead>
+<tr>
+<th>Tag 示例</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bookworm</code></td>
+<td>Debian 12 稳定版（最新稳定版本，推荐生产环境使用）</td>
+</tr>
+<tr>
+<td><code>bullseye</code></td>
+<td>Debian 11 稳定版</td>
+</tr>
+<tr>
+<td><code>buster</code></td>
+<td>Debian 10 稳定版（老版本）</td>
+</tr>
+<tr>
+<td><code>12</code>, <code>11</code>, <code>10</code></td>
+<td>对应 Debian 主版本号，和代号等价</td>
+</tr>
+<tr>
+<td><code>bookworm-slim</code></td>
+<td>精简版，去掉 man&#x2F;info&#x2F;locale，不带多余工具，体积更小</td>
+</tr>
+<tr>
+<td><code>bookworm-20240904</code></td>
+<td>带构建日期的镜像，保证可重复构建</td>
+</tr>
+<tr>
+<td><code>stable</code></td>
+<td>当前最新的稳定版（目前是 <code>bookworm</code>）</td>
+</tr>
+<tr>
+<td><code>testing</code></td>
+<td>即将成为下一个稳定版的滚动版本，不保证完全稳定</td>
+</tr>
+<tr>
+<td><code>unstable</code></td>
+<td>永远指向 <strong>sid</strong>，开发中，不推荐生产使用</td>
+</tr>
+<tr>
+<td><code>experimental</code></td>
+<td>实验性分支，风险高</td>
+</tr>
+</tbody></table>
+<p>👉 <strong>推荐选择</strong>：</p>
+<ul>
+<li>生产环境：<code>debian:bookworm-slim</code>（小而稳）</li>
+<li>调试环境：<code>debian:bookworm</code>（带工具，方便排查）</li>
+<li>可重复构建：<code>debian:bookworm-20240904</code>（固定快照）</li>
+</ul>
+<hr>
+<h1 id="🏷-Ubuntu-镜像-tag-说明"><a href="#🏷-Ubuntu-镜像-tag-说明" class="headerlink" title="🏷 Ubuntu 镜像 tag 说明"></a>🏷 Ubuntu 镜像 tag 说明</h1><p>Ubuntu 的版本遵循 <strong>年.月</strong> 格式，分为 <strong>LTS（长期支持）</strong> 和 <strong>非 LTS（短期支持）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>Tag 示例</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>22.04</code>, <code>jammy</code></td>
+<td>Ubuntu 22.04 LTS（支持至 2027，Extended Security 到 2032）</td>
+</tr>
+<tr>
+<td><code>20.04</code>, <code>focal</code></td>
+<td>Ubuntu 20.04 LTS（支持至 2025）</td>
+</tr>
+<tr>
+<td><code>18.04</code>, <code>bionic</code></td>
+<td>Ubuntu 18.04 LTS（支持至 2023）</td>
+</tr>
+<tr>
+<td><code>24.04</code>, <code>noble</code></td>
+<td>Ubuntu 24.04 LTS（最新 LTS，支持至 2029）</td>
+</tr>
+<tr>
+<td><code>latest</code></td>
+<td>当前最新版本（⚠️ 不推荐生产用，可能随时间变）</td>
+</tr>
+<tr>
+<td><code>22.04-slim</code></td>
+<td>精简版，体积更小</td>
+</tr>
+<tr>
+<td><code>rolling</code></td>
+<td>滚动版本，始终跟随最新稳定版</td>
+</tr>
+</tbody></table>
+<p>👉 <strong>推荐选择</strong>：</p>
+<ul>
+<li>生产环境：<code>ubuntu:22.04</code> 或 <code>ubuntu:22.04-slim</code></li>
+<li>长期维护：<code>ubuntu:24.04</code>（新 LTS）</li>
+<li>快速试验：<code>ubuntu:latest</code>（不建议生产使用）</li>
+</ul>
+<hr>
+<h1 id="✅-总结"><a href="#✅-总结" class="headerlink" title="✅ 总结"></a>✅ 总结</h1><ul>
+<li><strong>首选</strong>：<code>debian:bookworm-slim</code>（小、稳、安全更新快）</li>
+<li><strong>需要 LTS 长期支持</strong>：<code>ubuntu:22.04</code> 或 <code>ubuntu:24.04</code></li>
+<li><strong>极小镜像</strong>：<code>alpine:3.20</code>，但要考虑兼容性问题</li>
+<li><strong>企业 RHEL 兼容场景</strong>：<code>rockylinux:8</code> &#x2F; <code>almalinux:8</code></li>
+</ul>
+]]></content>
+  </entry>
 </search>
