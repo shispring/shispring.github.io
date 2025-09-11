@@ -3661,7 +3661,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 
 <h2 id="ping加时间戳"><a href="#ping加时间戳" class="headerlink" title="ping加时间戳"></a>ping加时间戳</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#安装moreutils</span><br><span class="line">brew install moreutils</span><br><span class="line"></span><br><span class="line">ping &quot;$@&quot; | ts &#x27;[%Y-%m-%d %H:%M:%S]&#x27;</span><br></pre></td></tr></table></figure>
 
-<h2 id="截长图工具"><a href="#截长图工具" class="headerlink" title="截长图工具"></a>截长图工具</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ishot</span><br></pre></td></tr></table></figure>
+<h2 id="截长图工具"><a href="#截长图工具" class="headerlink" title="截长图工具"></a>截长图工具</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ishot</span><br><span class="line"></span><br><span class="line">#另外</span><br><span class="line">BetterAndBetter</span><br></pre></td></tr></table></figure>
 
 <h2 id="相信任何源"><a href="#相信任何源" class="headerlink" title="相信任何源"></a>相信任何源</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo spctl --master-disable</span><br></pre></td></tr></table></figure>
 ]]></content>
