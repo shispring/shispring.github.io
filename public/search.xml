@@ -6975,6 +6975,12 @@ validate</p>
 
 <h3 id="制作倒序视频"><a href="#制作倒序视频" class="headerlink" title="制作倒序视频"></a>制作倒序视频</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; reverse.txt</span><br><span class="line">file &#x27;frame_00082.jpg&#x27;</span><br><span class="line">file &#x27;frame_00081.jpg&#x27;</span><br><span class="line">file &#x27;frame_00080.jpg&#x27;</span><br><span class="line">file &#x27;frame_00079.jpg&#x27;</span><br><span class="line">file &#x27;frame_00078.jpg&#x27;</span><br><span class="line">file &#x27;frame_00077.jpg&#x27;</span><br><span class="line">file &#x27;frame_00076.jpg&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -r 25 -i reverse.txt -c:v libx264 -pix_fmt yuv420p reverse.mp4</span><br></pre></td></tr></table></figure>
 <h3 id="拼接正向-反向-视频"><a href="#拼接正向-反向-视频" class="headerlink" title="拼接正向 + 反向 视频"></a>拼接正向 + 反向 视频</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; concat.txt</span><br><span class="line">file &#x27;forward.mp4&#x27;</span><br><span class="line">file &#x27;reverse.mp4&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -i concat.txt -r 25 -c:v libx264 -pix_fmt yuv420p looped.mp4</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="剔除视频片段"><a href="#剔除视频片段" class="headerlink" title="剔除视频片段"></a>剔除视频片段</h2><ul>
+<li>1.确定要剔除的片段时间范围（比如从 00:01:30 到 00:02:10）</li>
+<li>2.用 ffmpeg 将视频切成两段，然后拼接起来（中间那段就被“剔除”）</li>
+</ul>
+<h3 id="无损裁剪-拼接（推荐）"><a href="#无损裁剪-拼接（推荐）" class="headerlink" title="无损裁剪 + 拼接（推荐）"></a>无损裁剪 + 拼接（推荐）</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 切出前半段（从开头到 1:30）</span><br><span class="line">ffmpeg -i input.mp4 -ss 00:00:00 -to 00:01:30 -c copy part1.mp4</span><br><span class="line"></span><br><span class="line"># 切出后半段（从 2:10 到结尾）</span><br><span class="line">ffmpeg -i input.mp4 -ss 00:02:10 -c copy part2.mp4</span><br><span class="line"></span><br><span class="line"># 生成文件列表</span><br><span class="line">echo -e &quot;file &#x27;part1.mp4&#x27;\nfile &#x27;part2.mp4&#x27;&quot; &gt; files.txt</span><br><span class="line"></span><br><span class="line"># 拼接两段</span><br><span class="line">ffmpeg -f concat -safe 0 -i files.txt -c copy output.mp4</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>ffmpeg</tag>
