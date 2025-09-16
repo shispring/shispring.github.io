@@ -184,6 +184,227 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/11/%E5%A4%A7%E5%9E%8BPCAP%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/11/%E5%A4%A7%E5%9E%8BPCAP%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">大型PCAP文件分析最佳实践</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-08-11 20:54:04 / 修改时间：20:54:30" itemprop="dateCreated datePublished" datetime="2025-08-11T20:54:04+08:00">2025-08-11</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="大型PCAP文件分析最佳实践"><a href="#大型PCAP文件分析最佳实践" class="headerlink" title="大型PCAP文件分析最佳实践"></a>大型PCAP文件分析最佳实践</h1><p>本文档提供了分析大型PCAP（数据包捕获）文件的结构化方法，特别是如何根据特定时间定位问题。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E5%88%86%E6%9E%90%E5%A4%A7%E5%9E%8Bpcap%E6%96%87%E4%BB%B6%E7%9A%84%E6%AD%A5%E9%AA%A4">分析大型PCAP文件的步骤</a></li>
+<li><a href="#%E6%A0%B9%E6%8D%AE%E7%89%B9%E5%AE%9A%E6%97%B6%E9%97%B4%E5%AE%9A%E4%BD%8D%E9%97%AE%E9%A2%98">根据特定时间定位问题</a></li>
+<li><a href="#%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%E5%92%8C%E5%91%BD%E4%BB%A4">常用工具和命令</a></li>
+<li><a href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE">性能优化建议</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95">常见问题分析方法</a></li>
+</ul>
+<h2 id="分析大型PCAP文件的步骤"><a href="#分析大型PCAP文件的步骤" class="headerlink" title="分析大型PCAP文件的步骤"></a>分析大型PCAP文件的步骤</h2><p>大型PCAP文件分析应该遵循从宏观到微观的策略，先了解整体情况，再深入具体问题：</p>
+<h3 id="1-预处理和初步了解"><a href="#1-预处理和初步了解" class="headerlink" title="1. 预处理和初步了解"></a>1. 预处理和初步了解</h3><ul>
+<li><p><strong>检查文件基本信息</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">capinfos large_capture.pcap</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看数据包统计信息</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap -qn | <span class="built_in">wc</span> -l  <span class="comment"># 计算总数据包数</span></span><br><span class="line">tcpdump -r large_capture.pcap -qtnp | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr  <span class="comment"># 查看IP地址分布</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>获取捕获的时间范围</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -T fields -e frame.time | <span class="built_in">head</span> -1  <span class="comment"># 捕获开始时间</span></span><br><span class="line">tshark -r large_capture.pcap -T fields -e frame.time | <span class="built_in">tail</span> -1  <span class="comment"># 捕获结束时间</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-分割和提取"><a href="#2-分割和提取" class="headerlink" title="2. 分割和提取"></a>2. 分割和提取</h3><ul>
+<li><p><strong>按时间分割大文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">editcap -A <span class="string">&quot;2025-08-11 15:30:00&quot;</span> -B <span class="string">&quot;2025-08-11 15:35:00&quot;</span> large_capture.pcap time_window.pcap</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>按协议提取特定流量</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap -w http_only.pcap <span class="string">&#x27;tcp port 80 or tcp port 443&#x27;</span></span><br><span class="line">tcpdump -r large_capture.pcap -w dns_only.pcap <span class="string">&#x27;udp port 53&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>按会话提取特定流量</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap -w specific_conv.pcap <span class="string">&#x27;host 192.168.1.100 and host 192.168.1.200&#x27;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="3-初步分析"><a href="#3-初步分析" class="headerlink" title="3. 初步分析"></a>3. 初步分析</h3><ul>
+<li><p><strong>识别主要协议分布</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z io,phs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>识别高流量主机</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z endpoints,ip</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查找错误和异常</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.analysis.flags&quot;</span> -T fields -e frame.number -e frame.time -e ip.src -e ip.dst -e tcp.analysis.flags</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="4-深入分析"><a href="#4-深入分析" class="headerlink" title="4. 深入分析"></a>4. 深入分析</h3><ul>
+<li><p><strong>分析特定连接</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;ip.addr==192.168.1.100 &amp;&amp; ip.addr==192.168.1.200&quot;</span> -O tcp</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>提取应用层数据</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;http&quot;</span> -T fields -e frame.time -e ip.src -e http.request.method -e http.request.uri -e http.response.code</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>分析TCP会话性能</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z conv,tcp</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="5-可视化和图形分析"><a href="#5-可视化和图形分析" class="headerlink" title="5. 可视化和图形分析"></a>5. 可视化和图形分析</h3><ul>
+<li><strong>使用Wireshark图形界面</strong>进行交互式分析</li>
+<li><strong>使用termshark</strong>进行终端内图形分析</li>
+<li><strong>构建流量图表</strong>：使用tshark导出数据后利用Python或R进行可视化</li>
+</ul>
+<h2 id="根据特定时间定位问题"><a href="#根据特定时间定位问题" class="headerlink" title="根据特定时间定位问题"></a>根据特定时间定位问题</h2><p>在网络问题排查中，时间是关键线索。以下是根据时间定位问题的有效方法：</p>
+<h3 id="1-时间窗口提取"><a href="#1-时间窗口提取" class="headerlink" title="1. 时间窗口提取"></a>1. 时间窗口提取</h3><ul>
+<li><p><strong>提取特定时间窗口的流量</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取2025年8月11日15:30到15:35之间的所有数据包</span></span><br><span class="line">editcap -A <span class="string">&quot;2025-08-11 15:30:00&quot;</span> -B <span class="string">&quot;2025-08-11 15:35:00&quot;</span> large_capture.pcap time_window.pcap</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>通过精确的开始结束时间戳提取</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取时间戳在1691757000到1691757300之间的数据包</span></span><br><span class="line">tcpdump -r large_capture.pcap -w time_slice.pcap <span class="string">&quot;frame.time_epoch &gt;= 1691757000 and frame.time_epoch &lt;= 1691757300&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-基于时间的过滤"><a href="#2-基于时间的过滤" class="headerlink" title="2. 基于时间的过滤"></a>2. 基于时间的过滤</h3><ul>
+<li><strong>使用tcpdump过滤特定时间点附近的数据包</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看特定时间点前后5秒的数据包</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;frame.time &gt;= \&quot;2025-08-11 15:30:45\&quot; and frame.time &lt;= \&quot;2025-08-11 15:30:55\&quot;&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="3-构建时间轴分析"><a href="#3-构建时间轴分析" class="headerlink" title="3. 构建时间轴分析"></a>3. 构建时间轴分析</h3><ul>
+<li><p><strong>生成关键事件的时间轴</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取HTTP错误响应并按时间排序</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;http.response.code &gt;= 400&quot;</span> -T fields -e frame.time -e ip.src -e http.response.code -e http.request.uri</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>分析特定时间前后的TCP重传</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找目标时间段内的TCP重传</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.analysis.retransmission and frame.time &gt;= \&quot;2025-08-11 15:30:00\&quot; and frame.time &lt;= \&quot;2025-08-11 15:31:00\&quot;&quot;</span> -T fields -e frame.time -e ip.src -e ip.dst</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="4-并行事件分析"><a href="#4-并行事件分析" class="headerlink" title="4. 并行事件分析"></a>4. 并行事件分析</h3><ul>
+<li><strong>比较不同协议在同一时间窗口的行为</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取相同时间段内的DNS查询和HTTP请求</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;(dns or http) and frame.time &gt;= \&quot;2025-08-11 15:30:00\&quot; and frame.time &lt;= \&quot;2025-08-11 15:31:00\&quot;&quot;</span> -T fields -e frame.time -e frame.protocols</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="5-识别时间异常"><a href="#5-识别时间异常" class="headerlink" title="5. 识别时间异常"></a>5. 识别时间异常</h3><ul>
+<li><strong>找出响应时间异常的请求</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析HTTP请求-响应对，找出延迟高的交互</span></span><br><span class="line">tshark -r large_capture.pcap -q -z http,tree</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="常用工具和命令"><a href="#常用工具和命令" class="headerlink" title="常用工具和命令"></a>常用工具和命令</h2><h3 id="基础工具"><a href="#基础工具" class="headerlink" title="基础工具"></a>基础工具</h3><ol>
+<li><p><strong>tcpdump</strong> - 命令行数据包分析器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tcpdump -r file.pcap [filter]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看HTTP流量</span></span><br><span class="line">tcpdump -r file.pcap -s 0 -A <span class="string">&#x27;tcp port 80&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加时间戳</span></span><br><span class="line">tcpdump -r file.pcap -tttt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>tshark</strong> - Wireshark的命令行版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tshark -r file.pcap [options] [filter]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取特定字段</span></span><br><span class="line">tshark -r file.pcap -T fields -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计分析</span></span><br><span class="line">tshark -r file.pcap -q -z io,phs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Wireshark</strong> - 图形界面分析工具</p>
+<ul>
+<li>强大的过滤功能</li>
+<li>色彩编码的数据包</li>
+<li>协议解析</li>
+<li>会话追踪功能</li>
+</ul>
+</li>
+<li><p><strong>termshark</strong> - 终端中的类Wireshark界面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">termshark -r file.pcap</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>tcpflow</strong> - 重建和提取TCP会话</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpflow -r file.pcap -o output_dir</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="专业工具"><a href="#专业工具" class="headerlink" title="专业工具"></a>专业工具</h3><ol>
+<li><p><strong>editcap</strong> - 编辑和转换捕获文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按时间分割</span></span><br><span class="line">editcap -A <span class="string">&quot;2025-08-11 15:30:00&quot;</span> -B <span class="string">&quot;2025-08-11 15:35:00&quot;</span> input.pcap output.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按数量分割</span></span><br><span class="line">editcap -c 1000 input.pcap output.pcap</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>capinfos</strong> - 显示捕获文件信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">capinfos file.pcap</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>mergecap</strong> - 合并捕获文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mergecap -w merged.pcap input1.pcap input2.pcap</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>TraceWrangler</strong> - 大型捕获文件处理工具</p>
+</li>
+<li><p><strong>NetworkMiner</strong> - 网络取证分析工具</p>
+</li>
+</ol>
+<h2 id="性能优化建议"><a href="#性能优化建议" class="headerlink" title="性能优化建议"></a>性能优化建议</h2><p>处理大型PCAP文件时的性能优化：</p>
+<ol>
+<li><p><strong>硬件考虑</strong></p>
+<ul>
+<li>使用SSD存储加速读取</li>
+<li>增加RAM以处理大文件</li>
+<li>利用多核处理器进行并行分析</li>
+</ul>
+</li>
+<li><p><strong>分析策略</strong></p>
+<ul>
+<li>先分割成小文件再分析</li>
+<li>使用命令行工具替代图形界面处理初步分析</li>
+<li>限制提取的数据包数量和字段</li>
+</ul>
+</li>
+<li><p><strong>索引和缓存</strong></p>
+<ul>
+<li>为大型PCAP文件创建索引<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用Wireshark创建索引</span></span><br><span class="line">tshark -r large_capture.pcap -o <span class="string">&quot;gui.column.format:\&quot;Time\&quot;,\&quot;%t\&quot;&quot;</span> -w indexed_capture.pcapng</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>使用流式处理</strong></p>
+<ul>
+<li>避免一次性加载整个文件</li>
+<li>利用管道处理数据<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap | grep <span class="string">&quot;pattern&quot;</span> | <span class="built_in">head</span> -100</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<h2 id="常见问题分析方法"><a href="#常见问题分析方法" class="headerlink" title="常见问题分析方法"></a>常见问题分析方法</h2><h3 id="网络延迟问题"><a href="#网络延迟问题" class="headerlink" title="网络延迟问题"></a>网络延迟问题</h3><ol>
+<li><p><strong>TCP往返时间分析</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z io,<span class="built_in">stat</span>,0.1,<span class="string">&quot;SUM(tcp.analysis.ack_rtt)tcp.analysis.ack_rtt&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查找连接建立延迟</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1&quot;</span> -T fields -e frame.time -e tcp.time_delta</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="连接问题"><a href="#连接问题" class="headerlink" title="连接问题"></a>连接问题</h3><ol>
+<li><p><strong>查找TCP重置</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.flags.reset==1&quot;</span> -T fields -e frame.time -e ip.src -e ip.dst</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>分析TCP连接建立失败</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1 and !tcp.analysis.duplicate_ack&quot;</span> -T fields -e frame.number -e frame.time -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="应用层问题"><a href="#应用层问题" class="headerlink" title="应用层问题"></a>应用层问题</h3><ol>
+<li><p><strong>HTTP错误分析</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;http.response.code &gt;= 400&quot;</span> -T fields -e frame.time -e ip.src -e http.response.code -e http.request.uri</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>DNS解析问题</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;dns.flags.rcode != 0&quot;</span> -T fields -e frame.time -e ip.src -e dns.qry.name -e dns.flags.rcode</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/11/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97%EF%BC%88%E4%BD%BF%E7%94%A8tcpdump%E5%92%8Ctshark%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2891,189 +3112,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/" class="post-title-link" itemprop="url">关于FQDN</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-07-07 15:23:24 / 修改时间：15:24:58" itemprop="dateCreated datePublished" datetime="2025-07-07T15:23:24+08:00">2025-07-07</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>这是个很有技术深度的问题。在 Kubernetes 的网络架构中，<strong>FQDN（Fully Qualified Domain Name，完全限定域名）</strong> 是集群内部和外部通信中非常关键的一环。你提到的 <code>FQDN</code> 和 <code>RQDN</code>（可能是 Relative Qualified Domain Name 的意思，见下文）概念，都可以围绕 DNS 来系统理解。</p>
-<hr>
-<h2 id="✅-一、什么是-FQDN？"><a href="#✅-一、什么是-FQDN？" class="headerlink" title="✅ 一、什么是 FQDN？"></a>✅ 一、什么是 FQDN？</h2><p><strong>FQDN（Fully Qualified Domain Name）</strong> 是指一个完全的、绝对的 DNS 名字，它<strong>从主机名开始，一直到根域（<code>.</code>）结束</strong>。</p>
-<h3 id="🔹-举例："><a href="#🔹-举例：" class="headerlink" title="🔹 举例："></a>🔹 举例：</h3><table>
-<thead>
-<tr>
-<th>名称</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>my-service.default.svc.cluster.local.</code></td>
-<td>✅ FQDN，在 K8s 中完整的 service 解析域名</td>
-</tr>
-<tr>
-<td><code>my-service.default.svc.cluster.local</code></td>
-<td>✅ 几乎等价（根 <code>.</code> 可省略）</td>
-</tr>
-<tr>
-<td><code>my-service</code></td>
-<td>❌ 不是 FQDN，属于相对域名（可解析依赖 search 域）</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="✅-二、Kubernetes-中的-FQDN-使用场景"><a href="#✅-二、Kubernetes-中的-FQDN-使用场景" class="headerlink" title="✅ 二、Kubernetes 中的 FQDN 使用场景"></a>✅ 二、Kubernetes 中的 FQDN 使用场景</h2><p>在 Kubernetes 内部，所有服务、Pod 都可以通过 DNS 名称访问，而 <strong>KubeDNS&#x2F;CoreDNS</strong> 按如下规则拼接域名：</p>
-<h3 id="🚀-Service-默认-FQDN："><a href="#🚀-Service-默认-FQDN：" class="headerlink" title="🚀 Service 默认 FQDN："></a>🚀 Service 默认 FQDN：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><code>svc.cluster.local</code> 是 service 的默认 DNS 域名后缀，定义在 kubelet 或 CoreDNS 配置中。</p>
-</blockquote>
-<p>比如你有一个 service 叫 <code>nginx</code> 在 <code>prod</code> 命名空间，那么它的 FQDN 是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx.prod.svc.cluster.local</span><br></pre></td></tr></table></figure>
-
-<p>可以从任何命名空间使用这个 FQDN 访问该服务。</p>
-<hr>
-<h2 id="✅-三、FQDN-与非-FQDN-的区别"><a href="#✅-三、FQDN-与非-FQDN-的区别" class="headerlink" title="✅ 三、FQDN 与非 FQDN 的区别"></a>✅ 三、FQDN 与非 FQDN 的区别</h2><table>
-<thead>
-<tr>
-<th>类型</th>
-<th>示例</th>
-<th>是否全局唯一</th>
-<th>是否依赖 search 域</th>
-<th>是否推荐</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>FQDN</td>
-<td><code>nginx.prod.svc.cluster.local</code></td>
-<td>✅ 是</td>
-<td>❌ 不依赖</td>
-<td>✅ 推荐</td>
-</tr>
-<tr>
-<td>非 FQDN（短域名）</td>
-<td><code>nginx</code> 或 <code>nginx.prod</code></td>
-<td>❌ 可能冲突</td>
-<td>✅ 依赖</td>
-<td>❌ 不推荐跨命名空间</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="✅-四、使用-FQDN-的好处"><a href="#✅-四、使用-FQDN-的好处" class="headerlink" title="✅ 四、使用 FQDN 的好处"></a>✅ 四、使用 FQDN 的好处</h2><ol>
-<li><p><strong>跨命名空间通信稳定</strong></p>
-<ul>
-<li>使用完整域名 <code>svc.ns.svc.cluster.local</code> 不依赖 DNS search path</li>
-</ul>
-</li>
-<li><p><strong>更高的安全性和确定性</strong></p>
-<ul>
-<li>避免访问到其他命名空间中重名的 service（比如 <code>nginx</code>）</li>
-</ul>
-</li>
-<li><p><strong>跨集群 DNS 联通（例如 Service Mesh、多集群）</strong></p>
-<ul>
-<li>多集群环境中可以借助 FQDN 显式指定服务源</li>
-</ul>
-</li>
-<li><p><strong>自动证书绑定（如 Istio、cert-manager）</strong></p>
-<ul>
-<li>证书签发常用 FQDN 作为 <code>CommonName</code> 或 <code>SAN</code></li>
-</ul>
-</li>
-</ol>
-<hr>
-<h2 id="✅-五、K8s-真实案例"><a href="#✅-五、K8s-真实案例" class="headerlink" title="✅ 五、K8s 真实案例"></a>✅ 五、K8s 真实案例</h2><h3 id="🔸-kubectl-exec-调试时："><a href="#🔸-kubectl-exec-调试时：" class="headerlink" title="🔸 kubectl exec 调试时："></a>🔸 <code>kubectl exec</code> 调试时：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl nginx.default.svc.cluster.local:80</span><br></pre></td></tr></table></figure>
-
-<h3 id="🔸-Ingress、Istio-中配置主机名路由："><a href="#🔸-Ingress、Istio-中配置主机名路由：" class="headerlink" title="🔸 Ingress、Istio 中配置主机名路由："></a>🔸 Ingress、Istio 中配置主机名路由：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">host:</span> <span class="string">my-app.dev.svc.cluster.local</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="🔸-cert-manager-Issuer-中的-DNS-SAN-配置："><a href="#🔸-cert-manager-Issuer-中的-DNS-SAN-配置：" class="headerlink" title="🔸 cert-manager Issuer 中的 DNS SAN 配置："></a>🔸 cert-manager Issuer 中的 DNS SAN 配置：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">dnsNames:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">rancher.qihoo.net</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">harbor.qa.qihoo.net</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="✅-六、如何查看当前集群-FQDN-后缀？"><a href="#✅-六、如何查看当前集群-FQDN-后缀？" class="headerlink" title="✅ 六、如何查看当前集群 FQDN 后缀？"></a>✅ 六、如何查看当前集群 FQDN 后缀？</h2><p>你可以查看 kubelet 或 CoreDNS 的 DNS 配置：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/resolv.conf</span><br></pre></td></tr></table></figure>
-
-<p>示例：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">search default.svc.cluster.local svc.cluster.local cluster.local</span><br><span class="line">nameserver 10.43.0.10</span><br></pre></td></tr></table></figure>
-
-<p>这表示你在 <code>default</code> 命名空间时，短域名会自动补齐成：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;name&gt;.default.svc.cluster.local</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="✅-总结表格"><a href="#✅-总结表格" class="headerlink" title="✅ 总结表格"></a>✅ 总结表格</h2><table>
-<thead>
-<tr>
-<th>概念</th>
-<th>描述</th>
-<th>典型示例</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>FQDN</td>
-<td>完全限定域名，从主机名到根域的全路径</td>
-<td><code>svc.ns.svc.cluster.local</code></td>
-</tr>
-<tr>
-<td>简短域名</td>
-<td>极简写法，仅用于当前 namespace 内</td>
-<td><code>svc</code></td>
-</tr>
-<tr>
-<td>推荐场景</td>
-<td>跨命名空间访问 &#x2F; TLS 绑定 &#x2F; 多集群 &#x2F; Istio 等</td>
-<td>必须使用 FQDN</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -3145,7 +3183,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">143</span>
+          <span class="site-state-item-count">144</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
