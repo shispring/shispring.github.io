@@ -184,6 +184,128 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">MTU完整指南和故障排查</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-16 11:03:44 / 修改时间：11:04:03" itemprop="dateCreated datePublished" datetime="2025-09-16T11:03:44+08:00">2025-09-16</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="🎯-MTU快速理解"><a href="#🎯-MTU快速理解" class="headerlink" title="🎯 MTU快速理解"></a>🎯 MTU快速理解</h2><h3 id="什么是MTU？"><a href="#什么是MTU？" class="headerlink" title="什么是MTU？"></a>什么是MTU？</h3><p><strong>MTU (Maximum Transmission Unit)</strong> &#x3D; 网络接口一次能传输的最大数据包大小（字节）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">简单类比：</span><br><span class="line">MTU就像货车的载重限制</span><br><span class="line">- 货车限重5吨，装6吨就超载了</span><br><span class="line">- 网卡MTU=1500，发送1600字节包就会有问题</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">标准以太网MTU = 1500字节</span><br><span class="line">├── IP头: 20字节</span><br><span class="line">├── TCP头: 20字节  </span><br><span class="line">└── 数据载荷: 最大1460字节</span><br><span class="line"></span><br><span class="line">虚拟化环境MTU &lt; 1500字节</span><br><span class="line">├── 原始数据: 1460字节</span><br><span class="line">├── TCP/IP头: 40字节</span><br><span class="line">├── 虚拟化开销: 50字节</span><br><span class="line">└── 总计: 1550字节 &gt; 1500字节 ❌超出限制</span><br></pre></td></tr></table></figure>
+
+<h2 id="🔍-MTU检测和查看命令"><a href="#🔍-MTU检测和查看命令" class="headerlink" title="🔍 MTU检测和查看命令"></a>🔍 MTU检测和查看命令</h2><h3 id="1-查看当前MTU值"><a href="#1-查看当前MTU值" class="headerlink" title="1. 查看当前MTU值"></a>1. 查看当前MTU值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有网络接口MTU</span></span><br><span class="line">ip <span class="built_in">link</span> show</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">ifconfig</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定接口</span></span><br><span class="line">ip <span class="built_in">link</span> show eth0</span><br><span class="line">ip <span class="built_in">link</span> show docker0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 一行命令查看所有接口MTU</span></span><br><span class="line">ip -o <span class="built_in">link</span> show | awk <span class="string">&#x27;&#123;print $2, $5&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-测试MTU大小"><a href="#2-测试MTU大小" class="headerlink" title="2. 测试MTU大小"></a>2. 测试MTU大小</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ping测试MTU (Linux)</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 8.8.8.8    <span class="comment"># 1472 + 28(ICMP头) = 1500</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1500 8.8.8.8    <span class="comment"># 会失败，因为加上头部超过MTU</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Windows下测试</span></span><br><span class="line">ping -f -l 1472 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动发现路径MTU</span></span><br><span class="line">tracepath google.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Docker-MTU查看"><a href="#3-Docker-MTU查看" class="headerlink" title="3. Docker MTU查看"></a>3. Docker MTU查看</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看Docker网络MTU</span></span><br><span class="line">docker network <span class="built_in">ls</span></span><br><span class="line">docker network inspect bridge | grep -i mtu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器网络MTU</span></span><br><span class="line">docker <span class="built_in">exec</span> &lt;container&gt; ip <span class="built_in">link</span> show eth0</span><br></pre></td></tr></table></figure>
+
+<h2 id="⚙️-MTU配置方法"><a href="#⚙️-MTU配置方法" class="headerlink" title="⚙️ MTU配置方法"></a>⚙️ MTU配置方法</h2><h3 id="1-临时修改MTU"><a href="#1-临时修改MTU" class="headerlink" title="1. 临时修改MTU"></a>1. 临时修改MTU</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改网络接口MTU</span></span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev eth0 mtu 1450</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 mtu 1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改Docker桥接MTU</span></span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 down</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 mtu 1450</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 up</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-永久配置MTU"><a href="#2-永久配置MTU" class="headerlink" title="2. 永久配置MTU"></a>2. 永久配置MTU</h3><h4 id="Docker-daemon配置"><a href="#Docker-daemon配置" class="headerlink" title="Docker daemon配置"></a>Docker daemon配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;mtu&quot;</span>: 1450,</span><br><span class="line">  <span class="string">&quot;bridge&quot;</span>: <span class="string">&quot;docker0&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启Docker服务</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h4 id="系统网络接口配置"><a href="#系统网络接口配置" class="headerlink" title="系统网络接口配置"></a>系统网络接口配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CentOS/RHEL: /etc/sysconfig/network-scripts/ifcfg-eth0</span></span><br><span class="line">MTU=1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu: /etc/netplan/01-netcfg.yaml</span></span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      mtu: 1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># 应用配置</span></span><br><span class="line"><span class="built_in">sudo</span> netplan apply</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Kubernetes环境MTU配置"><a href="#3-Kubernetes环境MTU配置" class="headerlink" title="3. Kubernetes环境MTU配置"></a>3. Kubernetes环境MTU配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CNI插件配置 (以Calico为例)</span></span><br><span class="line"><span class="comment"># /etc/cni/net.d/10-calico.conf</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;name&quot;</span>: <span class="string">&quot;k8s-pod-network&quot;</span>,</span><br><span class="line">  <span class="string">&quot;cniVersion&quot;</span>: <span class="string">&quot;0.3.1&quot;</span>,</span><br><span class="line">  <span class="string">&quot;plugins&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;type&quot;</span>: <span class="string">&quot;calico&quot;</span>,</span><br><span class="line">      <span class="string">&quot;mtu&quot;</span>: 1450</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="🚨-需要关注MTU的场景"><a href="#🚨-需要关注MTU的场景" class="headerlink" title="🚨 需要关注MTU的场景"></a>🚨 需要关注MTU的场景</h2><h3 id="1-虚拟化环境-⭐⭐⭐"><a href="#1-虚拟化环境-⭐⭐⭐" class="headerlink" title="1. 虚拟化环境 ⭐⭐⭐"></a>1. 虚拟化环境 ⭐⭐⭐</h3><p><strong>场景</strong>: VMware、KVM、Hyper-V等虚拟机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">ip <span class="built_in">link</span> show | grep mtu</span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 &lt;target&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- VM网卡MTU=1500，但物理网卡实际支持&lt;1500</span><br><span class="line">- 多层虚拟化叠加导致MTU递减</span><br><span class="line">- VXLAN/GRE隧道额外开销</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-容器环境-⭐⭐⭐"><a href="#2-容器环境-⭐⭐⭐" class="headerlink" title="2. 容器环境 ⭐⭐⭐"></a>2. 容器环境 ⭐⭐⭐</h3><p><strong>场景</strong>: Docker、Kubernetes、容器网络</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">docker network inspect bridge</span><br><span class="line">kubectl get nodes -o custom-columns=<span class="string">&quot;NAME:.metadata.name,MTU:.status.addresses[0].type&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- Docker桥接网络MTU不匹配</span><br><span class="line">- Overlay网络额外封装</span><br><span class="line">- CNI插件配置错误</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-云环境-⭐⭐"><a href="#3-云环境-⭐⭐" class="headerlink" title="3. 云环境 ⭐⭐"></a>3. 云环境 ⭐⭐</h3><p><strong>场景</strong>: AWS、阿里云、腾讯云等公有云</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- 云主机默认MTU可能&lt;1500</span><br><span class="line">- VPC网络间MTU不一致</span><br><span class="line">- 跨可用区网络MTU差异</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-SD-WAN-隧道网络-⭐⭐"><a href="#4-SD-WAN-隧道网络-⭐⭐" class="headerlink" title="4. SD-WAN&#x2F;隧道网络 ⭐⭐"></a>4. SD-WAN&#x2F;隧道网络 ⭐⭐</h3><p><strong>场景</strong>: VPN、专线、隧道连接</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">tracepath &lt;remote-host&gt;</span><br><span class="line">mtr --report &lt;remote-host&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- VPN隧道额外开销</span><br><span class="line">- MPLS网络MTU限制</span><br><span class="line">- 跨运营商网络MTU不统一</span><br></pre></td></tr></table></figure>
+
+<h2 id="🛠️-MTU故障排查流程"><a href="#🛠️-MTU故障排查流程" class="headerlink" title="🛠️ MTU故障排查流程"></a>🛠️ MTU故障排查流程</h2><h3 id="阶段1-症状识别"><a href="#阶段1-症状识别" class="headerlink" title="阶段1: 症状识别"></a>阶段1: 症状识别</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 常见症状</span></span><br><span class="line">✓ 大文件传输失败或很慢</span><br><span class="line">✓ SSH连接建立后命令执行卡死</span><br><span class="line">✓ HTTP请求间歇性失败</span><br><span class="line">✓ 数据库连接超时</span><br><span class="line">✓ 文件上传失败</span><br><span class="line"></span><br><span class="line"><span class="comment"># 快速检测命令</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 &lt;target&gt;     <span class="comment"># 测试是否能通</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1400 &lt;target&gt;     <span class="comment"># 降低测试</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="阶段2-MTU路径发现"><a href="#阶段2-MTU路径发现" class="headerlink" title="阶段2: MTU路径发现"></a>阶段2: MTU路径发现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法1: tracepath (推荐)</span></span><br><span class="line">tracepath google.com</span><br><span class="line"><span class="comment"># 输出会显示路径上的MTU值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法2: ping二分法测试</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">find_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> host=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> low=1</span><br><span class="line">    <span class="built_in">local</span> high=1500</span><br><span class="line">    <span class="keyword">while</span> [ <span class="variable">$low</span> -lt <span class="variable">$high</span> ]; <span class="keyword">do</span></span><br><span class="line">        <span class="built_in">local</span> mid=$(( (low + high + <span class="number">1</span>) / <span class="number">2</span> ))</span><br><span class="line">        <span class="keyword">if</span> ping -c 1 -M <span class="keyword">do</span> -s <span class="variable">$mid</span> <span class="variable">$host</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">            low=<span class="variable">$mid</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            high=$((mid - <span class="number">1</span>))</span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;最大MTU: <span class="subst">$((low + 28)</span>)&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: find_mtu google.com</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="阶段3-分层排查"><a href="#阶段3-分层排查" class="headerlink" title="阶段3: 分层排查"></a>阶段3: 分层排查</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 主机网络层</span></span><br><span class="line">ip <span class="built_in">link</span> show                    <span class="comment"># 查看接口MTU</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/route             <span class="comment"># 查看路由表</span></span><br><span class="line">netstat -i                      <span class="comment"># 查看网络统计</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 虚拟化层</span></span><br><span class="line"><span class="comment"># VMware</span></span><br><span class="line">vmware-toolbox-cmd <span class="built_in">stat</span> speed</span><br><span class="line"><span class="comment"># KVM</span></span><br><span class="line">virsh domiflist &lt;vm-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 容器层</span></span><br><span class="line">docker network inspect bridge</span><br><span class="line">kubectl describe node | grep -i mtu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 应用层</span></span><br><span class="line">ss -i                           <span class="comment"># 查看TCP连接信息</span></span><br><span class="line">netstat -s | grep -i fragment   <span class="comment"># 查看分片统计</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="阶段4-性能验证"><a href="#阶段4-性能验证" class="headerlink" title="阶段4: 性能验证"></a>阶段4: 性能验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试脚本</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="comment"># mtu_test.sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== MTU性能测试 ===&quot;</span></span><br><span class="line"><span class="keyword">for</span> size <span class="keyword">in</span> 1400 1450 1472 1500; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> -n <span class="string">&quot;测试 MTU <span class="variable">$size</span>: &quot;</span></span><br><span class="line">    <span class="keyword">if</span> ping -c 3 -M <span class="keyword">do</span> -s $((size-<span class="number">28</span>)) 8.8.8.8 &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;✓ 通过&quot;</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;✗ 失败&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="📊-不同场景的MTU推荐值"><a href="#📊-不同场景的MTU推荐值" class="headerlink" title="📊 不同场景的MTU推荐值"></a>📊 不同场景的MTU推荐值</h2><h3 id="标准网络环境"><a href="#标准网络环境" class="headerlink" title="标准网络环境"></a>标准网络环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">以太网: 1500          <span class="comment"># 标准值</span></span><br><span class="line">千兆以太网: 9000      <span class="comment"># Jumbo Frame</span></span><br><span class="line">Wi-Fi: 1500           <span class="comment"># 通常与以太网相同</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="虚拟化环境"><a href="#虚拟化环境" class="headerlink" title="虚拟化环境"></a>虚拟化环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">VMware vSphere: 1450-1480    <span class="comment"># 考虑VXLAN开销</span></span><br><span class="line">KVM/QEMU: 1450               <span class="comment"># 保守值</span></span><br><span class="line">Hyper-V: 1500                <span class="comment"># 通常支持标准值</span></span><br><span class="line">Docker: 1450-1480            <span class="comment"># 取决于底层网络</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="云环境"><a href="#云环境" class="headerlink" title="云环境"></a>云环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">AWS EC2: 1500 (enhanced networking)</span><br><span class="line">       : 1500-9000 (placement group)</span><br><span class="line">阿里云ECS: 1500</span><br><span class="line">腾讯云CVM: 1500</span><br><span class="line">Azure VM: 1500</span><br></pre></td></tr></table></figure>
+
+<h3 id="容器网络"><a href="#容器网络" class="headerlink" title="容器网络"></a>容器网络</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Docker bridge: 1450-1480</span><br><span class="line">Kubernetes:</span><br><span class="line">  - Flannel: 1450</span><br><span class="line">  - Calico: 1440-1480  </span><br><span class="line">  - Weave: 1376</span><br><span class="line">  - Cilium: 1450</span><br></pre></td></tr></table></figure>
+
+<h2 id="🔧-自动化MTU管理脚本"><a href="#🔧-自动化MTU管理脚本" class="headerlink" title="🔧 自动化MTU管理脚本"></a>🔧 自动化MTU管理脚本</h2><h3 id="MTU检测脚本"><a href="#MTU检测脚本" class="headerlink" title="MTU检测脚本"></a>MTU检测脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># auto_mtu_detect.sh</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">detect_optimal_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> target=<span class="variable">$&#123;1:-8.8.8.8&#125;</span></span><br><span class="line">    <span class="built_in">local</span> max_mtu=1500</span><br><span class="line">    <span class="built_in">local</span> min_mtu=1200</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;正在检测到 <span class="variable">$target</span> 的最优MTU...&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> ((mtu=max_mtu; mtu&gt;=min_mtu; mtu-=<span class="number">50</span>)); <span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> ping -c 2 -M <span class="keyword">do</span> -s $((mtu-<span class="number">28</span>)) <span class="variable">$target</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;发现可用MTU: <span class="variable">$mtu</span>&quot;</span></span><br><span class="line">            <span class="comment"># 精确搜索</span></span><br><span class="line">            <span class="keyword">for</span> ((i=mtu; i&lt;=mtu+<span class="number">50</span>; i++)); <span class="keyword">do</span></span><br><span class="line">                <span class="keyword">if</span> ! ping -c 1 -M <span class="keyword">do</span> -s $((i-<span class="number">28</span>)) <span class="variable">$target</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">                    <span class="built_in">echo</span> <span class="string">&quot;最优MTU: <span class="subst">$((i-1)</span>)&quot;</span></span><br><span class="line">                    <span class="built_in">return</span></span><br><span class="line">                <span class="keyword">fi</span></span><br><span class="line">            <span class="keyword">done</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;未能检测到合适的MTU值&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用</span></span><br><span class="line">detect_optimal_mtu</span><br></pre></td></tr></table></figure>
+
+<h3 id="系统MTU配置脚本"><a href="#系统MTU配置脚本" class="headerlink" title="系统MTU配置脚本"></a>系统MTU配置脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># set_system_mtu.sh</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">set_system_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> mtu=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> interface=<span class="variable">$&#123;2:-eth0&#125;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;设置 <span class="variable">$interface</span> MTU为 <span class="variable">$mtu</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 临时设置</span></span><br><span class="line">    <span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev <span class="variable">$interface</span> mtu <span class="variable">$mtu</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 永久设置 (Ubuntu)</span></span><br><span class="line">    <span class="keyword">if</span> [[ -f /etc/netplan/01-netcfg.yaml ]]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">sudo</span> sed -i <span class="string">&quot;/mtu:/d&quot;</span> /etc/netplan/01-netcfg.yaml</span><br><span class="line">        <span class="built_in">sudo</span> sed -i <span class="string">&quot;/dhcp4: true/a\\      mtu: <span class="variable">$mtu</span>&quot;</span> /etc/netplan/01-netcfg.yaml</span><br><span class="line">        <span class="built_in">sudo</span> netplan apply</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Docker配置</span></span><br><span class="line">    <span class="keyword">if</span> systemctl is-active --quiet docker; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;配置Docker MTU...&quot;</span></span><br><span class="line">        <span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /etc/docker</span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&#x27;&#123;&quot;mtu&quot;: &#x27;</span><span class="variable">$mtu</span><span class="string">&#x27;&#125;&#x27;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/docker/daemon.json</span><br><span class="line">        <span class="built_in">sudo</span> systemctl restart docker</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;MTU配置完成&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: set_system_mtu 1450</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="⚠️-注意事项和最佳实践"><a href="#⚠️-注意事项和最佳实践" class="headerlink" title="⚠️ 注意事项和最佳实践"></a>⚠️ 注意事项和最佳实践</h2><h3 id="安全注意事项"><a href="#安全注意事项" class="headerlink" title="安全注意事项"></a>安全注意事项</h3><ul>
+<li><strong>生产环境修改要谨慎</strong>: MTU修改可能导致网络中断</li>
+<li><strong>逐步调整</strong>: 从小值开始，逐步调整到最优值</li>
+<li><strong>备份配置</strong>: 修改前备份网络配置文件</li>
+<li><strong>测试验证</strong>: 修改后充分测试网络连通性</li>
+</ul>
+<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><ol>
+<li><strong>自动发现优于手动配置</strong>: 使用工具自动检测最优MTU</li>
+<li><strong>分层一致性</strong>: 确保各网络层MTU配置一致</li>
+<li><strong>监控告警</strong>: 监控网络分片和丢包情况</li>
+<li><strong>文档记录</strong>: 记录MTU配置的原因和数值</li>
+</ol>
+<h3 id="常见误区"><a href="#常见误区" class="headerlink" title="常见误区"></a>常见误区</h3><p>❌ <strong>认为MTU越大越好</strong>: 不是的，要匹配网络环境<br>❌ <strong>只设置应用层MTU</strong>: 需要全链路一致<br>❌ <strong>忽略虚拟化开销</strong>: 虚拟环境需要预留开销<br>❌ <strong>设置后不验证</strong>: 必须通过实际测试验证效果</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1490,109 +1612,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">tcpkill工作原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-13 11:51:41 / 修改时间：11:54:31" itemprop="dateCreated datePublished" datetime="2025-08-13T11:51:41+08:00">2025-08-13</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="tcpkill-工作原理"><a href="#tcpkill-工作原理" class="headerlink" title="tcpkill 工作原理"></a>tcpkill 工作原理</h2><p><code>tcpkill</code> 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：</p>
-<ol>
-<li><strong>监听网络流量</strong>：在指定网络接口上监听符合过滤条件的数据包</li>
-<li><strong>伪造 RST 包</strong>：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包</li>
-<li><strong>双向发送</strong>：同时向连接的两端发送 RST 包，确保连接被彻底终止</li>
-</ol>
-<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装 sudo yun install -y dsniff</span></span><br><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>-i eth0</code>：在 eth0 网络接口上监听</li>
-<li><code>host 11.123.253.133 and port 80</code>：过滤条件，只处理涉及 IP 11.123.253.133 且端口为 80 的连接</li>
-</ul>
-<h2 id="tcpkill-输出解释"><a href="#tcpkill-输出解释" class="headerlink" title="tcpkill 输出解释"></a>tcpkill 输出解释</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tcpkill: listening on eth0 [host 11.123.253.133 and port 80]</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434213725:434213725(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434214227:434214227(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434215231:434215231(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599879870:599879870(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599880372:599880372(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599881376:599881376(0) win 0</span><br></pre></td></tr></table></figure>
-
-<p>每行格式：<code>源IP:端口 &gt; 目标IP:端口: R 序列号:序列号(数据长度) win 窗口大小</code></p>
-<ul>
-<li><code>R</code>：表示 RST（Reset）标志位</li>
-<li>序列号：TCP 序列号，tcpkill 会尝试不同的序列号以确保 RST 包被接受</li>
-<li><code>(0)</code>：数据长度为 0</li>
-<li><code>win 0</code>：窗口大小为 0</li>
-</ul>
-<h2 id="抓包分析"><a href="#抓包分析" class="headerlink" title="抓包分析"></a>抓包分析</h2><p>从您提供的抓包数据可以看出完整的攻击过程：</p>
-<h3 id="1-正常通信阶段"><a href="#1-正常通信阶段" class="headerlink" title="1. 正常通信阶段"></a>1. 正常通信阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">11:40:00.911181 - 服务器发送 HTTP 数据 (73 字节)</span><br><span class="line">11:40:00.911221 - 客户端发送 ACK 确认</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-RST-攻击阶段"><a href="#2-RST-攻击阶段" class="headerlink" title="2. RST 攻击阶段"></a>2. RST 攻击阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">11:40:01.310146 开始 - tcpkill 发送多个 RST 包</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键观察点</strong>：</p>
-<ol>
-<li><strong>TTL 变化</strong>：正常包 TTL&#x3D;51，RST 包 TTL&#x3D;64，说明 RST 包是本地伪造的</li>
-<li><strong>序列号策略</strong>：tcpkill 发送多个不同序列号的 RST 包，增加成功率</li>
-<li><strong>双向攻击</strong>：既伪造服务器向客户端发送 RST，也伪造客户端向服务器发送 RST</li>
-<li><strong>时间差</strong>：RST 包在正常通信后约 0.4 秒发送</li>
-</ol>
-<h2 id="技术细节"><a href="#技术细节" class="headerlink" title="技术细节"></a>技术细节</h2><p><strong>为什么发送多个 RST 包？</strong></p>
-<ul>
-<li>TCP 只接受序列号在有效窗口范围内的 RST 包</li>
-<li>tcpkill 通过发送不同序列号的 RST 包来提高成功概率</li>
-<li>从抓包可见，序列号呈递增趋势（434213725 → 434214227 → 434215231）</li>
-</ul>
-<p><strong>双向攻击的意义</strong>：</p>
-<ul>
-<li>确保连接两端都收到 RST 包</li>
-<li>即使一方的 RST 包被过滤，另一方仍可能生效</li>
-<li>提高攻击成功率</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1664,7 +1683,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">144</span>
+          <span class="site-state-item-count">145</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

@@ -184,6 +184,156 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/24/systemctl%E7%9A%84%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/24/systemctl%E7%9A%84%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">systemctl的一些用法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-24 18:13:00" itemprop="dateCreated datePublished" datetime="2025-02-24T18:13:00+08:00">2025-02-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-06-06 15:52:31" itemprop="dateModified" datetime="2025-06-06T15:52:31+08:00">2025-06-06</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><code>systemctl</code> 是 <strong>Systemd</strong> 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。</p>
+<hr>
+<h3 id="🌟-常用-systemctl-命令"><a href="#🌟-常用-systemctl-命令" class="headerlink" title="🌟 常用 systemctl 命令"></a>🌟 <strong>常用 systemctl 命令</strong></h3><h4 id="1-列出当前所有服务"><a href="#1-列出当前所有服务" class="headerlink" title="1. 列出当前所有服务"></a>1. <strong>列出当前所有服务</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service</span><br><span class="line">systemctl --no-pager list-units --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这个命令列出当前机器上所有正在运行的服务（包含活跃和非活跃的）。如果要查看更多详细信息，可以加上 <code>--all</code>。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --all</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="2-查看服务的状态"><a href="#2-查看服务的状态" class="headerlink" title="2. 查看服务的状态"></a>2. <strong>查看服务的状态</strong></h4><p>查看某个服务（比如 <code>sshd</code>）的状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status sshd</span><br></pre></td></tr></table></figure>
+<ul>
+<li>会显示该服务是否正在运行，启动类型（<code>active</code> 或 <code>inactive</code>），以及日志输出的最新部分。</li>
+</ul>
+<h4 id="3-启动服务"><a href="#3-启动服务" class="headerlink" title="3. 启动服务"></a>3. <strong>启动服务</strong></h4><p>启动某个服务，比如 <code>sshd</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start sshd</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这将立即启动 <code>sshd</code> 服务。</li>
+</ul>
+<h4 id="4-停止服务"><a href="#4-停止服务" class="headerlink" title="4. 停止服务"></a>4. <strong>停止服务</strong></h4><p>停止某个服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop sshd</span><br></pre></td></tr></table></figure>
+<ul>
+<li>停止 <code>sshd</code> 服务后，你将无法通过 SSH 访问机器，除非本地访问或其他服务仍然活跃。</li>
+</ul>
+<h4 id="5-重启服务"><a href="#5-重启服务" class="headerlink" title="5. 重启服务"></a>5. <strong>重启服务</strong></h4><p>重启某个服务，适用于更新配置等操作：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-重新加载服务配置"><a href="#6-重新加载服务配置" class="headerlink" title="6. 重新加载服务配置"></a>6. <strong>重新加载服务配置</strong></h4><p>有时候更改了服务的配置文件（例如 SSH 配置），并希望让服务应用新的配置，而不完全重启服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl reload sshd</span><br></pre></td></tr></table></figure>
+<ul>
+<li>此命令会让 <code>sshd</code> 服务重新加载配置，但不中断当前的连接。</li>
+</ul>
+<h4 id="7-启用服务开机自启"><a href="#7-启用服务开机自启" class="headerlink" title="7. 启用服务开机自启"></a>7. <strong>启用服务开机自启</strong></h4><p>使服务在系统启动时自动启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> sshd</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这会创建一个符号链接，使 <code>sshd</code> 服务在系统启动时自动启动。</li>
+</ul>
+<h4 id="8-禁用服务自启"><a href="#8-禁用服务自启" class="headerlink" title="8. 禁用服务自启"></a>8. <strong>禁用服务自启</strong></h4><p>取消服务的开机自启：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">disable</span> sshd</span><br></pre></td></tr></table></figure>
+
+<h4 id="9-查看服务日志"><a href="#9-查看服务日志" class="headerlink" title="9. 查看服务日志"></a>9. <strong>查看服务日志</strong></h4><p>查看 <code>sshd</code> 服务的日志，利用 <code>journalctl</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u sshd</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>-u</code> 用来指定服务，默认显示最近的日志。如果需要查看更早的日志，可以使用 <code>--since</code> 和 <code>--until</code> 选项。</li>
+</ul>
+<h4 id="10-查看系统日志"><a href="#10-查看系统日志" class="headerlink" title="10. 查看系统日志"></a>10. <strong>查看系统日志</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">journalctl</span><br><span class="line"></span><br><span class="line">journalctl -u docker --no-pager -n 50</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查看所有系统日志。默认会显示所有日志，如果想查看最近的日志，可以使用 <code>-n</code> 参数，查看最新的 100 行：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -n 100</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="11-查看服务的启动类型"><a href="#11-查看服务的启动类型" class="headerlink" title="11. 查看服务的启动类型"></a>11. <strong>查看服务的启动类型</strong></h4><p>查看 <code>sshd</code> 服务的启动类型（是否是自动启动）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl is-enabled sshd</span><br></pre></td></tr></table></figure>
+<ul>
+<li>会显示 <code>enabled</code>（已启用）、<code>disabled</code>（已禁用）或者 <code>static</code>（由其他服务依赖的启动）。</li>
+</ul>
+<h4 id="12-查看服务的依赖"><a href="#12-查看服务的依赖" class="headerlink" title="12. 查看服务的依赖"></a>12. <strong>查看服务的依赖</strong></h4><p>查看服务的所有依赖项和依赖于它的服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-dependencies sshd</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="🔧-对服务的其他操作"><a href="#🔧-对服务的其他操作" class="headerlink" title="🔧 对服务的其他操作"></a>🔧 <strong>对服务的其他操作</strong></h3><h4 id="13-查看服务的启动情况"><a href="#13-查看服务的启动情况" class="headerlink" title="13. 查看服务的启动情况"></a><strong>13. 查看服务的启动情况</strong></h4><p>查看当前系统启动时的所有服务状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --state=running</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这只会显示当前正在运行的服务。</li>
+</ul>
+<h4 id="14-查看是否正在等待某个服务"><a href="#14-查看是否正在等待某个服务" class="headerlink" title="14. 查看是否正在等待某个服务"></a><strong>14. 查看是否正在等待某个服务</strong></h4><p>如果你想查看某个服务（如 <code>sshd</code>）是否正在等待其他服务启动，可以使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show sshd</span><br></pre></td></tr></table></figure>
+
+<h4 id="15-开机后立即启动服务"><a href="#15-开机后立即启动服务" class="headerlink" title="15. 开机后立即启动服务"></a><strong>15. 开机后立即启动服务</strong></h4><p>如果你想在系统启动时立即启动某个服务（而不是等到下次重启），可以使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start sshd</span><br></pre></td></tr></table></figure>
+
+<h4 id="16-管理多个服务"><a href="#16-管理多个服务" class="headerlink" title="16. 管理多个服务"></a><strong>16. 管理多个服务</strong></h4><p>你可以在一个命令中管理多个服务。例如，停止 <code>sshd</code> 和 <code>nginx</code> 服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop sshd nginx</span><br></pre></td></tr></table></figure>
+
+<h4 id="17-显示服务的更多细节"><a href="#17-显示服务的更多细节" class="headerlink" title="17. 显示服务的更多细节"></a><strong>17. 显示服务的更多细节</strong></h4><p>查看某个服务的详细信息（包括环境变量、启动命令等）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show sshd</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="📋-总结"><a href="#📋-总结" class="headerlink" title="📋 总结"></a>📋 <strong>总结</strong></h3><ul>
+<li><strong>启动&#x2F;停止&#x2F;重启</strong>：<code>start</code> &#x2F; <code>stop</code> &#x2F; <code>restart</code></li>
+<li><strong>状态检查</strong>：<code>status</code></li>
+<li><strong>查看日志</strong>：<code>journalctl -u &lt;service&gt;</code></li>
+<li><strong>启用&#x2F;禁用自启</strong>：<code>enable</code> &#x2F; <code>disable</code></li>
+<li><strong>服务依赖</strong>：<code>list-dependencies</code></li>
+<li><strong>开机自启服务控制</strong>：<code>systemctl is-enabled &lt;service&gt;</code></li>
+</ul>
+<hr>
+<h2 id="journalctl用法"><a href="#journalctl用法" class="headerlink" title="journalctl用法"></a>journalctl用法</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/XAEyJ_LMXisHELcZO8jUpw">https://mp.weixin.qq.com/s/XAEyJ_LMXisHELcZO8jUpw</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/FpDcGtKMcyLKFyk3jxnjcg">https://mp.weixin.qq.com/s/FpDcGtKMcyLKFyk3jxnjcg</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#查看所有日志</span><br><span class="line">journalctl</span><br><span class="line"></span><br><span class="line">#查看实时日志</span><br><span class="line">journalctl -f   </span><br><span class="line"></span><br><span class="line">#查看指定服务的日志, -u 即 --unit</span><br><span class="line">journalctl -u nginx   </span><br><span class="line"></span><br><span class="line">#查看指定行数的日志</span><br><span class="line">journalctl -n 5000             # -n 即 --lines</span><br><span class="line"></span><br><span class="line">#查看指定启动会话的日志</span><br><span class="line"># 查看当前启动会话的日志</span><br><span class="line">journalctl -b                  # -b 即 --boot</span><br><span class="line"></span><br><span class="line"># 查看上次启动会话的日志</span><br><span class="line">journalctl -b -1               # 依此类推，-2 ...</span><br><span class="line"></span><br><span class="line">#查看指定时间的日志</span><br><span class="line"># 查看开始于某个时间的日志</span><br><span class="line">journalctl -S &quot;2024-04-14&quot;  # -S 即 --since</span><br><span class="line">journalctl -S &quot;1 hour ago&quot; # 也可以是相对时间</span><br><span class="line"></span><br><span class="line"># 查看截止到某个时间的日志</span><br><span class="line">journalctl -U &quot;2025-04-15&quot; # -U 即 --until</span><br><span class="line">journalctl -U &quot;yesterday&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看指定优先级的日志</span><br><span class="line">journalctl -p 3 # -P 即 --priority</span><br><span class="line">journalctl -p 2..4</span><br><span class="line"></span><br><span class="line"># 查看多个优先级</span><br><span class="line"># O 或 emerg：系统不可用 （Emergency） </span><br><span class="line"># 1 或 alert： 需要立即采取行动 （Alert） </span><br><span class="line"># 2 或 crit：严重情况 （Critical） </span><br><span class="line"># 3 或 err： 错误情况 （Error）</span><br><span class="line"># 4 或 warning：警告情况 （Warning） </span><br><span class="line"># 5 或 notice： 正常但重要的情况 （Notice） </span><br><span class="line"># 6 或 info：一般信息 （Informational） </span><br><span class="line"># 7或 debug：调试信息 （Debug）</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看内核日志</span><br><span class="line">journalctl -k   # -k 即 --dmesg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#指定日志输出格式</span><br><span class="line">journalctl -o json-pretty # -o 即 --output</span><br><span class="line"># 可选short、short-precise、short-iso、short-iso-precise、short-full、short-monotonic、short-unix、verbose、export、json、json-pretty、json-sse、json-seq、cat、with-unit</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/20/alpine%E6%BA%90%E5%8F%8A%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1343,101 +1493,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/24/time-After%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%A2%E6%B5%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/01/24/time-After%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%A2%E6%B5%8B/" class="post-title-link" itemprop="url">time.After内存泄漏探测</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-01-24 17:05:59 / 修改时间：17:18:52" itemprop="dateCreated datePublished" datetime="2025-01-24T17:05:59+08:00">2025-01-24</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/go/" itemprop="url" rel="index"><span itemprop="name">go</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="demo-v1"><a href="#demo-v1" class="headerlink" title="demo-v1"></a>demo-v1</h2><ul>
-<li>代码</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    _ <span class="string">&quot;net/http/pprof&quot;</span> // 引入 pprof 包</span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">var chs chan int</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Get</span></span>() &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> v := &lt;-chs:</span><br><span class="line">            fmt.Printf(<span class="string">&quot;print:%v\n&quot;</span>, v)</span><br><span class="line">        <span class="keyword">case</span> &lt;-time.After(3 * time.Minute):</span><br><span class="line">            fmt.Printf(<span class="string">&quot;time.After:%v\n&quot;</span>, time.Now().Unix())</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Put</span></span>() &#123;</span><br><span class="line">    var i = 0</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        i++</span><br><span class="line">        chs &lt;- i</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">    chs = make(chan int, 100)</span><br><span class="line"></span><br><span class="line">    // 启动一个 goroutine 运行 pprof 服务</span><br><span class="line">    go <span class="function"><span class="title">func</span></span>() &#123;</span><br><span class="line">        fmt.Println(<span class="string">&quot;pprof server running on :6060&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> err := http.ListenAndServe(<span class="string">&quot;localhost:6060&quot;</span>, nil); err != nil &#123;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;pprof server failed: %v\n&quot;</span>, err)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    go Put()</span><br><span class="line">    Get()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>pprof监控</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go tool pprof -http=:8081 http://127.0.0.1:6060/debug/pprof/heap</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>内存使用情况</li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250124165556.png" alt="image"></p>
-<h2 id="demo-v2"><a href="#demo-v2" class="headerlink" title="demo-v2"></a>demo-v2</h2><ul>
-<li>代码</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    _ <span class="string">&quot;net/http/pprof&quot;</span> // 引入 pprof 包</span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">var chs chan int</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Get</span></span>() &#123;</span><br><span class="line">    delay := time.NewTimer(3 * time.Minute)</span><br><span class="line"></span><br><span class="line">    defer delay.Stop()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        delay.Reset(3 * time.Minute)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> v := &lt;- chs:</span><br><span class="line">                fmt.Printf(<span class="string">&quot;print:%v\n&quot;</span>, v)</span><br><span class="line">            <span class="keyword">case</span> &lt;- delay.C:</span><br><span class="line">                fmt.Printf(<span class="string">&quot;time.After:%v&quot;</span>, time.Now().Unix())</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">Put</span></span>() &#123;</span><br><span class="line">    var i = 0</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        i++</span><br><span class="line">        chs &lt;- i</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func <span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">    chs = make(chan int, 100)</span><br><span class="line"></span><br><span class="line">    // 启动一个 goroutine 运行 pprof 服务</span><br><span class="line">    go <span class="function"><span class="title">func</span></span>() &#123;</span><br><span class="line">        fmt.Println(<span class="string">&quot;pprof server running on :6060&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> err := http.ListenAndServe(<span class="string">&quot;localhost:6060&quot;</span>, nil); err != nil &#123;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;pprof server failed: %v\n&quot;</span>, err)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    go Put()</span><br><span class="line">    Get()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>pprof监控</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go tool pprof -http=:8082 http://127.0.0.1:6060/debug/pprof/heap</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>内存使用</li>
-</ul>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250124165624.png" alt="image"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1509,7 +1564,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">144</span>
+          <span class="site-state-item-count">145</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
