@@ -11310,7 +11310,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </li>
 </ol>
 <hr>
-<h2 id="2-命令："><a href="#2-命令：" class="headerlink" title="2. 命令："></a>2. 命令：</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mount | grep <span class="string">&#x27;/run/containerd/io.containerd.runtime.v2.task/k8s.io&#x27;</span> | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | xargs -r <span class="built_in">sudo</span> umount -l</span><br></pre></td></tr></table></figure>
+<h2 id="2-mount-l-命令含义："><a href="#2-mount-l-命令含义：" class="headerlink" title="2. mount -l 命令含义："></a>2. mount -l 命令含义：</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mount | grep <span class="string">&#x27;/run/containerd/io.containerd.runtime.v2.task/k8s.io&#x27;</span> | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | xargs -r <span class="built_in">sudo</span> umount -l</span><br></pre></td></tr></table></figure>
 
 <h3 id="这个命令会做什么？"><a href="#这个命令会做什么？" class="headerlink" title="这个命令会做什么？"></a>这个命令会做什么？</h3><ul>
 <li>找出所有挂载在 <code>/run/containerd/io.containerd.runtime.v2.task/k8s.io/*</code> 下的 mount point。</li>
