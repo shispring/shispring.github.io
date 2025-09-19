@@ -184,6 +184,147 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/08/%E5%90%84%E5%B1%82%E7%BD%91%E7%BB%9C%E6%8E%A2%E6%B5%8B%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/08/%E5%90%84%E5%B1%82%E7%BD%91%E7%BB%9C%E6%8E%A2%E6%B5%8B%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">各层网络探测工具</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-08 13:43:51 / 修改时间：13:44:36" itemprop="dateCreated datePublished" datetime="2024-12-08T13:43:51+08:00">2024-12-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/network/" itemprop="url" rel="index"><span itemprop="name">network</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>探测网络连通性的方法和工具可以分为不同网络层次（OSI 模型）来讨论，涵盖从物理层到应用层的探测工具及其用途。以下是具体分类及工具：</p>
+<ol>
+<li>物理层 (Layer 1)</li>
+</ol>
+<p>主要检测物理连接是否正常。</p>
+<p>工具与方法：<br>    •	电缆测试仪<br>    •	用于检查网线、光纤的连接和质量问题。<br>    •	网络接口卡 (NIC) 指示灯<br>    •	查看网卡指示灯是否正常闪烁。<br>    •	信号检测工具<br>    •	测试信号强度和干扰（如 Wi-Fi 信号分析仪）。</p>
+<ol start="2">
+<li>数据链路层 (Layer 2)</li>
+</ol>
+<p>检测交换机、MAC 地址、VLAN 配置问题。</p>
+<p>工具与方法：<br>    •	ARP (Address Resolution Protocol)<br>    •	通过发送 ARP 请求检查目标主机是否在线。</p>
+<p>arp -a</p>
+<pre><code>•	Ethernet Sniffing (如 Wireshark)
+•	捕获数据链路层帧，分析网络广播、交换机转发问题。
+</code></pre>
+<ol start="3">
+<li>网络层 (Layer 3)</li>
+</ol>
+<p>主要用于检查 IP 地址是否可达。</p>
+<p>工具与方法：<br>    •	ping<br>    •	发送 ICMP 回显请求，检测目标是否可达、往返时间及丢包情况。</p>
+<p>ping &lt;目标IP&gt;</p>
+<pre><code>•	traceroute / tracert
+•	路径跟踪工具，显示从源到目标的每一跳。
+</code></pre>
+<p>traceroute &lt;目标IP&gt; (Linux)<br>tracert &lt;目标IP&gt; (Windows)</p>
+<pre><code>•	mtr (My Traceroute)
+•	结合 ping 和 traceroute 的功能，动态显示网络路径质量。
+</code></pre>
+<p>mtr &lt;目标IP&gt;</p>
+<pre><code>•	iputils-tools
+•	例如 ip link 和 ip addr 命令，用于检查网络接口和 IP 配置。
+</code></pre>
+<ol start="4">
+<li>传输层 (Layer 4)</li>
+</ol>
+<p>检测端口和连接的状态。</p>
+<p>工具与方法：<br>    •	tcping<br>    •	使用 TCP 连接检测目标主机的指定端口是否开放。</p>
+<p>tcping &lt;目标IP&gt; &lt;端口&gt;</p>
+<pre><code>•	telnet
+•	连接到目标主机指定端口，检查服务是否响应。
+</code></pre>
+<p>telnet &lt;目标IP&gt; &lt;端口&gt;</p>
+<pre><code>•	nc (Netcat)
+•	多功能网络工具，可用于测试端口可达性和数据传输。
+</code></pre>
+<p>nc -zv &lt;目标IP&gt; &lt;端口&gt;</p>
+<pre><code>•	ss / netstat
+•	查看当前主机的端口状态和连接情况。
+</code></pre>
+<p>ss -tuln</p>
+<ol start="5">
+<li>应用层 (Layer 7)</li>
+</ol>
+<p>检测具体应用服务是否正常。</p>
+<p>工具与方法：<br>    •	curl &#x2F; wget<br>    •	访问 HTTP&#x2F;HTTPS 服务，测试 Web 服务可用性。</p>
+<p>curl -I http:&#x2F;&#x2F;&lt;目标地址&gt;</p>
+<pre><code>•	httping
+•	类似于 ping，但针对 HTTP/HTTPS 服务。
+</code></pre>
+<p>httping -h &lt;目标地址&gt;</p>
+<pre><code>•	dig / nslookup
+•	测试 DNS 解析是否正常。
+</code></pre>
+<p>dig &lt;域名&gt;<br>nslookup &lt;域名&gt;</p>
+<pre><code>•	OpenSSL
+•	测试 SSL/TLS 连接。
+</code></pre>
+<p>openssl s_client -connect &lt;目标IP&gt;:443</p>
+<p>综合网络探测工具<br>    •	Wireshark<br>    •	捕获并分析各层流量，深入排查问题。<br>    •	Nmap<br>    •	网络扫描器，用于检测主机存活状态、端口开放情况及服务版本。</p>
+<p>nmap -sP &lt;子网&gt;</p>
+<pre><code>•	Zabbix / Nagios
+•	网络监控系统，长期监测网络连接和服务状态。
+</code></pre>
+<p>选择合适的工具<br>    •	快速测试：ping、tcping、curl<br>    •	路由问题：traceroute、mtr<br>    •	端口问题：telnet、nc、nmap<br>    •	协议深入分析：Wireshark、OpenSSL<br>    •	服务监控：Zabbix、Nagios</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/04/%E5%88%A0%E9%99%A4Terminatin%E7%8A%B6%E6%80%81%E7%9A%84%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1224,80 +1365,6 @@ validate</p>
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/13/kubectl-%E7%9B%B8%E5%85%B3%E8%84%9A%E6%9C%AC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/13/kubectl-%E7%9B%B8%E5%85%B3%E8%84%9A%E6%9C%AC/" class="post-title-link" itemprop="url">kubectl 相关脚本</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-11-13 11:57:20 / 修改时间：12:01:59" itemprop="dateCreated datePublished" datetime="2024-11-13T11:57:20+08:00">2024-11-13</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="统计node上pod数量"><a href="#统计node上pod数量" class="headerlink" title="统计node上pod数量"></a>统计node上pod数量</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for node in $(kubectl get nodes -o name | egrep -v &quot;docker01|docker23|docker08|docker15&quot;); do</span><br><span class="line">  echo &quot;$node: $(kubectl get pods -n wdfwd --field-selector spec.nodeName=$&#123;node##*/&#125; --no-headers | wc -l) Pods&quot;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-
-<h2 id="删除处理Terminating的pod"><a href="#删除处理Terminating的pod" class="headerlink" title="删除处理Terminating的pod"></a>删除处理Terminating的pod</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods --all-namespaces | grep Terminating | while read line; do</span><br><span class="line">  pod_name=$(echo $line | awk &#x27;&#123;print $2&#125;&#x27; ) \</span><br><span class="line">  name_space=$(echo $line | awk &#x27;&#123;print $1&#125;&#x27; ); \</span><br><span class="line">  kubectl delete pods $pod_name -n $name_space --grace-period=0 --force</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-
-<h2 id="查看当前集群所有pod状态"><a href="#查看当前集群所有pod状态" class="headerlink" title="查看当前集群所有pod状态"></a>查看当前集群所有pod状态</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">k get pod -A | awk &#x27;&#123;print $4&#125;&#x27; | sort | uniq -c | sort -rn</span><br></pre></td></tr></table></figure>
-
-<h2 id="统计制定命名空间下pod的镜像、环境变量、执行参数"><a href="#统计制定命名空间下pod的镜像、环境变量、执行参数" class="headerlink" title="统计制定命名空间下pod的镜像、环境变量、执行参数"></a>统计制定命名空间下pod的镜像、环境变量、执行参数</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># 定义要统计的命名空间，可以自行修改或添加</span><br><span class="line">NAMESPACES=(&quot;default&quot; &quot;kube-system&quot;) </span><br><span class="line"></span><br><span class="line"># 遍历每个命名空间</span><br><span class="line">for ns in &quot;$&#123;NAMESPACES[@]&#125;&quot;; do</span><br><span class="line">  echo &quot;命名空间: $ns&quot;</span><br><span class="line">  echo &quot;===============================&quot;</span><br><span class="line"></span><br><span class="line">  # 获取当前命名空间中的所有Pod信息</span><br><span class="line">  kubectl get pods -n &quot;$ns&quot; -o json | jq -c &#x27;.items[]&#x27; | while read -r pod; do</span><br><span class="line">    pod_name=$(echo &quot;$pod&quot; | jq -r &#x27;.metadata.name&#x27;)</span><br><span class="line">    echo &quot;Pod: $pod_name&quot;</span><br><span class="line">    echo &quot;-------------------&quot;</span><br><span class="line"></span><br><span class="line">    # 获取Pod中的容器列表</span><br><span class="line">    echo &quot;$pod&quot; | jq -c &#x27;.spec.containers[]&#x27; | while read -r container; do</span><br><span class="line">      container_name=$(echo &quot;$container&quot; | jq -r &#x27;.name&#x27;)</span><br><span class="line">      image=$(echo &quot;$container&quot; | jq -r &#x27;.image&#x27;)</span><br><span class="line"></span><br><span class="line">      echo &quot;  容器名: $container_name&quot;</span><br><span class="line">      echo &quot;  镜像: $image&quot;</span><br><span class="line"></span><br><span class="line">      # 获取环境变量</span><br><span class="line">      echo &quot;  环境变量:&quot;</span><br><span class="line">      envs=$(echo &quot;$container&quot; | jq -c &#x27;.env[]?&#x27;)</span><br><span class="line">      if [[ -z &quot;$envs&quot; ]]; then</span><br><span class="line">        echo &quot;    无&quot;</span><br><span class="line">      else</span><br><span class="line">        echo &quot;$envs&quot; | while read -r env; do</span><br><span class="line">          env_name=$(echo &quot;$env&quot; | jq -r &#x27;.name&#x27;)</span><br><span class="line">          env_value=$(echo &quot;$env&quot; | jq -r &#x27;.value // empty&#x27;)</span><br><span class="line">          value_from=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom // empty&#x27;)</span><br><span class="line"></span><br><span class="line">          if [[ -n &quot;$env_value&quot; ]]; then</span><br><span class="line">            echo &quot;    $env_name: $env_value&quot;</span><br><span class="line">          elif [[ -n &quot;$value_from&quot; ]]; then</span><br><span class="line">            # 处理 valueFrom 来源信息</span><br><span class="line">            config_map_ref=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom.configMapKeyRef.name // empty&#x27;)</span><br><span class="line">            secret_ref=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom.secretKeyRef.name // empty&#x27;)</span><br><span class="line">            field_ref=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom.fieldRef.fieldPath // empty&#x27;)</span><br><span class="line">            </span><br><span class="line">            if [[ -n &quot;$config_map_ref&quot; ]]; then</span><br><span class="line">              echo &quot;    $env_name (from ConfigMap: $config_map_ref)&quot;</span><br><span class="line">            elif [[ -n &quot;$secret_ref&quot; ]]; then</span><br><span class="line">              echo &quot;    $env_name (from Secret: $secret_ref)&quot;</span><br><span class="line">            elif [[ -n &quot;$field_ref&quot; ]]; then</span><br><span class="line">              echo &quot;    $env_name (from FieldRef: $field_ref)&quot;</span><br><span class="line">            else</span><br><span class="line">              echo &quot;    $env_name: 未知来源&quot;</span><br><span class="line">            fi</span><br><span class="line">          fi</span><br><span class="line">        done</span><br><span class="line">      fi</span><br><span class="line"></span><br><span class="line">      # 获取执行参数</span><br><span class="line">      echo &quot;  执行参数:&quot;</span><br><span class="line">      args=$(echo &quot;$container&quot; | jq -c &#x27;.args // []&#x27;)</span><br><span class="line">      if [[ &quot;$args&quot; == &quot;[]&quot; ]]; then</span><br><span class="line">        echo &quot;    无&quot;</span><br><span class="line">      else</span><br><span class="line">        echo &quot;$args&quot; | jq -r &#x27;.[] | &quot;    \(. // &quot;null&quot;)&quot;&#x27;</span><br><span class="line">      fi</span><br><span class="line"></span><br><span class="line">      echo &quot;-------------------&quot;</span><br><span class="line">    done</span><br><span class="line">    echo &quot;&quot;</span><br><span class="line">  done</span><br><span class="line">  echo &quot;===============================&quot;</span><br><span class="line">  echo &quot;&quot;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1369,7 +1436,7 @@ validate</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">145</span>
+          <span class="site-state-item-count">146</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

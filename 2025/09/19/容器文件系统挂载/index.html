@@ -20,20 +20,19 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="cgroup &amp; namespace   概念 含义 示例作用    cgroup 控制组，限制容器的 CPU、内存等 cpu.shares, memory.limit_in_bytes   namespace 名字空间，隔离容器运行环境 net, pid, mnt, ipc, uts, user   cAdvisor1234cAdvisor 直接读取:• &#x2F;sys&#x2F;fs&#x2F;cgroup（C">
+  <meta name="description" content="1. 查看挂载情况 看挂载情况 1mount | grep &#x2F;run&#x2F;containerd&#x2F;io.containerd.runtime.v2.task&#x2F;k8s.io  看是否有进程占用 12yum install -y psmiscfuser -vm &#x2F;run&#x2F;containerd&#x2F;io.containerd.runtime.v2.task&#x2F;k8s.io&#x2F;200ab1146de738bcbe79e">
 <meta property="og:type" content="article">
-<meta property="og:title" content="cAdvisor初探">
-<meta property="og:url" content="https://shispring.github.io/2025/06/19/cAdvisor%E5%88%9D%E6%8E%A2/index.html">
+<meta property="og:title" content="容器文件系统挂载">
+<meta property="og:url" content="https://shispring.github.io/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="cgroup &amp; namespace   概念 含义 示例作用    cgroup 控制组，限制容器的 CPU、内存等 cpu.shares, memory.limit_in_bytes   namespace 名字空间，隔离容器运行环境 net, pid, mnt, ipc, uts, user   cAdvisor1234cAdvisor 直接读取:• &#x2F;sys&#x2F;fs&#x2F;cgroup（C">
+<meta property="og:description" content="1. 查看挂载情况 看挂载情况 1mount | grep &#x2F;run&#x2F;containerd&#x2F;io.containerd.runtime.v2.task&#x2F;k8s.io  看是否有进程占用 12yum install -y psmiscfuser -vm &#x2F;run&#x2F;containerd&#x2F;io.containerd.runtime.v2.task&#x2F;k8s.io&#x2F;200ab1146de738bcbe79e">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-06-19T06:16:57.000Z">
-<meta property="article:modified_time" content="2025-06-19T06:19:11.390Z">
+<meta property="article:published_time" content="2025-09-19T04:36:25.000Z">
+<meta property="article:modified_time" content="2025-09-19T04:43:00.202Z">
 <meta property="article:author" content="shispring">
-<meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://shispring.github.io/2025/06/19/cAdvisor%E5%88%9D%E6%8E%A2/">
+<link rel="canonical" href="https://shispring.github.io/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/">
 
 
 <script id="page-configurations">
@@ -46,7 +45,7 @@
   };
 </script>
 
-  <title>cAdvisor初探 | Hexo</title>
+  <title>容器文件系统挂载 | Hexo</title>
   
 
 
@@ -190,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/19/cAdvisor%E5%88%9D%E6%8E%A2/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -203,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          cAdvisor初探
+          容器文件系统挂载
         </h1>
 
         <div class="post-meta">
@@ -214,7 +213,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-06-19 14:16:57 / 修改时间：14:19:11" itemprop="dateCreated datePublished" datetime="2025-06-19T14:16:57+08:00">2025-06-19</time>
+              <time title="创建时间：2025-09-19 12:36:25 / 修改时间：12:43:00" itemprop="dateCreated datePublished" datetime="2025-09-19T12:36:25+08:00">2025-09-19</time>
             </span>
 
           
@@ -235,30 +234,83 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="cgroup-namespace"><a href="#cgroup-namespace" class="headerlink" title="cgroup &amp; namespace"></a>cgroup &amp; namespace</h2><table>
-<thead>
-<tr>
-<th>概念</th>
-<th>含义</th>
-<th>示例作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>cgroup</code></td>
-<td>控制组，限制容器的 CPU、内存等</td>
-<td><code>cpu.shares</code>, <code>memory.limit_in_bytes</code></td>
-</tr>
-<tr>
-<td><code>namespace</code></td>
-<td>名字空间，隔离容器运行环境</td>
-<td><code>net</code>, <code>pid</code>, <code>mnt</code>, <code>ipc</code>, <code>uts</code>, <code>user</code></td>
-</tr>
-</tbody></table>
-<h2 id="cAdvisor"><a href="#cAdvisor" class="headerlink" title="cAdvisor"></a>cAdvisor</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cAdvisor 直接读取:</span><br><span class="line">• /sys/fs/cgroup（CPU、memory、blkio）</span><br><span class="line">• /proc/&lt;pid&gt;/net/dev（网络）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+        <h2 id="1-查看挂载情况"><a href="#1-查看挂载情况" class="headerlink" title="1. 查看挂载情况"></a>1. 查看挂载情况</h2><ul>
+<li><p><strong>看挂载情况</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep /run/containerd/io.containerd.runtime.v2.task/k8s.io</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>看是否有进程占用</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y psmisc</span><br><span class="line">fuser -vm /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
 
-<h2 id="cAdvisor-读取磁盘-I-O-指标的原理"><a href="#cAdvisor-读取磁盘-I-O-指标的原理" class="headerlink" title="cAdvisor 读取磁盘 I&#x2F;O 指标的原理"></a>cAdvisor 读取磁盘 I&#x2F;O 指标的原理</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. 从 cgroup blkio 子系统读取 I/O 限制与统计数据</span><br><span class="line">/sys/fs/cgroup/blkio/docker/&lt;container-id&gt;/</span><br><span class="line"></span><br><span class="line">2. 通过 /proc/&lt;pid&gt;/io 读取进程级磁盘数据</span><br><span class="line">/proc/&lt;container-pid&gt;/io</span><br><span class="line"></span><br><span class="line">cAdvisor 会汇总属于某个容器所有进程的 /proc/&lt;pid&gt;/io 统计。</span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof | grep 200ab1146de</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>看 containerd 里是否有残留 metadata</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io containers list | grep 200ab1146de</span><br><span class="line">ctr -n k8s.io tasks list | grep 200ab1146de</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol>
+<li><strong><code>ctr -n k8s.io tasks list | grep 200ab1146de</code> → 状态 STOPPED</strong></li>
+<li><strong><code>fuser -vm</code> 显示很多 <code>containerd-shim</code>、<code>qemu-system-x86</code>、<code>virtiofsd</code> 等进程引用这个目录</strong><ul>
+<li>说明这个目录（mountpoint）仍然被多个进程占用着。</li>
+<li>注意：这里的 “F.c..” &#x2F; “frc..” 表示打开了这个目录的 <strong>文件描述符</strong>，并且有读写&#x2F;控制引用。</li>
+</ul>
+</li>
+<li><strong>整体情况</strong><ul>
+<li>内核 <code>overlayfs</code> 挂载点还在，inode 没回收。</li>
+<li>容器已经 “STOPPED”（不可用），但是挂载点被其他 shim &#x2F; qemu &#x2F; virtiofsd 引用，所以无法自动卸载。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="2-命令："><a href="#2-命令：" class="headerlink" title="2. 命令："></a>2. 命令：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep <span class="string">&#x27;/run/containerd/io.containerd.runtime.v2.task/k8s.io&#x27;</span> | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | xargs -r <span class="built_in">sudo</span> umount -l</span><br></pre></td></tr></table></figure>
 
-<h2 id="模拟-cAdvisor-的行为"><a href="#模拟-cAdvisor-的行为" class="headerlink" title="模拟 cAdvisor 的行为"></a>模拟 cAdvisor 的行为</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker ps | grep kubelet</span><br><span class="line"></span><br><span class="line">docker inspect f965002cb995 | grep -w &quot;Id&quot;</span><br><span class="line">或</span><br><span class="line">docker inspect f965002cb995 | jq &#x27;.[].Id&#x27;</span><br><span class="line"></span><br><span class="line">#查看容器 blkio 数据</span><br><span class="line">cat /sys/fs/cgroup/blkio/docker/f965002cb995390b763ab8abacd86cc987d223101ace612a9e16c3bac9767a80/blkio.throttle.io_service_bytes</span><br><span class="line"></span><br><span class="line">查看某容器主进程的 PID：</span><br><span class="line">docker inspect f965002cb995 | grep -w &quot;Pid&quot;</span><br><span class="line">或</span><br><span class="line">docker inspect f965002cb995 | jq &#x27;.[].State.Pid&#x27;</span><br><span class="line"></span><br><span class="line">cat /proc/6687/io</span><br></pre></td></tr></table></figure>
+<h3 id="这个命令会做什么？"><a href="#这个命令会做什么？" class="headerlink" title="这个命令会做什么？"></a>这个命令会做什么？</h3><ul>
+<li>找出所有挂载在 <code>/run/containerd/io.containerd.runtime.v2.task/k8s.io/*</code> 下的 mount point。</li>
+<li>对它们执行 <code>umount -l</code>（lazy umount）。</li>
+</ul>
+<p><strong>lazy umount 含义</strong>：</p>
+<ul>
+<li>马上把挂载点从 mount namespace 里“摘掉”，进程不再能通过路径访问它。</li>
+<li>如果有进程仍然持有 fd，会等它们关闭 fd 之后再真正释放资源（inode、dentry、slab）。</li>
+<li>这样避免了 <code>umount</code> 报错 “busy”，算是比较温和的方式。</li>
+</ul>
+<hr>
+<h2 id="3-对当前系统的影响"><a href="#3-对当前系统的影响" class="headerlink" title="3. 对当前系统的影响"></a>3. 对当前系统的影响</h2><ul>
+<li><p><strong>如果容器仍然活跃</strong>：对应 Pod 会立刻失效，因为 rootfs 被摘掉了，里面的文件系统消失。</p>
+</li>
+<li><p><strong>如果容器已经 STOPPED</strong>（像你这种）：</p>
+<ul>
+<li>大多数情况下影响有限，等价于清理垃圾挂载点。</li>
+<li>不过要小心：如果 containerd metadata 里还记录这个容器存在，containerd 在后续 GC 或者回收时可能会发现找不到挂载点，从而报错。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="4-建议操作顺序"><a href="#4-建议操作顺序" class="headerlink" title="4. 建议操作顺序"></a>4. 建议操作顺序</h2><p>更温和的方案可以这样分级：</p>
+<ol>
+<li><p><strong>优先让 containerd 清理</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io tasks <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br><span class="line">ctr -n k8s.io containers <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+
+<p>（如果卡住，说明 shim&#x2F;进程依赖还在）</p>
+</li>
+<li><p><strong>确认 mount</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep 200ab1146de</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>再 lazy umount</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> umount -l /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9/rootfs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>最后清理目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>如果有大量残留</strong>，你那个 <code>awk | xargs umount -l</code> 可以作为批量清理手段，但最好在确认这些容器都已经 STOPPED 或已被 K8s 删除的前提下做。</p>
+</li>
+</ol>
+<hr>
+<p>✅ 结论：</p>
+<ul>
+<li>你的 <code>umount -l</code> 是温和可行的，不会直接 kill 进程，但会让容器 rootfs 消失。</li>
+<li><strong>如果只是清理 STOPPED 的残留容器</strong>，几乎没副作用，还能回收 inode&#x2F;slab。</li>
+<li>建议 <strong>先用 ctr rm</strong> 尝试让 containerd 自己清理，再手动 umount + rm 兜底。</li>
+</ul>
 
     </div>
 
@@ -267,10 +319,6 @@
     
 
       <footer class="post-footer">
-          
-          <div class="post-tags">
-              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
-          </div>
 
         
 
@@ -278,13 +326,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2025/06/19/curl%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E8%80%97%E6%97%B6/" rel="prev" title="curl网络请求耗时">
-      <i class="fa fa-chevron-left"></i> curl网络请求耗时
+    <a href="/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" rel="prev" title="MTU完整指南和故障排查">
+      <i class="fa fa-chevron-left"></i> MTU完整指南和故障排查
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2025/07/01/%E5%B8%B8%E8%A7%81runtime-socket/" rel="next" title="常见runtime socket">
-      常见runtime socket <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -343,7 +388,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#cgroup-namespace"><span class="nav-number">1.</span> <span class="nav-text">cgroup &amp; namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cAdvisor"><span class="nav-number">2.</span> <span class="nav-text">cAdvisor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cAdvisor-%E8%AF%BB%E5%8F%96%E7%A3%81%E7%9B%98-I-O-%E6%8C%87%E6%A0%87%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">cAdvisor 读取磁盘 I&#x2F;O 指标的原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F-cAdvisor-%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">4.</span> <span class="nav-text">模拟 cAdvisor 的行为</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%9F%A5%E7%9C%8B%E6%8C%82%E8%BD%BD%E6%83%85%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">1. 查看挂载情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%91%BD%E4%BB%A4%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">2. 命令：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%99%E4%B8%AA%E5%91%BD%E4%BB%A4%E4%BC%9A%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">这个命令会做什么？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%AF%B9%E5%BD%93%E5%89%8D%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">3.</span> <span class="nav-text">3. 对当前系统的影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%BB%BA%E8%AE%AE%E6%93%8D%E4%BD%9C%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">4. 建议操作顺序</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
