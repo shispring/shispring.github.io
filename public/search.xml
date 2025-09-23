@@ -5263,7 +5263,9 @@ validate</p>
   <entry>
     <title>linux查看内核模块</title>
     <url>/2025/02/06/linux%E6%9F%A5%E7%9C%8B%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/</url>
-    <content><![CDATA[<h2 id="查看linux是否开启虚拟化"><a href="#查看linux是否开启虚拟化" class="headerlink" title="查看linux是否开启虚拟化"></a>查看linux是否开启虚拟化</h2><ul>
+    <content><![CDATA[<h2 id="linux源码包"><a href="#linux源码包" class="headerlink" title="linux源码包"></a>linux源码包</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://mirrors.edge.kernel.org/pub/linux/kernel/</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="查看linux是否开启虚拟化"><a href="#查看linux是否开启虚拟化" class="headerlink" title="查看linux是否开启虚拟化"></a>查看linux是否开启虚拟化</h2><ul>
 <li>cat &#x2F;proc&#x2F;cpuinfo | grep -E “vmx|svm”<br>其中，vmx 表示Intel的虛拟化技术（InteIVT），svm 表示AMD的虚拟化技术（AMD-V）。</li>
 <li>lscpu</li>
 <li>lsmod | grep kvm</li>
