@@ -4737,7 +4737,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 
 <h2 id="白噪音"><a href="#白噪音" class="headerlink" title="白噪音"></a>白噪音</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/remvze/moodist</span><br></pre></td></tr></table></figure>
 
-<h2 id="convfmt"><a href="#convfmt" class="headerlink" title="convfmt"></a>convfmt</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#toml转json</span><br><span class="line">wget https://github.com/oriontvv/convfmt/releases/download/1.1.1/convfmt-linux-musl.tar.gz</span><br><span class="line">tar zxvf convfmt-linux-musl.tar.gz -C /bin</span><br><span class="line">#解压后</span><br><span class="line"></span><br><span class="line">cat /etc/containerd/config.toml | convfmt -f toml -t json &gt; cfg.json</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="convfmt-yaml-toml-json互换"><a href="#convfmt-yaml-toml-json互换" class="headerlink" title="convfmt(yaml&#x2F;toml&#x2F;json互换)"></a>convfmt(yaml&#x2F;toml&#x2F;json互换)</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#toml转json</span><br><span class="line">wget https://github.com/oriontvv/convfmt/releases/download/1.1.1/convfmt-linux-musl.tar.gz</span><br><span class="line">tar zxvf convfmt-linux-musl.tar.gz -C /bin</span><br><span class="line">#解压后</span><br><span class="line"></span><br><span class="line">cat /etc/containerd/config.toml | convfmt -f toml -t json &gt; cfg.json</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>tools</category>
