@@ -11444,7 +11444,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 
 <hr>
 <h2 id="🔍-三、查看清理效果"><a href="#🔍-三、查看清理效果" class="headerlink" title="🔍 三、查看清理效果"></a>🔍 三、查看清理效果</h2><p>执行完后再检查空间：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker system <span class="built_in">df</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># docker system df</span></span><br><span class="line">TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE</span><br><span class="line">Images          69        15        13.21GB   10.8GB (81%)</span><br><span class="line">Containers      25        0         24.54MB   24.54MB (100%)</span><br><span class="line">Local Volumes   43        1         2.966GB   2.958GB (99%)</span><br><span class="line">Build Cache     63        0         0B        0B</span><br></pre></td></tr></table></figure>
 
 <p>通常 Build Cache 会从 85 GB 降到 &lt;5 GB，磁盘释放非常明显。</p>
 ]]></content>
