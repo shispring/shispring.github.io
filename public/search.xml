@@ -11376,4 +11376,80 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>清理docker缓存数据</title>
+    <url>/2025/10/16/%E6%B8%85%E7%90%86docker%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE/</url>
+    <content><![CDATA[<h2 id="现象：构建镜像设备无空间"><a href="#现象：构建镜像设备无空间" class="headerlink" title="现象：构建镜像设备无空间"></a>现象：构建镜像设备无空间</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#docker build xxx</span><br><span class="line">...</span><br><span class="line">mkdir /tmp/go-build1189934179/b521/: no space left on device</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">#查看设备存储</span><br><span class="line">#df -lh</span><br><span class="line">/dev/sda1        99G   54G   41G  57% /</span><br><span class="line">/dev/sdb        100G  100G  945M 100% /data</span><br><span class="line"></span><br><span class="line">#查看docker资源占用情况</span><br><span class="line">#docker system df</span><br><span class="line">TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE</span><br><span class="line">Images          69        15        13.21GB   10.8GB (81%)</span><br><span class="line">Containers      25        0         24.54MB   24.54MB (100%)</span><br><span class="line">Local Volumes   43        1         2.966GB   2.958GB (99%)</span><br><span class="line">Build Cache     376       0         85.73GB   85.73GB</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="🧭-一、总体分析"><a href="#🧭-一、总体分析" class="headerlink" title="🧭 一、总体分析"></a>🧭 一、总体分析</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>占用</th>
+<th>可回收</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Images</strong></td>
+<td>13.21 GB</td>
+<td>10.8 GB (81%)</td>
+<td>很多旧镜像未使用</td>
+</tr>
+<tr>
+<td><strong>Containers</strong></td>
+<td>24 MB</td>
+<td>100% 可回收</td>
+<td>停止容器未清理</td>
+</tr>
+<tr>
+<td><strong>Local Volumes</strong></td>
+<td>2.96 GB</td>
+<td>99% 可回收</td>
+<td>旧卷未使用</td>
+</tr>
+<tr>
+<td><strong>Build Cache</strong></td>
+<td><strong>85.73 GB</strong></td>
+<td><strong>85.73 GB (巨量)</strong></td>
+<td>Docker build 中产生的大量中间层缓存</td>
+</tr>
+</tbody></table>
+<h2 id="🧹-二、分级清理策略"><a href="#🧹-二、分级清理策略" class="headerlink" title="🧹 二、分级清理策略"></a>🧹 二、分级清理策略</h2><blockquote>
+<p>✅ 建议分三步执行，从“安全”到“彻底”。</p>
+</blockquote>
+<h3 id="1️⃣-安全清理（释放最多空间，低风险）"><a href="#1️⃣-安全清理（释放最多空间，低风险）" class="headerlink" title="1️⃣ 安全清理（释放最多空间，低风险）"></a>1️⃣ 安全清理（释放最多空间，低风险）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 删除无用 build cache（推荐第一步）</span></span><br><span class="line">docker builder prune</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>交互时输入 <code>y</code> 确认即可，通常能释放 80GB 以上空间。<br>不影响现有镜像或运行中的容器。</p>
+</blockquote>
+<hr>
+<h3 id="2️⃣-深度清理（删除所有未使用的镜像、容器、卷）"><a href="#2️⃣-深度清理（删除所有未使用的镜像、容器、卷）" class="headerlink" title="2️⃣ 深度清理（删除所有未使用的镜像、容器、卷）"></a>2️⃣ 深度清理（删除所有未使用的镜像、容器、卷）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker system prune -a --volumes</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<ul>
+<li><code>-a</code>：删除所有未被容器使用的镜像（包括悬空镜像 <code>&lt;none&gt;</code>）。</li>
+<li><code>--volumes</code>：删除未被挂载的卷。</li>
+<li><code>system prune</code>：同时清理 network &#x2F; container &#x2F; build cache。</li>
+</ul>
+<p>💡 <strong>慎用</strong><br>此命令会删掉所有旧镜像，下次构建会重新拉取（时间成本较高，但可彻底释放空间）。</p>
+<hr>
+<h3 id="3️⃣-针对性清理（更精细控制）"><a href="#3️⃣-针对性清理（更精细控制）" class="headerlink" title="3️⃣ 针对性清理（更精细控制）"></a>3️⃣ 针对性清理（更精细控制）</h3><h4 id="清理无用镜像"><a href="#清理无用镜像" class="headerlink" title="清理无用镜像"></a>清理无用镜像</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker image prune -a</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理停止容器"><a href="#清理停止容器" class="headerlink" title="清理停止容器"></a>清理停止容器</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker container prune</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理未使用的卷"><a href="#清理未使用的卷" class="headerlink" title="清理未使用的卷"></a>清理未使用的卷</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理构建缓存（所有构建器实例）"><a href="#清理构建缓存（所有构建器实例）" class="headerlink" title="清理构建缓存（所有构建器实例）"></a>清理构建缓存（所有构建器实例）</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker builder prune --all</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🔍-三、查看清理效果"><a href="#🔍-三、查看清理效果" class="headerlink" title="🔍 三、查看清理效果"></a>🔍 三、查看清理效果</h2><p>执行完后再检查空间：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker system <span class="built_in">df</span></span><br></pre></td></tr></table></figure>
+
+<p>通常 Build Cache 会从 85 GB 降到 &lt;5 GB，磁盘释放非常明显。</p>
+]]></content>
+      <tags>
+        <tag>docker</tag>
+      </tags>
+  </entry>
 </search>

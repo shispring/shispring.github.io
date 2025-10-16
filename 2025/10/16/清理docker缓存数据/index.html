@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="现象：构建镜像设备无空间1234567891011121314151617#docker build xxx...mkdir &#x2F;tmp&#x2F;go-build1189934179&#x2F;b521&#x2F;: no space left on device...#查看设备存储#df -lh&#x2F;dev&#x2F;sda1        99G   54G   41G  57% &#x2F;&#x2F;dev&#x2F;sdb        100G  100G">
+<meta property="og:type" content="article">
+<meta property="og:title" content="清理docker缓存数据">
+<meta property="og:url" content="https://shispring.github.io/2025/10/16/%E6%B8%85%E7%90%86docker%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="现象：构建镜像设备无空间1234567891011121314151617#docker build xxx...mkdir &#x2F;tmp&#x2F;go-build1189934179&#x2F;b521&#x2F;: no space left on device...#查看设备存储#df -lh&#x2F;dev&#x2F;sda1        99G   54G   41G  57% &#x2F;&#x2F;dev&#x2F;sdb        100G  100G">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-10-16T02:51:19.000Z">
+<meta property="article:modified_time" content="2025-10-16T02:56:44.612Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/10/16/%E6%B8%85%E7%90%86docker%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>清理docker缓存数据 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/10/16/%E6%B8%85%E7%90%86docker%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          清理docker缓存数据
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-10-16 10:51:19 / 修改时间：10:56:44" itemprop="dateCreated datePublished" datetime="2025-10-16T10:51:19+08:00">2025-10-16</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="现象：构建镜像设备无空间"><a href="#现象：构建镜像设备无空间" class="headerlink" title="现象：构建镜像设备无空间"></a>现象：构建镜像设备无空间</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#docker build xxx</span><br><span class="line">...</span><br><span class="line">mkdir /tmp/go-build1189934179/b521/: no space left on device</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">#查看设备存储</span><br><span class="line">#df -lh</span><br><span class="line">/dev/sda1        99G   54G   41G  57% /</span><br><span class="line">/dev/sdb        100G  100G  945M 100% /data</span><br><span class="line"></span><br><span class="line">#查看docker资源占用情况</span><br><span class="line">#docker system df</span><br><span class="line">TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE</span><br><span class="line">Images          69        15        13.21GB   10.8GB (81%)</span><br><span class="line">Containers      25        0         24.54MB   24.54MB (100%)</span><br><span class="line">Local Volumes   43        1         2.966GB   2.958GB (99%)</span><br><span class="line">Build Cache     376       0         85.73GB   85.73GB</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="🧭-一、总体分析"><a href="#🧭-一、总体分析" class="headerlink" title="🧭 一、总体分析"></a>🧭 一、总体分析</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>占用</th>
+<th>可回收</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Images</strong></td>
+<td>13.21 GB</td>
+<td>10.8 GB (81%)</td>
+<td>很多旧镜像未使用</td>
+</tr>
+<tr>
+<td><strong>Containers</strong></td>
+<td>24 MB</td>
+<td>100% 可回收</td>
+<td>停止容器未清理</td>
+</tr>
+<tr>
+<td><strong>Local Volumes</strong></td>
+<td>2.96 GB</td>
+<td>99% 可回收</td>
+<td>旧卷未使用</td>
+</tr>
+<tr>
+<td><strong>Build Cache</strong></td>
+<td><strong>85.73 GB</strong></td>
+<td><strong>85.73 GB (巨量)</strong></td>
+<td>Docker build 中产生的大量中间层缓存</td>
+</tr>
+</tbody></table>
+<h2 id="🧹-二、分级清理策略"><a href="#🧹-二、分级清理策略" class="headerlink" title="🧹 二、分级清理策略"></a>🧹 二、分级清理策略</h2><blockquote>
+<p>✅ 建议分三步执行，从“安全”到“彻底”。</p>
+</blockquote>
+<h3 id="1️⃣-安全清理（释放最多空间，低风险）"><a href="#1️⃣-安全清理（释放最多空间，低风险）" class="headerlink" title="1️⃣ 安全清理（释放最多空间，低风险）"></a>1️⃣ 安全清理（释放最多空间，低风险）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除无用 build cache（推荐第一步）</span></span><br><span class="line">docker builder prune</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>交互时输入 <code>y</code> 确认即可，通常能释放 80GB 以上空间。<br>不影响现有镜像或运行中的容器。</p>
+</blockquote>
+<hr>
+<h3 id="2️⃣-深度清理（删除所有未使用的镜像、容器、卷）"><a href="#2️⃣-深度清理（删除所有未使用的镜像、容器、卷）" class="headerlink" title="2️⃣ 深度清理（删除所有未使用的镜像、容器、卷）"></a>2️⃣ 深度清理（删除所有未使用的镜像、容器、卷）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system prune -a --volumes</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<ul>
+<li><code>-a</code>：删除所有未被容器使用的镜像（包括悬空镜像 <code>&lt;none&gt;</code>）。</li>
+<li><code>--volumes</code>：删除未被挂载的卷。</li>
+<li><code>system prune</code>：同时清理 network &#x2F; container &#x2F; build cache。</li>
+</ul>
+<p>💡 <strong>慎用</strong><br>此命令会删掉所有旧镜像，下次构建会重新拉取（时间成本较高，但可彻底释放空间）。</p>
+<hr>
+<h3 id="3️⃣-针对性清理（更精细控制）"><a href="#3️⃣-针对性清理（更精细控制）" class="headerlink" title="3️⃣ 针对性清理（更精细控制）"></a>3️⃣ 针对性清理（更精细控制）</h3><h4 id="清理无用镜像"><a href="#清理无用镜像" class="headerlink" title="清理无用镜像"></a>清理无用镜像</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -a</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理停止容器"><a href="#清理停止容器" class="headerlink" title="清理停止容器"></a>清理停止容器</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container prune</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理未使用的卷"><a href="#清理未使用的卷" class="headerlink" title="清理未使用的卷"></a>清理未使用的卷</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理构建缓存（所有构建器实例）"><a href="#清理构建缓存（所有构建器实例）" class="headerlink" title="清理构建缓存（所有构建器实例）"></a>清理构建缓存（所有构建器实例）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker builder prune --all</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🔍-三、查看清理效果"><a href="#🔍-三、查看清理效果" class="headerlink" title="🔍 三、查看清理效果"></a>🔍 三、查看清理效果</h2><p>执行完后再检查空间：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system <span class="built_in">df</span></span><br></pre></td></tr></table></figure>
+
+<p>通常 Build Cache 会从 85 GB 降到 &lt;5 GB，磁盘释放非常明显。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/23/bash-profile%E9%85%8D%E7%BD%AE/" rel="prev" title="bash_profile配置">
+      <i class="fa fa-chevron-left"></i> bash_profile配置
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E8%B1%A1%EF%BC%9A%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F%E8%AE%BE%E5%A4%87%E6%97%A0%E7%A9%BA%E9%97%B4"><span class="nav-number">1.</span> <span class="nav-text">现象：构建镜像设备无空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%AD-%E4%B8%80%E3%80%81%E6%80%BB%E4%BD%93%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">🧭 一、总体分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%B9-%E4%BA%8C%E3%80%81%E5%88%86%E7%BA%A7%E6%B8%85%E7%90%86%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">🧹 二、分级清理策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E5%AE%89%E5%85%A8%E6%B8%85%E7%90%86%EF%BC%88%E9%87%8A%E6%94%BE%E6%9C%80%E5%A4%9A%E7%A9%BA%E9%97%B4%EF%BC%8C%E4%BD%8E%E9%A3%8E%E9%99%A9%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">1️⃣ 安全清理（释放最多空间，低风险）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E6%B7%B1%E5%BA%A6%E6%B8%85%E7%90%86%EF%BC%88%E5%88%A0%E9%99%A4%E6%89%80%E6%9C%89%E6%9C%AA%E4%BD%BF%E7%94%A8%E7%9A%84%E9%95%9C%E5%83%8F%E3%80%81%E5%AE%B9%E5%99%A8%E3%80%81%E5%8D%B7%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">2️⃣ 深度清理（删除所有未使用的镜像、容器、卷）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E9%92%88%E5%AF%B9%E6%80%A7%E6%B8%85%E7%90%86%EF%BC%88%E6%9B%B4%E7%B2%BE%E7%BB%86%E6%8E%A7%E5%88%B6%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">3️⃣ 针对性清理（更精细控制）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E6%97%A0%E7%94%A8%E9%95%9C%E5%83%8F"><span class="nav-number">3.3.1.</span> <span class="nav-text">清理无用镜像</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E5%81%9C%E6%AD%A2%E5%AE%B9%E5%99%A8"><span class="nav-number">3.3.2.</span> <span class="nav-text">清理停止容器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E6%9C%AA%E4%BD%BF%E7%94%A8%E7%9A%84%E5%8D%B7"><span class="nav-number">3.3.3.</span> <span class="nav-text">清理未使用的卷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E6%9E%84%E5%BB%BA%E7%BC%93%E5%AD%98%EF%BC%88%E6%89%80%E6%9C%89%E6%9E%84%E5%BB%BA%E5%99%A8%E5%AE%9E%E4%BE%8B%EF%BC%89"><span class="nav-number">3.3.4.</span> <span class="nav-text">清理构建缓存（所有构建器实例）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%8D-%E4%B8%89%E3%80%81%E6%9F%A5%E7%9C%8B%E6%B8%85%E7%90%86%E6%95%88%E6%9E%9C"><span class="nav-number">4.</span> <span class="nav-text">🔍 三、查看清理效果</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">148</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
