@@ -501,7 +501,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-04-29 14:57:03" itemprop="dateModified" datetime="2025-04-29T14:57:03+08:00">2025-04-29</time>
+                <time title="修改时间：2025-10-29 18:15:14" itemprop="dateModified" datetime="2025-10-29T18:15:14+08:00">2025-10-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -524,9 +524,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><code>kubectl patch</code> 的 <code>--type=&#39;json&#39;</code> 方式是一种非常灵活的 JSON Patch 操作，可以实现 添加、删除、更新多个字段 的功能。以下是具体的操作方式和案例：</p>
+          <h2 id="3-种-patch-类型"><a href="#3-种-patch-类型" class="headerlink" title="3 种 patch 类型"></a>3 种 patch 类型</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">参考：</span><br><span class="line"> https://xie.infoq.cn/article/8fbdf51461881b87333b904cf</span><br><span class="line"></span><br><span class="line">1 strategic patch（默认）：根据不同字段 patchStrategy 决定具体的合并 patch 策略。 Strategic merge patch 并非通用的 RFC 标准，而是 Kubernetes 特有的一种更新 Kubernetes 资源对象的方式。与 JSON merge patch 和 JSON patch 相比，strategic merge patch 更为强大。</span><br><span class="line"></span><br><span class="line">2 JSON merge patch：遵循 JSON Merge Patch, RFC 7386[1] 规范，根据 patch 中提供的期望更改的字段及其对应的值，更新到目标中。</span><br><span class="line"></span><br><span class="line">3 JSON patch：遵循 JSON Patch, RFC 6902[2] 规范，通过明确的指令表示具体的操作。</span><br><span class="line">`kubectl patch` 的 `--type=&#x27;json&#x27;` 方式是一种非常灵活的 JSON Patch 操作，可以实现 添加、删除、更新多个字段 的功能。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <hr>
-<h3 id="JSON-Patch-的基本结构"><a href="#JSON-Patch-的基本结构" class="headerlink" title="JSON Patch 的基本结构"></a>JSON Patch 的基本结构</h3><p>JSON Patch 遵循 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6902">RFC 6902</a> 标准。常用操作有：  </p>
+<h2 id="使用-JSON-patch-更新资源"><a href="#使用-JSON-patch-更新资源" class="headerlink" title="使用 JSON patch 更新资源"></a>使用 JSON patch 更新资源</h2><p>JSON Patch 遵循 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6902">RFC 6902</a> 标准。常用操作有：  </p>
 <ul>
 <li><code>add</code>：向指定路径添加新字段。</li>
 <li><code>remove</code>：删除指定路径的字段。</li>
