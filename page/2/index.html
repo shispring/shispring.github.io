@@ -184,6 +184,73 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/01/%E9%83%A8%E7%BD%B2kube-prometheus-stack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/01/%E9%83%A8%E7%BD%B2kube-prometheus-stack/" class="post-title-link" itemprop="url">部署kube-prometheus-stack</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-01 10:05:32 / 修改时间：10:12:16" itemprop="dateCreated datePublished" datetime="2025-09-01T10:05:32+08:00">2025-09-01</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h2><h3 id="1、加载仓库"><a href="#1、加载仓库" class="headerlink" title="1、加载仓库"></a>1、加载仓库</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">helm repo add prometheus-community https://prometheus-community.github.io/helm-charts</span><br><span class="line">helm search repo prometheus-community/kube-prometheus-stack </span><br><span class="line">helm pull prometheus-community/kube-prometheus-stack</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、修改镜像"><a href="#2、修改镜像" class="headerlink" title="2、修改镜像"></a>2、修改镜像</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar zxvf kube-prometheus-stack-77.0.2.tgz</span><br><span class="line">helm template ./kube-prometheus-stack &gt; kube-prometheus-stack.yaml</span><br><span class="line"></span><br><span class="line">#查看当前镜像</span><br><span class="line">cat kube-prometheus-stack.yaml  | grep -w image:</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、替换镜像"><a href="#3、替换镜像" class="headerlink" title="3、替换镜像"></a>3、替换镜像</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line"># 目标私有仓库前缀</span><br><span class="line">HARBOR_REGISTRY=&quot;harborqa.xxx.net/xxx&quot;</span><br><span class="line"></span><br><span class="line"># 待同步的镜像列表</span><br><span class="line">IMAGES=(</span><br><span class="line">  &quot;quay.io/prometheus/node-exporter:v1.9.1&quot;</span><br><span class="line">  &quot;quay.io/kiwigrid/k8s-sidecar:1.30.3&quot;</span><br><span class="line">  &quot;docker.io/grafana/grafana:12.1.0&quot;</span><br><span class="line">  &quot;registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0&quot;</span><br><span class="line">  &quot;quay.io/prometheus-operator/prometheus-operator:v0.85.0&quot;</span><br><span class="line">  &quot;quay.io/prometheus-operator/prometheus-config-reloader:v0.85.0&quot;</span><br><span class="line">  &quot;quay.io/prometheus/alertmanager:v0.28.1&quot;</span><br><span class="line">  &quot;quay.io/prometheus/prometheus:v3.5.0&quot;</span><br><span class="line">  &quot;docker.io/bats/bats:v1.4.1&quot;</span><br><span class="line">  &quot;registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.1&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">for IMAGE in &quot;$&#123;IMAGES[@]&#125;&quot;; do</span><br><span class="line">  echo &quot;&gt;&gt;&gt; 处理镜像: $IMAGE&quot;</span><br><span class="line"></span><br><span class="line">  # 分割 repo 与 tag</span><br><span class="line">  NAME_TAG=&quot;$&#123;IMAGE##*/&#125;&quot;          # e.g. prometheus:v3.5.0</span><br><span class="line">  NAME=&quot;$&#123;NAME_TAG%%:*&#125;&quot;           # e.g. prometheus</span><br><span class="line">  TAG=&quot;$&#123;NAME_TAG##*:&#125;&quot;            # e.g. v3.5.0</span><br><span class="line"></span><br><span class="line">  # 提取仓库路径（去掉前缀 registry）</span><br><span class="line">  REPO_PATH=$(echo &quot;$IMAGE&quot; | cut -d&#x27;/&#x27; -f2- | cut -d&#x27;:&#x27; -f1)</span><br><span class="line"></span><br><span class="line">  # 构造目标镜像</span><br><span class="line">  TARGET=&quot;$&#123;HARBOR_REGISTRY&#125;/$&#123;REPO_PATH&#125;:$&#123;TAG&#125;&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;拉取镜像: $IMAGE&quot;</span><br><span class="line">  docker pull &quot;$IMAGE&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;打标签: $IMAGE -&gt; $TARGET&quot;</span><br><span class="line">  docker tag &quot;$IMAGE&quot; &quot;$TARGET&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;推送到私有仓库: $TARGET&quot;</span><br><span class="line">  docker push &quot;$TARGET&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;清理本地镜像: $IMAGE&quot;</span><br><span class="line">  docker rmi &quot;$IMAGE&quot; || true</span><br><span class="line">  echo &quot;=== 完成 $IMAGE ===&quot;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<h3 id="4、修改镜像"><a href="#4、修改镜像" class="headerlink" title="4、修改镜像"></a>4、修改镜像</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed -i.bak \</span><br><span class="line">    -e &#x27;s#quay.io#harborqa.xxx.net/xxx#g&#x27; \</span><br><span class="line">    -e &#x27;s#docker.io#harborqa.xxx.net/xxx#g&#x27; \</span><br><span class="line">    -e &#x27;s#registry.k8s.io#harborqa.xxx.net/xxx#g&#x27; \</span><br><span class="line">    kube-prometheus-stack.yaml</span><br></pre></td></tr></table></figure>
+<h3 id="5、安装部署"><a href="#5、安装部署" class="headerlink" title="5、安装部署"></a>5、安装部署</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">k apply -f kube-prometheus-stack.yaml</span><br></pre></td></tr></table></figure>
+<h3 id="6、访问grafana"><a href="#6、访问grafana" class="headerlink" title="6、访问grafana"></a>6、访问grafana</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#浏览器访问： release-name-grafana-xxx-xxx pod ip ：</span><br><span class="line">#eg: 11.123.243.66:3000</span><br><span class="line">#查看密码</span><br><span class="line">#用户名：admin</span><br><span class="line">kubectl get secret release-name-grafana -n monitoring -o jsonpath=&quot;&#123;.data.admin-password&#125;&quot; | base64 -d</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/14/%E5%B8%B8%E8%A7%81%E6%B5%81%E7%A8%8B%E5%9B%BE%E7%B1%BB%E5%9E%8B%E5%8F%8A%E7%94%A8%E9%80%94/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2595,67 +2662,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/05/zap%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/05/zap%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB/" class="post-title-link" itemprop="url">zap日志级别</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-05 16:21:34 / 修改时间：16:23:24" itemprop="dateCreated datePublished" datetime="2025-08-05T16:21:34+08:00">2025-08-05</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="zap调试"><a href="#zap调试" class="headerlink" title="zap调试"></a>zap调试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;flag&quot;</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">	ctrl &quot;sigs.k8s.io/controller-runtime&quot;</span><br><span class="line">	&quot;sigs.k8s.io/controller-runtime/pkg/log/zap&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var opts zap.Options</span><br><span class="line">	opts.BindFlags(flag.CommandLine)</span><br><span class="line">	flag.Parse()</span><br><span class="line"></span><br><span class="line">	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&amp;opts)))</span><br><span class="line">	log := ctrl.Log.WithName(&quot;TestLogger&quot;)</span><br><span class="line"></span><br><span class="line">	fmt.Println(&quot;Testing different log levels:&quot;)</span><br><span class="line"></span><br><span class="line">	log.Info(&quot;This is Info level&quot;)</span><br><span class="line">	log.V(1).Info(&quot;This is V(1) level&quot;)</span><br><span class="line">	log.V(2).Info(&quot;This is V(2) level&quot;)</span><br><span class="line">	log.V(3).Info(&quot;This is V(3) level&quot;)</span><br><span class="line"></span><br><span class="line">	fmt.Println(&quot;Test completed&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="运行方式"><a href="#运行方式" class="headerlink" title="运行方式"></a>运行方式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">go run test-zap-levels.go --zap-log-level=1</span><br><span class="line">go run test-zap-levels.go --zap-log-level=debug</span><br><span class="line">go run test-zap-levels.go --zap-log-level=9</span><br><span class="line"></span><br><span class="line">V(1) → 显示为 debug 级别</span><br><span class="line">V(2) → 显示为 Level(-2) 级别</span><br><span class="line">V(3) → 显示为 Level(-3) 级别</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2727,7 +2733,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">148</span>
+          <span class="site-state-item-count">149</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
