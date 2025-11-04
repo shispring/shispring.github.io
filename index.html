@@ -316,10 +316,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-10-31 15:18:20 / 修改时间：15:25:00" itemprop="dateCreated datePublished" datetime="2025-10-31T15:18:20+08:00">2025-10-31</time>
+              <time title="创建时间：2025-10-31 15:18:20" itemprop="dateCreated datePublished" datetime="2025-10-31T15:18:20+08:00">2025-10-31</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-11-04 17:15:55" itemprop="dateModified" datetime="2025-11-04T17:15:55+08:00">2025-11-04</time>
+              </span>
 
           
 
@@ -509,6 +515,177 @@
 
 <h4 id="2-4-记录关键指标"><a href="#2-4-记录关键指标" class="headerlink" title="2.4 记录关键指标"></a>2.4 记录关键指标</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取关键数据</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 基准性能 ===&quot;</span> &gt; performance_baseline.txt</span><br><span class="line">grep <span class="string">&quot;sender&quot;</span> baseline_*.txt &gt;&gt; performance_baseline.txt</span><br><span class="line">grep <span class="string">&quot;Retr&quot;</span> baseline_*.txt &gt;&gt; performance_baseline.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查是否有性能问题</span></span><br><span class="line"><span class="comment"># 问题信号:</span></span><br><span class="line"><span class="comment"># 1. 多流吞吐量远低于单流 (&lt; 80%)</span></span><br><span class="line"><span class="comment"># 2. 重传次数高 (&gt; 1000)</span></span><br><span class="line"><span class="comment"># 3. CPU 集中在少数核心</span></span><br><span class="line"><span class="comment"># 4. 有丢包 (UDP 测试)</span></span><br></pre></td></tr></table></figure>
 
+<hr>
+<h2 id="中断类型详解"><a href="#中断类型详解" class="headerlink" title="中断类型详解"></a>中断类型详解</h2><h3 id="中断分类表"><a href="#中断分类表" class="headerlink" title="中断分类表"></a>中断分类表</h3><table>
+<thead>
+<tr>
+<th>中断类型</th>
+<th>编号范围</th>
+<th>触发方式</th>
+<th>典型用途</th>
+<th>处理优先级</th>
+<th>性能影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>硬件中断(IRQ)</strong></td>
+<td>0-255+</td>
+<td>硬件触发</td>
+<td>设备通知CPU</td>
+<td>高</td>
+<td>直接影响延迟</td>
+</tr>
+<tr>
+<td><strong>软中断(Softirq)</strong></td>
+<td>0-9</td>
+<td>软件触发</td>
+<td>延迟处理</td>
+<td>中</td>
+<td>影响吞吐量</td>
+</tr>
+<tr>
+<td><strong>网络中断(NET_RX)</strong></td>
+<td>softirq 3</td>
+<td>网卡接收</td>
+<td>数据包接收</td>
+<td>高</td>
+<td>高负载场景瓶颈</td>
+</tr>
+<tr>
+<td><strong>网络中断(NET_TX)</strong></td>
+<td>softirq 4</td>
+<td>网卡发送</td>
+<td>数据包发送</td>
+<td>中</td>
+<td>影响发送性能</td>
+</tr>
+<tr>
+<td><strong>块设备中断</strong></td>
+<td>变化</td>
+<td>磁盘I&#x2F;O</td>
+<td>磁盘读写完成</td>
+<td>中</td>
+<td>影响I&#x2F;O性能</td>
+</tr>
+<tr>
+<td><strong>定时器中断</strong></td>
+<td>softirq 1</td>
+<td>周期触发</td>
+<td>系统时钟</td>
+<td>中</td>
+<td>系统级影响</td>
+</tr>
+<tr>
+<td><strong>调度中断</strong></td>
+<td>softirq 7</td>
+<td>调度触发</td>
+<td>进程调度</td>
+<td>中</td>
+<td>影响响应时间</td>
+</tr>
+<tr>
+<td><strong>RCU中断</strong></td>
+<td>softirq 8,9</td>
+<td>内核同步</td>
+<td>内存回收</td>
+<td>低</td>
+<td>后台影响</td>
+</tr>
+</tbody></table>
+<h3 id="网络中断处理流程"><a href="#网络中断处理流程" class="headerlink" title="网络中断处理流程"></a>网络中断处理流程</h3><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>类型</th>
+<th>处理位置</th>
+<th>关键操作</th>
+<th>可优化点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1. 硬中断</strong></td>
+<td>Hardware IRQ</td>
+<td>中断处理程序(ISR)</td>
+<td>通知内核、禁止中断</td>
+<td>IRQ亲和性绑定</td>
+</tr>
+<tr>
+<td><strong>2. 软中断</strong></td>
+<td>NET_RX_SOFTIRQ</td>
+<td>ksoftirqd线程</td>
+<td>数据包处理、协议栈</td>
+<td>RPS&#x2F;RFS配置</td>
+</tr>
+<tr>
+<td><strong>3. 应用层</strong></td>
+<td>系统调用</td>
+<td>用户空间</td>
+<td>数据读取</td>
+<td>SO_REUSEPORT</td>
+</tr>
+</tbody></table>
+<h3 id="I-O中断类型对比"><a href="#I-O中断类型对比" class="headerlink" title="I&#x2F;O中断类型对比"></a>I&#x2F;O中断类型对比</h3><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>网络中断</th>
+<th>磁盘I&#x2F;O中断</th>
+<th>NVMe中断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>频率</strong></td>
+<td>极高(百万级&#x2F;秒)</td>
+<td>中等(万级&#x2F;秒)</td>
+<td>高(十万级&#x2F;秒)</td>
+</tr>
+<tr>
+<td><strong>延迟敏感度</strong></td>
+<td>极高</td>
+<td>中等</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>CPU占用</strong></td>
+<td>高</td>
+<td>中</td>
+<td>中高</td>
+</tr>
+<tr>
+<td><strong>优化方法</strong></td>
+<td>中断合并、NAPI</td>
+<td>I&#x2F;O调度器</td>
+<td>中断绑核、轮询</td>
+</tr>
+<tr>
+<td><strong>队列数</strong></td>
+<td>多队列(RSS)</td>
+<td>单队列&#x2F;多队列</td>
+<td>多队列(NVMe队列)</td>
+</tr>
+</tbody></table>
+<h3 id="🎯-核心概念"><a href="#🎯-核心概念" class="headerlink" title="🎯 核心概念"></a>🎯 核心概念</h3><ol>
+<li><p><strong>硬中断 vs 软中断</strong></p>
+<ul>
+<li>**硬中断(IRQ)**：硬件直接触发，处理快速，不可睡眠</li>
+<li>**软中断(Softirq)**：延迟处理，可以被调度，处理复杂逻辑</li>
+</ul>
+</li>
+<li><p><strong>RSS vs RPS vs RFS</strong></p>
+<ul>
+<li><strong>RSS</strong>（硬件）：网卡硬件根据哈希将数据包分发到不同队列</li>
+<li><strong>RPS</strong>（软件）：内核软件层面分发软中断到不同CPU</li>
+<li><strong>RFS</strong>（流感知）：将数据包分发到应用程序所在的CPU核心</li>
+</ul>
+</li>
+<li><p><strong>NAPI机制</strong></p>
+<ul>
+<li>高负载时从中断模式切换到轮询模式</li>
+<li>减少中断次数，提高吞吐量</li>
+<li>降低CPU中断开销</li>
+</ul>
+</li>
+</ol>
 
       
     </div>
