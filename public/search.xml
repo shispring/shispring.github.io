@@ -11865,4 +11865,48 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <h2 id="irqtop-与-lsirq"><a href="#irqtop-与-lsirq" class="headerlink" title="irqtop 与 lsirq"></a>irqtop 与 lsirq</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#cat /proc/interrupts 格式不够良好</span><br><span class="line">#默认util-linux-2.38才集成了irqtop与lsirq，升级util-linux有一定风险，仅编译安装两个工具</span><br><span class="line">#rpm -q util-linux</span><br><span class="line">util-linux-2.32.1-22.0.1.an8.x86_64</span><br><span class="line"></span><br><span class="line">#Anolis OS 8.2 编译安装</span><br><span class="line">git clone https://github.com/util-linux/util-linux.git</span><br><span class="line">cd util-linux/</span><br><span class="line">./autogen.sh</span><br><span class="line"></span><br><span class="line">#两个工具依赖libsmartcols</span><br><span class="line">./configure --enable-libsmartcols --disable-all-programs --enable-lsirq --enable-irqtop</span><br><span class="line">make</span><br><span class="line">cp lsirq /usr/local/bin/</span><br><span class="line">cp irqtop /usr/local/bin/</span><br></pre></td></tr></table></figure>
 ]]></content>
   </entry>
+  <entry>
+    <title>设备信息汇总</title>
+    <url>/2025/11/05/%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF%E6%B1%87%E6%80%BB/</url>
+    <content><![CDATA[<h2 id="NUMA架构lstopo显示系统拓扑"><a href="#NUMA架构lstopo显示系统拓扑" class="headerlink" title="NUMA架构lstopo显示系统拓扑"></a>NUMA架构lstopo显示系统拓扑</h2><blockquote>
+<p><a href="https://cloud-atlas.readthedocs.io/zh-cn/latest/kernel/memory/numa/lstopo.html">https://cloud-atlas.readthedocs.io/zh-cn/latest/kernel/memory/numa/lstopo.html</a> </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yum install -y hwloc hwloc-gui</span><br><span class="line"></span><br><span class="line">#文字表述</span><br><span class="line">lstopo</span><br><span class="line"></span><br><span class="line"># 生成 PNG 图片</span><br><span class="line">lstopo --of png /root/topo.png</span><br><span class="line"></span><br><span class="line"># 或者更简单的写法（自动根据后缀识别格式）</span><br><span class="line">lstopo /root/topo.png</span><br><span class="line"></span><br><span class="line"># 生成 SVG 矢量图（推荐，清晰且可放大）</span><br><span class="line">lstopo /root/topo.svg</span><br><span class="line"></span><br><span class="line"># 生成 PDF 格式</span><br><span class="line">lstopo /root/topo.pdf</span><br><span class="line"></span><br><span class="line"># 拓扑包含所有 PCIe / 网卡设备信息</span><br><span class="line">lstopo --whole-io topo-full.svg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#生成一张带编号、整齐布局的图：</span><br><span class="line">lstopo --whole-io --rect --fontsize 9 --gridsize 8 /root/topo.svg</span><br><span class="line"></span><br><span class="line"># 生成带网卡的完整 NUMA + PCIe 拓扑图</span><br><span class="line">sudo lstopo --whole-system --whole-io --rect --fontsize 9 --gridsize 8 /root/topo.svg</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="可选美化与调整参数"><a href="#可选美化与调整参数" class="headerlink" title="可选美化与调整参数"></a>可选美化与调整参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--fontsize 10</code></td>
+<td>调整字体大小</td>
+</tr>
+<tr>
+<td><code>--gridsize 10</code></td>
+<td>控制元素间距</td>
+</tr>
+<tr>
+<td><code>--rect</code></td>
+<td>使用矩形布局（更规整）</td>
+</tr>
+<tr>
+<td><code>--horiz</code> &#x2F; <code>--vert</code></td>
+<td>强制水平或垂直布局</td>
+</tr>
+<tr>
+<td><code>--physical</code></td>
+<td>显示物理 CPU 核编号</td>
+</tr>
+<tr>
+<td><code>--logical</code></td>
+<td>显示逻辑编号（默认）</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
 </search>

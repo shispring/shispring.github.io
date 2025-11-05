@@ -184,6 +184,158 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/05/cgroup-namespace-vs-Kata/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/05/cgroup-namespace-vs-Kata/" class="post-title-link" itemprop="url">cgroup/namespace vs Kata</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-05 11:03:32 / 修改时间：17:01:58" itemprop="dateCreated datePublished" datetime="2025-09-05T11:03:32+08:00">2025-09-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="概念快速梳理"><a href="#概念快速梳理" class="headerlink" title="概念快速梳理"></a>概念快速梳理</h2><ul>
+<li>namespace (PID&#x2F;NET&#x2F;IPC&#x2F;UTS&#x2F;MNT&#x2F;USER&#x2F;…) ：Linux 提供的进程隔离机制（名字空间），用于隔离进程视角（PID、网络命名空间等）。</li>
+<li>cgroup (control groups) ：Linux 提供的资源控制（CPU&#x2F;memory&#x2F;io&#x2F;pids），用于限制与计量资源消耗。</li>
+<li>传统容器 (Docker&#x2F;runc etc.) ：基于单一宿主机内核 + namespaces + cgroups，为应用提供轻量隔离。</li>
+<li>Kata Containers：为容器提供轻量级虚拟化：每个容器或 Pod 运行在一个轻量 VM（有独立内核），兼顾 VM 的强隔离与容器的速度。</li>
+</ul>
+<hr>
+<h2 id="关键差别（对比表）"><a href="#关键差别（对比表）" class="headerlink" title="关键差别（对比表）"></a>关键差别（对比表）</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th align="right">Namespaces + cgroups (传统容器)</th>
+<th>Kata Containers (轻量 VM)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>隔离级别</td>
+<td align="right">进程级隔离，同一宿主机内核共享</td>
+<td>每个 VM 有自己内核（更强的隔离）</td>
+</tr>
+<tr>
+<td>内核 bug 影响</td>
+<td align="right">宿主机内核 bug 可能影响所有容器</td>
+<td>客户 VM 内核问题通常仅影响该 VM（保护宿主）</td>
+</tr>
+<tr>
+<td>启动速度</td>
+<td align="right">极快（ms ~ s）</td>
+<td>较慢（s 量级，取决于 runtime&#x2F;VM）</td>
+</tr>
+<tr>
+<td>资源开销</td>
+<td align="right">很低（共享内核，少量 overhead）</td>
+<td>较高（每 VM 有 qemu&#x2F;kvm 等开销）</td>
+</tr>
+<tr>
+<td>安全边界</td>
+<td align="right">用户态较弱（容器逃逸有历史）</td>
+<td>更强（硬隔离，适合多租户&#x2F;不信任工作负载）</td>
+</tr>
+<tr>
+<td>调试与运维</td>
+<td align="right">与宿主一致（&#x2F;proc, cgroup）</td>
+<td>VM 内&#x2F;宿主 双层调试，复杂度高</td>
+</tr>
+<tr>
+<td>对单 Pod 内存泄漏影响</td>
+<td align="right">泄漏在 host kernel&#x2F;user space，可直接影响 host</td>
+<td>泄漏限制在 VM（若VM有 memory limit 则受限）</td>
+</tr>
+<tr>
+<td>使用场景</td>
+<td align="right">大多数云原生应用、CI&#x2F;CD、低延迟服务</td>
+<td>多租户且对安全敏感、需要防止内核级风险或特定内核版本隔离的场景</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="Kata-能否避免单业务导致全主机挂掉？"><a href="#Kata-能否避免单业务导致全主机挂掉？" class="headerlink" title="Kata 能否避免单业务导致全主机挂掉？"></a>Kata 能否避免单业务导致全主机挂掉？</h2><ul>
+<li><strong>能显著降低风险</strong>：如果问题是<strong>内核级 bug</strong> 或需要特殊内核模块出问题（例如某些驱动、netfilter bug），在 Kata 中发生时通常只影响该 VM，不会直接影响宿主机内核和其他 VM&#x2F;容器。  </li>
+<li><strong>对用户空间内存泄漏</strong>：如果单个 VM 的进程泄漏内存并且该 VM 的内存上限被设置（例如给 VM 分配 4Gi），则泄漏会耗尽该 VM 内存并导致 VM 内 OOM，但不会直接耗尽宿主整台机器的内存（只要宿主上没有被配置过大的 VM 数量）。  </li>
+<li><strong>注意</strong>：大量 Kata VM 被同时启动且每个都泄漏，仍然能用尽宿主资源 —— 因此仍需上层资源限制 &amp; 调度策略。</li>
+</ul>
+<hr>
+<h2 id="什么时候优先考虑使用-Kata？"><a href="#什么时候优先考虑使用-Kata？" class="headerlink" title="什么时候优先考虑使用 Kata？"></a>什么时候优先考虑使用 Kata？</h2><ul>
+<li>多租户平台（每租户代码不信任），需要强内核隔离。  </li>
+<li>运行需要自定义&#x2F;不同内核版本或特殊内核模块的 workload，避免宿主内核污染。  </li>
+<li>法规或安全要求必须严格隔离（例如金融 &#x2F; 医疗 &#x2F; 隐私敏感场景）。  </li>
+<li>需要兼顾容器化便捷性与 VM 级安全边界。</li>
+</ul>
+<hr>
+<h2 id="运维与排查差异"><a href="#运维与排查差异" class="headerlink" title="运维与排查差异"></a>运维与排查差异</h2><ul>
+<li><strong>传统容器</strong>：<ul>
+<li>优势：直接查看宿主 <code>/sys/fs/cgroup</code>、<code>/proc</code> 来诊断 container 内资源使用（更直观）。  </li>
+<li>常用工具：<code>docker ps</code>&#x2F;<code>ctr</code>、<code>systemd-cgls</code>、<code>cat cgroup memory.stat</code>。</li>
+</ul>
+</li>
+<li><strong>Kata</strong>：<ul>
+<li>你需要在<strong>宿主层</strong>和<strong>Guest VM 层</strong>都排查：宿主层看 VM 进程、资源分配，guest 内看应用行为。  </li>
+<li>更复杂：两层日志、两层指标，但隔离性更好。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="实践建议（基于场景）"><a href="#实践建议（基于场景）" class="headerlink" title="实践建议（基于场景）"></a>实践建议（基于场景）</h2><ol>
+<li><strong>大多数应用</strong>：先用传统容器 + 严格 cgroup &#x2F; kubelet eviction &#x2F;资源限额。  </li>
+<li><strong>不信任租户 &#x2F; 强隔离</strong>：用 Kata（或 VM-based multi-tenant）并为每 VM 设置合理内存上限。  </li>
+<li><strong>IO &#x2F; 存储敏感</strong>：优化后端存储、设置 <code>vm.dirty_*</code> 限额、在 runtime 层配合 QoS 限制。  </li>
+<li><strong>混合部署</strong>：把高风险工作负载放 Kata，普通服务放容器，减少总体成本。</li>
+</ol>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><ul>
+<li><code>cgroup + namespace</code> 提供高效、低开销的多租户能力，适合绝大多数云原生场景；  </li>
+<li><code>Kata</code> 在<strong>强隔离</strong>与<strong>安全</strong>场景下胜出，但有成本与运维复杂度，需权衡。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2279,358 +2431,10 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/11/tcpdump%E5%88%86%E6%9E%90%E5%8C%85%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/11/tcpdump%E5%88%86%E6%9E%90%E5%8C%85%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83/" class="post-title-link" itemprop="url">tcpdump分析包命令参考</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-08-11 17:14:44" itemprop="dateCreated datePublished" datetime="2025-08-11T17:14:44+08:00">2025-08-11</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-08-13 11:25:51" itemprop="dateModified" datetime="2025-08-13T11:25:51+08:00">2025-08-13</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="tcpdump网络抓包与分析速查笔记"><a href="#tcpdump网络抓包与分析速查笔记" class="headerlink" title="tcpdump网络抓包与分析速查笔记"></a>tcpdump网络抓包与分析速查笔记</h1><h2 id="最佳实践：TCP-异常分析流程"><a href="#最佳实践：TCP-异常分析流程" class="headerlink" title="最佳实践：TCP 异常分析流程"></a>最佳实践：TCP 异常分析流程</h2><ol>
-<li><strong>先看连接是否建立</strong>（SYN→SYN&#x2F;ACK→ACK）</li>
-<li><strong>检查是否有重传</strong>（<code>tcp.analysis.retransmission</code>）</li>
-<li><strong>看是否有 RST&#x2F;FIN 提前关闭</strong></li>
-<li><strong>分析延迟&#x2F;窗口问题</strong>（<code>tcp.analysis.window_full</code>、<code>tcp.analysis.zero_window</code>）</li>
-<li><strong>抓取完整 TCP 流</strong>（用 <code>-z follow,tcp,ascii</code>）</li>
-</ol>
-<hr>
-<h2 id="1-tcpdump-命令速查表"><a href="#1-tcpdump-命令速查表" class="headerlink" title="1. tcpdump 命令速查表"></a>1. tcpdump 命令速查表</h2><table>
-<thead>
-<tr>
-<th>用途说明</th>
-<th>示例命令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>抓取指定接口的所有包</td>
-<td><code>tcpdump -i eth0  -nn -tttt -vvv -s 0 </code></td>
-</tr>
-<tr>
-<td>抓取指定主机的包</td>
-<td><code>tcpdump host 192.168.1.10</code></td>
-</tr>
-<tr>
-<td>抓取指定端口的包</td>
-<td><code>tcpdump port 80</code></td>
-</tr>
-<tr>
-<td>抓取 TCP 协议的包</td>
-<td><code>tcpdump tcp</code></td>
-</tr>
-<tr>
-<td>抓取并保存到文件</td>
-<td><code>tcpdump -i eth0 -w output_$(date +%Y%m%d_%H%M%S).pcap</code></td>
-</tr>
-<tr>
-<td>从文件读取包</td>
-<td><code>tcpdump -r output.pcap</code></td>
-</tr>
-<tr>
-<td>抓取并显示 ASCII 内容（例如 JSON）</td>
-<td><code>tcpdump -A -s 0 -r output.pcap</code></td>
-</tr>
-<tr>
-<td>抓取并显示 16 进制和 ASCII</td>
-<td><code>tcpdump -XX -s 0 -r output.pcap</code></td>
-</tr>
-<tr>
-<td>按条件过滤（主机 + 端口）</td>
-<td><code>tcpdump host 10.0.0.1 and port 8080</code></td>
-</tr>
-<tr>
-<td>显示更详细的信息</td>
-<td><code>tcpdump -vvv</code></td>
-</tr>
-</tbody></table>
-<ul>
-<li>输出格式控制参数</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>描述</th>
-<th>应用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>-v</code></td>
-<td>详细输出</td>
-<td>提供更多包头信息，如TTL，TOS，长度等</td>
-</tr>
-<tr>
-<td><code>-vv</code></td>
-<td>更详细输出</td>
-<td>提供更多协议细节，如窗口大小，TCP选项等</td>
-</tr>
-<tr>
-<td><code>-vvv</code></td>
-<td>最详细输出</td>
-<td>提供最大程度的细节，包括包内容的详细解析</td>
-</tr>
-<tr>
-<td><code>-nn</code></td>
-<td>不解析主机名和端口名</td>
-<td>加快输出速度，避免DNS查询延迟，直接显示IP和数字端口</td>
-</tr>
-<tr>
-<td><code>-t</code></td>
-<td>不打印时间戳</td>
-<td>简化输出，关注包内容而非时间</td>
-</tr>
-<tr>
-<td><code>-tt</code></td>
-<td>打印未格式化的时间戳</td>
-<td>用于精确测量包间延迟，精确到微秒</td>
-</tr>
-<tr>
-<td><code>-ttt</code></td>
-<td>打印相对前一个包的延迟</td>
-<td>分析包间延迟模式，识别网络抖动</td>
-</tr>
-<tr>
-<td><code>-tttt</code></td>
-<td>打印带日期的时间戳</td>
-<td>长时间捕获时，便于识别包的具体时间点</td>
-</tr>
-</tbody></table>
-<ul>
-<li>包大小和内容控制参数</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>描述</th>
-<th>应用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>-s 0</code> 或 <code>-s 65535</code></td>
-<td>捕获完整包</td>
-<td>需要查看包的完整内容，进行深度包检查时</td>
-</tr>
-<tr>
-<td><code>-s 96</code></td>
-<td>限制捕获字节数</td>
-<td>只关心包头，减少存储空间和处理开销</td>
-</tr>
-<tr>
-<td><code>-X</code></td>
-<td>以十六进制和ASCII格式打印包内容</td>
-<td>查看包的原始数据，调试应用层协议</td>
-</tr>
-<tr>
-<td><code>-XX</code></td>
-<td>同-X，但包括链路层头部</td>
-<td>更全面地分析包结构，包括MAC地址等</td>
-</tr>
-</tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">tcpdump 需要抓取原始网络包，这在 Linux 里默认需要 root 权限或具备特定的 CAP_NET_RAW / CAP_NET_ADMIN 能力</span><br><span class="line">#给 tcpdump 二进制加 CAP_NET_RAW &amp; CAP_NET_ADMIN 能力</span><br><span class="line"># 1. 确认 tcpdump 路径</span><br><span class="line">which tcpdump</span><br><span class="line"># 假设输出是 /usr/sbin/tcpdump</span><br><span class="line"></span><br><span class="line"># 2. 给 tcpdump 添加所需权限（只需执行一次）</span><br><span class="line">sudo setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump</span><br><span class="line"></span><br><span class="line"># 3. 验证</span><br><span class="line">getcap /usr/sbin/tcpdump</span><br><span class="line"># 应该输出类似：</span><br><span class="line"># /usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip</span><br><span class="line"></span><br><span class="line">#cap_net_raw 权限可以抓取敏感数据包，存在信息泄露风险。</span><br><span class="line">#生产服务器建议仅给特定用户赋权，并在抓包完成后移除能力：</span><br><span class="line">sudo setcap -r /usr/sbin/tcpdump</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="2-tshark-命令速查表"><a href="#2-tshark-命令速查表" class="headerlink" title="2. tshark 命令速查表"></a>2. tshark 命令速查表</h2><table>
-<thead>
-<tr>
-<th>用途说明</th>
-<th>示例命令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>从文件读取并解析</td>
-<td><code>tshark -r file.pcap</code></td>
-</tr>
-<tr>
-<td>按显示过滤器过滤</td>
-<td><code>tshark -r file.pcap -Y &quot;http&quot;</code></td>
-</tr>
-<tr>
-<td>查看所有字段名</td>
-<td><code>tshark -G fields</code></td>
-</tr>
-<tr>
-<td>显示 HTTP 请求</td>
-<td><code>tshark -r file.pcap -Y &quot;http.request&quot;</code></td>
-</tr>
-<tr>
-<td>显示包内容（ASCII）</td>
-<td><code>tshark -r file.pcap -x</code></td>
-</tr>
-<tr>
-<td>显示包内容（16 进制）</td>
-<td><code>tshark -r file.pcap -x -V</code></td>
-</tr>
-<tr>
-<td>显示 HTTP 请求头和 body</td>
-<td><code>tshark -r file.pcap -Y &quot;http&quot; -T fields -e http.file_data</code></td>
-</tr>
-<tr>
-<td>按 TCP 流查看</td>
-<td><code>tshark -r file.pcap -q -z follow,tcp,ascii,0</code></td>
-</tr>
-<tr>
-<td>统计 TCP 流信息</td>
-<td><code>tshark -r file.pcap -q -z conv,tcp</code></td>
-</tr>
-<tr>
-<td>过滤 SYN 包</td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==0&quot;</code></td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="3-TCP-异常包类型对照表"><a href="#3-TCP-异常包类型对照表" class="headerlink" title="3. TCP 异常包类型对照表"></a>3. TCP 异常包类型对照表</h2><table>
-<thead>
-<tr>
-<th>异常类型</th>
-<th>说明</th>
-<th>tcpdump 过滤命令</th>
-<th>tshark 过滤命令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>TCP 连接建立（SYN）</td>
-<td>仅包含 SYN（第一次握手）</td>
-<td><code>tcpdump &#39;tcp[tcpflags] &amp; tcp-syn != 0 and tcp[tcpflags] &amp; tcp-ack == 0&#39;</code></td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==0&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 连接确认（SYN+ACK）</td>
-<td>第二次握手</td>
-<td><code>tcpdump &#39;tcp[tcpflags] &amp; tcp-syn != 0 and tcp[tcpflags] &amp; tcp-ack != 0&#39;</code></td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==1&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 正常关闭（FIN）</td>
-<td>发起关闭连接</td>
-<td><code>tcpdump &#39;tcp[tcpflags] &amp; tcp-fin != 0&#39;</code></td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.flags.fin==1&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 异常关闭（RST）</td>
-<td>强制关闭连接</td>
-<td><code>tcpdump &#39;tcp[tcpflags] &amp; tcp-rst != 0&#39;</code></td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.flags.reset==1&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 重传包</td>
-<td>数据包丢失重发</td>
-<td>（建议用 tshark）</td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.analysis.retransmission&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 快速重传</td>
-<td>提前触发的重传</td>
-<td>-</td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.analysis.fast_retransmission&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 零窗口</td>
-<td>接收方窗口大小为 0</td>
-<td>-</td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.analysis.zero_window&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 窗口更新</td>
-<td>更新接收窗口大小</td>
-<td>-</td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.analysis.window_update&quot;</code></td>
-</tr>
-<tr>
-<td>TCP 重复 ACK</td>
-<td>接收方收到相同序列号数据</td>
-<td>-</td>
-<td><code>tshark -r file.pcap -Y &quot;tcp.analysis.duplicate_ack&quot;</code></td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="4-速查总结"><a href="#4-速查总结" class="headerlink" title="4. 速查总结"></a>4. 速查总结</h2><ul>
-<li><strong>tcpdump</strong> 适合快速抓包、实时监控。</li>
-<li><strong>tshark</strong> 适合深度分析、协议解析、统计。</li>
-<li>建议配合使用：<code>tcpdump</code> 抓包 + <code>tshark</code> 离线分析。</li>
-</ul>
-<h2 id="5-其他命令"><a href="#5-其他命令" class="headerlink" title="5. 其他命令"></a>5. 其他命令</h2><h3 id="1-分析协议和流量分布"><a href="#1-分析协议和流量分布" class="headerlink" title="1. 分析协议和流量分布"></a>1. 分析协议和流量分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看协议分布</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看数据包大小分布</span></span><br><span class="line">tcpdump -r 文件名.pcap -nq | awk <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span> | <span class="built_in">sort</span> -n | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-分析TCP连接"><a href="#2-分析TCP连接" class="headerlink" title="2. 分析TCP连接"></a>2. 分析TCP连接</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看TCP SYN包（连接建立）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[S&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看TCP FIN包（连接终止）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[F&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看TCP RST包（连接重置）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[R&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有带P标志的包（数据推送）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvX | grep -i <span class="string">&quot;Flags \[P&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-HTTP流量分析"><a href="#3-HTTP流量分析" class="headerlink" title="3. HTTP流量分析"></a>3. HTTP流量分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看HTTP请求</span></span><br><span class="line">tcpdump -r 文件名.pcap -A | grep -i <span class="string">&quot;HTTP\|GET\|POST&quot;</span> | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看HTTP响应状态</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnn -A | grep -i <span class="string">&quot;HTTP/&quot;</span> | <span class="built_in">head</span> -5</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看请求和响应的内容类型</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnn -A | grep -i <span class="string">&quot;Accept\|Content-Type&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看HTTP请求的User-Agent</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnA | grep -i <span class="string">&quot;User-Agent&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="4-安全和异常分析"><a href="#4-安全和异常分析" class="headerlink" title="4. 安全和异常分析"></a>4. 安全和异常分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找错误或异常信息</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnA | grep -i <span class="string">&quot;error\|failure\|denied\|attack\|malicious\|failed&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找可疑的HTTP请求（如SQL注入、XSS攻击）</span></span><br><span class="line">tcpdump -r 文件名.pcap -A | grep -i <span class="string">&quot;select\|union\|insert\|delete\|&lt;script&gt;\|eval(&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找端口扫描行为（大量SYN包）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp[13] &amp; 2 != 0&#x27;</span> | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br></pre></td></tr></table></figure>
-
-<h2 id="高级tcpdump分析技巧"><a href="#高级tcpdump分析技巧" class="headerlink" title="高级tcpdump分析技巧"></a>高级tcpdump分析技巧</h2><h3 id="1-按IP地址和端口过滤"><a href="#1-按IP地址和端口过滤" class="headerlink" title="1. 按IP地址和端口过滤"></a>1. 按IP地址和端口过滤</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看特定源IP的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn src host 192.168.1.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定目标IP的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn dst host 192.168.1.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定端口的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定IP和端口组合的流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;host 192.168.1.1 and port 80&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-按协议过滤"><a href="#2-按协议过滤" class="headerlink" title="2. 按协议过滤"></a>2. 按协议过滤</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只查看TCP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只查看UDP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn udp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只查看ICMP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn icmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看非HTTP流量</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp and not port 80 and not port 443&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-数据包内容分析"><a href="#3-数据包内容分析" class="headerlink" title="3. 数据包内容分析"></a>3. 数据包内容分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以十六进制和ASCII格式显示完整数据包内容</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvXX</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示数据包头部</span></span><br><span class="line">tcpdump -r 文件名.pcap -nnvv</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示特定字节偏移量的内容</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp[20:4] = 0x47455420&#x27;</span>  <span class="comment"># 查找&quot;GET &quot;开头的数据包</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="4-会话流分析"><a href="#4-会话流分析" class="headerlink" title="4. 会话流分析"></a>4. 会话流分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 追踪特定TCP会话</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn -A <span class="string">&#x27;host 192.168.1.1 and host 192.168.1.2 and port 80&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看握手包的时间差（延迟分析）</span></span><br><span class="line">tcpdump -r 文件名.pcap -nntt <span class="string">&#x27;tcp[13] &amp; 2 != 0 or tcp[13] &amp; 16 != 0&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="其他有用的网络分析工具"><a href="#其他有用的网络分析工具" class="headerlink" title="其他有用的网络分析工具"></a>其他有用的网络分析工具</h2><h3 id="1-tshark-Wireshark的命令行版本"><a href="#1-tshark-Wireshark的命令行版本" class="headerlink" title="1. tshark (Wireshark的命令行版本)"></a>1. tshark (Wireshark的命令行版本)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># linux下安装</span></span><br><span class="line">yum install -y wireshark</span><br><span class="line"><span class="comment"># 基本使用方法</span></span><br><span class="line">tshark -r 文件名.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment">#termshark GUI</span></span><br><span class="line">https://github.com/gcla/termshark</span><br><span class="line"><span class="comment">#使用说明</span></span><br><span class="line">https://github.com/gcla/termshark/blob/master/docs/UserGuide.md</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-tcpflow-TCP流重组"><a href="#2-tcpflow-TCP流重组" class="headerlink" title="2. tcpflow (TCP流重组)"></a>2. tcpflow (TCP流重组)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重组TCP会话</span></span><br><span class="line">tcpflow -r 文件名.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定输出目录</span></span><br><span class="line">tcpflow -r 文件名.pcap -o 输出目录</span><br></pre></td></tr></table></figure>
-
-<h2 id="实用一行命令"><a href="#实用一行命令" class="headerlink" title="实用一行命令"></a>实用一行命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找Top Talkers (通信最频繁的主机)</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | <span class="built_in">cut</span> -d. -f1-4 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找最常用的服务</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn | awk <span class="string">&#x27;&#123;print $5&#125;&#x27;</span> | <span class="built_in">cut</span> -d. -f5 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有URL</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn -A | grep -oE <span class="string">&#x27;(GET|POST|HEAD) .* HTTP/[0-9.]+&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检测SYN Flood攻击</span></span><br><span class="line">tcpdump -r 文件名.pcap -nn <span class="string">&#x27;tcp[13] &amp; 2 != 0&#x27;</span> | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取所有邮箱地址</span></span><br><span class="line">tcpdump -r 文件名.pcap -A | grep -oE <span class="string">&#x27;[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]&#123;2,6&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="实时捕获命令参考"><a href="#实时捕获命令参考" class="headerlink" title="实时捕获命令参考"></a>实时捕获命令参考</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 捕获指定接口的流量</span></span><br><span class="line">tcpdump -i eth0 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定主机的流量</span></span><br><span class="line">tcpdump -i eth0 host 192.168.1.1 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 捕获特定端口的流量</span></span><br><span class="line">tcpdump -i eth0 port 80 -w 输出文件.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制捕获包的数量或大小</span></span><br><span class="line">tcpdump -i eth0 -c 1000 -w 输出文件.pcap  <span class="comment"># 捕获1000个包后停止</span></span><br><span class="line">tcpdump -i eth0 -C 10 -w 输出文件.pcap    <span class="comment"># 每个文件限制为10MB</span></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -2698,7 +2502,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">150</span>
+          <span class="site-state-item-count">151</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
