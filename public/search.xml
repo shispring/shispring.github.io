@@ -11460,7 +11460,10 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   <entry>
     <title>numactl使用指南</title>
     <url>/2025/10/31/numactl%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
-    <content><![CDATA[<h1 id="numactl-完整使用指南"><a href="#numactl-完整使用指南" class="headerlink" title="numactl 完整使用指南"></a>numactl 完整使用指南</h1><h2 id="一、numactl-是什么"><a href="#一、numactl-是什么" class="headerlink" title="一、numactl 是什么"></a>一、numactl 是什么</h2><p><strong>numactl</strong> 是一个控制 NUMA 策略和内存分配的工具，允许你：</p>
+    <content><![CDATA[<h1 id="numactl-完整使用指南"><a href="#numactl-完整使用指南" class="headerlink" title="numactl 完整使用指南"></a>numactl 完整使用指南</h1><blockquote>
+<p><a href="https://www.cnblogs.com/Xinenhui/p/18316326">https://www.cnblogs.com/Xinenhui/p/18316326</a></p>
+</blockquote>
+<h2 id="一、numactl-是什么"><a href="#一、numactl-是什么" class="headerlink" title="一、numactl 是什么"></a>一、numactl 是什么</h2><p><strong>numactl</strong> 是一个控制 NUMA 策略和内存分配的工具，允许你：</p>
 <ul>
 <li>将进程绑定到特定 NUMA 节点</li>
 <li>控制进程的内存分配策略</li>
