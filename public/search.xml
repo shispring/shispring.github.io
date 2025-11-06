@@ -2952,7 +2952,7 @@ jq -r &#39;.[] | [.address, .weight] | @tsv&#39; &lt;&lt;&lt; &#39;[&#123;&quot;
 </ul>
 <h3 id="10-iptraf-ng"><a href="#10-iptraf-ng" class="headerlink" title="10. iptraf-ng"></a>10. <strong><code>iptraf-ng</code></strong></h3><p><code>iptraf-ng</code> 是一个基于终端的实时网络监控工具，能够监控网络流量和连接。</p>
 <ul>
-<li><strong>启动 <code>iptraf-ng</code> 监控：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptraf-ng</span><br></pre></td></tr></table></figure></li>
+<li><strong>启动 <code>iptraf-ng</code> 监控：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#安装</span></span><br><span class="line">yum search iptraf</span><br><span class="line">yum install -y iptraf-ng </span><br><span class="line"></span><br><span class="line">iptraf-ng</span><br><span class="line"></span><br><span class="line"><span class="comment">#进入X视图模式后的统计界面</span></span><br><span class="line">iptraf-ng -d eth0</span><br></pre></td></tr></table></figure></li>
 </ul>
 <h3 id="11-tcping"><a href="#11-tcping" class="headerlink" title="11. tcping"></a>11. <strong><code>tcping</code></strong></h3><ul>
 <li><p><strong>TCPing</strong>：基于 TCP 协议，通过三次握手连接指定端口进行探测。如果目标主机的应用程序未能及时响应或端口临时不可用，会显示为失败。</p>
