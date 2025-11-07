@@ -184,6 +184,114 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">lsns命令使用指南与故障排查</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-16 10:49:11 / 修改时间：10:49:35" itemprop="dateCreated datePublished" datetime="2025-09-16T10:49:11+08:00">2025-09-16</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="lsns基础用法"><a href="#lsns基础用法" class="headerlink" title="lsns基础用法"></a>lsns基础用法</h2><h3 id="1-基本命令"><a href="#1-基本命令" class="headerlink" title="1. 基本命令"></a>1. 基本命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有命名空间</span></span><br><span class="line">lsns</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定进程的命名空间</span></span><br><span class="line">lsns -p &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定类型的命名空间</span></span><br><span class="line">lsns -t net        <span class="comment"># 网络命名空间</span></span><br><span class="line">lsns -t mnt        <span class="comment"># 挂载命名空间</span></span><br><span class="line">lsns -t pid        <span class="comment"># PID命名空间</span></span><br><span class="line">lsns -t user       <span class="comment"># 用户命名空间</span></span><br><span class="line">lsns -t uts        <span class="comment"># UTS命名空间</span></span><br><span class="line">lsns -t ipc        <span class="comment"># IPC命名空间</span></span><br><span class="line">lsns -t cgroup     <span class="comment"># cgroup命名空间</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示详细输出格式</span></span><br><span class="line">lsns -l            <span class="comment"># 长格式显示</span></span><br><span class="line">lsns -J            <span class="comment"># JSON格式输出</span></span><br><span class="line">lsns -r            <span class="comment"># 显示原始设备号</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示特定列</span></span><br><span class="line">lsns -o NS,TYPE,NPROCS,PID,USER,NETNSID,COMMAND</span><br><span class="line"></span><br><span class="line"><span class="comment"># 不显示头部</span></span><br><span class="line">lsns -n</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-高级用法"><a href="#2-高级用法" class="headerlink" title="2. 高级用法"></a>2. 高级用法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看特定命名空间的详细信息</span></span><br><span class="line">lsns --nsfs-file /proc/1/ns/net</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按类型和进程数排序</span></span><br><span class="line">lsns -t net -o NS,TYPE,NPROCS,PID,COMMAND | <span class="built_in">sort</span> -k3 -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器相关的命名空间</span></span><br><span class="line">lsns | grep docker</span><br><span class="line">lsns | grep containerd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看systemd相关命名空间</span></span><br><span class="line">lsns | grep systemd</span><br></pre></td></tr></table></figure>
+
+<h2 id="命名空间操作命令"><a href="#命名空间操作命令" class="headerlink" title="命名空间操作命令"></a>命名空间操作命令</h2><h3 id="1-进入命名空间"><a href="#1-进入命名空间" class="headerlink" title="1. 进入命名空间"></a>1. 进入命名空间</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进入特定进程的网络命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入多个命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n -p -m bash     <span class="comment"># 网络+PID+挂载</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入所有命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -a bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用ip命令进入网络命名空间</span></span><br><span class="line">ip netns <span class="built_in">exec</span> &lt;netns-name&gt; bash</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-查看命名空间详情"><a href="#2-查看命名空间详情" class="headerlink" title="2. 查看命名空间详情"></a>2. 查看命名空间详情</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看进程的命名空间文件</span></span><br><span class="line"><span class="built_in">ls</span> -la /proc/&lt;PID&gt;/ns/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络命名空间</span></span><br><span class="line">ip netns list</span><br><span class="line">ip netns show</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看挂载命名空间</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/mounts</span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/mountinfo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看PID命名空间</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/status | grep NSpid</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-命名空间监控"><a href="#3-命名空间监控" class="headerlink" title="3. 命名空间监控"></a>3. 命名空间监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实时监控命名空间变化</span></span><br><span class="line">watch -n 1 <span class="string">&#x27;lsns -t net&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看命名空间统计</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
+
+<h2 id="故障排查场景和命令清单"><a href="#故障排查场景和命令清单" class="headerlink" title="故障排查场景和命令清单"></a>故障排查场景和命令清单</h2><h3 id="🔍-场景1-容器网络问题"><a href="#🔍-场景1-容器网络问题" class="headerlink" title="🔍 场景1: 容器网络问题"></a>🔍 场景1: 容器网络问题</h3><p><strong>症状</strong>: 容器无法访问网络，DNS解析失败</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看容器网络命名空间</span></span><br><span class="line">docker inspect &lt;container&gt; | grep NetworkMode</span><br><span class="line">lsns -t net | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器网络命名空间排查</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -n bash</span><br><span class="line">ip addr show                    <span class="comment"># 查看网络接口</span></span><br><span class="line">ip route show                   <span class="comment"># 查看路由表</span></span><br><span class="line"><span class="built_in">cat</span> /etc/resolv.conf            <span class="comment"># 查看DNS配置</span></span><br><span class="line">ping 8.8.8.8                    <span class="comment"># 测试网络连通性</span></span><br><span class="line">nslookup google.com             <span class="comment"># 测试DNS解析</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 对比宿主机网络</span></span><br><span class="line"><span class="built_in">exit</span>  <span class="comment"># 退出容器网络命名空间</span></span><br><span class="line">ip addr show                    <span class="comment"># 宿主机网络接口</span></span><br><span class="line">ip route show                   <span class="comment"># 宿主机路由表</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景2-容器文件系统问题"><a href="#🔍-场景2-容器文件系统问题" class="headerlink" title="🔍 场景2: 容器文件系统问题"></a>🔍 场景2: 容器文件系统问题</h3><p><strong>症状</strong>: 容器内文件丢失，挂载点异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看挂载命名空间</span></span><br><span class="line">lsns -t mnt | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器挂载命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -m bash</span><br><span class="line">mount | grep &lt;path&gt;             <span class="comment"># 查看特定路径挂载</span></span><br><span class="line"><span class="built_in">df</span> -h                           <span class="comment"># 查看磁盘使用</span></span><br><span class="line">findmnt                         <span class="comment"># 详细挂载信息</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 对比宿主机挂载</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line">mount | grep &lt;container-volume&gt;</span><br><span class="line">docker inspect &lt;container&gt; | grep Mounts</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景3-进程PID问题"><a href="#🔍-场景3-进程PID问题" class="headerlink" title="🔍 场景3: 进程PID问题"></a>🔍 场景3: 进程PID问题</h3><p><strong>症状</strong>: 容器内PID冲突，进程管理异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看PID命名空间</span></span><br><span class="line">lsns -t pid | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器PID命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -p bash</span><br><span class="line">ps aux                          <span class="comment"># 查看容器内进程</span></span><br><span class="line">pstree                          <span class="comment"># 进程树</span></span><br><span class="line"><span class="built_in">cat</span> /proc/1/cmdline             <span class="comment"># 容器内PID 1进程</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 查看宿主机视角的进程</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line">ps aux | grep &lt;container-name&gt;</span><br><span class="line">pstree -p &lt;container-pid&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景4-用户权限问题"><a href="#🔍-场景4-用户权限问题" class="headerlink" title="🔍 场景4: 用户权限问题"></a>🔍 场景4: 用户权限问题</h3><p><strong>症状</strong>: 容器内用户权限异常，文件访问被拒绝</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看用户命名空间</span></span><br><span class="line">lsns -t user | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查用户映射</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/uid_map</span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/gid_map</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 进入容器用户命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -U bash</span><br><span class="line"><span class="built_in">id</span>                              <span class="comment"># 查看当前用户</span></span><br><span class="line"><span class="built_in">whoami</span></span><br><span class="line"><span class="built_in">ls</span> -la /                        <span class="comment"># 查看文件权限</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景5-系统调用和cgroup问题"><a href="#🔍-场景5-系统调用和cgroup问题" class="headerlink" title="🔍 场景5: 系统调用和cgroup问题"></a>🔍 场景5: 系统调用和cgroup问题</h3><p><strong>症状</strong>: 容器资源限制异常，性能问题</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看cgroup命名空间</span></span><br><span class="line">lsns -t cgroup | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查cgroup配置</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/cgroup</span><br><span class="line">systemd-cgls | grep &lt;container&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 查看资源使用</span></span><br><span class="line">docker stats &lt;container&gt;</span><br><span class="line"><span class="built_in">cat</span> /sys/fs/cgroup/memory/docker/&lt;container-id&gt;/memory.usage_in_bytes</span><br><span class="line"><span class="built_in">cat</span> /sys/fs/cgroup/cpu/docker/&lt;container-id&gt;/cpu.shares</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景6-Kubernetes-Pod网络问题"><a href="#🔍-场景6-Kubernetes-Pod网络问题" class="headerlink" title="🔍 场景6: Kubernetes Pod网络问题"></a>🔍 场景6: Kubernetes Pod网络问题</h3><p><strong>症状</strong>: Pod间通信失败，Service访问异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查找Pod进程</span></span><br><span class="line">kubectl get pods -o wide</span><br><span class="line">ps aux | grep &lt;pod-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 查看Pod网络命名空间</span></span><br><span class="line">PID=$(pgrep -f &lt;pod-container&gt;)</span><br><span class="line">lsns -t net | grep <span class="variable">$PID</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 进入Pod网络空间排查</span></span><br><span class="line">nsenter -t <span class="variable">$PID</span> -n bash</span><br><span class="line">ip addr show                    <span class="comment"># 查看Pod IP</span></span><br><span class="line">ip route show                   <span class="comment"># 查看路由</span></span><br><span class="line">iptables -L                     <span class="comment"># 查看防火墙规则（如果有权限）</span></span><br><span class="line">nslookup kubernetes.default     <span class="comment"># 测试集群DNS</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 查看CNI配置</span></span><br><span class="line"><span class="built_in">cat</span> /etc/cni/net.d/*            <span class="comment"># CNI插件配置</span></span><br><span class="line">ip <span class="built_in">link</span> show                    <span class="comment"># 网络设备</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景7-容器启动失败"><a href="#🔍-场景7-容器启动失败" class="headerlink" title="🔍 场景7: 容器启动失败"></a>🔍 场景7: 容器启动失败</h3><p><strong>症状</strong>: 容器启动后立即退出，状态异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看容器日志</span></span><br><span class="line">docker logs &lt;container&gt;</span><br><span class="line">kubectl logs &lt;pod&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 查看容器命名空间状态</span></span><br><span class="line">docker inspect &lt;container&gt; | grep State -A 10</span><br><span class="line">lsns | grep &lt;container-name&gt;    <span class="comment"># 看是否还有命名空间残留</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 模拟容器环境调试</span></span><br><span class="line">docker run -it --<span class="built_in">rm</span> &lt;image&gt; bash</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">kubectl run debug-pod --image=&lt;image&gt; -it --<span class="built_in">rm</span> -- bash</span><br></pre></td></tr></table></figure>
+
+<h2 id="命名空间排查最佳实践"><a href="#命名空间排查最佳实践" class="headerlink" title="命名空间排查最佳实践"></a>命名空间排查最佳实践</h2><h3 id="1-排查流程"><a href="#1-排查流程" class="headerlink" title="1. 排查流程"></a>1. 排查流程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Step 1: 识别问题进程</span></span><br><span class="line">ps aux | grep &lt;service-name&gt;</span><br><span class="line">pgrep -f &lt;pattern&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 2: 查看命名空间概况</span></span><br><span class="line">lsns -p &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 3: 针对性进入问题命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n -p -m bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 4: 在命名空间内排查</span></span><br><span class="line"><span class="comment"># 网络: ip addr, ip route, netstat</span></span><br><span class="line"><span class="comment"># 文件系统: mount, df, ls</span></span><br><span class="line"><span class="comment"># 进程: ps, pstree</span></span><br><span class="line"><span class="comment"># 权限: id, whoami, ls -la</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-常用组合命令"><a href="#2-常用组合命令" class="headerlink" title="2. 常用组合命令"></a>2. 常用组合命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 快速查看容器所有命名空间信息</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">container_ns_info</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> pid=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== 命名空间概况 ===&quot;</span></span><br><span class="line">    lsns -p <span class="variable">$pid</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 网络信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -n ip addr show</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 挂载信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -m mount | <span class="built_in">head</span> -10</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 进程信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -p ps aux | <span class="built_in">head</span> -10</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: container_ns_info &lt;PID&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-监控脚本"><a href="#3-监控脚本" class="headerlink" title="3. 监控脚本"></a>3. 监控脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># ns_monitor.sh - 命名空间监控脚本</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 命名空间统计 ===&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;类型统计:&quot;</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n进程数最多的命名空间:&quot;</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2, $3, $5&#125;&#x27;</span> | <span class="built_in">sort</span> -k2 -nr | <span class="built_in">head</span> -5</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n容器相关命名空间:&quot;</span></span><br><span class="line">lsns | grep -E <span class="string">&quot;(docker|containerd|runc)&quot;</span> | <span class="built_in">wc</span> -l</span><br></pre></td></tr></table></figure>
+
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>⚠️ <strong>安全提醒</strong>:</p>
+<ul>
+<li>使用<code>nsenter</code>需要root权限或相应的capabilities</li>
+<li>进入生产容器命名空间要谨慎，避免影响业务</li>
+<li>某些命名空间操作可能影响系统稳定性</li>
+</ul>
+<p>💡 <strong>最佳实践</strong>:</p>
+<ul>
+<li>先用<code>lsns</code>观察，再用<code>nsenter</code>进入</li>
+<li>排查时记录操作步骤，便于复现和分析</li>
+<li>结合容器编排工具的日志和状态信息</li>
+<li>定期监控命名空间数量，避免泄漏</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/11/%E5%9F%BA%E7%A1%80%E9%95%9C%E5%83%8F%E5%AF%B9%E6%AF%94/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1485,227 +1593,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/11/%E5%A4%A7%E5%9E%8BPCAP%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/11/%E5%A4%A7%E5%9E%8BPCAP%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">大型PCAP文件分析最佳实践</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-11 20:54:04 / 修改时间：20:54:30" itemprop="dateCreated datePublished" datetime="2025-08-11T20:54:04+08:00">2025-08-11</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="大型PCAP文件分析最佳实践"><a href="#大型PCAP文件分析最佳实践" class="headerlink" title="大型PCAP文件分析最佳实践"></a>大型PCAP文件分析最佳实践</h1><p>本文档提供了分析大型PCAP（数据包捕获）文件的结构化方法，特别是如何根据特定时间定位问题。</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
-<li><a href="#%E5%88%86%E6%9E%90%E5%A4%A7%E5%9E%8Bpcap%E6%96%87%E4%BB%B6%E7%9A%84%E6%AD%A5%E9%AA%A4">分析大型PCAP文件的步骤</a></li>
-<li><a href="#%E6%A0%B9%E6%8D%AE%E7%89%B9%E5%AE%9A%E6%97%B6%E9%97%B4%E5%AE%9A%E4%BD%8D%E9%97%AE%E9%A2%98">根据特定时间定位问题</a></li>
-<li><a href="#%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%E5%92%8C%E5%91%BD%E4%BB%A4">常用工具和命令</a></li>
-<li><a href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE">性能优化建议</a></li>
-<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95">常见问题分析方法</a></li>
-</ul>
-<h2 id="分析大型PCAP文件的步骤"><a href="#分析大型PCAP文件的步骤" class="headerlink" title="分析大型PCAP文件的步骤"></a>分析大型PCAP文件的步骤</h2><p>大型PCAP文件分析应该遵循从宏观到微观的策略，先了解整体情况，再深入具体问题：</p>
-<h3 id="1-预处理和初步了解"><a href="#1-预处理和初步了解" class="headerlink" title="1. 预处理和初步了解"></a>1. 预处理和初步了解</h3><ul>
-<li><p><strong>检查文件基本信息</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">capinfos large_capture.pcap</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查看数据包统计信息</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap -qn | <span class="built_in">wc</span> -l  <span class="comment"># 计算总数据包数</span></span><br><span class="line">tcpdump -r large_capture.pcap -qtnp | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr  <span class="comment"># 查看IP地址分布</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>获取捕获的时间范围</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -T fields -e frame.time | <span class="built_in">head</span> -1  <span class="comment"># 捕获开始时间</span></span><br><span class="line">tshark -r large_capture.pcap -T fields -e frame.time | <span class="built_in">tail</span> -1  <span class="comment"># 捕获结束时间</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="2-分割和提取"><a href="#2-分割和提取" class="headerlink" title="2. 分割和提取"></a>2. 分割和提取</h3><ul>
-<li><p><strong>按时间分割大文件</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">editcap -A <span class="string">&quot;2025-08-11 15:30:00&quot;</span> -B <span class="string">&quot;2025-08-11 15:35:00&quot;</span> large_capture.pcap time_window.pcap</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>按协议提取特定流量</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap -w http_only.pcap <span class="string">&#x27;tcp port 80 or tcp port 443&#x27;</span></span><br><span class="line">tcpdump -r large_capture.pcap -w dns_only.pcap <span class="string">&#x27;udp port 53&#x27;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>按会话提取特定流量</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap -w specific_conv.pcap <span class="string">&#x27;host 192.168.1.100 and host 192.168.1.200&#x27;</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="3-初步分析"><a href="#3-初步分析" class="headerlink" title="3. 初步分析"></a>3. 初步分析</h3><ul>
-<li><p><strong>识别主要协议分布</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z io,phs</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>识别高流量主机</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z endpoints,ip</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查找错误和异常</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.analysis.flags&quot;</span> -T fields -e frame.number -e frame.time -e ip.src -e ip.dst -e tcp.analysis.flags</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="4-深入分析"><a href="#4-深入分析" class="headerlink" title="4. 深入分析"></a>4. 深入分析</h3><ul>
-<li><p><strong>分析特定连接</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;ip.addr==192.168.1.100 &amp;&amp; ip.addr==192.168.1.200&quot;</span> -O tcp</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>提取应用层数据</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;http&quot;</span> -T fields -e frame.time -e ip.src -e http.request.method -e http.request.uri -e http.response.code</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>分析TCP会话性能</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z conv,tcp</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="5-可视化和图形分析"><a href="#5-可视化和图形分析" class="headerlink" title="5. 可视化和图形分析"></a>5. 可视化和图形分析</h3><ul>
-<li><strong>使用Wireshark图形界面</strong>进行交互式分析</li>
-<li><strong>使用termshark</strong>进行终端内图形分析</li>
-<li><strong>构建流量图表</strong>：使用tshark导出数据后利用Python或R进行可视化</li>
-</ul>
-<h2 id="根据特定时间定位问题"><a href="#根据特定时间定位问题" class="headerlink" title="根据特定时间定位问题"></a>根据特定时间定位问题</h2><p>在网络问题排查中，时间是关键线索。以下是根据时间定位问题的有效方法：</p>
-<h3 id="1-时间窗口提取"><a href="#1-时间窗口提取" class="headerlink" title="1. 时间窗口提取"></a>1. 时间窗口提取</h3><ul>
-<li><p><strong>提取特定时间窗口的流量</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取2025年8月11日15:30到15:35之间的所有数据包</span></span><br><span class="line">editcap -A <span class="string">&quot;2025-08-11 15:30:00&quot;</span> -B <span class="string">&quot;2025-08-11 15:35:00&quot;</span> large_capture.pcap time_window.pcap</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>通过精确的开始结束时间戳提取</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取时间戳在1691757000到1691757300之间的数据包</span></span><br><span class="line">tcpdump -r large_capture.pcap -w time_slice.pcap <span class="string">&quot;frame.time_epoch &gt;= 1691757000 and frame.time_epoch &lt;= 1691757300&quot;</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="2-基于时间的过滤"><a href="#2-基于时间的过滤" class="headerlink" title="2. 基于时间的过滤"></a>2. 基于时间的过滤</h3><ul>
-<li><strong>使用tcpdump过滤特定时间点附近的数据包</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看特定时间点前后5秒的数据包</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;frame.time &gt;= \&quot;2025-08-11 15:30:45\&quot; and frame.time &lt;= \&quot;2025-08-11 15:30:55\&quot;&quot;</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="3-构建时间轴分析"><a href="#3-构建时间轴分析" class="headerlink" title="3. 构建时间轴分析"></a>3. 构建时间轴分析</h3><ul>
-<li><p><strong>生成关键事件的时间轴</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取HTTP错误响应并按时间排序</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;http.response.code &gt;= 400&quot;</span> -T fields -e frame.time -e ip.src -e http.response.code -e http.request.uri</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>分析特定时间前后的TCP重传</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找目标时间段内的TCP重传</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.analysis.retransmission and frame.time &gt;= \&quot;2025-08-11 15:30:00\&quot; and frame.time &lt;= \&quot;2025-08-11 15:31:00\&quot;&quot;</span> -T fields -e frame.time -e ip.src -e ip.dst</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="4-并行事件分析"><a href="#4-并行事件分析" class="headerlink" title="4. 并行事件分析"></a>4. 并行事件分析</h3><ul>
-<li><strong>比较不同协议在同一时间窗口的行为</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取相同时间段内的DNS查询和HTTP请求</span></span><br><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;(dns or http) and frame.time &gt;= \&quot;2025-08-11 15:30:00\&quot; and frame.time &lt;= \&quot;2025-08-11 15:31:00\&quot;&quot;</span> -T fields -e frame.time -e frame.protocols</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="5-识别时间异常"><a href="#5-识别时间异常" class="headerlink" title="5. 识别时间异常"></a>5. 识别时间异常</h3><ul>
-<li><strong>找出响应时间异常的请求</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析HTTP请求-响应对，找出延迟高的交互</span></span><br><span class="line">tshark -r large_capture.pcap -q -z http,tree</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="常用工具和命令"><a href="#常用工具和命令" class="headerlink" title="常用工具和命令"></a>常用工具和命令</h2><h3 id="基础工具"><a href="#基础工具" class="headerlink" title="基础工具"></a>基础工具</h3><ol>
-<li><p><strong>tcpdump</strong> - 命令行数据包分析器</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tcpdump -r file.pcap [filter]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看HTTP流量</span></span><br><span class="line">tcpdump -r file.pcap -s 0 -A <span class="string">&#x27;tcp port 80&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加时间戳</span></span><br><span class="line">tcpdump -r file.pcap -tttt</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>tshark</strong> - Wireshark的命令行版本</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tshark -r file.pcap [options] [filter]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取特定字段</span></span><br><span class="line">tshark -r file.pcap -T fields -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计分析</span></span><br><span class="line">tshark -r file.pcap -q -z io,phs</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>Wireshark</strong> - 图形界面分析工具</p>
-<ul>
-<li>强大的过滤功能</li>
-<li>色彩编码的数据包</li>
-<li>协议解析</li>
-<li>会话追踪功能</li>
-</ul>
-</li>
-<li><p><strong>termshark</strong> - 终端中的类Wireshark界面</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">termshark -r file.pcap</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>tcpflow</strong> - 重建和提取TCP会话</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpflow -r file.pcap -o output_dir</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="专业工具"><a href="#专业工具" class="headerlink" title="专业工具"></a>专业工具</h3><ol>
-<li><p><strong>editcap</strong> - 编辑和转换捕获文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按时间分割</span></span><br><span class="line">editcap -A <span class="string">&quot;2025-08-11 15:30:00&quot;</span> -B <span class="string">&quot;2025-08-11 15:35:00&quot;</span> input.pcap output.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按数量分割</span></span><br><span class="line">editcap -c 1000 input.pcap output.pcap</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>capinfos</strong> - 显示捕获文件信息</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">capinfos file.pcap</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>mergecap</strong> - 合并捕获文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mergecap -w merged.pcap input1.pcap input2.pcap</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>TraceWrangler</strong> - 大型捕获文件处理工具</p>
-</li>
-<li><p><strong>NetworkMiner</strong> - 网络取证分析工具</p>
-</li>
-</ol>
-<h2 id="性能优化建议"><a href="#性能优化建议" class="headerlink" title="性能优化建议"></a>性能优化建议</h2><p>处理大型PCAP文件时的性能优化：</p>
-<ol>
-<li><p><strong>硬件考虑</strong></p>
-<ul>
-<li>使用SSD存储加速读取</li>
-<li>增加RAM以处理大文件</li>
-<li>利用多核处理器进行并行分析</li>
-</ul>
-</li>
-<li><p><strong>分析策略</strong></p>
-<ul>
-<li>先分割成小文件再分析</li>
-<li>使用命令行工具替代图形界面处理初步分析</li>
-<li>限制提取的数据包数量和字段</li>
-</ul>
-</li>
-<li><p><strong>索引和缓存</strong></p>
-<ul>
-<li>为大型PCAP文件创建索引<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用Wireshark创建索引</span></span><br><span class="line">tshark -r large_capture.pcap -o <span class="string">&quot;gui.column.format:\&quot;Time\&quot;,\&quot;%t\&quot;&quot;</span> -w indexed_capture.pcapng</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-<li><p><strong>使用流式处理</strong></p>
-<ul>
-<li>避免一次性加载整个文件</li>
-<li>利用管道处理数据<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r large_capture.pcap | grep <span class="string">&quot;pattern&quot;</span> | <span class="built_in">head</span> -100</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-</ol>
-<h2 id="常见问题分析方法"><a href="#常见问题分析方法" class="headerlink" title="常见问题分析方法"></a>常见问题分析方法</h2><h3 id="网络延迟问题"><a href="#网络延迟问题" class="headerlink" title="网络延迟问题"></a>网络延迟问题</h3><ol>
-<li><p><strong>TCP往返时间分析</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -q -z io,<span class="built_in">stat</span>,0.1,<span class="string">&quot;SUM(tcp.analysis.ack_rtt)tcp.analysis.ack_rtt&quot;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查找连接建立延迟</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1&quot;</span> -T fields -e frame.time -e tcp.time_delta</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="连接问题"><a href="#连接问题" class="headerlink" title="连接问题"></a>连接问题</h3><ol>
-<li><p><strong>查找TCP重置</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.flags.reset==1&quot;</span> -T fields -e frame.time -e ip.src -e ip.dst</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>分析TCP连接建立失败</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;tcp.flags.syn==1 and !tcp.analysis.duplicate_ack&quot;</span> -T fields -e frame.number -e frame.time -e ip.src -e tcp.srcport -e ip.dst -e tcp.dstport</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="应用层问题"><a href="#应用层问题" class="headerlink" title="应用层问题"></a>应用层问题</h3><ol>
-<li><p><strong>HTTP错误分析</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;http.response.code &gt;= 400&quot;</span> -T fields -e frame.time -e ip.src -e http.response.code -e http.request.uri</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>DNS解析问题</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r large_capture.pcap -Y <span class="string">&quot;dns.flags.rcode != 0&quot;</span> -T fields -e frame.time -e ip.src -e dns.qry.name -e dns.flags.rcode</span><br></pre></td></tr></table></figure></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1777,7 +1664,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">153</span>
+          <span class="site-state-item-count">154</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

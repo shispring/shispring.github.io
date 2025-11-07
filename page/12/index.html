@@ -184,6 +184,117 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E4%BA%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E4%BA%8C/" class="post-title-link" itemprop="url">k8s最佳实践(二)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-08 11:15:07 / 修改时间：11:16:04" itemprop="dateCreated datePublished" datetime="2024-11-08T11:15:07+08:00">2024-11-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Kubernetes 中，Network Policies、Admission Webhooks 和 Admission Controllers 是实现集群安全、资源控制与策略验证的关键部分。以下是关于这几项功能的实践总结：</p>
+<ol>
+<li>常见 Network Policies 策略</li>
+</ol>
+<p>Network Policies 是基于命名空间的网络隔离策略，通过设置 Pod 的入站和出站流量规则来控制网络访问。常见策略及其特点如下：</p>
+<pre><code>•	默认隔离：通过创建一个 Network Policy 将所有 ingress 或 egress 设置为空，即默认阻止流量，只有明确允许的流量才能访问。这在实际应用中非常适合对敏感服务进行隔离，减少网络攻击面。
+•	特定端口限制：只允许某些端口的入站流量。例如，将数据库服务的 Network Policy 配置为只允许从特定应用 Pod 的请求，并限制在特定的端口（如 3306）上连接。这种策略有效地减少了开放端口的数量，提高了安全性。
+•	基于标签的策略：在 Network Policies 中，基于 Pod 标签来允许流量。这使得可以灵活地控制服务之间的访问，例如允许同一应用的多个组件互相通信，但限制外部流量。
+•	跨命名空间的访问控制：默认情况下，Network Policies 只在当前命名空间内生效。对于需要跨命名空间的访问，可以通过 namespaceSelector 指定允许的命名空间流量。此策略适用于多租户环境中，确保各租户之间的隔离性。
+•	双向隔离（Ingress 和 Egress）：一些应用场景需要双向流量控制。例如，限制应用 Pod 只能从特定 IP 段或外部服务获得数据，并控制它们的流出流量。这有助于防止敏感信息泄露，并减少外部威胁。
+•	CIDR 限制：通过 CIDR 范围控制 IP 地址访问，例如仅允许来自某一特定子网的流量。对于需要局部网络保护的 Pod，这种策略可有效阻止未经允许的访问。
+</code></pre>
+<p>关注点：</p>
+<pre><code>•	优先级：Network Policies 不具备优先级，策略应用是基于 “允许优先”。多条策略的组合可能会导致意外的流量过滤或开放。
+•	性能：在大型集群中，复杂的 Network Policies 可能影响网络性能，尤其是基于大量 IP 地址或复杂标签的规则。
+•	兼容性：不同 CNI 插件（如 Calico、Weave）支持的 Network Policies 细节上可能存在差异，需确保策略兼容性。
+</code></pre>
+<ol start="2">
+<li>Admission Webhook 注意事项</li>
+</ol>
+<p>Admission Webhook 是在资源创建或更新请求达到 API Server 时，对其进行拦截和动态处理的一种机制。它分为两类：Validating Webhook（用于验证请求合法性）和 Mutating Webhook（用于动态修改请求）。</p>
+<pre><code>•	动态修改资源：Mutating Webhook 可以在创建资源时自动注入一些字段（如默认镜像拉取策略、标签等），适合自动化配置的场景。实践中，如 Sidecar 容器的自动注入可通过此功能实现。
+•	顺序和优先级：多个 Admission Webhook 的执行是无序的，如果有依赖关系，需注意可能的顺序冲突。例如，确保 Mutating Webhook 在 Validating Webhook 之前触发，以避免未修改的资源触发不必要的验证错误。
+•	失败策略：在配置 Admission Webhook 时，可设置 failurePolicy 为 Ignore 或 Fail。在生产环境中，建议对非关键性检查使用 Ignore 以确保高可用性，对关键检查（如安全性验证）使用 Fail。
+•	性能影响：Admission Webhook 会影响 API Server 的响应时间，尤其是当 Webhook 服务响应延迟较高时。在实践中可通过减少 Webhook 校验的资源范围或避免阻塞性请求来优化性能。
+•	兼容性：Admission Webhook 需要 K8s 1.9 以上版本支持，对低版本集群可能需要其他认证或审计机制替代。
+</code></pre>
+<ol start="3">
+<li>Admission Controller 的注意事项</li>
+</ol>
+<p>Admission Controller 是 Kubernetes 中用于在 API Server 处理请求的过程中动态拦截和检查资源配置的组件。它内置了一系列控制器，负责配置、验证和强制执行集群策略。</p>
+<pre><code>•	PodSecurityPolicy（PSP）：限制 Pod 安全上下文（如运行用户、特权权限等），用于提升集群安全性。PSP 是一种有效的权限控制工具，但它的使用较复杂，容易导致权限不足的 Pod 无法创建。PSP 从 Kubernetes 1.21 开始已被标记为弃用，建议使用 OPA Gatekeeper 替代实现。
+•	ResourceQuota：通过限制命名空间的资源上限（如 CPU、内存、对象数量等），防止资源滥用。设置时需要合理配置，以避免单一命名空间的资源超额导致其他服务受影响。特别是在多租户集群中，有效的 ResourceQuota 是资源控制的关键。
+•	LimitRange：在 Pod 或容器级别设置资源的最小、最大请求值，防止资源不足或资源浪费。开发中应确保合理的默认值，避免 Pod 配置过于宽泛或局限。
+•	ImagePolicyWebhook：控制镜像的使用，可以防止拉取未经批准或不安全的镜像。适用于需要集中控制镜像仓库访问的场景，提升集群的整体安全性。
+•	NamespaceLifecycle：确保在删除命名空间时清理相关资源，以避免资源泄漏。此 Admission Controller 对动态调整命名空间的生命周期管理尤为重要。
+</code></pre>
+<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/frc-c9ec2afa9d8d6c07ac428c1aea35f1ea.jpeg" alt="webhook1" title="webhook1"></p>
+<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/admission-controller-phases.png" alt="webhook2" title="webhook2"></p>
+<ol start="4">
+<li><p>总结与最佳实践</p>
+<p> •	分层防护：结合 Network Policies、RBAC、PSP 等，形成多层次的集群安全体系。<br> •	测试和验证：在生产集群应用策略前，可使用沙盒环境测试 Admission Webhook 和 Network Policies 的效果，以避免策略冲突导致服务中断。<br> •	性能与可用性：确保 Admission Webhook 的执行快速、稳定，避免对集群的可用性产生影响。</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1238,109 +1349,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/24/linux-%E5%B7%A5%E5%85%B7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/24/linux-%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">linux 工具</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-10-24 17:39:29" itemprop="dateCreated datePublished" datetime="2024-10-24T17:39:29+08:00">2024-10-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-11-07 17:14:53" itemprop="dateModified" datetime="2025-11-07T17:14:53+08:00">2025-11-07</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><ul>
-<li>yq</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#https://github.com/mikefarah/yq/releases</span></span><br><span class="line">wget https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line">tar vxf yq_linux_amd64.tar.gz ./</span><br><span class="line"><span class="built_in">mv</span> ./yq_linux_amd64 /usr/local/bin/yq</span><br></pre></td></tr></table></figure>
-
-<h2 id="ping加时间戳"><a href="#ping加时间戳" class="headerlink" title="ping加时间戳"></a>ping加时间戳</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># https://www.wlbcoder.com/cn/2020/08/experience-in-shell-programming/</span><br><span class="line"></span><br><span class="line">yum -y install epel-release</span><br><span class="line">--------------------------</span><br><span class="line">#如果安装失败</span><br><span class="line"># Step 1. 安装 EPEL8 仓库</span><br><span class="line">yum install -y https://mirrors.aliyun.com/epel/epel-release-latest-8.noarch.rpm</span><br><span class="line"></span><br><span class="line"># Step 2. 列出仓库</span><br><span class="line">yum repolist | grep epel</span><br><span class="line"></span><br><span class="line"># Step 3. 更新缓存</span><br><span class="line">yum makecache</span><br><span class="line"></span><br><span class="line"># Step 4. 安装 dnsperf</span><br><span class="line">yum install -y dnsperf</span><br><span class="line">--------------------------</span><br><span class="line"></span><br><span class="line">yum -y install moreutils</span><br><span class="line">ping baidu.com | ts &#x27;[%Y-%m-%d %H:%M:%S]&#x27;</span><br><span class="line"></span><br><span class="line">#或者</span><br><span class="line">ping baidu.com | awk &#x27;&#123; print strftime(&quot;%Y.%m.%d %H:%M:%S&quot;,systime())&quot;\t&quot; $0; fflush() &#125;&#x27;</span><br></pre></td></tr></table></figure>
-
-<h2 id="pstree"><a href="#pstree" class="headerlink" title="pstree"></a>pstree</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pstree -asp `echo $$`</span><br><span class="line"></span><br><span class="line">systemctl status sshd</span><br><span class="line"></span><br><span class="line">pstree -asp &lt;pid&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="script用法-输出内容到文件"><a href="#script用法-输出内容到文件" class="headerlink" title="script用法(输出内容到文件)"></a>script用法(输出内容到文件)</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">script -q image-info.txt</span><br><span class="line">cat /etc/os-release</span><br><span class="line">uname -r</span><br><span class="line">cat /etc/resolv.conf</span><br><span class="line">cat /etc/docker/daemon.json</span><br><span class="line">rpm -qa | grep -E &quot;docker|docker-compose|telnet|nslookup|toa|tree|jq&quot; | sort</span><br><span class="line">cat /etc/sysconfig/network-scripts/ifcfg-eth0</span><br><span class="line">docker version</span><br><span class="line">systemctl is-enabled docker</span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="rpm"><a href="#rpm" class="headerlink" title="rpm"></a>rpm</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#查看依赖</span><br><span class="line">rpm -qpR docker-ce-26.1.3-1.el8.x86_64.rpm</span><br><span class="line"></span><br><span class="line">#查询软件包的详细信息</span><br><span class="line">rpm -qi xxx</span><br><span class="line"></span><br><span class="line">#查询未安装软件包的详细信息</span><br><span class="line">rpm -qip 包全名</span><br><span class="line"></span><br><span class="line">yum deplist xxx</span><br></pre></td></tr></table></figure>
-
-<h2 id="端口转发代理"><a href="#端口转发代理" class="headerlink" title="端口转发代理"></a>端口转发代理</h2><h3 id="ssh"><a href="#ssh" class="headerlink" title="ssh"></a>ssh</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#配置代理，从本机端口转发主机A</span><br><span class="line">ssh -f -N -g -L 0.0.0.0:8080:&lt;A_HOST_IP&gt;:80 -L 0.0.0.0:8443:&lt;A_HOST_IP&gt;:443 root@&lt;A_HOST_IP&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="iptables（简单的端口映射，iptables-是最轻量级的方案）"><a href="#iptables（简单的端口映射，iptables-是最轻量级的方案）" class="headerlink" title="iptables（简单的端口映射，iptables 是最轻量级的方案）"></a>iptables（简单的端口映射，iptables 是最轻量级的方案）</h3><p>假设</p>
-<ul>
-<li>B_HOST 是执行 ssh -L 的机器。</li>
-<li>A_HOST_IP 是远程目标机器（你要转发流量到这里）。</li>
-<li>B_HOST 监听 8080 和 8443 端口，并将流量转发到 A_HOST_IP 的 80 和 443 端口。</li>
-</ul>
-<p>配置 iptables 规则,在 B_HOST 上执行：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># 开启 IP 转发（如果未启用）</span><br><span class="line">echo 1 &gt; /proc/sys/net/ipv4/ip_forward</span><br><span class="line">sysctl -w net.ipv4.ip_forward=1</span><br><span class="line"></span><br><span class="line"># 允许将 8080 端口的流量转发到 A_HOST_IP:80</span><br><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to-destination &lt;A_HOST_IP&gt;:80</span><br><span class="line"></span><br><span class="line"># 允许将 8443 端口的流量转发到 A_HOST_IP:443</span><br><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 8443 -j DNAT --to-destination &lt;A_HOST_IP&gt;:443</span><br><span class="line"></span><br><span class="line"># 允许服务器本身的流量也能转发</span><br><span class="line">iptables -t nat -A OUTPUT -p tcp --dport 8080 -j DNAT --to-destination &lt;A_HOST_IP&gt;:80</span><br><span class="line">iptables -t nat -A OUTPUT -p tcp --dport 8443 -j DNAT --to-destination &lt;A_HOST_IP&gt;:443</span><br><span class="line"></span><br><span class="line"># 伪装 SNAT，保证返回数据包正确回到源客户端</span><br><span class="line">iptables -t nat -A POSTROUTING -p tcp -d &lt;A_HOST_IP&gt; --dport 80 -j MASQUERADE</span><br><span class="line">iptables -t nat -A POSTROUTING -p tcp -d &lt;A_HOST_IP&gt; --dport 443 -j MASQUERADE</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#持久化操作</span><br><span class="line">yum install -y iptables-services</span><br><span class="line">systemctl enable iptables</span><br><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
-<h3 id="nginx（如需要处理-HTTP-HTTPS，如-修改请求头、做负载均衡、SSL-终止，nginx-合适）"><a href="#nginx（如需要处理-HTTP-HTTPS，如-修改请求头、做负载均衡、SSL-终止，nginx-合适）" class="headerlink" title="nginx（如需要处理 HTTP&#x2F;HTTPS，如 修改请求头、做负载均衡、SSL 终止，nginx 合适）"></a>nginx（如需要处理 HTTP&#x2F;HTTPS，如 修改请求头、做负载均衡、SSL 终止，nginx 合适）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#配置 nginx,编辑 /etc/nginx/nginx.conf 或 /etc/nginx/conf.d/proxy.conf，添加以下内容：</span><br><span class="line">server &#123;</span><br><span class="line">    listen 8080;</span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass http://&lt;A_HOST_IP&gt;:80;</span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">        proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen 8443 ssl;</span><br><span class="line">    ssl_certificate /etc/nginx/cert.pem;  # 需要有效的 SSL 证书</span><br><span class="line">    ssl_certificate_key /etc/nginx/cert.key;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass https://&lt;A_HOST_IP&gt;:443;</span><br><span class="line">        proxy_ssl_verify off;</span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">        proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">## 重启nginx</span><br><span class="line">systemctl restart nginx</span><br><span class="line">systemctl enable nginx</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="find-grep-xargs"><a href="#find-grep-xargs" class="headerlink" title="find&#x2F;grep&#x2F;xargs"></a>find&#x2F;grep&#x2F;xargs</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://mp.weixin.qq.com/s/UQjMicPWCXSZ6I2XY3kvLw</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="大文件切割机查询"><a href="#大文件切割机查询" class="headerlink" title="大文件切割机查询"></a>大文件切割机查询</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#切割</span><br><span class="line">1、普通文件：</span><br><span class="line">按大小切</span><br><span class="line">split -b 10k third.yanyingapi.log.20240122 -d -a 3 yanying_split_size</span><br><span class="line"></span><br><span class="line">按行数切</span><br><span class="line">split -l 10000 third.yanyingapi.log.20240122 -d -a 3 yanying_split_size</span><br><span class="line"></span><br><span class="line">2、压缩文件：使用管道符“|”注意使用“-”代替文件名</span><br><span class="line">1、按行切割</span><br><span class="line">less third.yanyingapi.log.20240122.gz | split -l 10000000 - -d -a 3 yanying_20240122_line</span><br><span class="line"></span><br><span class="line">2、按文件大小切割</span><br><span class="line">less third.yanyingapi.log.20240122.gz | split -b 400M - -d -a 3 yanying_20240122_size</span><br><span class="line"></span><br><span class="line">#sed截取一定时段的日志</span><br><span class="line">注意事项：</span><br><span class="line">(1)开始时间如果在文件中不存在，则查不到数据</span><br><span class="line">(2)可以不具体到秒，模糊查询，例如 09:35：这种</span><br><span class="line"></span><br><span class="line">1、按照模糊时间</span><br><span class="line">sed -n &#x27;/2024-01-24 18:38:/,/2024-01-24 18:44:/p&#x27; sql.query.log.20240124 &gt; test.log</span><br><span class="line"></span><br><span class="line">2、按照正则，不知道具体时间，可以使用正则表达式来查询</span><br><span class="line">sed -n &#x27;/2024-01-24 18:[0-3][0-6]/p&#x27; sql.query.log.20240124 &gt; test.log</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="ssh端口转发"><a href="#ssh端口转发" class="headerlink" title="ssh端口转发"></a>ssh端口转发</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -f -N -g -L 0.0.0.0:8080:11.10.10.10:80 -L 0.0.0.0:8443:11.10.10.10:443 root@11.10.10.10</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1412,7 +1420,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">153</span>
+          <span class="site-state-item-count">154</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

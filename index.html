@@ -184,6 +184,218 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/07/%E4%B8%AD%E6%96%AD%E6%95%85%E4%BA%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/07/%E4%B8%AD%E6%96%AD%E6%95%85%E4%BA%8B/" class="post-title-link" itemprop="url">中断故事</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-11-07 22:15:24 / 修改时间：22:17:26" itemprop="dateCreated datePublished" datetime="2025-11-07T22:15:24+08:00">2025-11-07</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="NAPI机制详解与快递站的故事-📦"><a href="#NAPI机制详解与快递站的故事-📦" class="headerlink" title="NAPI机制详解与快递站的故事 📦"></a>NAPI机制详解与快递站的故事 📦</h1><h2 id="一、NAPI在系统中的存在形式"><a href="#一、NAPI在系统中的存在形式" class="headerlink" title="一、NAPI在系统中的存在形式"></a>一、NAPI在系统中的存在形式</h2><h3 id="❓-NAPI是进程吗？"><a href="#❓-NAPI是进程吗？" class="headerlink" title="❓ NAPI是进程吗？"></a>❓ NAPI是进程吗？</h3><p><strong>不是独立进程！</strong> NAPI是Linux内核网络子系统的一个<strong>机制&#x2F;框架</strong>，而不是一个可见的进程。</p>
+<h3 id="🔍-在系统中如何体现？"><a href="#🔍-在系统中如何体现？" class="headerlink" title="🔍 在系统中如何体现？"></a>🔍 在系统中如何体现？</h3><h4 id="1-软中断上下文中运行"><a href="#1-软中断上下文中运行" class="headerlink" title="1. 软中断上下文中运行"></a>1. <strong>软中断上下文中运行</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看软中断处理线程（每个CPU一个）</span></span><br><span class="line">ps aux | grep ksoftirqd</span><br></pre></td></tr></table></figure>
+<p>输出示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root         12  0.0  0.0      0     0 ?        S    10:00   0:00 [ksoftirqd/0]</span><br><span class="line">root         18  0.0  0.0      0     0 ?        S    10:00   0:00 [ksoftirqd/1]</span><br><span class="line">root         24  0.0  0.0      0     0 ?        S    10:00   0:00 [ksoftirqd/2]</span><br></pre></td></tr></table></figure>
+
+<p><strong>NAPI就运行在这些 <code>ksoftirqd</code> 线程中！</strong></p>
+<h4 id="2-每个网卡有自己的NAPI结构"><a href="#2-每个网卡有自己的NAPI结构" class="headerlink" title="2. 每个网卡有自己的NAPI结构"></a>2. <strong>每个网卡有自己的NAPI结构</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看网卡的NAPI统计</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/softnet_stat</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-可以通过内核参数调整"><a href="#3-可以通过内核参数调整" class="headerlink" title="3. 可以通过内核参数调整"></a>3. <strong>可以通过内核参数调整</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看NAPI相关参数</span></span><br><span class="line">sysctl -a | grep net.core</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="二、NAPI工作原理详解"><a href="#二、NAPI工作原理详解" class="headerlink" title="二、NAPI工作原理详解"></a>二、NAPI工作原理详解</h2><h3 id="🎯-核心思想：智能切换"><a href="#🎯-核心思想：智能切换" class="headerlink" title="🎯 核心思想：智能切换"></a>🎯 核心思想：智能切换</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">低负载（包少） ──→ 中断模式（来一个处理一个）</span><br><span class="line">                     ↓</span><br><span class="line">                  负载上升</span><br><span class="line">                     ↓</span><br><span class="line">高负载（包多） ──→ 轮询模式（定时批量处理）</span><br></pre></td></tr></table></figure>
+
+<h3 id="📊-工作流程图"><a href="#📊-工作流程图" class="headerlink" title="📊 工作流程图"></a>📊 工作流程图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">包到达 → 硬中断 → 触发NAPI → 开启轮询 → 批量处理</span><br><span class="line">                      ↓</span><br><span class="line">                  处理完毕</span><br><span class="line">                      ↓</span><br><span class="line">                队列空了 → 关闭轮询 → 等待下次中断</span><br></pre></td></tr></table></figure>
+
+<h3 id="💡-为什么这样设计？"><a href="#💡-为什么这样设计？" class="headerlink" title="💡 为什么这样设计？"></a>💡 为什么这样设计？</h3><h4 id="问题1：纯中断模式的问题"><a href="#问题1：纯中断模式的问题" class="headerlink" title="问题1：纯中断模式的问题"></a><strong>问题1：纯中断模式的问题</strong></h4><ul>
+<li>每来1个包就中断1次</li>
+<li>高负载时（每秒100万个包）&#x3D; 100万次中断</li>
+<li>CPU被中断打断，来回切换开销巨大</li>
+</ul>
+<h4 id="问题2：纯轮询模式的问题"><a href="#问题2：纯轮询模式的问题" class="headerlink" title="问题2：纯轮询模式的问题"></a><strong>问题2：纯轮询模式的问题</strong></h4><ul>
+<li>没包也要不停查看，浪费CPU</li>
+<li>低负载时响应延迟高</li>
+</ul>
+<h4 id="NAPI的解决方案：混合模式"><a href="#NAPI的解决方案：混合模式" class="headerlink" title="NAPI的解决方案：混合模式"></a><strong>NAPI的解决方案：混合模式</strong></h4><ul>
+<li><strong>低负载</strong>：用中断（响应快）</li>
+<li><strong>高负载</strong>：用轮询（效率高）</li>
+<li><strong>动态切换</strong>：自动适应</li>
+</ul>
+<h3 id="🔧-NAPI的实现细节"><a href="#🔧-NAPI的实现细节" class="headerlink" title="🔧 NAPI的实现细节"></a>🔧 NAPI的实现细节</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 伪代码示例</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">napi_struct</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">poll_list</span>;</span>  <span class="comment">// 轮询列表</span></span><br><span class="line">    <span class="type">int</span> (*poll)(<span class="keyword">struct</span> napi_struct *, <span class="type">int</span>);  <span class="comment">// 轮询函数</span></span><br><span class="line">    <span class="type">int</span> weight;  <span class="comment">// 每次轮询处理的最大包数</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 网卡驱动注册NAPI</span></span><br><span class="line">netif_napi_add(dev, &amp;priv-&gt;napi, my_poll_function, <span class="number">64</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 中断处理函数</span></span><br><span class="line">irq_handler() &#123;</span><br><span class="line">    disable_irq();  <span class="comment">// 关闭网卡中断</span></span><br><span class="line">    napi_schedule(&amp;priv-&gt;napi);  <span class="comment">// 启动NAPI轮询</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NAPI轮询函数</span></span><br><span class="line">my_poll_function(<span class="keyword">struct</span> napi_struct *napi, <span class="type">int</span> budget) &#123;</span><br><span class="line">    <span class="type">int</span> work_done = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (work_done &lt; budget) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!more_packets())</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        process_packet();</span><br><span class="line">        work_done++;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (work_done &lt; budget) &#123;</span><br><span class="line">        napi_complete(napi);  <span class="comment">// 处理完了，关闭轮询</span></span><br><span class="line">        enable_irq();  <span class="comment">// 重新开启中断</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> work_done;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、快递站的完整故事-📮"><a href="#三、快递站的完整故事-📮" class="headerlink" title="三、快递站的完整故事 📮"></a>三、快递站的完整故事 📮</h2><h3 id="🏢-故事背景设定"><a href="#🏢-故事背景设定" class="headerlink" title="🏢 故事背景设定"></a>🏢 故事背景设定</h3><p><strong>人物角色：</strong></p>
+<ul>
+<li><strong>网线</strong> &#x3D; 高速公路</li>
+<li><strong>网卡（NIC1）</strong> &#x3D; 小区快递接收点</li>
+<li><strong>门卫</strong> &#x3D; 硬件中断</li>
+<li><strong>DMA搬运工</strong> &#x3D; 自动传送带机器人</li>
+<li><strong>Ring Buffer</strong> &#x3D; 环形旋转仓库（8个格子）</li>
+<li><strong>NAPI巡检员</strong> &#x3D; 智能快递管理员</li>
+<li><strong>软中断处理员</strong> &#x3D; 后台分拣中心</li>
+<li><strong>协议栈</strong> &#x3D; 快递最后一公里投递员</li>
+<li><strong>应用程序</strong> &#x3D; 收件人</li>
+</ul>
+<hr>
+<h3 id="📖-故事正文"><a href="#📖-故事正文" class="headerlink" title="📖 故事正文"></a>📖 故事正文</h3><h4 id="第一幕：平静的早晨（低负载）"><a href="#第一幕：平静的早晨（低负载）" class="headerlink" title="第一幕：平静的早晨（低负载）"></a><strong>第一幕：平静的早晨（低负载）</strong></h4><p>早上8点，阳光明媚。小区快递接收点很安静，偶尔有一两个快递到达。</p>
+<p><strong>门卫老王（硬件中断）</strong> 坐在门口，悠闲地喝着茶。</p>
+<p><em>叮咚！</em> 一个快递包裹从高速公路（网线）送到了接收点（网卡NIC1）。</p>
+<p><strong>老王（硬件中断）：</strong> “哎呀，有快递了！” 他立刻按响门铃（触发中断），通知楼上的管理中心。</p>
+<p><strong>DMA机器人（自动搬运工）</strong> 听到信号后，立刻启动，不需要任何人工操作，直接把包裹从接收点搬到了<strong>环形旋转仓库</strong>（Ring Buffer）的1号格子里。</p>
+<p><strong>老王快速登记：</strong> “1号包裹已入库！” 然后继续回去喝茶。</p>
+<p><strong>NAPI巡检员小李（轮询机制）</strong> 听到通知后过来查看：</p>
+<ul>
+<li>看了看仓库，只有1个包裹</li>
+<li>拿起包裹，交给<strong>后台分拣中心</strong>（软中断处理）</li>
+<li>分拣员快速处理，贴上标签，送给<strong>快递员</strong>（协议栈）</li>
+<li>快递员查看地址（IP层），确认楼号和房间号（TCP&#x2F;UDP层），最后敲门交给<strong>收件人</strong>（应用程序）</li>
+</ul>
+<p>小李处理完后说：**”仓库空了，我继续等老王通知吧。”** （关闭轮询，回到中断模式）</p>
+<hr>
+<h4 id="第二幕：双11爆仓（高负载）"><a href="#第二幕：双11爆仓（高负载）" class="headerlink" title="第二幕：双11爆仓（高负载）"></a><strong>第二幕：双11爆仓（高负载）</strong></h4><p>中午12点，双11促销开始了！快递像雪片一样飞来！</p>
+<p><em>叮咚！叮咚！叮咚！叮咚！</em> 每秒钟有<strong>成百上千个</strong>包裹到达！</p>
+<p><strong>老王（硬件中断）</strong> 急得满头大汗：</p>
+<ul>
+<li>“1号包裹到了！”（按门铃）</li>
+<li>“2号包裹到了！”（按门铃）</li>
+<li>“3号包裹到了！”（按门铃）</li>
+<li>…</li>
+</ul>
+<p>他发现自己<strong>光按门铃就按不过来</strong>了，手都快抽筋了！而且楼上的人也被频繁的门铃吵得工作效率下降！</p>
+<p><strong>这时，NAPI巡检员小李（智能管理员）发现了问题：</strong></p>
+<p><strong>小李：</strong> “老王，你别按了！我看这架势，包裹会源源不断来。你就专心让DMA机器人往仓库里放吧，我<strong>自己定时过来批量取</strong>就行了！”</p>
+<p><strong>老王：</strong> “好！那我就不按门铃了！” （<strong>关闭中断</strong>）</p>
+<p>于是，新的工作模式开始了：</p>
+<ol>
+<li><p><strong>DMA机器人</strong> 疯狂工作，不停地把包裹放入<strong>环形仓库</strong>的1→2→3→4→5→6→7→8→1→2…（循环使用）</p>
+</li>
+<li><p><strong>小李（NAPI轮询）</strong> 每隔一小段时间（比如几微秒）就来仓库看一眼：</p>
+<ul>
+<li>“哦，有64个包裹！” （budget&#x3D;64）</li>
+<li>一次性拿走64个，交给<strong>后台分拣中心</strong>（软中断）</li>
+<li>分拣中心开始批量处理：<ul>
+<li>贴标签（添加协议信息）</li>
+<li>分类（IP路由）</li>
+<li>装车（送入协议栈）</li>
+</ul>
+</li>
+<li><strong>快递员们</strong>（协议栈）批量投递到各家各户（应用程序）</li>
+</ul>
+</li>
+<li><p><strong>关键优化：</strong></p>
+<ul>
+<li>老王不用频繁按门铃了（减少中断开销）</li>
+<li>小李批量处理，效率高（一次拿64个）</li>
+<li>仓库满了也不怕，DMA会覆盖旧数据（Ring Buffer特性）</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4 id="第三幕：夜深人静（恢复低负载）"><a href="#第三幕：夜深人静（恢复低负载）" class="headerlink" title="第三幕：夜深人静（恢复低负载）"></a><strong>第三幕：夜深人静（恢复低负载）</strong></h4><p>晚上11点，双11活动结束，快递量骤减。</p>
+<p><strong>小李（NAPI）</strong> 又来巡检了：</p>
+<ul>
+<li>第1次：拿了20个包裹</li>
+<li>第2次：拿了5个包裹</li>
+<li>第3次：拿了1个包裹</li>
+<li>第4次：<strong>仓库空了！</strong></li>
+</ul>
+<p><strong>小李：</strong> “看来又恢复平静了。老王，你继续按门铃模式吧，我去休息了。”（<strong>关闭轮询，重新开启中断</strong>）</p>
+<p><strong>老王：</strong> “好嘞！” （<strong>恢复中断模式</strong>）</p>
+<p>系统又回到了开始的状态：有包裹就按门铃，NAPI按需响应。</p>
+<hr>
+<h2 id="四、关键知识点总结"><a href="#四、关键知识点总结" class="headerlink" title="四、关键知识点总结"></a>四、关键知识点总结</h2><h3 id="🎯-NAPI的精髓"><a href="#🎯-NAPI的精髓" class="headerlink" title="🎯 NAPI的精髓"></a>🎯 NAPI的精髓</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>模式</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>低负载</strong></td>
+<td>中断驱动</td>
+<td>响应快，不浪费CPU</td>
+</tr>
+<tr>
+<td><strong>高负载</strong></td>
+<td>轮询驱动</td>
+<td>减少中断，批量处理</td>
+</tr>
+<tr>
+<td><strong>切换时机</strong></td>
+<td>自动检测</td>
+<td>队列满→开轮询；队列空→关轮询</td>
+</tr>
+</tbody></table>
+<h3 id="🔑-记忆口诀"><a href="#🔑-记忆口诀" class="headerlink" title="🔑 记忆口诀"></a>🔑 记忆口诀</h3><p><strong>“包少按门铃，包多我自取”</strong></p>
+<ul>
+<li>包少（低负载）&#x3D; 中断模式（按门铃通知）</li>
+<li>包多（高负载）&#x3D; 轮询模式（主动批量取）</li>
+</ul>
+<h3 id="📊-性能对比"><a href="#📊-性能对比" class="headerlink" title="📊 性能对比"></a>📊 性能对比</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">纯中断模式：</span><br><span class="line">  1,000,000 包/秒 × 1 中断/包 = 1,000,000 次中断 😱</span><br><span class="line"></span><br><span class="line">NAPI混合模式：</span><br><span class="line">  1,000,000 包/秒 ÷ 64 包/批 = 15,625 次轮询 😊</span><br><span class="line">  </span><br><span class="line">性能提升：约 60 倍！</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、实战查看"><a href="#五、实战查看" class="headerlink" title="五、实战查看"></a>五、实战查看</h2><h3 id="查看NAPI统计"><a href="#查看NAPI统计" class="headerlink" title="查看NAPI统计"></a>查看NAPI统计</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看软中断统计</span></span><br><span class="line"><span class="built_in">cat</span> /proc/softirqs</span><br></pre></td></tr></table></figure>
+
+<h3 id="调整NAPI参数"><a href="#调整NAPI参数" class="headerlink" title="调整NAPI参数"></a>调整NAPI参数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每次轮询最多处理的包数（budget）</span></span><br><span class="line">sysctl net.core.netdev_budget=300</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每次轮询最长时间（微秒）</span></span><br><span class="line">sysctl net.core.netdev_budget_usecs=2000</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🎓-总结"><a href="#🎓-总结" class="headerlink" title="🎓 总结"></a>🎓 总结</h2><ul>
+<li><strong>NAPI不是进程</strong>，是运行在<code>ksoftirqd</code>内核线程中的机制</li>
+<li><strong>核心是智能切换</strong>：低负载用中断，高负载用轮询</li>
+<li><strong>快递站故事</strong>：老王（中断）和小李（轮询）配合，应对不同流量</li>
+<li><strong>性能提升</strong>：减少中断次数，提高批量处理效率</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/07/dnsperf%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1613,114 +1825,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">lsns命令使用指南与故障排查</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-09-16 10:49:11 / 修改时间：10:49:35" itemprop="dateCreated datePublished" datetime="2025-09-16T10:49:11+08:00">2025-09-16</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="lsns基础用法"><a href="#lsns基础用法" class="headerlink" title="lsns基础用法"></a>lsns基础用法</h2><h3 id="1-基本命令"><a href="#1-基本命令" class="headerlink" title="1. 基本命令"></a>1. 基本命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有命名空间</span></span><br><span class="line">lsns</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定进程的命名空间</span></span><br><span class="line">lsns -p &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定类型的命名空间</span></span><br><span class="line">lsns -t net        <span class="comment"># 网络命名空间</span></span><br><span class="line">lsns -t mnt        <span class="comment"># 挂载命名空间</span></span><br><span class="line">lsns -t pid        <span class="comment"># PID命名空间</span></span><br><span class="line">lsns -t user       <span class="comment"># 用户命名空间</span></span><br><span class="line">lsns -t uts        <span class="comment"># UTS命名空间</span></span><br><span class="line">lsns -t ipc        <span class="comment"># IPC命名空间</span></span><br><span class="line">lsns -t cgroup     <span class="comment"># cgroup命名空间</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示详细输出格式</span></span><br><span class="line">lsns -l            <span class="comment"># 长格式显示</span></span><br><span class="line">lsns -J            <span class="comment"># JSON格式输出</span></span><br><span class="line">lsns -r            <span class="comment"># 显示原始设备号</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示特定列</span></span><br><span class="line">lsns -o NS,TYPE,NPROCS,PID,USER,NETNSID,COMMAND</span><br><span class="line"></span><br><span class="line"><span class="comment"># 不显示头部</span></span><br><span class="line">lsns -n</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-高级用法"><a href="#2-高级用法" class="headerlink" title="2. 高级用法"></a>2. 高级用法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看特定命名空间的详细信息</span></span><br><span class="line">lsns --nsfs-file /proc/1/ns/net</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按类型和进程数排序</span></span><br><span class="line">lsns -t net -o NS,TYPE,NPROCS,PID,COMMAND | <span class="built_in">sort</span> -k3 -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器相关的命名空间</span></span><br><span class="line">lsns | grep docker</span><br><span class="line">lsns | grep containerd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看systemd相关命名空间</span></span><br><span class="line">lsns | grep systemd</span><br></pre></td></tr></table></figure>
-
-<h2 id="命名空间操作命令"><a href="#命名空间操作命令" class="headerlink" title="命名空间操作命令"></a>命名空间操作命令</h2><h3 id="1-进入命名空间"><a href="#1-进入命名空间" class="headerlink" title="1. 进入命名空间"></a>1. 进入命名空间</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进入特定进程的网络命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入多个命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n -p -m bash     <span class="comment"># 网络+PID+挂载</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入所有命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -a bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用ip命令进入网络命名空间</span></span><br><span class="line">ip netns <span class="built_in">exec</span> &lt;netns-name&gt; bash</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-查看命名空间详情"><a href="#2-查看命名空间详情" class="headerlink" title="2. 查看命名空间详情"></a>2. 查看命名空间详情</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看进程的命名空间文件</span></span><br><span class="line"><span class="built_in">ls</span> -la /proc/&lt;PID&gt;/ns/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络命名空间</span></span><br><span class="line">ip netns list</span><br><span class="line">ip netns show</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看挂载命名空间</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/mounts</span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/mountinfo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看PID命名空间</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/status | grep NSpid</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-命名空间监控"><a href="#3-命名空间监控" class="headerlink" title="3. 命名空间监控"></a>3. 命名空间监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实时监控命名空间变化</span></span><br><span class="line">watch -n 1 <span class="string">&#x27;lsns -t net&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看命名空间统计</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
-
-<h2 id="故障排查场景和命令清单"><a href="#故障排查场景和命令清单" class="headerlink" title="故障排查场景和命令清单"></a>故障排查场景和命令清单</h2><h3 id="🔍-场景1-容器网络问题"><a href="#🔍-场景1-容器网络问题" class="headerlink" title="🔍 场景1: 容器网络问题"></a>🔍 场景1: 容器网络问题</h3><p><strong>症状</strong>: 容器无法访问网络，DNS解析失败</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看容器网络命名空间</span></span><br><span class="line">docker inspect &lt;container&gt; | grep NetworkMode</span><br><span class="line">lsns -t net | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器网络命名空间排查</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -n bash</span><br><span class="line">ip addr show                    <span class="comment"># 查看网络接口</span></span><br><span class="line">ip route show                   <span class="comment"># 查看路由表</span></span><br><span class="line"><span class="built_in">cat</span> /etc/resolv.conf            <span class="comment"># 查看DNS配置</span></span><br><span class="line">ping 8.8.8.8                    <span class="comment"># 测试网络连通性</span></span><br><span class="line">nslookup google.com             <span class="comment"># 测试DNS解析</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 对比宿主机网络</span></span><br><span class="line"><span class="built_in">exit</span>  <span class="comment"># 退出容器网络命名空间</span></span><br><span class="line">ip addr show                    <span class="comment"># 宿主机网络接口</span></span><br><span class="line">ip route show                   <span class="comment"># 宿主机路由表</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="🔍-场景2-容器文件系统问题"><a href="#🔍-场景2-容器文件系统问题" class="headerlink" title="🔍 场景2: 容器文件系统问题"></a>🔍 场景2: 容器文件系统问题</h3><p><strong>症状</strong>: 容器内文件丢失，挂载点异常</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看挂载命名空间</span></span><br><span class="line">lsns -t mnt | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器挂载命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -m bash</span><br><span class="line">mount | grep &lt;path&gt;             <span class="comment"># 查看特定路径挂载</span></span><br><span class="line"><span class="built_in">df</span> -h                           <span class="comment"># 查看磁盘使用</span></span><br><span class="line">findmnt                         <span class="comment"># 详细挂载信息</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 对比宿主机挂载</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line">mount | grep &lt;container-volume&gt;</span><br><span class="line">docker inspect &lt;container&gt; | grep Mounts</span><br></pre></td></tr></table></figure>
-
-<h3 id="🔍-场景3-进程PID问题"><a href="#🔍-场景3-进程PID问题" class="headerlink" title="🔍 场景3: 进程PID问题"></a>🔍 场景3: 进程PID问题</h3><p><strong>症状</strong>: 容器内PID冲突，进程管理异常</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看PID命名空间</span></span><br><span class="line">lsns -t pid | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器PID命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -p bash</span><br><span class="line">ps aux                          <span class="comment"># 查看容器内进程</span></span><br><span class="line">pstree                          <span class="comment"># 进程树</span></span><br><span class="line"><span class="built_in">cat</span> /proc/1/cmdline             <span class="comment"># 容器内PID 1进程</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 查看宿主机视角的进程</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line">ps aux | grep &lt;container-name&gt;</span><br><span class="line">pstree -p &lt;container-pid&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="🔍-场景4-用户权限问题"><a href="#🔍-场景4-用户权限问题" class="headerlink" title="🔍 场景4: 用户权限问题"></a>🔍 场景4: 用户权限问题</h3><p><strong>症状</strong>: 容器内用户权限异常，文件访问被拒绝</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看用户命名空间</span></span><br><span class="line">lsns -t user | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查用户映射</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/uid_map</span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/gid_map</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 进入容器用户命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -U bash</span><br><span class="line"><span class="built_in">id</span>                              <span class="comment"># 查看当前用户</span></span><br><span class="line"><span class="built_in">whoami</span></span><br><span class="line"><span class="built_in">ls</span> -la /                        <span class="comment"># 查看文件权限</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="🔍-场景5-系统调用和cgroup问题"><a href="#🔍-场景5-系统调用和cgroup问题" class="headerlink" title="🔍 场景5: 系统调用和cgroup问题"></a>🔍 场景5: 系统调用和cgroup问题</h3><p><strong>症状</strong>: 容器资源限制异常，性能问题</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看cgroup命名空间</span></span><br><span class="line">lsns -t cgroup | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查cgroup配置</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/cgroup</span><br><span class="line">systemd-cgls | grep &lt;container&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 查看资源使用</span></span><br><span class="line">docker stats &lt;container&gt;</span><br><span class="line"><span class="built_in">cat</span> /sys/fs/cgroup/memory/docker/&lt;container-id&gt;/memory.usage_in_bytes</span><br><span class="line"><span class="built_in">cat</span> /sys/fs/cgroup/cpu/docker/&lt;container-id&gt;/cpu.shares</span><br></pre></td></tr></table></figure>
-
-<h3 id="🔍-场景6-Kubernetes-Pod网络问题"><a href="#🔍-场景6-Kubernetes-Pod网络问题" class="headerlink" title="🔍 场景6: Kubernetes Pod网络问题"></a>🔍 场景6: Kubernetes Pod网络问题</h3><p><strong>症状</strong>: Pod间通信失败，Service访问异常</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查找Pod进程</span></span><br><span class="line">kubectl get pods -o wide</span><br><span class="line">ps aux | grep &lt;pod-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 查看Pod网络命名空间</span></span><br><span class="line">PID=$(pgrep -f &lt;pod-container&gt;)</span><br><span class="line">lsns -t net | grep <span class="variable">$PID</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 进入Pod网络空间排查</span></span><br><span class="line">nsenter -t <span class="variable">$PID</span> -n bash</span><br><span class="line">ip addr show                    <span class="comment"># 查看Pod IP</span></span><br><span class="line">ip route show                   <span class="comment"># 查看路由</span></span><br><span class="line">iptables -L                     <span class="comment"># 查看防火墙规则（如果有权限）</span></span><br><span class="line">nslookup kubernetes.default     <span class="comment"># 测试集群DNS</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 查看CNI配置</span></span><br><span class="line"><span class="built_in">cat</span> /etc/cni/net.d/*            <span class="comment"># CNI插件配置</span></span><br><span class="line">ip <span class="built_in">link</span> show                    <span class="comment"># 网络设备</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="🔍-场景7-容器启动失败"><a href="#🔍-场景7-容器启动失败" class="headerlink" title="🔍 场景7: 容器启动失败"></a>🔍 场景7: 容器启动失败</h3><p><strong>症状</strong>: 容器启动后立即退出，状态异常</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看容器日志</span></span><br><span class="line">docker logs &lt;container&gt;</span><br><span class="line">kubectl logs &lt;pod&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 查看容器命名空间状态</span></span><br><span class="line">docker inspect &lt;container&gt; | grep State -A 10</span><br><span class="line">lsns | grep &lt;container-name&gt;    <span class="comment"># 看是否还有命名空间残留</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 模拟容器环境调试</span></span><br><span class="line">docker run -it --<span class="built_in">rm</span> &lt;image&gt; bash</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">kubectl run debug-pod --image=&lt;image&gt; -it --<span class="built_in">rm</span> -- bash</span><br></pre></td></tr></table></figure>
-
-<h2 id="命名空间排查最佳实践"><a href="#命名空间排查最佳实践" class="headerlink" title="命名空间排查最佳实践"></a>命名空间排查最佳实践</h2><h3 id="1-排查流程"><a href="#1-排查流程" class="headerlink" title="1. 排查流程"></a>1. 排查流程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Step 1: 识别问题进程</span></span><br><span class="line">ps aux | grep &lt;service-name&gt;</span><br><span class="line">pgrep -f &lt;pattern&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 2: 查看命名空间概况</span></span><br><span class="line">lsns -p &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 3: 针对性进入问题命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n -p -m bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 4: 在命名空间内排查</span></span><br><span class="line"><span class="comment"># 网络: ip addr, ip route, netstat</span></span><br><span class="line"><span class="comment"># 文件系统: mount, df, ls</span></span><br><span class="line"><span class="comment"># 进程: ps, pstree</span></span><br><span class="line"><span class="comment"># 权限: id, whoami, ls -la</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-常用组合命令"><a href="#2-常用组合命令" class="headerlink" title="2. 常用组合命令"></a>2. 常用组合命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 快速查看容器所有命名空间信息</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">container_ns_info</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> pid=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== 命名空间概况 ===&quot;</span></span><br><span class="line">    lsns -p <span class="variable">$pid</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 网络信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -n ip addr show</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 挂载信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -m mount | <span class="built_in">head</span> -10</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 进程信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -p ps aux | <span class="built_in">head</span> -10</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: container_ns_info &lt;PID&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-监控脚本"><a href="#3-监控脚本" class="headerlink" title="3. 监控脚本"></a>3. 监控脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># ns_monitor.sh - 命名空间监控脚本</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 命名空间统计 ===&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;类型统计:&quot;</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n进程数最多的命名空间:&quot;</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2, $3, $5&#125;&#x27;</span> | <span class="built_in">sort</span> -k2 -nr | <span class="built_in">head</span> -5</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n容器相关命名空间:&quot;</span></span><br><span class="line">lsns | grep -E <span class="string">&quot;(docker|containerd|runc)&quot;</span> | <span class="built_in">wc</span> -l</span><br></pre></td></tr></table></figure>
-
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>⚠️ <strong>安全提醒</strong>:</p>
-<ul>
-<li>使用<code>nsenter</code>需要root权限或相应的capabilities</li>
-<li>进入生产容器命名空间要谨慎，避免影响业务</li>
-<li>某些命名空间操作可能影响系统稳定性</li>
-</ul>
-<p>💡 <strong>最佳实践</strong>:</p>
-<ul>
-<li>先用<code>lsns</code>观察，再用<code>nsenter</code>进入</li>
-<li>排查时记录操作步骤，便于复现和分析</li>
-<li>结合容器编排工具的日志和状态信息</li>
-<li>定期监控命名空间数量，避免泄漏</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1792,7 +1896,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">153</span>
+          <span class="site-state-item-count">154</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
