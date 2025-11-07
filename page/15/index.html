@@ -184,6 +184,133 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/04/k8s-cordon-drain-taint/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/09/04/k8s-cordon-drain-taint/" class="post-title-link" itemprop="url">k8s cordon drain taint</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-09-04 19:30:18" itemprop="dateCreated datePublished" datetime="2024-09-04T19:30:18+08:00">2024-09-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-08-13 17:20:45" itemprop="dateModified" datetime="2025-08-13T17:20:45+08:00">2025-08-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="cordon-标记节点不可调度"><a href="#cordon-标记节点不可调度" class="headerlink" title="cordon: 标记节点不可调度"></a>cordon: 标记节点不可调度</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- 如果一个node被标记为cordon，新创建的pod不会被调度到此node上，已经调度上去的不会被移走。</span><br></pre></td></tr></table></figure>
+<h3 id="drain-驱逐节点上的pod"><a href="#drain-驱逐节点上的pod" class="headerlink" title="drain: 驱逐节点上的pod"></a>drain: 驱逐节点上的pod</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- drain包含两种状态：cordon不可被调度，evicted驱逐当前节点所以pod</span><br></pre></td></tr></table></figure>
+<h3 id="taint-设置节点的污点"><a href="#taint-设置节点的污点" class="headerlink" title="taint:设置节点的污点"></a>taint:设置节点的污点</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1、污点的格式: key=value:&lt;effect&gt;  或  key:&lt;effect&gt;</span><br><span class="line">2、key和value是污点的标签，可以自行拟定</span><br><span class="line">3、effect描述污点的作用,effect支持如下三个选项:</span><br><span class="line">  - PreferNoSchedule：尽量避免把pod调度到具有该污点的node上，除非没有其他节点可调度</span><br><span class="line">  - NoSchedule:：不会把pod调度到具有该污点的node上，但不会影响当前node已存在的pod</span><br><span class="line">  - NoExecute：不会把pod调度到具有该污点的node上，同时还会驱逐node上已存在的pod</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Toleration Key</th>
+<th>Effect</th>
+<th>作用含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>(空 key, 仅 op&#x3D;Exists)</em></td>
+<td>—</td>
+<td>容忍任意污点（这是一个通配的容忍度）</td>
+</tr>
+<tr>
+<td>node.kubernetes.io&#x2F;disk-pressure</td>
+<td>NoSchedule</td>
+<td>允许 Pod 调度到磁盘压力大的节点</td>
+</tr>
+<tr>
+<td>node.kubernetes.io&#x2F;memory-pressure</td>
+<td>NoSchedule</td>
+<td>允许 Pod 调度到内存压力大的节点</td>
+</tr>
+<tr>
+<td>node.kubernetes.io&#x2F;network-unavailable</td>
+<td>NoSchedule</td>
+<td>允许 Pod 调度到网络不可用的节点（常见于新节点）</td>
+</tr>
+<tr>
+<td>node.kubernetes.io&#x2F;not-ready</td>
+<td>NoExecute</td>
+<td>允许 Pod 在节点未就绪时继续运行，不会立刻驱逐</td>
+</tr>
+<tr>
+<td>node.kubernetes.io&#x2F;pid-pressure</td>
+<td>NoSchedule</td>
+<td>允许 Pod 调度到进程数（PID）压力大的节点</td>
+</tr>
+<tr>
+<td>node.kubernetes.io&#x2F;unreachable</td>
+<td>NoExecute</td>
+<td>允许 Pod 在节点不可达（网络断开等）时继续存活</td>
+</tr>
+<tr>
+<td>node.kubernetes.io&#x2F;unschedulable</td>
+<td>NoSchedule</td>
+<td>允许 Pod 调度到被标记为不可调度的节点（比如 cordon 状态）</td>
+</tr>
+</tbody></table>
+<h3 id="操作命令"><a href="#操作命令" class="headerlink" title="操作命令"></a>操作命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置node不可调度</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">kubectl  describe node &lt;NODE&gt; | grep Unschedulable</span><br><span class="line"></span><br><span class="line"><span class="comment">#drain停机维护</span></span><br><span class="line">kubectl cordon &lt;NODE&gt;</span><br><span class="line">kubectl drain &lt;NODE&gt; --ignore-daemonsets --delete-local-data --force --grace-period=0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">kubectl drain node-1 --grace-period=60 --<span class="built_in">timeout</span>=10m --ignore-daemonsets --delete-local-data</span><br><span class="line">参数说明：</span><br><span class="line">--grace-period=60：每个 Pod 有 60 秒的优雅关闭时间。</span><br><span class="line">--<span class="built_in">timeout</span>=10m：整个驱逐操作最多等待 10 分钟。</span><br><span class="line">--ignore-daemonsets：忽略 DaemonSet 管理的 Pod，不会尝试驱逐它们。</span><br><span class="line">--delete-local-data：强制删除使用本地存储的数据，即使 Pod 使用了本地卷。</span><br><span class="line"></span><br><span class="line"><span class="comment">#uncordon恢复节点可调度</span></span><br><span class="line">kubectl uncordon &lt;NODE&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置污点,指定标签为dedicated=special-user,策略为NoSchedule</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated=special-user:NoSchedule</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置成无value</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; bar:NoSchedule</span><br><span class="line"></span><br><span class="line"><span class="comment">#移除key为dedicated的NoSchedule污点</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated:NoSchedule-</span><br><span class="line"><span class="comment">#移除key为dedicated的所有污点</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated-</span><br><span class="line"><span class="comment">#设置&lt;NODE&gt;污点,策略为NoExecute</span></span><br><span class="line">kubectl taint nodes &lt;NODE&gt; dedicated=special-user:NoExecute</span><br><span class="line"><span class="comment">#注意一点,不要混淆节点不可调度,节点上存在污点节点仍然是可以调度的,只要pod中存在容忍即可调度到&lt;NODE&gt;节点</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/08/30/http%E7%8A%B6%E6%80%81%E7%A0%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -986,97 +1113,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2022/04/27/go-tips/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/04/27/go-tips/" class="post-title-link" itemprop="url">go tips</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-04-27 16:43:25" itemprop="dateCreated datePublished" datetime="2022-04-27T16:43:25+08:00">2022-04-27</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-29 14:43:35" itemprop="dateModified" datetime="2024-09-29T14:43:35+08:00">2024-09-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/go/" itemprop="url" rel="index"><span itemprop="name">go</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="go基本类型"><a href="#go基本类型" class="headerlink" title="go基本类型"></a>go基本类型</h2><ol>
-<li>基本类型：<ul>
-<li>整型（int&#x2F;uint&#x2F;int8&#x2F;uint8&#x2F;int16&#x2F;uint16&#x2F;int32&#x2F;uint32&#x2F;int64&#x2F;uint64&#x2F;byte&#x2F;rune等）</li>
-<li>浮点数（float32&#x2F;float64）</li>
-<li>复数类型（complex64&#x2F;complex128）</li>
-<li>字符串（string）</li>
-</ul>
-</li>
-<li>复合类型（又叫聚合类型）：数组和结构体类型。</li>
-<li>引用类型：切片（slice）、map、channel、指针。</li>
-<li>接口类型：如error。</li>
-</ol>
-<h2 id="比较"><a href="#比较" class="headerlink" title="&#x3D;&#x3D; 比较"></a>&#x3D;&#x3D; 比较</h2><p><strong>&#x3D;&#x3D;操作最重要的一个前提是：两个操作数类型必须相同！类型必须相同！类型必须相同!</strong></p>
-<p>关于引用类型，有两个比较特殊的规定：</p>
-<ul>
-<li>切片之间不允许比较。切片只能与nil值比较。</li>
-<li>map之间不允许比较。map只能与nil值比较。</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1148,7 +1184,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">151</span>
+          <span class="site-state-item-count">152</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
