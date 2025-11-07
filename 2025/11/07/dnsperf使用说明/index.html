@@ -28,7 +28,7 @@
 <meta property="og:description" content="🧭 dnsperf 实战与最佳实践速查指南📖 1. 工具简介dnsperf 是由 Nominum &#x2F; DNS-OARC 提供的 DNS 性能压测工具，用于模拟客户端大规模并发请求，测试 DNS 服务器（如 BIND、CoreDNS、PowerDNS） 的 QPS、响应延迟、丢包率等性能指标。常用于：  DNS 服务性能压测； 网络栈优化与软中断验证； 负载均衡策略评估； DNS 缓存">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-11-07T09:19:42.000Z">
-<meta property="article:modified_time" content="2025-11-07T09:21:54.993Z">
+<meta property="article:modified_time" content="2025-11-07T09:36:04.695Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="linux">
 <meta name="twitter:card" content="summary">
@@ -214,7 +214,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-11-07 17:19:42 / 修改时间：17:21:54" itemprop="dateCreated datePublished" datetime="2025-11-07T17:19:42+08:00">2025-11-07</time>
+              <time title="创建时间：2025-11-07 17:19:42 / 修改时间：17:36:04" itemprop="dateCreated datePublished" datetime="2025-11-07T17:19:42+08:00">2025-11-07</time>
             </span>
 
           
@@ -376,7 +376,7 @@
 </ul>
 </blockquote>
 <hr>
-<h3 id="📊-5-5-查看响应延迟分布"><a href="#📊-5-5-查看响应延迟分布" class="headerlink" title="📊 5.5 查看响应延迟分布"></a>📊 5.5 查看响应延迟分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30 -Q 10000 -v</span><br></pre></td></tr></table></figure>
+<h3 id="📊-5-5-查看响应延迟分布"><a href="#📊-5-5-查看响应延迟分布" class="headerlink" title="📊 5.5 查看响应延迟分布"></a>📊 5.5 查看响应延迟分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30 -Q 10000 -v</span><br><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 60 -t 8 -Q 400000 -v &gt; dnsperf_verbose.log 2&gt;&amp;1</span><br><span class="line"><span class="comment">#分析</span></span><br><span class="line">grep -E <span class="string">&quot;Latency Distribution|Queries per second|Average Latency|Latency StdDev&quot;</span> dnsperf_verbose.log -n</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p><strong>输出示例：</strong></p>

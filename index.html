@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-11-07 17:19:42 / 修改时间：17:21:54" itemprop="dateCreated datePublished" datetime="2025-11-07T17:19:42+08:00">2025-11-07</time>
+              <time title="创建时间：2025-11-07 17:19:42 / 修改时间：17:36:04" itemprop="dateCreated datePublished" datetime="2025-11-07T17:19:42+08:00">2025-11-07</time>
             </span>
 
           
@@ -364,7 +364,7 @@
 </ul>
 </blockquote>
 <hr>
-<h3 id="📊-5-5-查看响应延迟分布"><a href="#📊-5-5-查看响应延迟分布" class="headerlink" title="📊 5.5 查看响应延迟分布"></a>📊 5.5 查看响应延迟分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30 -Q 10000 -v</span><br></pre></td></tr></table></figure>
+<h3 id="📊-5-5-查看响应延迟分布"><a href="#📊-5-5-查看响应延迟分布" class="headerlink" title="📊 5.5 查看响应延迟分布"></a>📊 5.5 查看响应延迟分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30 -Q 10000 -v</span><br><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 60 -t 8 -Q 400000 -v &gt; dnsperf_verbose.log 2&gt;&amp;1</span><br><span class="line"><span class="comment">#分析</span></span><br><span class="line">grep -E <span class="string">&quot;Latency Distribution|Queries per second|Average Latency|Latency StdDev&quot;</span> dnsperf_verbose.log -n</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p><strong>输出示例：</strong></p>

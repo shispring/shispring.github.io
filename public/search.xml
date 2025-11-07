@@ -12296,7 +12296,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </ul>
 </blockquote>
 <hr>
-<h3 id="📊-5-5-查看响应延迟分布"><a href="#📊-5-5-查看响应延迟分布" class="headerlink" title="📊 5.5 查看响应延迟分布"></a>📊 5.5 查看响应延迟分布</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30 -Q 10000 -v</span><br></pre></td></tr></table></figure>
+<h3 id="📊-5-5-查看响应延迟分布"><a href="#📊-5-5-查看响应延迟分布" class="headerlink" title="📊 5.5 查看响应延迟分布"></a>📊 5.5 查看响应延迟分布</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30 -Q 10000 -v</span><br><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 60 -t 8 -Q 400000 -v &gt; dnsperf_verbose.log 2&gt;&amp;1</span><br><span class="line"><span class="comment">#分析</span></span><br><span class="line">grep -E <span class="string">&quot;Latency Distribution|Queries per second|Average Latency|Latency StdDev&quot;</span> dnsperf_verbose.log -n</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p><strong>输出示例：</strong></p>
