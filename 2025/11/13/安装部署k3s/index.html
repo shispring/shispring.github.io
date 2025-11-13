@@ -28,7 +28,7 @@
 <meta property="og:description" content="安装 https:&#x2F;&#x2F;forums.rancher.cn&#x2F;t&#x2F;k3s&#x2F;3314  12345curl -sfL https:&#x2F;&#x2F;rancher-mirror.rancher.cn&#x2F;k3s&#x2F;k3s-install.sh | \  INSTALL_K3S_MIRROR&#x3D;cn \  INSTALL_K3S_SKIP_SELINUX_RPM&#x3D;true \  K3S_TOKEN&#x3D;12345 sh -s -">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-11-13T09:12:18.000Z">
-<meta property="article:modified_time" content="2025-11-13T09:44:47.707Z">
+<meta property="article:modified_time" content="2025-11-13T14:42:12.758Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="k3s">
 <meta name="twitter:card" content="summary">
@@ -214,7 +214,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2025-11-13 17:12:18 / 修改时间：17:44:47" itemprop="dateCreated datePublished" datetime="2025-11-13T17:12:18+08:00">2025-11-13</time>
+              <time title="创建时间：2025-11-13 17:12:18 / 修改时间：22:42:12" itemprop="dateCreated datePublished" datetime="2025-11-13T17:12:18+08:00">2025-11-13</time>
             </span>
 
           
@@ -243,6 +243,10 @@
 <h3 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl status k3s</span><br><span class="line"></span><br><span class="line">k3s --version</span><br></pre></td></tr></table></figure>
 
 <h3 id="🧠-K3s-的-kubeconfig-默认路径"><a href="#🧠-K3s-的-kubeconfig-默认路径" class="headerlink" title="🧠 K3s 的 kubeconfig 默认路径"></a>🧠 K3s 的 kubeconfig 默认路径</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#默认路径</span><br><span class="line">/etc/rancher/k3s/k3s.yaml</span><br><span class="line"></span><br><span class="line">#kubectl 使用时需要显式指定该配置文件，或者将其复制到 $HOME/.kube/config。</span><br><span class="line">kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get nodes</span><br><span class="line"></span><br><span class="line">#copy</span><br><span class="line">sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config</span><br></pre></td></tr></table></figure>
+
+<h3 id="部署helm"><a href="#部署helm" class="headerlink" title="部署helm"></a>部署helm</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#helm与k8s版本兼容匹配：https://helm.sh/zh/docs/topics/version_skew</span><br><span class="line">wget https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">tar zxvf helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">mv linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br></pre></td></tr></table></figure>
+
+<h3 id="部署cert-manager"><a href="#部署cert-manager" class="headerlink" title="部署cert-manager"></a>部署cert-manager</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#安装certcert-manager</span><br><span class="line">#安装CRD</span><br><span class="line">kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/&lt;VERSION&gt;/cert-manager.crds.yaml</span><br><span class="line"></span><br><span class="line">#使用helm安装</span><br><span class="line">helm repo add jetstack https://charts.jetstack.io</span><br><span class="line"></span><br><span class="line">helm repo updatehelm install cert-manager jetstack/cert-manager \</span><br><span class="line"> --namespace cert-manager \</span><br><span class="line"> --create-namespace</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -324,7 +328,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E7%8A%B6%E6%80%81"><span class="nav-number">1.1.</span> <span class="nav-text">查看状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%A7%A0-K3s-%E7%9A%84-kubeconfig-%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84"><span class="nav-number">1.2.</span> <span class="nav-text">🧠 K3s 的 kubeconfig 默认路径</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E7%8A%B6%E6%80%81"><span class="nav-number">1.1.</span> <span class="nav-text">查看状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%A7%A0-K3s-%E7%9A%84-kubeconfig-%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84"><span class="nav-number">1.2.</span> <span class="nav-text">🧠 K3s 的 kubeconfig 默认路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2helm"><span class="nav-number">1.3.</span> <span class="nav-text">部署helm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2cert-manager"><span class="nav-number">1.4.</span> <span class="nav-text">部署cert-manager</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
