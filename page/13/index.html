@@ -184,6 +184,78 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">nginx 模块及配置</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-31 12:05:49 / 修改时间：18:28:43" itemprop="dateCreated datePublished" datetime="2024-10-31T12:05:49+08:00">2024-10-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx/" itemprop="url" rel="index"><span itemprop="name">nginx</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="统计连接数"><a href="#统计连接数" class="headerlink" title="统计连接数"></a>统计连接数</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#netstat</span><br><span class="line">netstat -ant | awk &#x27;NR &gt; 2 &#123;print $NF&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#ss</span><br><span class="line">ss -tan | awk &#x27;NR &gt; 2 &#123;print $1&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#读取/proc/net/tcp文件</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;print $4&#125;&#x27; | cut -d&#x27;:&#x27; -f2 | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#含义介绍</span><br><span class="line">TCP_ESTABLISHED:1   TCP_SYN_SENT:2</span><br><span class="line">TCP_SYN_RECV:3      TCP_FIN_WAIT1:4</span><br><span class="line">TCP_FIN_WAIT2:5     TCP_TIME_WAIT:6</span><br><span class="line">TCP_CLOSE:7         TCP_CLOSE_WAIT:8</span><br><span class="line">TCP_LAST_ACL:9      TCP_LISTEN:10</span><br><span class="line">TCP_CLOSING:11</span><br><span class="line"></span><br><span class="line">#获取linux服务器上数据</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;</span><br><span class="line">    status=sprintf(&quot;%02X&quot;, strtonum(&quot;0x&quot;$4));</span><br><span class="line">    tcp_states[&quot;01&quot;]=&quot;TCP_ESTABLISHED&quot;;</span><br><span class="line">    tcp_states[&quot;02&quot;]=&quot;TCP_SYN_SENT&quot;;</span><br><span class="line">    tcp_states[&quot;03&quot;]=&quot;TCP_SYN_RECV&quot;;</span><br><span class="line">    tcp_states[&quot;04&quot;]=&quot;TCP_FIN_WAIT1&quot;;</span><br><span class="line">    tcp_states[&quot;05&quot;]=&quot;TCP_FIN_WAIT2&quot;;</span><br><span class="line">    tcp_states[&quot;06&quot;]=&quot;TCP_TIME_WAIT&quot;;</span><br><span class="line">    tcp_states[&quot;07&quot;]=&quot;TCP_CLOSE&quot;;</span><br><span class="line">    tcp_states[&quot;08&quot;]=&quot;TCP_CLOSE_WAIT&quot;;</span><br><span class="line">    tcp_states[&quot;09&quot;]=&quot;TCP_LAST_ACK&quot;;</span><br><span class="line">    tcp_states[&quot;0A&quot;]=&quot;TCP_LISTEN&quot;;</span><br><span class="line">    tcp_states[&quot;0B&quot;]=&quot;TCP_CLOSING&quot;;</span><br><span class="line">    print tcp_states[status];</span><br><span class="line">&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#获取容器上的网络数据</span><br><span class="line">kubectl exec -it &lt;pod-name&gt; -n &lt;namespace&gt; -- sh -c &quot;</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;</span><br><span class="line">    status=\$4;</span><br><span class="line">    tcp_states[\&quot;01\&quot;]=\&quot;TCP_ESTABLISHED\&quot;;</span><br><span class="line">    tcp_states[\&quot;02\&quot;]=\&quot;TCP_SYN_SENT\&quot;;</span><br><span class="line">    tcp_states[\&quot;03\&quot;]=\&quot;TCP_SYN_RECV\&quot;;</span><br><span class="line">    tcp_states[\&quot;04\&quot;]=\&quot;TCP_FIN_WAIT1\&quot;;</span><br><span class="line">    tcp_states[\&quot;05\&quot;]=\&quot;TCP_FIN_WAIT2\&quot;;</span><br><span class="line">    tcp_states[\&quot;06\&quot;]=\&quot;TCP_TIME_WAIT\&quot;;</span><br><span class="line">    tcp_states[\&quot;07\&quot;]=\&quot;TCP_CLOSE\&quot;;</span><br><span class="line">    tcp_states[\&quot;08\&quot;]=\&quot;TCP_CLOSE_WAIT\&quot;;</span><br><span class="line">    tcp_states[\&quot;09\&quot;]=\&quot;TCP_LAST_ACK\&quot;;</span><br><span class="line">    tcp_states[\&quot;0A\&quot;]=\&quot;TCP_LISTEN\&quot;;</span><br><span class="line">    tcp_states[\&quot;0B\&quot;]=\&quot;TCP_CLOSING\&quot;;</span><br><span class="line">    status=sprintf(\&quot;%02X\&quot;, \&quot;0x\&quot; substr(status, 1, 2));</span><br><span class="line">    print tcp_states[status];</span><br><span class="line">&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line">&quot;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031145102.png" alt="tcp" title="tcp1"></p>
+<hr>
+<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031120653.png" alt="nginx架构" title="nginx2"></p>
+<h3 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h3><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031120448.png" alt="nginx模块" title="nginx1"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/29/k8s-patch-%E7%94%A8%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1573,189 +1645,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/12/DNS%E7%BC%93%E5%AD%98%E6%97%B6%E9%97%B4TTL/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/12/DNS%E7%BC%93%E5%AD%98%E6%97%B6%E9%97%B4TTL/" class="post-title-link" itemprop="url">DNS缓存时间TTL</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-10-12 16:07:25 / 修改时间：16:09:48" itemprop="dateCreated datePublished" datetime="2024-10-12T16:07:25+08:00">2024-10-12</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在计算机网络中，<strong>DNS（域名系统）缓存</strong>用于加速域名解析过程，减少重复查询，提高访问速度。<strong>本地 DNS 缓存时间</strong>主要取决于以下几个因素：</p>
-<ol>
-<li><strong>DNS 记录的 TTL（生存时间）</strong>：<ul>
-<li><strong>TTL（Time-To-Live）</strong> 是 DNS 记录中指定的一个时间值，表示该记录在缓存中可以存储的最长时间。TTL 的单位通常是秒。</li>
-<li>例如，TTL 为 <code>3600</code> 秒（即 1 小时），表示该 DNS 记录在缓存中有效期为 1 小时。</li>
-</ul>
-</li>
-<li><strong>本地 DNS 解析器的缓存策略</strong>：<ul>
-<li>不同操作系统和 DNS 解析器（如 <code>systemd-resolved</code>、<code>dnsmasq</code>、<code>nscd</code> 等）可能有自己的缓存策略，可能会设置最小或最大 TTL 值，以确保缓存的灵活性和安全性。</li>
-</ul>
-</li>
-</ol>
-<h2 id="1-本地-DNS-缓存时间的常见范围"><a href="#1-本地-DNS-缓存时间的常见范围" class="headerlink" title="1. 本地 DNS 缓存时间的常见范围"></a><strong>1. 本地 DNS 缓存时间的常见范围</strong></h2><ul>
-<li><strong>短 TTL</strong>：如 30 秒至 5 分钟，适用于频繁更新的记录。</li>
-<li><strong>中等 TTL</strong>：如 5 分钟至 1 小时，适用于大多数动态变化的记录。</li>
-<li><strong>长 TTL</strong>：如 1 小时至 24 小时，适用于较为稳定的记录。</li>
-</ul>
-<h2 id="2-如何查看和配置本地-DNS-缓存时间"><a href="#2-如何查看和配置本地-DNS-缓存时间" class="headerlink" title="2. 如何查看和配置本地 DNS 缓存时间"></a><strong>2. 如何查看和配置本地 DNS 缓存时间</strong></h2><p>不同操作系统和 DNS 解析器有不同的方法来查看和配置本地 DNS 缓存时间。以下是常见操作系统和解析器的具体步骤：</p>
-<h3 id="a-Linux-系统"><a href="#a-Linux-系统" class="headerlink" title="a. Linux 系统"></a><strong>a. Linux 系统</strong></h3><p><strong>查看 DNS 缓存内容和 TTL：</strong></p>
-<ul>
-<li>具体方法取决于所使用的 DNS 缓存服务。</li>
-</ul>
-<ol>
-<li><p>**使用 <code>systemd-resolved</code>**：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#systemctl start systemd-resolved</span></span><br><span class="line">systemd-resolve --statistics</span><br></pre></td></tr></table></figure>
-<ul>
-<li>查看缓存统计信息。</li>
-</ul>
-</li>
-<li><p><strong>使用 <code>nscd</code>（Name Service Cache Daemon）</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum install -y nscd</span></span><br><span class="line">nscd -g</span><br></pre></td></tr></table></figure>
-<ul>
-<li>查看缓存信息。</li>
-</ul>
-</li>
-<li><p>**使用 <code>dnsmasq</code>**：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl status dnsmasq</span><br><span class="line">dnsmasq --<span class="built_in">test</span>  <span class="comment"># 检查配置</span></span><br></pre></td></tr></table></figure></li>
-</ol>
-<p><strong>清除 DNS 缓存：</strong></p>
-<ol>
-<li><p><strong>systemd-resolved</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>nscd</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart nscd</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>dnsmasq</strong>：</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart dnsmasq</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p><strong>配置 DNS 客户端缓存策略：</strong></p>
-<ol>
-<li><p><strong>systemd-resolved</strong>：</p>
-<ul>
-<li>配置文件位于 <code>/etc/systemd/resolved.conf</code>。</li>
-<li>可设置 <code>Cache</code> 相关参数，但通常遵循 DNS 记录的 TTL。</li>
-</ul>
-</li>
-<li><p><strong>nscd</strong>：</p>
-<ul>
-<li>配置文件位于 <code>/etc/nscd.conf</code>。</li>
-<li>可设置 <code>positive-time-to-live</code> 和 <code>negative-time-to-live</code>。</li>
-</ul>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/nscd.conf</span><br></pre></td></tr></table></figure>
-<p> 示例配置：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">enable-cache hosts yes</span><br><span class="line">positive-time-to-live hosts 3600</span><br><span class="line">negative-time-to-live hosts 20</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>dnsmasq</strong>：</p>
-<ul>
-<li>配置文件位于 <code>/etc/dnsmasq.conf</code>。</li>
-<li>可设置 <code>min-cache-ttl</code> 和 <code>max-cache-ttl</code>。</li>
-</ul>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/dnsmasq.conf</span><br></pre></td></tr></table></figure>
-<p> 示例配置：</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">min-cache-ttl=60</span><br><span class="line">max-cache-ttl=3600</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="3-确认-DNS-缓存时间"><a href="#3-确认-DNS-缓存时间" class="headerlink" title="3. 确认 DNS 缓存时间"></a><strong>3. 确认 DNS 缓存时间</strong></h2><p><strong>查看特定 DNS 记录的 TTL：</strong></p>
-<p>使用 <code>dig</code> 命令可以查看 DNS 记录的 TTL 值。<br>在 Anolis OS 8 上安装 dig 命令通常通过安装 bind-utils 包来实现<br>yum install bind-utils -y </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dig example.com</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">example.com.     3600    IN      A       93.184.216.34</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>上述输出中，<code>3600</code> 表示该 DNS 记录的 TTL 为 3600 秒（1 小时）。</li>
-</ul>
-<p><strong>综合判断缓存时间：</strong></p>
-<ul>
-<li>本地 DNS 缓存时间通常不会超过 DNS 记录本身的 TTL。</li>
-<li>某些解析器可能会调整实际缓存时间，如设置最小 TTL 或最大 TTL。</li>
-</ul>
-<h2 id="4-实际案例演示"><a href="#4-实际案例演示" class="headerlink" title="4. 实际案例演示"></a><strong>4. 实际案例演示</strong></h2><p>以下是一个在 Linux 系统上使用 <code>systemd-resolved</code> 配置和查看 DNS 缓存时间的示例：</p>
-<p><strong>查看当前 DNS 缓存统计：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemd-resolve --statistics</span><br></pre></td></tr></table></figure>
-
-<p>输出示例：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Global</span><br><span class="line">         LLMNR setting: yes</span><br><span class="line">  MulticastDNS setting: no</span><br><span class="line">    DNSOverTLS setting: no</span><br><span class="line">        DNSSEC setting: no</span><br><span class="line">      DNSSEC supported: no</span><br><span class="line"></span><br><span class="line">Per-Link Statistics</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>清除 DNS 缓存：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure>
-
-<p><strong>查看某个域名的 TTL：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig example.com +nocmd +noall +answer</span><br></pre></td></tr></table></figure>
-
-<p>输出示例：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">example.com.     3600    IN      A       93.184.216.34</span><br></pre></td></tr></table></figure>
-
-<h2 id="5-最佳实践"><a href="#5-最佳实践" class="headerlink" title="5. 最佳实践"></a><strong>5. 最佳实践</strong></h2><ol>
-<li><strong>合理设置 DNS 记录的 TTL</strong>：<ul>
-<li>根据应用需求和域名更新频率，合理设置 TTL。较低的 TTL 适用于频繁变动的记录，较高的 TTL 则适用于稳定的记录。</li>
-</ul>
-</li>
-<li><strong>优化本地 DNS 解析器的缓存策略</strong>：<ul>
-<li>根据网络环境和应用需求，调整本地解析器的最小和最大缓存时间，平衡缓存效率与更新灵活性。</li>
-</ul>
-</li>
-<li><strong>定期清理 DNS 缓存</strong>：<ul>
-<li>在进行 DNS 变更后，及时清理本地 DNS 缓存，确保新配置生效。</li>
-</ul>
-</li>
-<li><strong>监控 DNS 解析性能</strong>：<ul>
-<li>使用监控工具（如 Prometheus、Grafana）监控 DNS 解析的性能和缓存命中率，优化 DNS 配置。</li>
-</ul>
-</li>
-<li><strong>使用可靠的 DNS 解析器</strong>：<ul>
-<li>选择性能稳定、支持高级功能（如 DNSSEC、负载均衡）的 DNS 解析器，提升网络稳定性和安全性。</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1827,7 +1716,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">155</span>
+          <span class="site-state-item-count">156</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1840,7 +1729,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">21</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

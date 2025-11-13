@@ -12855,4 +12855,17 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>安装部署k3s</title>
+    <url>/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/</url>
+    <content><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | \</span><br><span class="line">  INSTALL_K3S_MIRROR=cn \</span><br><span class="line">  INSTALL_K3S_SKIP_SELINUX_RPM=true \</span><br><span class="line">  K3S_TOKEN=12345 sh -s - \</span><br><span class="line">  --system-default-registry=registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
+<p>📘 说明：<br>• INSTALL_K3S_SKIP_SELINUX_RPM&#x3D;true：告诉安装脚本跳过 k3s-selinux 安装；</p>
+<h3 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemctl status k3s</span><br><span class="line"></span><br><span class="line">k3s --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="🧠-K3s-的-kubeconfig-默认路径"><a href="#🧠-K3s-的-kubeconfig-默认路径" class="headerlink" title="🧠 K3s 的 kubeconfig 默认路径"></a>🧠 K3s 的 kubeconfig 默认路径</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#默认路径</span><br><span class="line">/etc/rancher/k3s/k3s.yaml</span><br><span class="line"></span><br><span class="line">#kubectl 使用时需要显式指定该配置文件，或者将其复制到 $HOME/.kube/config。</span><br><span class="line">kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get nodes</span><br><span class="line"></span><br><span class="line">#copy</span><br><span class="line">sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>k3s</tag>
+      </tags>
+  </entry>
 </search>

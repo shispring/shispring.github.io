@@ -184,6 +184,237 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/13/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">网络故障模拟工具及常用命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-08-13 12:09:51 / 修改时间：12:17:56" itemprop="dateCreated datePublished" datetime="2025-08-13T12:09:51+08:00">2025-08-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="网络故障模拟工具与常用命令"><a href="#网络故障模拟工具与常用命令" class="headerlink" title="网络故障模拟工具与常用命令"></a>网络故障模拟工具与常用命令</h1><p>本文档提供了一系列网络故障模拟工具和常用命令，用于测试应用程序在各种网络条件下的行为，特别是长连接（如SSE、WebSocket）的稳定性测试。</p>
+<h2 id="1-常用网络故障模拟工具对比"><a href="#1-常用网络故障模拟工具对比" class="headerlink" title="1. 常用网络故障模拟工具对比"></a>1. 常用网络故障模拟工具对比</h2><table>
+<thead>
+<tr>
+<th>工具名称</th>
+<th>主要功能</th>
+<th>优势</th>
+<th>局限性</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>tc&#x2F;netem</strong></td>
+<td>延迟、丢包、重排、复制、损坏</td>
+<td>内置Linux内核，精确控制</td>
+<td>配置较复杂</td>
+<td>全面的网络条件模拟</td>
+</tr>
+<tr>
+<td><strong>iptables</strong></td>
+<td>过滤、拦截、重定向</td>
+<td>灵活精确，低级别控制</td>
+<td>语法复杂</td>
+<td>精确控制特定连接</td>
+</tr>
+<tr>
+<td><strong>tcpkill</strong></td>
+<td>中断TCP连接</td>
+<td>简单直接</td>
+<td>功能单一</td>
+<td>模拟连接中断</td>
+</tr>
+<tr>
+<td><strong>Comcast</strong></td>
+<td>延迟、带宽限制、丢包等</td>
+<td>简单易用，GUI工具也有</td>
+<td>精度不如tc</td>
+<td>快速简易测试</td>
+</tr>
+<tr>
+<td><strong>toxiproxy</strong></td>
+<td>延迟、带宽限制、超时、中断等</td>
+<td>提供API，易于集成</td>
+<td>需要单独部署</td>
+<td>CI&#x2F;CD集成测试</td>
+</tr>
+<tr>
+<td><strong>Charles&#x2F;Fiddler</strong></td>
+<td>流量拦截、修改、限速</td>
+<td>图形界面，易于使用</td>
+<td>主要针对HTTP(S)</td>
+<td>应用层协议测试</td>
+</tr>
+<tr>
+<td><strong>WANem</strong></td>
+<td>全面网络模拟</td>
+<td>开箱即用，界面友好</td>
+<td>需要独立设备&#x2F;VM</td>
+<td>完整WAN环境模拟</td>
+</tr>
+</tbody></table>
+<h2 id="2-tc-Traffic-Control-详解"><a href="#2-tc-Traffic-Control-详解" class="headerlink" title="2. tc (Traffic Control) 详解"></a>2. tc (Traffic Control) 详解</h2><p><code>tc</code>是Linux内核的流量控制工具，通过<code>netem</code>模块可以模拟各种网络条件。这是最强大、最灵活的网络故障模拟工具。</p>
+<h3 id="基本使用模式"><a href="#基本使用模式" class="headerlink" title="基本使用模式"></a>基本使用模式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查找 dnf search iproute</span></span><br><span class="line"><span class="built_in">sudo</span> dnf install iproute-tc -y</span><br><span class="line">tc -V</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tc qdisc add dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换现有规则</span></span><br><span class="line">tc qdisc change dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除规则</span></span><br><span class="line">tc qdisc del dev INTERFACE root</span><br></pre></td></tr></table></figure>
+
+<h3 id="模拟常见网络问题的命令"><a href="#模拟常见网络问题的命令" class="headerlink" title="模拟常见网络问题的命令"></a>模拟常见网络问题的命令</h3><h4 id="1-延迟模拟"><a href="#1-延迟模拟" class="headerlink" title="1. 延迟模拟"></a>1. 延迟模拟</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加固定延迟(100ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟及抖动(100ms ±10ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加正态分布的延迟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 20ms distribution normal</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加相关性延迟(上一个包的延迟对当前包有25%影响)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms 25%</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-丢包模拟"><a href="#2-丢包模拟" class="headerlink" title="2. 丢包模拟"></a>2. 丢包模拟</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机丢包(10%)</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基于状态的丢包模型(Gilbert-Elliott)</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss gemodel 10% 50% 70% 20%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢包与成功相关</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10% 25%</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-数据包损坏"><a href="#3-数据包损坏" class="headerlink" title="3. 数据包损坏"></a>3. 数据包损坏</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机损坏5%的数据包</span></span><br><span class="line">tc qdisc add dev eth0 root netem corrupt 5%</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-数据包重复"><a href="#4-数据包重复" class="headerlink" title="4. 数据包重复"></a>4. 数据包重复</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机重复1%的数据包</span></span><br><span class="line">tc qdisc add dev eth0 root netem duplicate 1%</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-数据包乱序"><a href="#5-数据包乱序" class="headerlink" title="5. 数据包乱序"></a>5. 数据包乱序</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 25%的数据包将被延迟10ms以造成乱序</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 10ms reorder 25% 50%</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-带宽限制"><a href="#6-带宽限制" class="headerlink" title="6. 带宽限制"></a>6. 带宽限制</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制带宽为1Mbit/s</span></span><br><span class="line">tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-组合多种故障"><a href="#7-组合多种故障" class="headerlink" title="7. 组合多种故障"></a>7. 组合多种故障</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 组合延迟、丢包和乱序</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms distribution normal loss 5% reorder 25%</span><br></pre></td></tr></table></figure>
+
+<h4 id="8-精确模拟TCP重传"><a href="#8-精确模拟TCP重传" class="headerlink" title="8. 精确模拟TCP重传"></a>8. 精确模拟TCP重传</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过组合延迟和随机丢包来触发重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 200ms loss random 15%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络拥塞</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 50ms loss 5% 25%</span><br></pre></td></tr></table></figure>
+
+<h3 id="针对特定流量的故障模拟"><a href="#针对特定流量的故障模拟" class="headerlink" title="针对特定流量的故障模拟"></a>针对特定流量的故障模拟</h3><p>使用tc与iptables结合，可以只对特定流量应用网络故障模拟：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建标记特定流量的iptables规则</span></span><br><span class="line">iptables -A FORWARD -t mangle -p tcp --dport 80 -j MARK --set-mark 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为标记的流量创建队列规则</span></span><br><span class="line">tc qdisc add dev eth0 root handle 1: prio</span><br><span class="line">tc qdisc add dev eth0 parent 1:3 handle 30: netem delay 100ms loss 10%</span><br><span class="line">tc filter add dev eth0 protocol ip parent 1:0 prio 3 handle 1 fw flowid 1:3</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-iptables-模拟网络故障"><a href="#3-iptables-模拟网络故障" class="headerlink" title="3. iptables 模拟网络故障"></a>3. iptables 模拟网络故障</h2><p>iptables可以用于模拟网络层面的多种故障，尤其擅长精确控制特定连接。</p>
+<h3 id="RST包和连接重置"><a href="#RST包和连接重置" class="headerlink" title="RST包和连接重置"></a>RST包和连接重置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 向特定连接发送RST包</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -j REJECT --reject-with tcp-reset</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只针对特定条件的连接发送RST</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -m statistic --mode random --probability 0.3 -j REJECT --reject-with tcp-reset</span><br></pre></td></tr></table></figure>
+
+<h3 id="丢弃数据包"><a href="#丢弃数据包" class="headerlink" title="丢弃数据包"></a>丢弃数据包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 丢弃所有发往特定主机端口的数据包</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 192.168.1.100 --dport 80 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢弃30%的数据包(随机)</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 192.168.1.100 -m statistic --mode random --probability 0.3 -j DROP</span><br></pre></td></tr></table></figure>
+
+<h3 id="限制连接数"><a href="#限制连接数" class="headerlink" title="限制连接数"></a>限制连接数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制同时连接数</span></span><br><span class="line">iptables -A FORWARD -p tcp --syn --dport 80 -m connlimit --connlimit-above 10 -j DROP</span><br></pre></td></tr></table></figure>
+
+<h3 id="模拟防火墙策略变更"><a href="#模拟防火墙策略变更" class="headerlink" title="模拟防火墙策略变更"></a>模拟防火墙策略变更</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 突然阻断所有连接</span></span><br><span class="line">iptables -I FORWARD 1 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 之后移除此规则恢复连接</span></span><br><span class="line">iptables -D FORWARD 1</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-tcpkill-及相关工具详解"><a href="#4-tcpkill-及相关工具详解" class="headerlink" title="4. tcpkill 及相关工具详解"></a>4. tcpkill 及相关工具详解</h2><p>tcpkill属于dsniff工具集，主要用于中断TCP连接，但功能相对单一。同一工具集的其他工具可以模拟更多类型的网络攻击。</p>
+<h3 id="tcpkill-基本用法"><a href="#tcpkill-基本用法" class="headerlink" title="tcpkill 基本用法"></a>tcpkill 基本用法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 中断所有到达特定主机和端口的连接</span></span><br><span class="line">tcpkill -i eth0 host 192.168.1.100 and port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断指定协议的连接</span></span><br><span class="line">tcpkill -i eth0 port 443 and tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断特定源IP发起的连接</span></span><br><span class="line">tcpkill -i eth0 src 10.0.0.1 and dst port 22</span><br></pre></td></tr></table></figure>
+
+<h3 id="tcpkill-能模拟的其他攻击"><a href="#tcpkill-能模拟的其他攻击" class="headerlink" title="tcpkill 能模拟的其他攻击"></a>tcpkill 能模拟的其他攻击</h3><p>tcpkill本身功能有限，主要用于发送RST包中断连接。但dsniff工具集中的其他工具可以模拟更多攻击：</p>
+<ol>
+<li><p><strong>tcpnice</strong>: 通过操纵TCP窗口大小降低连接速度</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpnice -i eth0 host target.example.com</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>filesnarf</strong>: 捕获NFS文件传输</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">filesnarf -i eth0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>mailsnarf</strong>: 捕获邮件内容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mailsnarf -i eth0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>msgsnarf</strong>: 捕获即时通讯消息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msgsnarf -i eth0</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="tcpreplay-回放捕获的数据包"><a href="#tcpreplay-回放捕获的数据包" class="headerlink" title="tcpreplay: 回放捕获的数据包"></a>tcpreplay: 回放捕获的数据包</h3><p>tcpreplay可以重放之前捕获的数据包，用于模拟各种网络场景：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 回放之前捕获的数据包</span></span><br><span class="line">tcpreplay -i eth0 capture.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 调整回放速度</span></span><br><span class="line">tcpreplay -M 10.0 -i eth0 capture.pcap  <span class="comment"># 10倍速播放</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 循环播放</span></span><br><span class="line">tcpreplay -l 5 -i eth0 capture.pcap  <span class="comment"># 播放5次</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-其他高级网络模拟工具"><a href="#5-其他高级网络模拟工具" class="headerlink" title="5. 其他高级网络模拟工具"></a>5. 其他高级网络模拟工具</h2><h3 id="1-Toxiproxy"><a href="#1-Toxiproxy" class="headerlink" title="1. Toxiproxy"></a>1. Toxiproxy</h3><p>Toxiproxy是一个为测试设计的代理服务，可以模拟各种网络条件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动toxiproxy服务</span></span><br><span class="line">toxiproxy-server</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建代理</span></span><br><span class="line">toxiproxy-cli create myproxy --listen 0.0.0.0:8474 --upstream example.com:80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t latency -a latency=1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加随机延迟</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t latency -a jitter=500</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t bandwidth -a rate=100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟断开连接</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t <span class="built_in">timeout</span> -a <span class="built_in">timeout</span>=5000</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Comcast"><a href="#2-Comcast" class="headerlink" title="2. Comcast"></a>2. Comcast</h3><p>一个简单易用的网络条件模拟工具：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">go get github.com/tylertreat/comcast</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟和丢包</span></span><br><span class="line">comcast --device=eth0 --latency=250 --packet-loss=10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止模拟</span></span><br><span class="line">comcast --stop</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-pumba-Docker环境"><a href="#3-pumba-Docker环境" class="headerlink" title="3. pumba (Docker环境)"></a>3. pumba (Docker环境)</h3><p>专门为Docker容器设计的网络混沌测试工具：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为指定容器添加延迟</span></span><br><span class="line">pumba netem --interface eth0 delay --time 3000 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络中断</span></span><br><span class="line">pumba netem --interface eth0 loss --percent 100 --correlation 100 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">pumba netem --interface eth0 rate --rate 1kbit my_container</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Chaos-Mesh-Kubernetes环境"><a href="#4-Chaos-Mesh-Kubernetes环境" class="headerlink" title="4. Chaos Mesh (Kubernetes环境)"></a>4. Chaos Mesh (Kubernetes环境)</h3><p>为Kubernetes设计的混沌工程平台：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络延迟示例</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">chaos-mesh.org/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">NetworkChaos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">network-delay-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">action:</span> <span class="string">delay</span></span><br><span class="line">  <span class="attr">mode:</span> <span class="string">one</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">namespaces:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line">    <span class="attr">labelSelectors:</span></span><br><span class="line">      <span class="attr">&quot;app&quot;:</span> <span class="string">&quot;web-server&quot;</span></span><br><span class="line">  <span class="attr">delay:</span></span><br><span class="line">    <span class="attr">latency:</span> <span class="string">&quot;10ms&quot;</span></span><br><span class="line">    <span class="attr">correlation:</span> <span class="string">&quot;100&quot;</span></span><br><span class="line">    <span class="attr">jitter:</span> <span class="string">&quot;0ms&quot;</span></span><br><span class="line">  <span class="attr">duration:</span> <span class="string">&quot;30s&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="6-具体网络问题模拟方案"><a href="#6-具体网络问题模拟方案" class="headerlink" title="6. 具体网络问题模拟方案"></a>6. 具体网络问题模拟方案</h2><h3 id="模拟TCP重传"><a href="#模拟TCP重传" class="headerlink" title="模拟TCP重传"></a>模拟TCP重传</h3><p>TCP重传通常是由丢包、超时或网络拥塞引起的。要模拟TCP重传：</p>
+<h4 id="使用tc模拟"><a href="#使用tc模拟" class="headerlink" title="使用tc模拟:"></a>使用tc模拟:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机丢包引起的重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss random 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拥塞引起的重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 40ms distribution normal loss 5% 25%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 仅对特定流量引起重传</span></span><br><span class="line">tc qdisc add dev eth0 root handle 1: prio</span><br><span class="line">tc qdisc add dev eth0 parent 1:3 handle 30: netem loss 15%</span><br><span class="line">tc filter add dev eth0 parent 1: protocol ip prio 3 u32 match ip dport 80 0xffff flowid 1:3</span><br></pre></td></tr></table></figure>
+
+<h4 id="验证重传是否发生"><a href="#验证重传是否发生" class="headerlink" title="验证重传是否发生:"></a>验证重传是否发生:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用tcpdump观察重传</span></span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-fin|tcp-rst|tcp-push) != 0 and port 80&quot;</span> -v</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找标记为&quot;retransmission&quot;的数据包</span></span><br><span class="line">tcpdump -i eth0 -v tcp | grep -i retransmission</span><br></pre></td></tr></table></figure>
+
+<h3 id="模拟网络分区"><a href="#模拟网络分区" class="headerlink" title="模拟网络分区"></a>模拟网络分区</h3><p>网络分区是指网络被分割成多个无法相互通信的部分：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用iptables模拟网络分区</span></span><br><span class="line">iptables -A FORWARD -s 192.168.1.0/24 -d 192.168.2.0/24 -j DROP</span><br><span class="line">iptables -A FORWARD -s 192.168.2.0/24 -d 192.168.1.0/24 -j DROP</span><br></pre></td></tr></table></figure>
+
+<h3 id="模拟慢启动和拥塞控制"><a href="#模拟慢启动和拥塞控制" class="headerlink" title="模拟慢启动和拥塞控制"></a>模拟慢启动和拥塞控制</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制初始拥塞窗口大小</span></span><br><span class="line">ip route change default via 192.168.1.1 dev eth0 initcwnd 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 恢复默认设置</span></span><br><span class="line">ip route change default via 192.168.1.1 dev eth0 initcwnd 10</span><br></pre></td></tr></table></figure>
+
+<h3 id="模拟网络风暴"><a href="#模拟网络风暴" class="headerlink" title="模拟网络风暴"></a>模拟网络风暴</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用hping3模拟SYN泛洪</span></span><br><span class="line">hping3 -S --flood -p 80 target.example.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用iperf3模拟高流量</span></span><br><span class="line">iperf3 -c target.example.com -b 1G -t 60</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-常用命令总结"><a href="#7-常用命令总结" class="headerlink" title="7. 常用命令总结"></a>7. 常用命令总结</h2><h3 id="基本网络故障模拟命令"><a href="#基本网络故障模拟命令" class="headerlink" title="基本网络故障模拟命令"></a>基本网络故障模拟命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 添加延迟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 丢包率</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 限制带宽</span></span><br><span class="line">tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 数据包损坏</span></span><br><span class="line">tc qdisc add dev eth0 root netem corrupt 5%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 模拟RST包</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -j REJECT --reject-with tcp-reset</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 中断特定连接</span></span><br><span class="line">tcpkill -i eth0 host 192.168.1.100 and port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 7. 模拟TCP重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss random 15% delay 200ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 8. 重置所有网络模拟</span></span><br><span class="line">tc qdisc del dev eth0 root</span><br><span class="line">iptables -F</span><br></pre></td></tr></table></figure>
+
+<h3 id="监控网络问题命令"><a href="#监控网络问题命令" class="headerlink" title="监控网络问题命令"></a>监控网络问题命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看TCP重传和其他统计信息</span></span><br><span class="line">netstat -s | grep -i retrans</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络接口统计</span></span><br><span class="line">netstat -i</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时监控特定主机的网络连接</span></span><br><span class="line">watch -n 1 <span class="string">&quot;netstat -tunapl | grep 192.168.1.100&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用tcpdump查看重传</span></span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-fin|tcp-rst|tcp-push) != 0&quot;</span> -v | grep -i retransmission</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查丢包情况</span></span><br><span class="line">ping -c 100 192.168.1.100 | grep <span class="string">&quot;packet loss&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络路由</span></span><br><span class="line">traceroute -T 192.168.1.100</span><br></pre></td></tr></table></figure>
+
+<h3 id="常用组合场景命令"><a href="#常用组合场景命令" class="headerlink" title="常用组合场景命令"></a>常用组合场景命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 场景1: 不稳定的网络连接</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 50ms distribution normal loss 5% 25% duplicate 1% corrupt 2%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景2: 移动网络环境模拟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 200ms 100ms loss 3% reorder 5% rate 1mbit</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景3: 高丢包率环境下的TCP重传测试</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 20% delay 100ms 30ms &amp;&amp; \</span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;host 192.168.1.100&quot;</span> -v | grep -i retransmission</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景4: 周期性网络抖动(脚本示例)</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span>; <span class="keyword">do</span></span><br><span class="line">  <span class="comment"># 网络正常</span></span><br><span class="line">  tc qdisc del dev eth0 root</span><br><span class="line">  <span class="built_in">sleep</span> 30</span><br><span class="line">  <span class="comment"># 网络抖动</span></span><br><span class="line">  tc qdisc add dev eth0 root netem delay 500ms 200ms loss 10%</span><br><span class="line">  <span class="built_in">sleep</span> 10</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="8-总结与最佳实践"><a href="#8-总结与最佳实践" class="headerlink" title="8. 总结与最佳实践"></a>8. 总结与最佳实践</h2><p>在测试SSE或WebSocket等长连接时，应考虑以下方面：</p>
+<ol>
+<li><p><strong>模拟不同类型的网络中断</strong>：</p>
+<ul>
+<li>使用FIN包的优雅关闭 (应用层主动关闭)</li>
+<li>使用RST包的强制中断 (网络异常导致)</li>
+<li>临时网络不可达 (数据包丢失)</li>
+</ul>
+</li>
+<li><p><strong>测试客户端重连机制</strong>：</p>
+<ul>
+<li>指数退避重连</li>
+<li>区分不同类型的连接错误</li>
+<li>维持会话状态</li>
+</ul>
+</li>
+<li><p><strong>测试服务端优雅降级</strong>：</p>
+<ul>
+<li>连接突然断开时的资源清理</li>
+<li>部分网络可达时的服务降级</li>
+<li>高负载下的连接管理</li>
+</ul>
+</li>
+<li><p><strong>常见问题及解决方案</strong>：</p>
+<ul>
+<li>僵尸连接：设置合理的keepalive和超时</li>
+<li>资源泄漏：确保连接正确关闭</li>
+<li>重连风暴：客户端实现退避机制</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2780,314 +3011,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/31/tcpdump%E6%8A%93%E5%8C%85%E6%8C%87%E5%8D%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/07/31/tcpdump%E6%8A%93%E5%8C%85%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">tcpdump抓包指南</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-07-31 13:15:53 / 修改时间：13:16:22" itemprop="dateCreated datePublished" datetime="2025-07-31T13:15:53+08:00">2025-07-31</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="tcpdump-网络问题排查完整指南"><a href="#tcpdump-网络问题排查完整指南" class="headerlink" title="tcpdump 网络问题排查完整指南"></a>tcpdump 网络问题排查完整指南</h1><h2 id="🎯-目录"><a href="#🎯-目录" class="headerlink" title="🎯 目录"></a>🎯 目录</h2><ul>
-<li><a href="#%E6%8A%93%E5%8C%85%E5%89%8D%E7%9A%84%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C">抓包前的准备工作</a></li>
-<li><a href="#%E5%B8%B8%E8%A7%81%E7%BD%91%E7%BB%9C%E9%97%AE%E9%A2%98%E5%9C%BA%E6%99%AF">常见网络问题场景</a></li>
-<li><a href="#tcpdump-%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0%E8%AF%A6%E8%A7%A3">tcpdump 命令参数详解</a></li>
-<li><a href="#%E5%AE%9E%E6%88%98%E5%9C%BA%E6%99%AF%E4%B8%8E%E5%91%BD%E4%BB%A4">实战场景与命令</a></li>
-<li><a href="#%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95">结果分析方法</a></li>
-<li><a href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">最佳实践与注意事项</a></li>
-</ul>
-<hr>
-<h2 id="抓包前的准备工作"><a href="#抓包前的准备工作" class="headerlink" title="抓包前的准备工作"></a>抓包前的准备工作</h2><h3 id="1-问题定义阶段"><a href="#1-问题定义阶段" class="headerlink" title="1. 问题定义阶段"></a>1. 问题定义阶段</h3><p><strong>在开始抓包前，必须明确以下问题：</strong></p>
-<ul>
-<li>🔍 <strong>具体现象</strong>：连接超时？响应慢？数据包丢失？</li>
-<li>📍 <strong>问题范围</strong>：客户端？服务端？中间网络设备？</li>
-<li>⏰ <strong>发生时间</strong>：持续发生？间歇性？特定时间段？</li>
-<li>🌐 <strong>网络拓扑</strong>：了解数据包的完整传输路径</li>
-<li>📊 <strong>基线数据</strong>：正常情况下的网络表现如何？</li>
-</ul>
-<h3 id="2-环境信息收集"><a href="#2-环境信息收集" class="headerlink" title="2. 环境信息收集"></a>2. 环境信息收集</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查网络接口</span></span><br><span class="line">ip addr show</span><br><span class="line">ifconfig -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查路由表</span></span><br><span class="line">ip route show</span><br><span class="line">route -n</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查网络连接状态</span></span><br><span class="line">ss -tuln</span><br><span class="line">netstat -tuln</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查系统资源</span></span><br><span class="line">free -h</span><br><span class="line"><span class="built_in">df</span> -h</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-权限和工具准备"><a href="#3-权限和工具准备" class="headerlink" title="3. 权限和工具准备"></a>3. 权限和工具准备</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 确保有足够权限</span></span><br><span class="line"><span class="built_in">sudo</span> -v</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查 tcpdump 版本</span></span><br><span class="line">tcpdump --version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查磁盘空间（抓包文件可能很大）</span></span><br><span class="line"><span class="built_in">df</span> -h /tmp</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="常见网络问题场景"><a href="#常见网络问题场景" class="headerlink" title="常见网络问题场景"></a>常见网络问题场景</h2><h3 id="🚨-场景分类表"><a href="#🚨-场景分类表" class="headerlink" title="🚨 场景分类表"></a>🚨 场景分类表</h3><table>
-<thead>
-<tr>
-<th>场景类型</th>
-<th>典型问题</th>
-<th>关注重点</th>
-<th>预期结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>连接建立问题</strong></td>
-<td>连接超时、拒绝连接</td>
-<td>TCP 三次握手</td>
-<td>SYN, SYN-ACK, ACK</td>
-</tr>
-<tr>
-<td><strong>性能问题</strong></td>
-<td>响应慢、吞吐量低</td>
-<td>延迟、重传、窗口大小</td>
-<td>RTT, 重传率</td>
-</tr>
-<tr>
-<td><strong>DNS 解析问题</strong></td>
-<td>域名无法解析</td>
-<td>DNS 查询和响应</td>
-<td>Query&#x2F;Response 匹配</td>
-</tr>
-<tr>
-<td><strong>HTTP&#x2F;HTTPS 问题</strong></td>
-<td>4xx&#x2F;5xx 错误、SSL 握手失败</td>
-<td>应用层协议</td>
-<td>HTTP 状态码、TLS 握手</td>
-</tr>
-<tr>
-<td><strong>防火墙&#x2F;安全问题</strong></td>
-<td>包被丢弃、端口不通</td>
-<td>ICMP 消息、RST 包</td>
-<td>拒绝原因分析</td>
-</tr>
-<tr>
-<td><strong>负载均衡问题</strong></td>
-<td>请求分布不均、健康检查失败</td>
-<td>多目标流量分析</td>
-<td>负载分布模式</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="tcpdump-命令参数详解"><a href="#tcpdump-命令参数详解" class="headerlink" title="tcpdump 命令参数详解"></a>tcpdump 命令参数详解</h2><h3 id="基础语法"><a href="#基础语法" class="headerlink" title="基础语法"></a>基础语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump [选项] [过滤表达式]</span><br></pre></td></tr></table></figure>
-
-<h3 id="核心参数"><a href="#核心参数" class="headerlink" title="核心参数"></a>核心参数</h3><table>
-<thead>
-<tr>
-<th>参数</th>
-<th>作用</th>
-<th>示例</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>-i</code></td>
-<td>指定网络接口</td>
-<td><code>-i eth0</code>, <code>-i any</code></td>
-</tr>
-<tr>
-<td><code>-w</code></td>
-<td>写入文件</td>
-<td><code>-w capture.pcap</code></td>
-</tr>
-<tr>
-<td><code>-r</code></td>
-<td>读取文件</td>
-<td><code>-r capture.pcap</code></td>
-</tr>
-<tr>
-<td><code>-c</code></td>
-<td>捕获包数量</td>
-<td><code>-c 1000</code></td>
-</tr>
-<tr>
-<td><code>-n</code></td>
-<td>不解析主机名</td>
-<td><code>-n</code></td>
-</tr>
-<tr>
-<td><code>-nn</code></td>
-<td>不解析主机名和端口名</td>
-<td><code>-nn</code></td>
-</tr>
-<tr>
-<td><code>-v/-vv/-vvv</code></td>
-<td>详细程度</td>
-<td><code>-vv</code></td>
-</tr>
-<tr>
-<td><code>-s</code></td>
-<td>每个包的捕获长度</td>
-<td><code>-s 65535</code> (完整包)</td>
-</tr>
-<tr>
-<td><code>-X</code></td>
-<td>十六进制和ASCII显示</td>
-<td><code>-X</code></td>
-</tr>
-<tr>
-<td><code>-A</code></td>
-<td>ASCII 显示</td>
-<td><code>-A</code></td>
-</tr>
-<tr>
-<td><code>-t</code></td>
-<td>不显示时间戳</td>
-<td><code>-t</code></td>
-</tr>
-<tr>
-<td><code>-tt</code></td>
-<td>显示精确时间戳</td>
-<td><code>-tt</code></td>
-</tr>
-</tbody></table>
-<h3 id="过滤表达式"><a href="#过滤表达式" class="headerlink" title="过滤表达式"></a>过滤表达式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 主机过滤</span></span><br><span class="line">host 192.168.1.100</span><br><span class="line">src host 192.168.1.100</span><br><span class="line">dst host 192.168.1.100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 端口过滤</span></span><br><span class="line">port 80</span><br><span class="line">src port 8080</span><br><span class="line">dst port 443</span><br><span class="line">portrange 8000-8080</span><br><span class="line"></span><br><span class="line"><span class="comment"># 协议过滤</span></span><br><span class="line">tcp</span><br><span class="line">udp</span><br><span class="line">icmp</span><br><span class="line">arp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络过滤</span></span><br><span class="line">net 192.168.1.0/24</span><br><span class="line">src net 10.0.0.0/8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 逻辑操作符</span></span><br><span class="line">and, or, not</span><br><span class="line"><span class="comment"># 示例：tcp and port 80 and host 192.168.1.100</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="实战场景与命令"><a href="#实战场景与命令" class="headerlink" title="实战场景与命令"></a>实战场景与命令</h2><h3 id="场景1：TCP-连接问题排查"><a href="#场景1：TCP-连接问题排查" class="headerlink" title="场景1：TCP 连接问题排查"></a>场景1：TCP 连接问题排查</h3><h4 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h4><p>应用连接数据库超时，需要确认是网络问题还是应用问题。</p>
-<h4 id="定位思路"><a href="#定位思路" class="headerlink" title="定位思路"></a>定位思路</h4><ol>
-<li>确认 TCP 三次握手是否正常</li>
-<li>检查是否有 RST 包</li>
-<li>分析连接建立时间</li>
-</ol>
-<h4 id="抓包命令"><a href="#抓包命令" class="headerlink" title="抓包命令"></a>抓包命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 抓取特定主机和端口的 TCP 连接</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv -s 65535 \</span><br><span class="line">  -w tcp_connection_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap \</span><br><span class="line">  <span class="string">&quot;host 192.168.1.100 and port 3306 and tcp&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时查看 TCP 握手过程</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-ack) != 0&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 只看 SYN 包</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn <span class="string">&quot;tcp[tcpflags] &amp; tcp-syn != 0&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="结果分析"><a href="#结果分析" class="headerlink" title="结果分析"></a>结果分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 正常的 TCP 握手应该看到：</span></span><br><span class="line"><span class="comment"># 1. Client -&gt; Server: SYN</span></span><br><span class="line"><span class="comment"># 2. Server -&gt; Client: SYN, ACK  </span></span><br><span class="line"><span class="comment"># 3. Client -&gt; Server: ACK</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 异常情况：</span></span><br><span class="line"><span class="comment"># - 只有 SYN，没有 SYN-ACK：服务端未响应</span></span><br><span class="line"><span class="comment"># - SYN-ACK 后有 RST：连接被重置</span></span><br><span class="line"><span class="comment"># - 重复的 SYN：网络延迟或丢包</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="场景2：HTTP-HTTPS-问题排查"><a href="#场景2：HTTP-HTTPS-问题排查" class="headerlink" title="场景2：HTTP&#x2F;HTTPS 问题排查"></a>场景2：HTTP&#x2F;HTTPS 问题排查</h3><h4 id="问题描述-1"><a href="#问题描述-1" class="headerlink" title="问题描述"></a>问题描述</h4><p>Web 应用响应慢，用户反馈页面加载时间长。</p>
-<h4 id="定位思路-1"><a href="#定位思路-1" class="headerlink" title="定位思路"></a>定位思路</h4><ol>
-<li>分析 HTTP 请求和响应时间</li>
-<li>检查 HTTP 状态码</li>
-<li>分析 SSL&#x2F;TLS 握手时间</li>
-</ol>
-<h4 id="抓包命令-1"><a href="#抓包命令-1" class="headerlink" title="抓包命令"></a>抓包命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 抓取 HTTP 流量</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -A -s 65535 \</span><br><span class="line">  -w http_debug_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap \</span><br><span class="line">  <span class="string">&quot;port 80 or port 8080&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 抓取 HTTPS 流量（包含 TLS 握手）</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv -s 65535 \</span><br><span class="line">  -w https_debug_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap \</span><br><span class="line">  <span class="string">&quot;port 443&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时查看 HTTP 请求</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -A <span class="string">&quot;port 80 and tcp and host 192.168.1.100&quot;</span> \</span><br><span class="line">  | grep -E <span class="string">&quot;(GET|POST|PUT|DELETE|HTTP)&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="结果分析-1"><a href="#结果分析-1" class="headerlink" title="结果分析"></a>结果分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># HTTP 请求分析要点：</span></span><br><span class="line"><span class="comment"># 1. 请求方法和 URL</span></span><br><span class="line"><span class="comment"># 2. User-Agent 和其他头信息</span></span><br><span class="line"><span class="comment"># 3. 响应状态码（200, 404, 500 等）</span></span><br><span class="line"><span class="comment"># 4. Content-Length 和传输时间</span></span><br><span class="line"><span class="comment"># 5. Keep-Alive 连接复用情况</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># HTTPS 分析要点：</span></span><br><span class="line"><span class="comment"># 1. TLS 握手时间</span></span><br><span class="line"><span class="comment"># 2. 证书交换过程</span></span><br><span class="line"><span class="comment"># 3. 加密后的数据传输量</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="场景3：DNS-解析问题"><a href="#场景3：DNS-解析问题" class="headerlink" title="场景3：DNS 解析问题"></a>场景3：DNS 解析问题</h3><h4 id="问题描述-2"><a href="#问题描述-2" class="headerlink" title="问题描述"></a>问题描述</h4><p>域名解析失败或解析慢，影响应用启动。</p>
-<h4 id="定位思路-2"><a href="#定位思路-2" class="headerlink" title="定位思路"></a>定位思路</h4><ol>
-<li>捕获 DNS 查询和响应</li>
-<li>分析解析时间</li>
-<li>检查 DNS 服务器响应</li>
-</ol>
-<h4 id="抓包命令-2"><a href="#抓包命令-2" class="headerlink" title="抓包命令"></a>抓包命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 抓取 DNS 查询</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv -s 65535 \</span><br><span class="line">  -w dns_debug_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap \</span><br><span class="line">  <span class="string">&quot;port 53&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时查看 DNS 查询</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn <span class="string">&quot;port 53&quot;</span> | \</span><br><span class="line">  <span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;[<span class="subst">$(date &#x27;+%H:%M:%S&#x27;)</span>] <span class="variable">$line</span>&quot;</span></span><br><span class="line">  <span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 抓取特定域名的 DNS 查询</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv <span class="string">&quot;port 53 and host 8.8.8.8&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="结果分析-2"><a href="#结果分析-2" class="headerlink" title="结果分析"></a>结果分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># DNS 分析要点：</span></span><br><span class="line"><span class="comment"># 1. 查询类型（A, AAAA, CNAME, MX 等）</span></span><br><span class="line"><span class="comment"># 2. 查询域名和响应 IP</span></span><br><span class="line"><span class="comment"># 3. 响应时间（Query -&gt; Response 间隔）</span></span><br><span class="line"><span class="comment"># 4. DNS 服务器是否响应</span></span><br><span class="line"><span class="comment"># 5. NXDOMAIN 错误（域名不存在）</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="场景4：网络延迟和丢包分析"><a href="#场景4：网络延迟和丢包分析" class="headerlink" title="场景4：网络延迟和丢包分析"></a>场景4：网络延迟和丢包分析</h3><h4 id="问题描述-3"><a href="#问题描述-3" class="headerlink" title="问题描述"></a>问题描述</h4><p>网络传输慢，怀疑有丢包或高延迟。</p>
-<h4 id="定位思路-3"><a href="#定位思路-3" class="headerlink" title="定位思路"></a>定位思路</h4><ol>
-<li>分析 RTT（往返时间）</li>
-<li>检测重传包</li>
-<li>分析 TCP 窗口大小</li>
-</ol>
-<h4 id="抓包命令-3"><a href="#抓包命令-3" class="headerlink" title="抓包命令"></a>抓包命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 抓取 ICMP ping 包分析延迟</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv \</span><br><span class="line">  -w ping_analysis_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap \</span><br><span class="line">  <span class="string">&quot;icmp and host 192.168.1.100&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 抓取 TCP 重传包</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv \</span><br><span class="line">  <span class="string">&quot;tcp and host 192.168.1.100&quot;</span> | \</span><br><span class="line">  grep -E <span class="string">&quot;(retransmission|duplicate)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 抓取所有流量分析窗口大小</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv -s 96 \</span><br><span class="line">  -w network_performance_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap \</span><br><span class="line">  <span class="string">&quot;tcp and host 192.168.1.100&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="结果分析-3"><a href="#结果分析-3" class="headerlink" title="结果分析"></a>结果分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 延迟分析：</span></span><br><span class="line"><span class="comment"># 1. ICMP ping 的往返时间</span></span><br><span class="line"><span class="comment"># 2. TCP SYN -&gt; SYN-ACK 的时间间隔</span></span><br><span class="line"><span class="comment"># 3. HTTP 请求 -&gt; 响应的时间间隔</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢包分析：</span></span><br><span class="line"><span class="comment"># 1. 重复的 ACK 包</span></span><br><span class="line"><span class="comment"># 2. TCP 重传</span></span><br><span class="line"><span class="comment"># 3. 窗口大小变化</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="场景5：容器网络问题"><a href="#场景5：容器网络问题" class="headerlink" title="场景5：容器网络问题"></a>场景5：容器网络问题</h3><h4 id="问题描述-4"><a href="#问题描述-4" class="headerlink" title="问题描述"></a>问题描述</h4><p>Kubernetes 集群中 Pod 间通信异常。</p>
-<h4 id="定位思路-4"><a href="#定位思路-4" class="headerlink" title="定位思路"></a>定位思路</h4><ol>
-<li>在不同网络层面抓包</li>
-<li>分析容器网络接口</li>
-<li>检查 iptables 规则影响</li>
-</ol>
-<h4 id="抓包命令-4"><a href="#抓包命令-4" class="headerlink" title="抓包命令"></a>抓包命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在宿主机抓取所有容器流量</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i docker0 -nn -vv \</span><br><span class="line">  -w container_network_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 抓取特定 Pod IP 的流量</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv \</span><br><span class="line">  <span class="string">&quot;host 10.244.1.100&quot;</span> \</span><br><span class="line">  -w pod_communication_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在容器内抓包</span></span><br><span class="line">kubectl <span class="built_in">exec</span> -it pod-name -c container-name -- \</span><br><span class="line">  tcpdump -i eth0 -nn -vv -w - &gt; container_internal.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 抓取 CNI 网络接口流量</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i cni0 -nn -vv \</span><br><span class="line">  -w cni_traffic_$(<span class="built_in">date</span> +%Y%m%d_%H%M%S).pcap</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="结果分析方法"><a href="#结果分析方法" class="headerlink" title="结果分析方法"></a>结果分析方法</h2><h3 id="1-使用-Wireshark-图形化分析"><a href="#1-使用-Wireshark-图形化分析" class="headerlink" title="1. 使用 Wireshark 图形化分析"></a>1. 使用 Wireshark 图形化分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将 pcap 文件导入 Wireshark</span></span><br><span class="line">wireshark capture.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常用 Wireshark 过滤器</span></span><br><span class="line">tcp.analysis.flags</span><br><span class="line">http.response.code != 200</span><br><span class="line">dns.flags.response == 0</span><br><span class="line">tcp.analysis.retransmission</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-命令行快速分析"><a href="#2-命令行快速分析" class="headerlink" title="2. 命令行快速分析"></a>2. 命令行快速分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 统计协议分布</span></span><br><span class="line">tcpdump -r capture.pcap -nn | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计目标 IP</span></span><br><span class="line">tcpdump -r capture.pcap -nn | awk <span class="string">&#x27;&#123;print $5&#125;&#x27;</span> | <span class="built_in">cut</span> -d: -f1 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找特定错误</span></span><br><span class="line">tcpdump -r capture.pcap -nn -A | grep -i <span class="string">&quot;error\|timeout\|refused&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析连接时间</span></span><br><span class="line">tcpdump -r capture.pcap -nn -tt | grep -E <span class="string">&quot;SYN|ACK&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-数据包分析清单"><a href="#3-数据包分析清单" class="headerlink" title="3. 数据包分析清单"></a>3. 数据包分析清单</h3><h4 id="TCP-连接分析"><a href="#TCP-连接分析" class="headerlink" title="TCP 连接分析"></a>TCP 连接分析</h4><ul>
-<li><input disabled="" type="checkbox"> SYN, SYN-ACK, ACK 三次握手完整</li>
-<li><input disabled="" type="checkbox"> 序列号和确认号正确递增</li>
-<li><input disabled="" type="checkbox"> 无异常 RST 包</li>
-<li><input disabled="" type="checkbox"> 窗口大小合理</li>
-<li><input disabled="" type="checkbox"> 无频繁重传</li>
-</ul>
-<h4 id="HTTP-分析"><a href="#HTTP-分析" class="headerlink" title="HTTP 分析"></a>HTTP 分析</h4><ul>
-<li><input disabled="" type="checkbox"> 请求方法和 URL 正确</li>
-<li><input disabled="" type="checkbox"> HTTP 状态码符合预期</li>
-<li><input disabled="" type="checkbox"> 响应时间在合理范围</li>
-<li><input disabled="" type="checkbox"> Content-Length 与实际内容匹配</li>
-<li><input disabled="" type="checkbox"> 无异常重定向</li>
-</ul>
-<h4 id="DNS-分析"><a href="#DNS-分析" class="headerlink" title="DNS 分析"></a>DNS 分析</h4><ul>
-<li><input disabled="" type="checkbox"> 查询和响应配对正确</li>
-<li><input disabled="" type="checkbox"> 响应时间 &lt; 100ms</li>
-<li><input disabled="" type="checkbox"> 无 NXDOMAIN 错误</li>
-<li><input disabled="" type="checkbox"> DNS 服务器可达</li>
-</ul>
-<hr>
-<h2 id="最佳实践与注意事项"><a href="#最佳实践与注意事项" class="headerlink" title="最佳实践与注意事项"></a>最佳实践与注意事项</h2><h3 id="✅-最佳实践"><a href="#✅-最佳实践" class="headerlink" title="✅ 最佳实践"></a>✅ 最佳实践</h3><h4 id="1-抓包策略"><a href="#1-抓包策略" class="headerlink" title="1. 抓包策略"></a>1. 抓包策略</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 始终使用时间戳和详细信息</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -vv -tt -s 65535</span><br><span class="line"></span><br><span class="line"><span class="comment"># 大流量环境下限制抓包大小</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -c 10000 -s 128</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用轮转文件避免单文件过大</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -w capture.pcap -C 100 -W 5</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-过滤器优化"><a href="#2-过滤器优化" class="headerlink" title="2. 过滤器优化"></a>2. 过滤器优化</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 精确过滤减少无关流量</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn \</span><br><span class="line">  <span class="string">&quot;host 192.168.1.100 and port 80 and tcp[tcpflags] &amp; tcp-syn != 0&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 BPF 过滤器提高性能</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn <span class="string">&quot;tcp and dst port 443&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="3-文件管理"><a href="#3-文件管理" class="headerlink" title="3. 文件管理"></a>3. 文件管理</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建专门的抓包目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /tmp/tcpdump/$(<span class="built_in">date</span> +%Y%m%d)</span><br><span class="line"><span class="built_in">cd</span> /tmp/tcpdump/$(<span class="built_in">date</span> +%Y%m%d)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用描述性文件名</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn -w <span class="string">&quot;<span class="subst">$(hostname)</span>_<span class="subst">$(date +%Y%m%d_%H%M%S)</span>_issue_description.pcap&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="⚠️-注意事项"><a href="#⚠️-注意事项" class="headerlink" title="⚠️ 注意事项"></a>⚠️ 注意事项</h3><h4 id="1-性能影响"><a href="#1-性能影响" class="headerlink" title="1. 性能影响"></a>1. 性能影响</h4><ul>
-<li>大流量环境下抓包会消耗 CPU 和内存</li>
-<li>使用适当的过滤器减少数据量</li>
-<li>监控磁盘空间，避免写满系统盘</li>
-</ul>
-<h4 id="2-安全考虑"><a href="#2-安全考虑" class="headerlink" title="2. 安全考虑"></a>2. 安全考虑</h4><ul>
-<li>抓包文件可能包含敏感信息</li>
-<li>及时删除不需要的抓包文件</li>
-<li>在生产环境抓包需要额外审批</li>
-</ul>
-<h4 id="3-法律合规"><a href="#3-法律合规" class="headerlink" title="3. 法律合规"></a>3. 法律合规</h4><ul>
-<li>确保有权限抓取网络流量</li>
-<li>遵守公司网络监控政策</li>
-<li>不要抓取他人隐私数据</li>
-</ul>
-<h3 id="🔧-常用脚本模板"><a href="#🔧-常用脚本模板" class="headerlink" title="🔧 常用脚本模板"></a>🔧 常用脚本模板</h3><h4 id="自动化抓包脚本"><a href="#自动化抓包脚本" class="headerlink" title="自动化抓包脚本"></a>自动化抓包脚本</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># tcpdump_auto.sh</span></span><br><span class="line"></span><br><span class="line">INTERFACE=<span class="variable">$&#123;1:-any&#125;</span></span><br><span class="line">FILTER=<span class="variable">$&#123;2:-&quot;&quot;&#125;</span></span><br><span class="line">DURATION=<span class="variable">$&#123;3:-60&#125;</span></span><br><span class="line">OUTPUT_DIR=<span class="string">&quot;/tmp/tcpdump&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="variable">$OUTPUT_DIR</span></span><br><span class="line">FILENAME=<span class="string">&quot;<span class="variable">$OUTPUT_DIR</span>/capture_<span class="subst">$(hostname)</span>_<span class="subst">$(date +%Y%m%d_%H%M%S)</span>.pcap&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;开始抓包: <span class="variable">$DURATION</span> 秒&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;接口: <span class="variable">$INTERFACE</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;过滤器: <span class="variable">$FILTER</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;输出文件: <span class="variable">$FILENAME</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">timeout</span> <span class="variable">$DURATION</span> <span class="built_in">sudo</span> tcpdump -i <span class="variable">$INTERFACE</span> -nn -vv -s 65535 -w <span class="variable">$FILENAME</span> <span class="string">&quot;<span class="variable">$FILTER</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;抓包完成，文件大小: <span class="subst">$(du -h $FILENAME | cut -f1)</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;使用以下命令分析:&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;tcpdump -r <span class="variable">$FILENAME</span> -nn -vv | less&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;wireshark <span class="variable">$FILENAME</span> &amp;&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="问题诊断检查清单"><a href="#问题诊断检查清单" class="headerlink" title="问题诊断检查清单"></a>问题诊断检查清单</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># network_check.sh</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 网络问题诊断检查清单 ===&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;1. 基础连通性测试&quot;</span></span><br><span class="line">ping -c 4 <span class="variable">$1</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;✅ Ping 成功&quot;</span> || <span class="built_in">echo</span> <span class="string">&quot;❌ Ping 失败&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;2. 端口连通性测试&quot;</span>  </span><br><span class="line">nc -zv <span class="variable">$1</span> <span class="variable">$2</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;✅ 端口 <span class="variable">$2</span> 可达&quot;</span> || <span class="built_in">echo</span> <span class="string">&quot;❌ 端口 <span class="variable">$2</span> 不可达&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;3. DNS 解析测试&quot;</span></span><br><span class="line">nslookup <span class="variable">$1</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;✅ DNS 解析成功&quot;</span> || <span class="built_in">echo</span> <span class="string">&quot;❌ DNS 解析失败&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;4. 路由跟踪&quot;</span></span><br><span class="line">traceroute <span class="variable">$1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;5. 开始详细抓包分析...&quot;</span></span><br><span class="line"><span class="comment"># 调用抓包脚本</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="📚-扩展阅读"><a href="#📚-扩展阅读" class="headerlink" title="📚 扩展阅读"></a>📚 扩展阅读</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://www.tcpdump.org/manpages/tcpdump.1.html">tcpdump 官方文档</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.wireshark.org/docs/wsug_html_chunked/">Wireshark 用户指南</a></li>
-<li><a target="_blank" rel="noopener" href="https://tools.ietf.org/rfc/">网络协议栈分析方法</a></li>
-</ul>
-<hr>
-<p><strong>最后更新时间：</strong> $(date +%Y-%m-%d)<br><strong>版本：</strong> v1.0<br><strong>维护者：</strong> Network Team</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -3159,7 +3082,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">155</span>
+          <span class="site-state-item-count">156</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -3172,7 +3095,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">21</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
