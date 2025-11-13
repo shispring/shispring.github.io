@@ -184,6 +184,123 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/09/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/06/09/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" class="post-title-link" itemprop="url">单元测试</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-09 10:11:23 / 修改时间：10:35:20" itemprop="dateCreated datePublished" datetime="2025-06-09T10:11:23+08:00">2025-06-09</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="单元测试的标准与最佳实践"><a href="#单元测试的标准与最佳实践" class="headerlink" title="单元测试的标准与最佳实践"></a>单元测试的标准与最佳实践</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">1. **函数命名规范**  </span><br><span class="line">   测试函数必须以 Test 开头，后跟要测试的函数名或功能点</span><br><span class="line">2. **测试用例覆盖**  </span><br><span class="line">   - 覆盖正常情况、边界情况、异常情况。</span><br><span class="line">   - 尽量覆盖所有分支和逻辑路径。</span><br><span class="line">3. **结构清晰**  </span><br><span class="line">   - 使用 table-driven 测试（表驱动测试），便于添加和维护用例。</span><br><span class="line">   - 测试用例结构体字段要表达清楚输入、期望输出。</span><br><span class="line">4. **断言明确**  </span><br><span class="line">   - 使用 t.Errorf 或 t.Fatalf 明确指出期望与实际的差异。</span><br><span class="line">   - 错误信息要有可读性，便于定位问题。</span><br><span class="line">5. **独立性**  </span><br><span class="line">   - 每个测试用例应相互独立，不能依赖其他测试的执行结果。</span><br><span class="line">   - 尽量避免全局变量或外部依赖。</span><br><span class="line">6. **可读性与可维护性**  </span><br><span class="line">   - 变量命名清晰，结构体字段含义明确。</span><br><span class="line">   - 适当注释复杂逻辑。</span><br><span class="line">7. **自动化**  </span><br><span class="line">   - 测试应能自动运行，且不需要人工干预。</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="测试模式分类"><a href="#测试模式分类" class="headerlink" title="测试模式分类"></a>测试模式分类</h2><h3 id="1-表驱动测试（table-driven-test）"><a href="#1-表驱动测试（table-driven-test）" class="headerlink" title="1. 表驱动测试（table-driven test）"></a>1. 表驱动测试（table-driven test）</h3><ul>
+<li>是 Go 语言社区非常推崇的一种测试模式。它的核心思想是：  </li>
+<li>把一组输入和期望输出写成一个“表”（通常是切片或数组），然后用循环依次执行每组用例。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">这样做的好处是：  </span><br><span class="line">- 结构清晰，易于维护和扩展  </span><br><span class="line">- 新增用例只需加一行数据  </span><br><span class="line">- 代码更简洁，避免重复</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h4 id="表驱动测试的基本结构"><a href="#表驱动测试的基本结构" class="headerlink" title="表驱动测试的基本结构"></a>表驱动测试的基本结构</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestAdd</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 定义测试用例表</span></span><br><span class="line">    tests := []<span class="keyword">struct</span> &#123;</span><br><span class="line">        name <span class="type">string</span>    <span class="comment">// 用例名称</span></span><br><span class="line">        a, b <span class="type">int</span>       <span class="comment">// 输入参数</span></span><br><span class="line">        want <span class="type">int</span>       <span class="comment">// 期望输出</span></span><br><span class="line">    &#125;&#123;</span><br><span class="line">        &#123;<span class="string">&quot;正数相加&quot;</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;负数相加&quot;</span>, <span class="number">-1</span>, <span class="number">-2</span>, <span class="number">-3</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;正负相加&quot;</span>, <span class="number">1</span>, <span class="number">-2</span>, <span class="number">-1</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;零相加&quot;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历表，逐个执行</span></span><br><span class="line">    <span class="keyword">for</span> _, tt := <span class="keyword">range</span> tests &#123;</span><br><span class="line">        t.Run(tt.name, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">            got := Add(tt.a, tt.b)</span><br><span class="line">            <span class="keyword">if</span> got != tt.want &#123;</span><br><span class="line">                t.Errorf(<span class="string">&quot;Add(%d, %d) = %d, want %d&quot;</span>, tt.a, tt.b, got, tt.want)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 被测试的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Add</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h4><ul>
+<li>输入输出明确、参数组合多的函数</li>
+<li>需要覆盖多种边界情况的逻辑</li>
+</ul>
+<hr>
+<h3 id="2-子测试（Subtests）"><a href="#2-子测试（Subtests）" class="headerlink" title="2.子测试（Subtests）"></a>2.子测试（Subtests）</h3><ul>
+<li><strong>简介</strong>：使用 <code>t.Run</code> 创建子测试，便于分组、并发和独立执行。</li>
+<li><strong>优点</strong>：可以单独运行某个子测试，输出更清晰。</li>
+<li><strong>示例</strong>：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestSomething</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Run(<span class="string">&quot;case1&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 测试逻辑</span></span><br><span class="line">    &#125;)</span><br><span class="line">    t.Run(<span class="string">&quot;case2&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 测试逻辑</span></span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3 id="3-基准测试（Benchmark）"><a href="#3-基准测试（Benchmark）" class="headerlink" title="3.基准测试（Benchmark）"></a>3.基准测试（Benchmark）</h3><ul>
+<li><strong>简介</strong>：以 <code>Benchmark</code> 开头的函数，用于性能测试。</li>
+<li><strong>规范</strong>：函数签名为 <code>func(b *testing.B)</code>，通过循环多次执行被测代码。</li>
+<li><strong>示例</strong>：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkAdd</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">        Add(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3 id="4-并发测试（Parallel-Test）"><a href="#4-并发测试（Parallel-Test）" class="headerlink" title="4.并发测试（Parallel Test）"></a>4.并发测试（Parallel Test）</h3><ul>
+<li><strong>简介</strong>：使用 <code>t.Parallel()</code> 让测试用例并发执行，检测并发安全问题。</li>
+<li><h2 id="示例："><a href="#示例：" class="headerlink" title="示例："></a><strong>示例</strong>：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestParallel</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Parallel()</span><br><span class="line">    <span class="comment">// 并发相关测试逻辑</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></h2></li>
+</ul>
+<h3 id="5-测试覆盖率（Coverage）"><a href="#5-测试覆盖率（Coverage）" class="headerlink" title="5. 测试覆盖率（Coverage）"></a>5. 测试覆盖率（Coverage）</h3><ul>
+<li><strong>简介</strong>：通过 <code>go test -cover</code> 查看测试覆盖率，确保代码质量。</li>
+<li><strong>建议</strong>：覆盖率不是越高越好，但应覆盖核心逻辑和边界情况。</li>
+</ul>
+<hr>
+<h3 id="6-断言库（Assertion-Library）"><a href="#6-断言库（Assertion-Library）" class="headerlink" title="6. 断言库（Assertion Library）"></a>6. 断言库（Assertion Library）</h3><ul>
+<li><strong>简介</strong>：使用断言库简化判断和输出，如 <code>github.com/stretchr/testify/assert</code>。</li>
+<li><strong>示例</strong>：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;github.com/stretchr/testify/assert&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestAdd</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    assert.Equal(t, <span class="number">3</span>, Add(<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3 id="7-Mock-和-Stub"><a href="#7-Mock-和-Stub" class="headerlink" title="7. Mock 和 Stub"></a>7. Mock 和 Stub</h3><ul>
+<li><strong>简介</strong>：通过接口和自定义实现，模拟外部依赖（如数据库、网络等），实现隔离测试。</li>
+<li><strong>常用库</strong>：<code>github.com/stretchr/testify/mock</code>、<code>golang/mock</code>。</li>
+</ul>
+<hr>
+<h3 id="8-测试文件规范"><a href="#8-测试文件规范" class="headerlink" title="8. 测试文件规范"></a>8. 测试文件规范</h3><ul>
+<li>测试文件以 <code>_test.go</code> 结尾。</li>
+<li>测试函数以 <code>Test</code>、<code>Benchmark</code>、<code>Example</code> 开头。</li>
+<li>测试代码和生产代码分离。</li>
+</ul>
+<hr>
+<h2 id="官方文档与社区资源"><a href="#官方文档与社区资源" class="headerlink" title="官方文档与社区资源"></a>官方文档与社区资源</h2><ul>
+<li>Go 官方测试文档：<br><a target="_blank" rel="noopener" href="https://pkg.go.dev/testing">https://pkg.go.dev/testing</a></li>
+<li>Go 官方标准库 testing 包：<br><a target="_blank" rel="noopener" href="https://pkg.go.dev/testing">https://pkg.go.dev/testing</a></li>
+<li>Go Blog: Table-driven Tests<br><a target="_blank" rel="noopener" href="https://go.dev/wiki/TableDrivenTests">https://go.dev/wiki/TableDrivenTests</a></li>
+<li>Go Blog: Subtests and Sub-benchmarks<br><a target="_blank" rel="noopener" href="https://go.dev/blog/subtests">https://go.dev/blog/subtests</a></li>
+<li>Testify 断言库<br><a target="_blank" rel="noopener" href="https://github.com/stretchr/testify">https://github.com/stretchr/testify</a></li>
+</ul>
+<hr>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/05/26/%E4%BB%8Emain-go%E6%96%87%E4%BB%B6%E5%88%B0%E9%83%A8%E7%BD%B2k8s%E9%9B%86%E7%BE%A4%E7%9A%84%E6%AD%A5%E9%AA%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1018,160 +1135,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/14/daemonset%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/04/14/daemonset%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7/" class="post-title-link" itemprop="url">daemonset滚动升级</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-04-14 16:03:49 / 修改时间：16:04:16" itemprop="dateCreated datePublished" datetime="2025-04-14T16:03:49+08:00">2025-04-14</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="🚀-DaemonSet-的-updateStrategy-升级策略详解"><a href="#🚀-DaemonSet-的-updateStrategy-升级策略详解" class="headerlink" title="🚀 DaemonSet 的 updateStrategy 升级策略详解"></a>🚀 DaemonSet 的 <code>updateStrategy</code> 升级策略详解</h2><p>DaemonSet 的升级策略定义在 <code>spec.updateStrategy</code> 字段下，用来控制 <strong>Pod 的滚动升级行为</strong>。</p>
-<p>目前支持两种类型：</p>
-<table>
-<thead>
-<tr>
-<th>类型</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>RollingUpdate</code></td>
-<td>自动滚动升级，推荐的方式</td>
-</tr>
-<tr>
-<td><code>OnDelete</code></td>
-<td>手动删除后重建，不自动升级</td>
-</tr>
-</tbody></table>
-<hr>
-<h3 id="🔁-1-type-RollingUpdate-（自动滚动升级）"><a href="#🔁-1-type-RollingUpdate-（自动滚动升级）" class="headerlink" title="🔁 1. type: RollingUpdate （自动滚动升级）"></a>🔁 1. <code>type: RollingUpdate</code> （自动滚动升级）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">RollingUpdate</span></span><br><span class="line">  <span class="attr">rollingUpdate:</span></span><br><span class="line">    <span class="attr">maxUnavailable:</span> <span class="number">30</span><span class="string">%</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="🔸-含义："><a href="#🔸-含义：" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
-<li>自动将老版本的 Pod 一个个替换为新版本，<strong>每次升级部分 Pod</strong>。</li>
-<li>受 <code>maxUnavailable</code> 控制，表示 <strong>在任意时刻最多有多少 Pod 可以不可用</strong>。</li>
-</ul>
-<h4 id="📌-maxUnavailable-参数详解："><a href="#📌-maxUnavailable-参数详解：" class="headerlink" title="📌 maxUnavailable 参数详解："></a>📌 <code>maxUnavailable</code> 参数详解：</h4><ul>
-<li>可以是整数（如 <code>1</code>）或百分比（如 <code>30%</code>）</li>
-<li>表示 <strong>升级期间，允许的最大不可用 Pod 数量</strong></li>
-</ul>
-<h4 id="⛓️-升级过程（示例）："><a href="#⛓️-升级过程（示例）：" class="headerlink" title="⛓️ 升级过程（示例）："></a>⛓️ 升级过程（示例）：</h4><p>假设你在 10 个节点上部署了 DaemonSet，每个节点都有一个 Pod。</p>
-<p>升级步骤：</p>
-<ol>
-<li>允许最多 3 个 Pod（30%）同时被删除并重建。</li>
-<li>控制器会自动删除旧版本的 Pod 并创建新版本。</li>
-<li>等新版本的 Pod 启动成功后，再继续替换下一批。</li>
-</ol>
-<h4 id="✅-优点："><a href="#✅-优点：" class="headerlink" title="✅ 优点："></a>✅ 优点：</h4><ul>
-<li><strong>平滑升级</strong>，对服务影响最小</li>
-<li>推荐用于生产环境</li>
-</ul>
-<hr>
-<h3 id="🧍-2-type-OnDelete-（手动升级）"><a href="#🧍-2-type-OnDelete-（手动升级）" class="headerlink" title="🧍 2. type: OnDelete （手动升级）"></a>🧍 2. <code>type: OnDelete</code> （手动升级）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">OnDelete</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="🔸-含义：-1"><a href="#🔸-含义：-1" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
-<li>DaemonSet 控制器 <strong>不会主动删除旧版本 Pod</strong></li>
-<li>只有当你手动 <code>kubectl delete pod xxx</code> 删除旧 Pod 时，DaemonSet 才会拉起新版本的 Pod</li>
-</ul>
-<h4 id="⛓️-升级过程："><a href="#⛓️-升级过程：" class="headerlink" title="⛓️ 升级过程："></a>⛓️ 升级过程：</h4><ol>
-<li>你修改了 DaemonSet 的模板（如 image）</li>
-<li>DaemonSet 检测到变更，但 <strong>不会更新任何 Pod</strong></li>
-<li>你需要手动删除 Pod：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod ingress-nginx-controller-xxxxx -n ingress-nginx</span><br></pre></td></tr></table></figure></li>
-<li>控制器自动基于新的模板重新创建 Pod</li>
-</ol>
-<h4 id="✅-适用场景："><a href="#✅-适用场景：" class="headerlink" title="✅ 适用场景："></a>✅ 适用场景：</h4><ul>
-<li>你需要<strong>精确控制每个节点 Pod 的升级时机</strong></li>
-<li>避免自动滚动升级带来的不确定性</li>
-</ul>
-<h4 id="❌-缺点："><a href="#❌-缺点：" class="headerlink" title="❌ 缺点："></a>❌ 缺点：</h4><ul>
-<li>升级需要人工干预</li>
-<li>不适合频繁迭代或高可用性要求场景</li>
-</ul>
-<hr>
-<h3 id="🧠-总结对比"><a href="#🧠-总结对比" class="headerlink" title="🧠 总结对比"></a>🧠 总结对比</h3><table>
-<thead>
-<tr>
-<th>特性</th>
-<th>RollingUpdate</th>
-<th>OnDelete</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>是否自动升级</td>
-<td>✅ 是</td>
-<td>❌ 否，需要手动删除</td>
-</tr>
-<tr>
-<td>可控性</td>
-<td>中等</td>
-<td>高</td>
-</tr>
-<tr>
-<td>服务连续性</td>
-<td>高（通过 <code>maxUnavailable</code> 控制）</td>
-<td>高（完全受控）</td>
-</tr>
-<tr>
-<td>推荐场景</td>
-<td>生产环境通用升级</td>
-<td>手动灰度升级、需精细控制时</td>
-</tr>
-<tr>
-<td>运维复杂度</td>
-<td>低</td>
-<td>中-高</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1243,7 +1206,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">154</span>
+          <span class="site-state-item-count">155</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
