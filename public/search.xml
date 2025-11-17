@@ -13038,6 +13038,35 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </ul>
 </li>
 </ul>
+<hr>
+<h1 id="⭐-terminationGracePeriodSeconds-设计核心原则（总结）"><a href="#⭐-terminationGracePeriodSeconds-设计核心原则（总结）" class="headerlink" title="⭐ terminationGracePeriodSeconds 设计核心原则（总结）"></a>⭐ terminationGracePeriodSeconds 设计核心原则（总结）</h1><table>
+<thead>
+<tr>
+<th>原则</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 与业务退出耗时相匹配</td>
+<td>不够会被 SIGKILL</td>
+</tr>
+<tr>
+<td>2. 大于 preStop 脚本执行时间</td>
+<td>防止脚本被中断</td>
+</tr>
+<tr>
+<td>3. 大于 LB 连接迁移耗时</td>
+<td>防止客户端访问异常</td>
+</tr>
+<tr>
+<td>4. 必须进行业务侧 graceful shutdown</td>
+<td>否则延长时间也没用</td>
+</tr>
+<tr>
+<td>5. 对长任务必须设计 checkpoint</td>
+<td>不然永远无法优雅终止</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>k8s</tag>
