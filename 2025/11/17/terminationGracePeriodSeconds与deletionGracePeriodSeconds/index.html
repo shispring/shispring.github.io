@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用 #️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）✔ 所在位置Pod Spec 字段： 12spec:  terminationGracePeriodSeconds: 30  ✔ 意义“容器终止">
+<meta property="og:type" content="article">
+<meta property="og:title" content="terminationGracePeriodSeconds与deletionGracePeriodSeconds">
+<meta property="og:url" content="https://shispring.github.io/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用 #️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）✔ 所在位置Pod Spec 字段： 12spec:  terminationGracePeriodSeconds: 30  ✔ 意义“容器终止">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-17T09:58:16.000Z">
+<meta property="article:modified_time" content="2025-11-17T09:59:11.086Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>terminationGracePeriodSeconds与deletionGracePeriodSeconds | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          terminationGracePeriodSeconds与deletionGracePeriodSeconds
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-11-17 17:58:16 / 修改时间：17:59:11" itemprop="dateCreated datePublished" datetime="2025-11-17T17:58:16+08:00">2025-11-17</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="✅-terminationGracePeriodSeconds-与-deletionGracePeriodSeconds-的区别、来源与作用"><a href="#✅-terminationGracePeriodSeconds-与-deletionGracePeriodSeconds-的区别、来源与作用" class="headerlink" title="✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用"></a>✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用</h1><hr>
+<h1 id="️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）"><a href="#️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）" class="headerlink" title="#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）"></a>#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）</h1><h3 id="✔-所在位置"><a href="#✔-所在位置" class="headerlink" title="✔ 所在位置"></a>✔ 所在位置</h3><p>Pod Spec 字段：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="✔-意义"><a href="#✔-意义" class="headerlink" title="✔ 意义"></a>✔ 意义</h3><p><strong>“容器终止前允许它优雅退出的时间”</strong><br>即：K8s 要删除 Pod 时，不是立刻强制杀掉容器，而是：</p>
+<ol>
+<li>kubelet 先向容器发送 <strong>SIGTERM</strong></li>
+<li>等待 <code>terminationGracePeriodSeconds</code> 秒</li>
+<li>超时后如果容器仍未退出 → 再发送 <strong>SIGKILL</strong></li>
+</ol>
+<h3 id="✔-默认值"><a href="#✔-默认值" class="headerlink" title="✔ 默认值"></a>✔ 默认值</h3><p>30 秒。</p>
+<h3 id="✔-被哪些机制使用？"><a href="#✔-被哪些机制使用？" class="headerlink" title="✔ 被哪些机制使用？"></a>✔ 被哪些机制使用？</h3><ul>
+<li>Pod eviction（驱逐）</li>
+<li>Deployment 滚动升级</li>
+<li>手动删除 Pod</li>
+<li>节点失联时 controller manager 删除 orphaned pods</li>
+</ul>
+<p>这些都会触发 graceful termination。</p>
+<hr>
+<h1 id="️⃣-2-deletionGracePeriodSeconds-——-Kubernetes-API（运行时动态产生）"><a href="#️⃣-2-deletionGracePeriodSeconds-——-Kubernetes-API（运行时动态产生）" class="headerlink" title="#️⃣ 2. deletionGracePeriodSeconds —— Kubernetes API（运行时动态产生）"></a>#️⃣ 2. deletionGracePeriodSeconds —— Kubernetes API（运行时动态产生）</h1><h3 id="✔-所在位置-1"><a href="#✔-所在位置-1" class="headerlink" title="✔ 所在位置"></a>✔ 所在位置</h3><p><strong>不在 Pod Spec 内</strong>，属于 metadata 的运行时字段：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionTimestamp:</span> <span class="string">&quot;2024-11-14T01:02:03Z&quot;</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<p>➡ <strong>API Server 写入的字段，代表当前删除操作所使用的宽限期。</strong></p>
+<h3 id="✔-来自哪里？"><a href="#✔-来自哪里？" class="headerlink" title="✔ 来自哪里？"></a>✔ 来自哪里？</h3><p>来源于：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">terminationGracePeriodSeconds</span><br></pre></td></tr></table></figure>
+
+<p>或者用户通过：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod podA --grace-period=10</span><br></pre></td></tr></table></figure>
+
+<p>覆盖默认值。</p>
+<h3 id="✔-工作方式（Controller-Kubelet）"><a href="#✔-工作方式（Controller-Kubelet）" class="headerlink" title="✔ 工作方式（Controller &amp; Kubelet）"></a>✔ 工作方式（Controller &amp; Kubelet）</h3><p>当你删除 Pod：</p>
+<ol>
+<li><p>API Server 设置：</p>
+<ul>
+<li><code>deletionTimestamp</code> &#x3D; 当前时间</li>
+<li><code>deletionGracePeriodSeconds</code> &#x3D; 本次删除使用的宽限秒数</li>
+</ul>
+</li>
+<li><p>kubelet 根据这个值（而不是 Spec 里的 terminationGracePeriodSeconds）控制真正的 SIGTERM → SIGKILL 过程。</p>
+</li>
+</ol>
+<p>因此：</p>
+<blockquote>
+<p><strong>deletionGracePeriodSeconds 是“实际生效”的宽限期。</strong><br><strong>terminationGracePeriodSeconds 是“默认配置”。</strong></p>
+</blockquote>
+<hr>
+<h1 id="️⃣-3-二者关系总结"><a href="#️⃣-3-二者关系总结" class="headerlink" title="#️⃣ 3. 二者关系总结"></a>#️⃣ 3. 二者关系总结</h1><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>terminationGracePeriodSeconds</th>
+<th>deletionGracePeriodSeconds</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>类型</td>
+<td>Pod Spec 固定字段</td>
+<td>Pod metadata 运行时字段</td>
+</tr>
+<tr>
+<td>谁设置的？</td>
+<td>用户写在 YAML 中</td>
+<td>API Server 删除 Pod 时自动写入</td>
+</tr>
+<tr>
+<td>何时存在？</td>
+<td>Pod 一出生就有</td>
+<td>只有 Pod 被删除时才出现</td>
+</tr>
+<tr>
+<td>默认值</td>
+<td>30 秒</td>
+<td>等于 terminationGracePeriodSeconds</td>
+</tr>
+<tr>
+<td>可以覆盖？</td>
+<td>可以（spec 设置）</td>
+<td>可被 <code>kubectl delete --grace-period=X</code> 覆盖</td>
+</tr>
+<tr>
+<td>实际生效？</td>
+<td>❌（只是默认值）</td>
+<td>✅（真正决定 kubelet 等待时间）</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="️⃣-4-为什么-Kubernetes-需要两个字段？"><a href="#️⃣-4-为什么-Kubernetes-需要两个字段？" class="headerlink" title="#️⃣ 4. 为什么 Kubernetes 需要两个字段？"></a>#️⃣ 4. 为什么 Kubernetes 需要两个字段？</h1><p>原因如下：</p>
+<h2 id="✦-①-Pod-Spec-需要一个默认优雅退出时间"><a href="#✦-①-Pod-Spec-需要一个默认优雅退出时间" class="headerlink" title="✦ ① Pod Spec 需要一个默认优雅退出时间"></a>✦ ① Pod Spec 需要一个默认优雅退出时间</h2><p>应用有不同的退出需求，如：</p>
+<ul>
+<li>Web 服务器需要 10s 关闭连接</li>
+<li>数据库需要 60s flush 数据</li>
+<li>Stream 服务需要完成正在发送的数据包</li>
+</ul>
+<p>于是 <code>terminationGracePeriodSeconds</code> 用来为 Pod <strong>设定统一默认退出策略</strong>。</p>
+<hr>
+<h2 id="✦-②-删除操作可能需要临时修改退出宽限期"><a href="#✦-②-删除操作可能需要临时修改退出宽限期" class="headerlink" title="✦ ② 删除操作可能需要临时修改退出宽限期"></a>✦ ② 删除操作可能需要临时修改退出宽限期</h2><p>例如：</p>
+<h3 id="✔-强制删除"><a href="#✔-强制删除" class="headerlink" title="✔ 强制删除"></a>✔ 强制删除</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod A --grace-period=0 --force</span><br></pre></td></tr></table></figure>
+
+<p>这时：</p>
+<ul>
+<li><strong>不会修改 pod.spec.terminationGracePeriodSeconds</strong></li>
+<li>但 <strong>metadata.deletionGracePeriodSeconds &#x3D; 0</strong></li>
+</ul>
+<p>kubelet 看到 0 → 立即 SIGKILL。</p>
+<hr>
+<h2 id="✦-③-deletionGracePeriodSeconds-表示-Pod-正在-termination-状态"><a href="#✦-③-deletionGracePeriodSeconds-表示-Pod-正在-termination-状态" class="headerlink" title="✦ ③ deletionGracePeriodSeconds 表示 Pod 正在 termination 状态"></a>✦ ③ deletionGracePeriodSeconds 表示 Pod 正在 termination 状态</h2><p>带有：</p>
+<ul>
+<li>deletionTimestamp</li>
+<li>deletionGracePeriodSeconds</li>
+</ul>
+<p>API Server 认为 Pod 处于 “Terminating”，controller manager 和 kubelet由此处理清理流程。</p>
+<hr>
+<h1 id="️⃣-5-结合例子理解（最清晰）"><a href="#️⃣-5-结合例子理解（最清晰）" class="headerlink" title="#️⃣ 5. 结合例子理解（最清晰）"></a>#️⃣ 5. 结合例子理解（最清晰）</h1><h3 id="Pod-YAML（用户写的）："><a href="#Pod-YAML（用户写的）：" class="headerlink" title="Pod YAML（用户写的）："></a>Pod YAML（用户写的）：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="删除命令："><a href="#删除命令：" class="headerlink" title="删除命令："></a>删除命令：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod mypod</span><br></pre></td></tr></table></figure>
+
+<h3 id="Pod-在-API-Server-会变成："><a href="#Pod-在-API-Server-会变成：" class="headerlink" title="Pod 在 API Server 会变成："></a>Pod 在 API Server 会变成：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionTimestamp:</span> <span class="string">&quot;2025-11-17T08:00:00Z&quot;</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li>kubelet 会等待 30 秒后强杀</li>
+</ul>
+<hr>
+<h3 id="覆盖默认值："><a href="#覆盖默认值：" class="headerlink" title="覆盖默认值："></a>覆盖默认值：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod mypod --grace-period=5</span><br></pre></td></tr></table></figure>
+
+<p>API Server 变成：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<p>此时 kubelet 的实际宽限期是 5 秒，而不是 Spec 中的 30 秒。</p>
+<hr>
+<h1 id="️⃣-6-哪些场景必须关注这两个值？"><a href="#️⃣-6-哪些场景必须关注这两个值？" class="headerlink" title="#️⃣ 6. 哪些场景必须关注这两个值？"></a>#️⃣ 6. 哪些场景必须关注这两个值？</h1><h3 id="✔-滚动升级慢"><a href="#✔-滚动升级慢" class="headerlink" title="✔ 滚动升级慢"></a>✔ 滚动升级慢</h3><p>容器退出慢 → 需要增大 terminationGracePeriodSeconds。</p>
+<h3 id="✔-Pod-一直处于-Terminating"><a href="#✔-Pod-一直处于-Terminating" class="headerlink" title="✔ Pod 一直处于 Terminating"></a>✔ Pod 一直处于 Terminating</h3><p>检查 deletionGracePeriodSeconds 表示实际等待多久。</p>
+<h3 id="✔-强制删除-Pod-时需要明确-grace-period-0-的行为"><a href="#✔-强制删除-Pod-时需要明确-grace-period-0-的行为" class="headerlink" title="✔ 强制删除 Pod 时需要明确 --grace-period=0 的行为"></a>✔ 强制删除 Pod 时需要明确 <code>--grace-period=0</code> 的行为</h3><p>它不会改 spec，但会影响 metadata 的实际值。</p>
+<h3 id="✔-Stateful-workloads（DB，消息队列）需要更长的宽限期"><a href="#✔-Stateful-workloads（DB，消息队列）需要更长的宽限期" class="headerlink" title="✔ Stateful workloads（DB，消息队列）需要更长的宽限期"></a>✔ Stateful workloads（DB，消息队列）需要更长的宽限期</h3><p>否则容易数据损坏或主从 failover。</p>
+<hr>
+<h1 id="⭐-最后一段总结（可直接加入知识库）"><a href="#⭐-最后一段总结（可直接加入知识库）" class="headerlink" title="⭐ 最后一段总结（可直接加入知识库）"></a>⭐ 最后一段总结（可直接加入知识库）</h1><ul>
+<li><p><code>terminationGracePeriodSeconds</code> &#x3D; Pod 的 <strong>默认优雅退出时间</strong>，用户定义。</p>
+</li>
+<li><p><code>deletionGracePeriodSeconds</code> &#x3D; Pod <strong>被删除时真正采用的宽限期</strong>，由 API Server 设置，可被强制覆盖。</p>
+</li>
+<li><p>二者共同决定了 Pod 的生命周期：</p>
+<ul>
+<li>Pod 配置退出策略（spec）</li>
+<li>具体删除动作由 API server 在 metadata 记录（metadata）</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/" rel="prev" title="安装部署k3s">
+      <i class="fa fa-chevron-left"></i> 安装部署k3s
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%9C%85-terminationGracePeriodSeconds-%E4%B8%8E-deletionGracePeriodSeconds-%E7%9A%84%E5%8C%BA%E5%88%AB%E3%80%81%E6%9D%A5%E6%BA%90%E4%B8%8E%E4%BD%9C%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%B8%8F%E2%83%A3-1-terminationGracePeriodSeconds-%E2%80%94%E2%80%94-Pod-spec-%E5%AD%97%E6%AE%B5%EF%BC%88%E7%94%A8%E6%88%B7%E9%85%8D%E7%BD%AE%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E6%89%80%E5%9C%A8%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.0.1.</span> <span class="nav-text">✔ 所在位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E6%84%8F%E4%B9%89"><span class="nav-number">2.0.2.</span> <span class="nav-text">✔ 意义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E9%BB%98%E8%AE%A4%E5%80%BC"><span class="nav-number">2.0.3.</span> <span class="nav-text">✔ 默认值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E8%A2%AB%E5%93%AA%E4%BA%9B%E6%9C%BA%E5%88%B6%E4%BD%BF%E7%94%A8%EF%BC%9F"><span class="nav-number">2.0.4.</span> <span class="nav-text">✔ 被哪些机制使用？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%B8%8F%E2%83%A3-2-deletionGracePeriodSeconds-%E2%80%94%E2%80%94-Kubernetes-API%EF%BC%88%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8A%A8%E6%80%81%E4%BA%A7%E7%94%9F%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">#️⃣ 2. deletionGracePeriodSeconds —— Kubernetes API（运行时动态产生）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E6%89%80%E5%9C%A8%E4%BD%8D%E7%BD%AE-1"><span class="nav-number">3.0.1.</span> <span class="nav-text">✔ 所在位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E6%9D%A5%E8%87%AA%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="nav-number">3.0.2.</span> <span class="nav-text">✔ 来自哪里？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E5%B7%A5%E4%BD%9C%E6%96%B9%E5%BC%8F%EF%BC%88Controller-Kubelet%EF%BC%89"><span class="nav-number">3.0.3.</span> <span class="nav-text">✔ 工作方式（Controller &amp; Kubelet）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%B8%8F%E2%83%A3-3-%E4%BA%8C%E8%80%85%E5%85%B3%E7%B3%BB%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">#️⃣ 3. 二者关系总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%B8%8F%E2%83%A3-4-%E4%B8%BA%E4%BB%80%E4%B9%88-Kubernetes-%E9%9C%80%E8%A6%81%E4%B8%A4%E4%B8%AA%E5%AD%97%E6%AE%B5%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">#️⃣ 4. 为什么 Kubernetes 需要两个字段？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%A6-%E2%91%A0-Pod-Spec-%E9%9C%80%E8%A6%81%E4%B8%80%E4%B8%AA%E9%BB%98%E8%AE%A4%E4%BC%98%E9%9B%85%E9%80%80%E5%87%BA%E6%97%B6%E9%97%B4"><span class="nav-number">5.1.</span> <span class="nav-text">✦ ① Pod Spec 需要一个默认优雅退出时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%A6-%E2%91%A1-%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C%E5%8F%AF%E8%83%BD%E9%9C%80%E8%A6%81%E4%B8%B4%E6%97%B6%E4%BF%AE%E6%94%B9%E9%80%80%E5%87%BA%E5%AE%BD%E9%99%90%E6%9C%9F"><span class="nav-number">5.2.</span> <span class="nav-text">✦ ② 删除操作可能需要临时修改退出宽限期</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E5%BC%BA%E5%88%B6%E5%88%A0%E9%99%A4"><span class="nav-number">5.2.1.</span> <span class="nav-text">✔ 强制删除</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%A6-%E2%91%A2-deletionGracePeriodSeconds-%E8%A1%A8%E7%A4%BA-Pod-%E6%AD%A3%E5%9C%A8-termination-%E7%8A%B6%E6%80%81"><span class="nav-number">5.3.</span> <span class="nav-text">✦ ③ deletionGracePeriodSeconds 表示 Pod 正在 termination 状态</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%B8%8F%E2%83%A3-5-%E7%BB%93%E5%90%88%E4%BE%8B%E5%AD%90%E7%90%86%E8%A7%A3%EF%BC%88%E6%9C%80%E6%B8%85%E6%99%B0%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">#️⃣ 5. 结合例子理解（最清晰）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pod-YAML%EF%BC%88%E7%94%A8%E6%88%B7%E5%86%99%E7%9A%84%EF%BC%89%EF%BC%9A"><span class="nav-number">6.0.1.</span> <span class="nav-text">Pod YAML（用户写的）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%91%BD%E4%BB%A4%EF%BC%9A"><span class="nav-number">6.0.2.</span> <span class="nav-text">删除命令：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pod-%E5%9C%A8-API-Server-%E4%BC%9A%E5%8F%98%E6%88%90%EF%BC%9A"><span class="nav-number">6.0.3.</span> <span class="nav-text">Pod 在 API Server 会变成：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E9%BB%98%E8%AE%A4%E5%80%BC%EF%BC%9A"><span class="nav-number">6.0.4.</span> <span class="nav-text">覆盖默认值：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%EF%B8%8F%E2%83%A3-6-%E5%93%AA%E4%BA%9B%E5%9C%BA%E6%99%AF%E5%BF%85%E9%A1%BB%E5%85%B3%E6%B3%A8%E8%BF%99%E4%B8%A4%E4%B8%AA%E5%80%BC%EF%BC%9F"><span class="nav-number">7.</span> <span class="nav-text">#️⃣ 6. 哪些场景必须关注这两个值？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7%E6%85%A2"><span class="nav-number">7.0.1.</span> <span class="nav-text">✔ 滚动升级慢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-Pod-%E4%B8%80%E7%9B%B4%E5%A4%84%E4%BA%8E-Terminating"><span class="nav-number">7.0.2.</span> <span class="nav-text">✔ Pod 一直处于 Terminating</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-%E5%BC%BA%E5%88%B6%E5%88%A0%E9%99%A4-Pod-%E6%97%B6%E9%9C%80%E8%A6%81%E6%98%8E%E7%A1%AE-grace-period-0-%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">7.0.3.</span> <span class="nav-text">✔ 强制删除 Pod 时需要明确 --grace-period&#x3D;0 的行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%94-Stateful-workloads%EF%BC%88DB%EF%BC%8C%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%EF%BC%89%E9%9C%80%E8%A6%81%E6%9B%B4%E9%95%BF%E7%9A%84%E5%AE%BD%E9%99%90%E6%9C%9F"><span class="nav-number">7.0.4.</span> <span class="nav-text">✔ Stateful workloads（DB，消息队列）需要更长的宽限期</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%AD%90-%E6%9C%80%E5%90%8E%E4%B8%80%E6%AE%B5%E6%80%BB%E7%BB%93%EF%BC%88%E5%8F%AF%E7%9B%B4%E6%8E%A5%E5%8A%A0%E5%85%A5%E7%9F%A5%E8%AF%86%E5%BA%93%EF%BC%89"><span class="nav-number">8.</span> <span class="nav-text">⭐ 最后一段总结（可直接加入知识库）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">157</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
