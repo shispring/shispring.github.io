@@ -12891,7 +12891,9 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   <entry>
     <title>terminationGracePeriodSeconds与deletionGracePeriodSeconds</title>
     <url>/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/</url>
-    <content><![CDATA[<h1 id="✅-terminationGracePeriodSeconds-与-deletionGracePeriodSeconds-的区别、来源与作用"><a href="#✅-terminationGracePeriodSeconds-与-deletionGracePeriodSeconds-的区别、来源与作用" class="headerlink" title="✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用"></a>✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用</h1><hr>
+    <content><![CDATA[<h1 id="✅-terminationGracePeriodSeconds-与-deletionGracePeriodSeconds-的区别、来源与作用"><a href="#✅-terminationGracePeriodSeconds-与-deletionGracePeriodSeconds-的区别、来源与作用" class="headerlink" title="✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用"></a>✅ terminationGracePeriodSeconds 与 deletionGracePeriodSeconds 的区别、来源与作用</h1><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">在Kubernetes环境中，当Pod被删除时，kubelet会发送SIGTERM信号给容器进程，启动优雅停止过程。如果预设的grace期限内进程未结束，则发送SIGKILL强制终止。Pod的终止流程包括从service endpoint移除、执行preStopHook、发送SIGTERM、等待进程结束等步骤。为了实现优雅退出，应用需捕获并处理SIGTERM信号，可能需要配合设置preStopHook和terminationGracePeriodSeconds。</span><br></pre></td></tr></table></figure>
+
+<hr>
 <h1 id="️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）"><a href="#️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）" class="headerlink" title="#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）"></a>#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）</h1><h3 id="✔-所在位置"><a href="#✔-所在位置" class="headerlink" title="✔ 所在位置"></a>✔ 所在位置</h3><p>Pod Spec 字段：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
 
