@@ -184,6 +184,67 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/05/zap%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/05/zap%E6%97%A5%E5%BF%97%E7%BA%A7%E5%88%AB/" class="post-title-link" itemprop="url">zap日志级别</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-08-05 16:21:34 / 修改时间：16:23:24" itemprop="dateCreated datePublished" datetime="2025-08-05T16:21:34+08:00">2025-08-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="zap调试"><a href="#zap调试" class="headerlink" title="zap调试"></a>zap调试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;flag&quot;</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">	ctrl &quot;sigs.k8s.io/controller-runtime&quot;</span><br><span class="line">	&quot;sigs.k8s.io/controller-runtime/pkg/log/zap&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var opts zap.Options</span><br><span class="line">	opts.BindFlags(flag.CommandLine)</span><br><span class="line">	flag.Parse()</span><br><span class="line"></span><br><span class="line">	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&amp;opts)))</span><br><span class="line">	log := ctrl.Log.WithName(&quot;TestLogger&quot;)</span><br><span class="line"></span><br><span class="line">	fmt.Println(&quot;Testing different log levels:&quot;)</span><br><span class="line"></span><br><span class="line">	log.Info(&quot;This is Info level&quot;)</span><br><span class="line">	log.V(1).Info(&quot;This is V(1) level&quot;)</span><br><span class="line">	log.V(2).Info(&quot;This is V(2) level&quot;)</span><br><span class="line">	log.V(3).Info(&quot;This is V(3) level&quot;)</span><br><span class="line"></span><br><span class="line">	fmt.Println(&quot;Test completed&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="运行方式"><a href="#运行方式" class="headerlink" title="运行方式"></a>运行方式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">go run test-zap-levels.go --zap-log-level=1</span><br><span class="line">go run test-zap-levels.go --zap-log-level=debug</span><br><span class="line">go run test-zap-levels.go --zap-log-level=9</span><br><span class="line"></span><br><span class="line">V(1) → 显示为 debug 级别</span><br><span class="line">V(2) → 显示为 Level(-2) 级别</span><br><span class="line">V(3) → 显示为 Level(-3) 级别</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/01/pod%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%B8%8Ewebhook%E7%AE%A1%E6%8E%A7%E5%88%86%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2013,133 +2074,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/18/etcd%E9%9B%86%E7%BE%A4%E7%9B%91%E6%8E%A7%E4%B8%8E%E8%BF%90%E7%BB%B4%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/06/18/etcd%E9%9B%86%E7%BE%A4%E7%9B%91%E6%8E%A7%E4%B8%8E%E8%BF%90%E7%BB%B4%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">etcd集群监控与运维完整指南</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-06-18 14:09:06 / 修改时间：14:09:52" itemprop="dateCreated datePublished" datetime="2025-06-18T14:09:06+08:00">2025-06-18</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、健康状况检查命令"><a href="#一、健康状况检查命令" class="headerlink" title="一、健康状况检查命令"></a>一、健康状况检查命令</h2><h3 id="1-1-基础健康检查"><a href="#1-1-基础健康检查" class="headerlink" title="1.1 基础健康检查"></a>1.1 基础健康检查</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查集群整体健康状况</span></span><br><span class="line">etcdctl endpoint health --cluster</span><br><span class="line">etcdctl endpoint health --endpoints=10.10.10.100:2379,10.10.10.101:2379,10.10.10.102:2379</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查集群状态详情</span></span><br><span class="line">etcdctl endpoint status --cluster --write-out=table</span><br><span class="line">etcdctl endpoint status --endpoints=10.10.10.100:2379,10.10.10.101:2379,10.10.10.102:2379 --write-out=table</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查成员列表</span></span><br><span class="line">etcdctl member list --write-out=table</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查Leader信息</span></span><br><span class="line">etcdctl endpoint status --cluster --write-out=json | jq <span class="string">&#x27;.[] | select(.Status.leader != &quot;&quot;)&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="1-2-性能检查命令"><a href="#1-2-性能检查命令" class="headerlink" title="1.2 性能检查命令"></a>1.2 性能检查命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查网络延迟和吞吐量</span></span><br><span class="line">etcdctl check perf --endpoints=10.10.10.100:2379,10.10.10.101:2379,10.10.10.102:2379</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查数据一致性</span></span><br><span class="line">etcdctl check datascale --endpoints=10.10.10.100:2379,10.10.10.101:2379,10.10.10.102:2379</span><br><span class="line"></span><br><span class="line"><span class="comment"># 压力测试</span></span><br><span class="line">etcdctl check perf --load=<span class="string">&quot;s&quot;</span> --prefix=<span class="string">&quot;/test/&quot;</span> --endpoints=10.10.10.100:2379</span><br></pre></td></tr></table></figure>
-
-<h2 id="二、关键监控指标"><a href="#二、关键监控指标" class="headerlink" title="二、关键监控指标"></a>二、关键监控指标</h2><h3 id="2-1-集群健康指标"><a href="#2-1-集群健康指标" class="headerlink" title="2.1 集群健康指标"></a>2.1 集群健康指标</h3><h4 id="Raft相关指标"><a href="#Raft相关指标" class="headerlink" title="Raft相关指标"></a>Raft相关指标</h4><ul>
-<li><strong>etcd_server_has_leader</strong>: 是否有Leader (0&#x2F;1)</li>
-<li><strong>etcd_server_leader_changes_seen_total</strong>: Leader变更次数</li>
-<li><strong>etcd_server_proposals_committed_total</strong>: 已提交的提案数</li>
-<li><strong>etcd_server_proposals_applied_total</strong>: 已应用的提案数</li>
-<li><strong>etcd_server_proposals_pending</strong>: 待处理的提案数</li>
-<li><strong>etcd_server_proposals_failed_total</strong>: 失败的提案数</li>
-</ul>
-<h4 id="数据库指标"><a href="#数据库指标" class="headerlink" title="数据库指标"></a>数据库指标</h4><ul>
-<li><strong>etcd_mvcc_db_total_size_in_bytes</strong>: 数据库总大小</li>
-<li><strong>etcd_mvcc_db_total_size_in_use_in_bytes</strong>: 实际使用的数据库大小</li>
-<li><strong>etcd_server_quota_backend_bytes</strong>: 后端存储配额</li>
-<li><strong>etcd_mvcc_delete_total</strong>: 删除操作总数</li>
-<li><strong>etcd_mvcc_put_total</strong>: 写入操作总数</li>
-<li><strong>etcd_mvcc_range_total</strong>: 读取操作总数</li>
-</ul>
-<h3 id="2-2-性能指标"><a href="#2-2-性能指标" class="headerlink" title="2.2 性能指标"></a>2.2 性能指标</h3><h4 id="延迟指标"><a href="#延迟指标" class="headerlink" title="延迟指标"></a>延迟指标</h4><ul>
-<li><strong>etcd_disk_wal_fsync_duration_seconds</strong>: WAL fsync延迟</li>
-<li><strong>etcd_disk_backend_commit_duration_seconds</strong>: 后端提交延迟</li>
-<li><strong>etcd_network_peer_round_trip_time_seconds</strong>: 节点间网络延迟</li>
-<li><strong>etcd_server_read_indexes_failed_total</strong>: 读索引失败次数</li>
-</ul>
-<h4 id="网络指标"><a href="#网络指标" class="headerlink" title="网络指标"></a>网络指标</h4><ul>
-<li><strong>etcd_network_client_grpc_received_bytes_total</strong>: 客户端接收字节数</li>
-<li><strong>etcd_network_client_grpc_sent_bytes_total</strong>: 客户端发送字节数</li>
-<li><strong>etcd_network_peer_received_bytes_total</strong>: 节点间接收字节数</li>
-<li><strong>etcd_network_peer_sent_bytes_total</strong>: 节点间发送字节数</li>
-</ul>
-<h3 id="2-3-资源使用指标"><a href="#2-3-资源使用指标" class="headerlink" title="2.3 资源使用指标"></a>2.3 资源使用指标</h3><ul>
-<li><strong>process_resident_memory_bytes</strong>: 内存使用量</li>
-<li><strong>process_cpu_seconds_total</strong>: CPU使用时间</li>
-<li><strong>etcd_server_slow_apply_total</strong>: 慢应用次数</li>
-<li><strong>etcd_server_slow_read_indexes_total</strong>: 慢读索引次数</li>
-</ul>
-<h2 id="三、告警规则建议"><a href="#三、告警规则建议" class="headerlink" title="三、告警规则建议"></a>三、告警规则建议</h2><h3 id="3-1-关键告警"><a href="#3-1-关键告警" class="headerlink" title="3.1 关键告警"></a>3.1 关键告警</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># etcd集群无Leader</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">EtcdNoLeader</span></span><br><span class="line">  <span class="attr">expr:</span> <span class="string">etcd_server_has_leader</span> <span class="string">==</span> <span class="number">0</span></span><br><span class="line">  <span class="attr">for:</span> <span class="string">1m</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">severity:</span> <span class="string">critical</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">summary:</span> <span class="string">&quot;etcd集群无Leader&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># etcd数据库大小接近配额</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">EtcdDatabaseQuotaLowSpace</span></span><br><span class="line">  <span class="attr">expr:</span> <span class="string">(etcd_mvcc_db_total_size_in_bytes</span> <span class="string">/</span> <span class="string">etcd_server_quota_backend_bytes)</span> <span class="string">&gt;</span> <span class="number">0.8</span></span><br><span class="line">  <span class="attr">for:</span> <span class="string">5m</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">severity:</span> <span class="string">warning</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">summary:</span> <span class="string">&quot;etcd数据库使用量超过80%&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># etcd成员通信失败</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">EtcdMemberCommunicationSlow</span></span><br><span class="line">  <span class="attr">expr:</span> <span class="string">histogram_quantile(0.99,</span> <span class="string">etcd_network_peer_round_trip_time_seconds_bucket)</span> <span class="string">&gt;</span> <span class="number">0.15</span></span><br><span class="line">  <span class="attr">for:</span> <span class="string">10m</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">severity:</span> <span class="string">warning</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-2-性能告警"><a href="#3-2-性能告警" class="headerlink" title="3.2 性能告警"></a>3.2 性能告警</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 磁盘I/O延迟过高</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">EtcdDiskSlow</span></span><br><span class="line">  <span class="attr">expr:</span> <span class="string">histogram_quantile(0.99,</span> <span class="string">etcd_disk_wal_fsync_duration_seconds_bucket)</span> <span class="string">&gt;</span> <span class="number">0.5</span></span><br><span class="line">  <span class="attr">for:</span> <span class="string">10m</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">severity:</span> <span class="string">warning</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Leader变更频繁</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">EtcdLeaderChanges</span></span><br><span class="line">  <span class="attr">expr:</span> <span class="string">increase(etcd_server_leader_changes_seen_total[1h])</span> <span class="string">&gt;</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">for:</span> <span class="string">5m</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">severity:</span> <span class="string">warning</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="四、备份策略"><a href="#四、备份策略" class="headerlink" title="四、备份策略"></a>四、备份策略</h2><h3 id="4-1-快照备份"><a href="#4-1-快照备份" class="headerlink" title="4.1 快照备份"></a>4.1 快照备份</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建快照</span></span><br><span class="line">etcdctl snapshot save backup-$(<span class="built_in">date</span> +%Y%m%d-%H%M%S).db \</span><br><span class="line">  --endpoints=https://10.10.10.102:2379 \</span><br><span class="line">  --cacert=/etc/kubernetes/pki/etcd/ca.crt \</span><br><span class="line">  --cert=/etc/kubernetes/pki/etcd/server.crt \</span><br><span class="line">  --key=/etc/kubernetes/pki/etcd/server.key</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证快照</span></span><br><span class="line">etcdctl snapshot status backup-20250613-120000.db --write-out=table</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动化备份脚本</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line">BACKUP_DIR=<span class="string">&quot;/backup/etcd&quot;</span></span><br><span class="line">DATE=$(<span class="built_in">date</span> +%Y%m%d-%H%M%S)</span><br><span class="line">ENDPOINTS=<span class="string">&quot;https://10.10.10.100:2379,https://10.10.10.101:2379,https://10.10.10.102:2379&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="variable">$BACKUP_DIR</span></span><br><span class="line">etcdctl snapshot save <span class="variable">$BACKUP_DIR</span>/etcd-backup-<span class="variable">$DATE</span>.db \</span><br><span class="line">  --endpoints=<span class="variable">$ENDPOINTS</span> \</span><br><span class="line">  --cacert=/etc/kubernetes/pki/etcd/ca.crt \</span><br><span class="line">  --cert=/etc/kubernetes/pki/etcd/server.crt \</span><br><span class="line">  --key=/etc/kubernetes/pki/etcd/server.key</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保留最近7天的备份</span></span><br><span class="line">find <span class="variable">$BACKUP_DIR</span> -name <span class="string">&quot;etcd-backup-*.db&quot;</span> -mtime +7 -delete</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-2-备份策略建议"><a href="#4-2-备份策略建议" class="headerlink" title="4.2 备份策略建议"></a>4.2 备份策略建议</h3><ul>
-<li><strong>频率</strong>: 每天至少一次完整备份</li>
-<li><strong>保留</strong>: 保留7天内的每日备份，4周内的每周备份</li>
-<li><strong>存储</strong>: 备份文件应存储在不同的物理位置</li>
-<li><strong>验证</strong>: 定期验证备份文件的完整性</li>
-</ul>
-<h2 id="五、故障恢复"><a href="#五、故障恢复" class="headerlink" title="五、故障恢复"></a>五、故障恢复</h2><h3 id="5-1-从快照恢复"><a href="#5-1-从快照恢复" class="headerlink" title="5.1 从快照恢复"></a>5.1 从快照恢复</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 停止etcd服务</span></span><br><span class="line">systemctl stop etcd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除现有数据目录</span></span><br><span class="line"><span class="built_in">rm</span> -rf /var/lib/etcd/*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从快照恢复</span></span><br><span class="line">etcdctl snapshot restore backup-20250613-120000.db \</span><br><span class="line">  --name etcd-1 \</span><br><span class="line">  --initial-cluster etcd-1=https://10.10.10.100:2380,etcd-2=https://10.10.10.101:2380,etcd-3=https://10.10.10.102:2380 \</span><br><span class="line">  --initial-cluster-token etcd-cluster-1 \</span><br><span class="line">  --initial-advertise-peer-urls https://10.10.10.100:2380 \</span><br><span class="line">  --data-dir /var/lib/etcd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启etcd服务</span></span><br><span class="line">systemctl start etcd</span><br></pre></td></tr></table></figure>
-
-<h3 id="5-2-成员替换"><a href="#5-2-成员替换" class="headerlink" title="5.2 成员替换"></a>5.2 成员替换</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加新成员</span></span><br><span class="line">etcdctl member add etcd-new --peer-urls=https://10.236.100.100:2380</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除故障成员</span></span><br><span class="line">etcdctl member remove &lt;member-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看成员状态</span></span><br><span class="line">etcdctl member list --write-out=table</span><br></pre></td></tr></table></figure>
-
-<h2 id="六、性能优化"><a href="#六、性能优化" class="headerlink" title="六、性能优化"></a>六、性能优化</h2><h3 id="6-1-配置优化"><a href="#6-1-配置优化" class="headerlink" title="6.1 配置优化"></a>6.1 配置优化</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># etcd配置文件优化</span></span><br><span class="line"><span class="attr">data-dir:</span> <span class="string">/var/lib/etcd</span></span><br><span class="line"><span class="attr">wal-dir:</span> <span class="string">/var/lib/etcd/wal</span>  <span class="comment"># 将WAL放在单独的SSD上</span></span><br><span class="line"><span class="attr">max-snapshots:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">max-wals:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">quota-backend-bytes:</span> <span class="number">8589934592</span>  <span class="comment"># 8GB</span></span><br><span class="line"><span class="attr">auto-compaction-retention:</span> <span class="string">&quot;1h&quot;</span></span><br><span class="line"><span class="attr">auto-compaction-mode:</span> <span class="string">periodic</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="6-2-系统优化"><a href="#6-2-系统优化" class="headerlink" title="6.2 系统优化"></a>6.2 系统优化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 文件描述符限制</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;* soft nofile 65536&quot;</span> &gt;&gt; /etc/security/limits.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;* hard nofile 65536&quot;</span> &gt;&gt; /etc/security/limits.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络优化</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;net.core.rmem_max = 16777216&#x27;</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;net.core.wmem_max = 16777216&#x27;</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line">sysctl -p</span><br></pre></td></tr></table></figure>
-
-<h2 id="七、数据维护"><a href="#七、数据维护" class="headerlink" title="七、数据维护"></a>七、数据维护</h2><h3 id="7-1-压缩和碎片整理"><a href="#7-1-压缩和碎片整理" class="headerlink" title="7.1 压缩和碎片整理"></a>7.1 压缩和碎片整理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 手动压缩</span></span><br><span class="line">etcdctl compact $(etcdctl endpoint status --write-out=<span class="string">&quot;json&quot;</span> | jq -r <span class="string">&#x27;.[0].Status.header.revision&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 碎片整理</span></span><br><span class="line">etcdctl defrag --endpoints=https://10.10.10.100:2379,https://10.10.10.101:2379,https://10.10.10.102:2379</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查碎片整理效果</span></span><br><span class="line">etcdctl endpoint status --endpoints=https://10.10.10.100:2379,https://10.10.10.101:2379,https://10.10.10.102:2379 --write-out=table</span><br></pre></td></tr></table></figure>
-
-<h3 id="7-2-定期维护任务"><a href="#7-2-定期维护任务" class="headerlink" title="7.2 定期维护任务"></a>7.2 定期维护任务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 每周维护脚本</span></span><br><span class="line"><span class="comment"># 1. 压缩历史版本</span></span><br><span class="line">etcdctl compact $(etcdctl endpoint status --write-out=<span class="string">&quot;json&quot;</span> | jq -r <span class="string">&#x27;.[0].Status.header.revision&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 碎片整理</span></span><br><span class="line">etcdctl defrag --cluster</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 检查集群健康</span></span><br><span class="line">etcdctl endpoint health --cluster</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 创建备份</span></span><br><span class="line">etcdctl snapshot save /backup/etcd/weekly-backup-$(<span class="built_in">date</span> +%Y%m%d).db</span><br></pre></td></tr></table></figure>
-
-<h2 id="八、安全加固"><a href="#八、安全加固" class="headerlink" title="八、安全加固"></a>八、安全加固</h2><h3 id="8-1-认证配置"><a href="#8-1-认证配置" class="headerlink" title="8.1 认证配置"></a>8.1 认证配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用认证</span></span><br><span class="line">etcdctl auth <span class="built_in">enable</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建root用户</span></span><br><span class="line">etcdctl user add root --interactive</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建角色</span></span><br><span class="line">etcdctl role add admin</span><br><span class="line">etcdctl role grant-permission admin readwrite /*</span><br></pre></td></tr></table></figure>
-
-<h3 id="8-2-TLS配置"><a href="#8-2-TLS配置" class="headerlink" title="8.2 TLS配置"></a>8.2 TLS配置</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用客户端TLS</span></span><br><span class="line"><span class="attr">client-cert-auth:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">trusted-ca-file:</span> <span class="string">/etc/ssl/certs/etcd-ca.pem</span></span><br><span class="line"><span class="attr">cert-file:</span> <span class="string">/etc/ssl/certs/etcd-server.pem</span></span><br><span class="line"><span class="attr">key-file:</span> <span class="string">/etc/ssl/private/etcd-server-key.pem</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用peer TLS</span></span><br><span class="line"><span class="attr">peer-client-cert-auth:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">peer-trusted-ca-file:</span> <span class="string">/etc/ssl/certs/etcd-ca.pem</span></span><br><span class="line"><span class="attr">peer-cert-file:</span> <span class="string">/etc/ssl/certs/etcd-peer.pem</span></span><br><span class="line"><span class="attr">peer-key-file:</span> <span class="string">/etc/ssl/private/etcd-peer-key.pem</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="九、故障排查"><a href="#九、故障排查" class="headerlink" title="九、故障排查"></a>九、故障排查</h2><h3 id="9-1-常见问题诊断"><a href="#9-1-常见问题诊断" class="headerlink" title="9.1 常见问题诊断"></a>9.1 常见问题诊断</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查etcd进程</span></span><br><span class="line">ps aux | grep etcd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查端口监听</span></span><br><span class="line">netstat -tlnp | grep :2379</span><br><span class="line">netstat -tlnp | grep :2380</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查日志</span></span><br><span class="line">journalctl -u etcd -f</span><br><span class="line"><span class="built_in">tail</span> -f /var/log/etcd/etcd.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查网络连通性</span></span><br><span class="line">curl -k https://10.10.10.100:2379/health</span><br></pre></td></tr></table></figure>
-
-<h3 id="9-2-性能分析"><a href="#9-2-性能分析" class="headerlink" title="9.2 性能分析"></a>9.2 性能分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分析慢查询</span></span><br><span class="line">etcdctl get --prefix / --keys-only | <span class="built_in">wc</span> -l  <span class="comment"># 检查key数量</span></span><br><span class="line">etcdctl compaction $(etcdctl endpoint status --write-out=<span class="string">&quot;json&quot;</span> | jq -r <span class="string">&#x27;.[0].Status.header.revision&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析网络延迟</span></span><br><span class="line">ping 10.10.10.100</span><br><span class="line">ping 10.10.10.101  </span><br><span class="line">ping 10.10.10.102</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2211,7 +2145,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-count">159</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
