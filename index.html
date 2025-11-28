@@ -184,6 +184,233 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/28/Go%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/28/Go%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">Go单元测试整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-11-28 17:52:29 / 修改时间：17:57:47" itemprop="dateCreated datePublished" datetime="2025-11-28T17:52:29+08:00">2025-11-28</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Go单元测试快速参考表"><a href="#Go单元测试快速参考表" class="headerlink" title="Go单元测试快速参考表"></a>Go单元测试快速参考表</h1><h2 id="📋-一页纸总结"><a href="#📋-一页纸总结" class="headerlink" title="📋 一页纸总结"></a>📋 一页纸总结</h2><h3 id="测试文件命名和位置"><a href="#测试文件命名和位置" class="headerlink" title="测试文件命名和位置"></a>测试文件命名和位置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">源文件: foo.go          测试文件: foo_test.go (同目录，同package)</span><br><span class="line">源文件: bar.go          测试文件: bar_test.go</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试函数命名"><a href="#测试函数命名" class="headerlink" title="测试函数命名"></a>测试函数命名</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestXxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;           <span class="comment">// 单元测试 ✅</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkXxx</span><span class="params">(b *testing.B)</span></span> &#123; &#125;      <span class="comment">// 性能测试 ✅</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ExampleXxx</span><span class="params">()</span></span> &#123; &#125;                    <span class="comment">// 示例文档 ✅</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">testxxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;           <span class="comment">// 小写，不执行 ❌</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Test</span><span class="params">(t *testing.T)</span></span> &#123; &#125;              <span class="comment">// 无后缀，不执行 ❌</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🚀-常用命令速查表"><a href="#🚀-常用命令速查表" class="headerlink" title="🚀 常用命令速查表"></a>🚀 常用命令速查表</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>快速测试</strong></td>
+<td><code>go test ./...</code></td>
+<td>运行所有包的测试</td>
+</tr>
+<tr>
+<td><strong>详细输出</strong></td>
+<td><code>go test -v ./...</code></td>
+<td>显示每个测试函数名</td>
+</tr>
+<tr>
+<td><strong>特定测试</strong></td>
+<td><code>go test -run TestName ./...</code></td>
+<td>只运行匹配的测试</td>
+</tr>
+<tr>
+<td><strong>特定包</strong></td>
+<td><code>go test -v ./pkg/util/color</code></td>
+<td>测试指定包</td>
+</tr>
+<tr>
+<td><strong>设置超时</strong></td>
+<td><code>go test -timeout 30s ./...</code></td>
+<td>30秒超时</td>
+</tr>
+<tr>
+<td><strong>竞态检测</strong></td>
+<td><code>go test -race ./...</code></td>
+<td>检测数据竞争</td>
+</tr>
+<tr>
+<td><strong>代码覆盖率</strong></td>
+<td><code>go test -cover ./...</code></td>
+<td>显示覆盖率百分比</td>
+</tr>
+<tr>
+<td><strong>覆盖率文件</strong></td>
+<td><code>go test -coverprofile=cov.out ./...</code></td>
+<td>生成覆盖率文件</td>
+</tr>
+<tr>
+<td><strong>覆盖率HTML</strong></td>
+<td><code>go tool cover -html=cov.out</code></td>
+<td>HTML格式报告</td>
+</tr>
+<tr>
+<td><strong>基准测试</strong></td>
+<td><code>go test -bench=. ./...</code></td>
+<td>运行所有基准测试</td>
+</tr>
+<tr>
+<td><strong>基准+内存</strong></td>
+<td><code>go test -bench=. -benchmem ./...</code></td>
+<td>基准+内存统计</td>
+</tr>
+<tr>
+<td><strong>并行运行</strong></td>
+<td><code>go test -parallel 4 ./...</code></td>
+<td>4个并发运行</td>
+</tr>
+<tr>
+<td><strong>运行N次</strong></td>
+<td><code>go test -count 3 ./...</code></td>
+<td>运行3次</td>
+</tr>
+<tr>
+<td><strong>跳过长测</strong></td>
+<td><code>go test -short ./...</code></td>
+<td>跳过耗时测试</td>
+</tr>
+<tr>
+<td><strong>显示日志</strong></td>
+<td><code>go test -v -run Test ./...</code></td>
+<td>显示t.Log输出</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="📝-testing-T-常用方法"><a href="#📝-testing-T-常用方法" class="headerlink" title="📝 testing.T 常用方法"></a>📝 testing.T 常用方法</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestExample</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 日志输出（仅失败或-v时显示）</span></span><br><span class="line">    t.Log(<span class="string">&quot;message&quot;</span>)          <span class="comment">// 输出日志</span></span><br><span class="line">    t.Logf(<span class="string">&quot;format: %v&quot;</span>, x)   <span class="comment">// 格式化日志</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 标记失败但继续</span></span><br><span class="line">    t.Error(<span class="string">&quot;message&quot;</span>)        <span class="comment">// 失败+继续</span></span><br><span class="line">    t.Errorf(<span class="string">&quot;format: %v&quot;</span>, x) <span class="comment">// 格式化失败+继续</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 标记失败并停止</span></span><br><span class="line">    t.Fatal(<span class="string">&quot;message&quot;</span>)        <span class="comment">// 失败+停止</span></span><br><span class="line">    t.Fatalf(<span class="string">&quot;format: %v&quot;</span>, x) <span class="comment">// 格式化失败+停止</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 跳过测试</span></span><br><span class="line">    t.Skip(<span class="string">&quot;reason&quot;</span>)          <span class="comment">// 跳过</span></span><br><span class="line">    t.Skipf(<span class="string">&quot;format: %v&quot;</span>, x)  <span class="comment">// 格式化跳过</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 其他</span></span><br><span class="line">    t.Fail()                  <span class="comment">// 标记失败（不输出），继续</span></span><br><span class="line">    t.FailNow()               <span class="comment">// 标记失败（不输出），停止</span></span><br><span class="line">    t.Helper()                <span class="comment">// 标记为辅助函数（用于自定义assert）</span></span><br><span class="line">    t.Name()                  <span class="comment">// 获取测试名称</span></span><br><span class="line">    t.Run(<span class="string">&quot;subtest&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;&#125;)  <span class="comment">// 子测试</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🎯-常见场景速解"><a href="#🎯-常见场景速解" class="headerlink" title="🎯 常见场景速解"></a>🎯 常见场景速解</h2><h3 id="场景1：运行单个测试文件"><a href="#场景1：运行单个测试文件" class="headerlink" title="场景1：运行单个测试文件"></a>场景1：运行单个测试文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># color_test.go</span></span><br><span class="line">go <span class="built_in">test</span> color_test.go color.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或使用包路径</span></span><br><span class="line">go <span class="built_in">test</span> code.geelib.net/pkg/util/color</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景2：运行特定测试函数"><a href="#场景2：运行特定测试函数" class="headerlink" title="场景2：运行特定测试函数"></a>场景2：运行特定测试函数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只运行 TestAll 函数</span></span><br><span class="line">go <span class="built_in">test</span> -run ^TestAll$ ./pkg/util/color</span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行所有 Test 开头的函数</span></span><br><span class="line">go <span class="built_in">test</span> -run Test ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行 TestWrap 和 TestColor 函数</span></span><br><span class="line">go <span class="built_in">test</span> -run <span class="string">&#x27;TestWrap|TestColor&#x27;</span> ./...</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景3：调试失败的测试"><a href="#场景3：调试失败的测试" class="headerlink" title="场景3：调试失败的测试"></a>场景3：调试失败的测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 详细输出 + 显示所有日志</span></span><br><span class="line">go <span class="built_in">test</span> -v -run TestFailing ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示panic堆栈跟踪（不会recover）</span></span><br><span class="line">go <span class="built_in">test</span> -v ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示第一个失败就停止</span></span><br><span class="line">go <span class="built_in">test</span> -failfast ./...</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景4：生成覆盖率报告"><a href="#场景4：生成覆盖率报告" class="headerlink" title="场景4：生成覆盖率报告"></a>场景4：生成覆盖率报告</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第1步：生成覆盖率文件</span></span><br><span class="line">go <span class="built_in">test</span> -coverprofile=coverage.out ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第2步：查看文本摘要</span></span><br><span class="line">go tool cover -func=coverage.out</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第3步：生成HTML报告</span></span><br><span class="line">go tool cover -html=coverage.out -o coverage.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第4步：在浏览器打开</span></span><br><span class="line">open coverage.html</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景5：基准测试"><a href="#场景5：基准测试" class="headerlink" title="场景5：基准测试"></a>场景5：基准测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基准测试</span></span><br><span class="line">go <span class="built_in">test</span> -bench=BenchmarkWrap ./pkg/util/color</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示内存分配</span></span><br><span class="line">go <span class="built_in">test</span> -bench=BenchmarkWrap -benchmem ./pkg/util/color</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置运行时间至少5秒</span></span><br><span class="line">go <span class="built_in">test</span> -bench=BenchmarkWrap -benchtime=5s ./pkg/util/color</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景6：竞态检测"><a href="#场景6：竞态检测" class="headerlink" title="场景6：竞态检测"></a>场景6：竞态检测</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 并发场景下的数据竞争检测</span></span><br><span class="line">go <span class="built_in">test</span> -race ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 竞态检测+详细输出</span></span><br><span class="line">go <span class="built_in">test</span> -race -v ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重复运行可能会增加发现竞态的概率</span></span><br><span class="line">go <span class="built_in">test</span> -race -count=10 ./...</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🐛-常见问题"><a href="#🐛-常见问题" class="headerlink" title="🐛 常见问题"></a>🐛 常见问题</h2><h3 id="Q-测试文件在哪里？"><a href="#Q-测试文件在哪里？" class="headerlink" title="Q: 测试文件在哪里？"></a>Q: 测试文件在哪里？</h3><p>A: 与源文件在同一目录，以 <code>_test.go</code> 结尾</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pkg/util/color/</span><br><span class="line">├── color.go          ← 源文件</span><br><span class="line">└── color_test.go     ← 测试文件（同package）</span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-测试函数为什么不运行？"><a href="#Q-测试函数为什么不运行？" class="headerlink" title="Q: 测试函数为什么不运行？"></a>Q: 测试函数为什么不运行？</h3><p>A: 检查是否符合命名规范</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestXxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;     <span class="comment">// ✅ 运行</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">testXxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;     <span class="comment">// ❌ 不运行（小写）</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">XxxTest</span><span class="params">(t *testing.T)</span></span> &#123; &#125;     <span class="comment">// ❌ 不运行（前缀错）</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestXxx</span><span class="params">(b *testing.B)</span></span> &#123; &#125;     <span class="comment">// ❌ 不运行（参数错）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-如何跳过某个测试？"><a href="#Q-如何跳过某个测试？" class="headerlink" title="Q: 如何跳过某个测试？"></a>Q: 如何跳过某个测试？</h3><p>A: 使用 <code>t.Skip()</code> 或 <code>t.SkipNow()</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestSkip</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> os.Getenv(<span class="string">&quot;SKIP_LONG&quot;</span>) != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">        t.Skip(<span class="string">&quot;跳过长时间测试&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 实际测试代码</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-如何设置测试超时？"><a href="#Q-如何设置测试超时？" class="headerlink" title="Q: 如何设置测试超时？"></a>Q: 如何设置测试超时？</h3><p>A: 使用 <code>-timeout</code> 标志</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">go <span class="built_in">test</span> -<span class="built_in">timeout</span> 30s ./...     <span class="comment"># 30秒</span></span><br><span class="line">go <span class="built_in">test</span> -<span class="built_in">timeout</span> 5m ./...      <span class="comment"># 5分钟</span></span><br><span class="line">go <span class="built_in">test</span> -<span class="built_in">timeout</span> 0 ./...       <span class="comment"># 无限（不推荐）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-为什么测试输出看不到-t-Log？"><a href="#Q-为什么测试输出看不到-t-Log？" class="headerlink" title="Q: 为什么测试输出看不到 t.Log？"></a>Q: 为什么测试输出看不到 t.Log？</h3><p>A: <code>t.Log()</code> 只在失败或使用 <code>-v</code> 时输出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">go <span class="built_in">test</span> -v ./...               <span class="comment"># ✅ 显示Log</span></span><br><span class="line">go <span class="built_in">test</span> ./...                  <span class="comment"># ❌ 不显示Log（除非失败）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-如何运行子测试？"><a href="#Q-如何运行子测试？" class="headerlink" title="Q: 如何运行子测试？"></a>Q: 如何运行子测试？</h3><p>A: 使用 <code>t.Run()</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestMain</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Run(<span class="string">&quot;subtest1&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 子测试1</span></span><br><span class="line">    &#125;)</span><br><span class="line">    t.Run(<span class="string">&quot;subtest2&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 子测试2</span></span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行</span></span><br><span class="line"><span class="keyword">go</span> test -run TestMain/subtest1 ./...</span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-基准测试输出的数字什么意思？"><a href="#Q-基准测试输出的数字什么意思？" class="headerlink" title="Q: 基准测试输出的数字什么意思？"></a>Q: 基准测试输出的数字什么意思？</h3><p>A: 基准测试输出解析</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">BenchmarkWrap-8     1000000     1000 ns/op    100 B/op    5 allocs/op</span><br><span class="line">├─ 函数名-8      : 函数在8个G下运行</span><br><span class="line">├─ 1000000       : 循环1,000,000次</span><br><span class="line">├─ 1000 ns/op    : 平均每次操作1000纳秒</span><br><span class="line">├─ 100 B/op      : 平均每次操作分配100字节</span><br><span class="line">└─ 5 allocs/op   : 平均每次操作5次内存分配</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-提交代码前检查清单"><a href="#✅-提交代码前检查清单" class="headerlink" title="✅ 提交代码前检查清单"></a>✅ 提交代码前检查清单</h2><p>在提交代码前运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 快速测试</span></span><br><span class="line">go <span class="built_in">test</span> -v ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 竞态检测</span></span><br><span class="line">go <span class="built_in">test</span> -race ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 代码覆盖率</span></span><br><span class="line">go <span class="built_in">test</span> -cover ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 生成报告（可选）</span></span><br><span class="line">go <span class="built_in">test</span> -coverprofile=coverage.out ./...</span><br><span class="line">go tool cover -html=coverage.out</span><br></pre></td></tr></table></figure>
+
+<p>或使用一条命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">go <span class="built_in">test</span> -v -race -coverprofile=coverage.out ./... &amp;&amp; \</span><br><span class="line">  go tool cover -func=coverage.out &amp;&amp; \</span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;✅ 所有检查通过&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="📊-测试框架对比"><a href="#📊-测试框架对比" class="headerlink" title="📊 测试框架对比"></a>📊 测试框架对比</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>标准testing</th>
+<th>Ginkgo</th>
+<th>testify</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>风格</strong></td>
+<td>程序式</td>
+<td>BDD</td>
+<td>断言库</td>
+</tr>
+<tr>
+<td><strong>学习曲线</strong></td>
+<td>低</td>
+<td>中</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>代码量</strong></td>
+<td>较多</td>
+<td>少</td>
+<td>少</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>通用</td>
+<td>行为驱动</td>
+<td>快速断言</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/27/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1833,115 +2060,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/04/%E7%B3%BB%E7%BB%9F%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/04/%E7%B3%BB%E7%BB%9F%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">系统分析</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-11-04 15:05:10 / 修改时间：15:22:05" itemprop="dateCreated datePublished" datetime="2025-11-04T15:05:10+08:00">2025-11-04</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="系统分析"><a href="#系统分析" class="headerlink" title="系统分析"></a>系统分析</h2><blockquote>
-<p>覆盖了网卡、NUMA、中断、CPU绑定、CPU软中断分布、I&#x2F;O负载(pidstat&#x2F;iostat)、队列与中断绑定分析</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"># ------------------------------------------------------------</span><br><span class="line"># 网络 + NUMA + CPU + 中断 综合排查脚本</span><br><span class="line"># ------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">NIC=$&#123;1:-eth2&#125;   # 默认网卡 eth2，可通过参数指定</span><br><span class="line">echo -e &quot;\n\033[1;36m&gt;&gt;&gt; 开始分析网卡: $NIC\033[0m&quot;</span><br><span class="line">echo &quot;------------------------------------------------------------&quot;</span><br><span class="line"></span><br><span class="line"># ========== 1. 基础硬件与NUMA结构 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[1] NUMA与CPU拓扑信息\033[0m&quot;</span><br><span class="line">lscpu | egrep &quot;Model name|Socket|Core|Thread|NUMA&quot;</span><br><span class="line">echo</span><br><span class="line">numactl --hardware | grep -E &quot;available:|node [0-9]+ cpus:&quot;</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">if [ -f &quot;/sys/class/net/$NIC/device/numa_node&quot; ]; then</span><br><span class="line">    NUMA_NODE=$(cat /sys/class/net/$NIC/device/numa_node)</span><br><span class="line">    echo &quot;🧩 网卡 $NIC 属于 NUMA 节点: $NUMA_NODE&quot;</span><br><span class="line">    NODE_CPUS=$(cat /sys/devices/system/node/node$&#123;NUMA_NODE&#125;/cpulist)</span><br><span class="line">    echo &quot;🧠 对应 NUMA 节点CPU列表: $NODE_CPUS&quot;</span><br><span class="line">else</span><br><span class="line">    echo &quot;⚠️ 未找到 $NIC 的 NUMA 节点信息&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># ========== 2. 网卡硬件与队列信息 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[2] 网卡硬件参数与队列情况\033[0m&quot;</span><br><span class="line">ethtool -i $NIC | grep -E &quot;driver|version|firmware&quot;</span><br><span class="line">ethtool -l $NIC | grep -A1 &quot;Combined&quot;</span><br><span class="line">echo</span><br><span class="line">echo &quot;队列列表:&quot;</span><br><span class="line">ls /sys/class/net/$NIC/queues/ 2&gt;/dev/null || echo &quot;无队列目录&quot;</span><br><span class="line">echo</span><br><span class="line">ethtool -x $NIC 2&gt;/dev/null | head -20 || echo &quot;该网卡不支持RSS映射查看&quot;</span><br><span class="line"></span><br><span class="line"># ========== 3. 中断分布与绑定 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[3] 中断与CPU绑定关系\033[0m&quot;</span><br><span class="line">echo &quot;👉 $NIC 的中断号分布：&quot;</span><br><span class="line">grep $NIC /proc/interrupts | awk &#x27;&#123;print $1 &quot;\t&quot; $NF&#125;&#x27; | tr -d &#x27;:&#x27; | column -t</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n👉 每个中断号绑定CPU信息:&quot;</span><br><span class="line">grep $NIC /proc/interrupts | cut -d: -f1 | while read irq; do</span><br><span class="line">    [ -n &quot;$irq&quot; ] &amp;&amp; printf &quot;IRQ %-4s -&gt; CPU(s): %s\n&quot; &quot;$irq&quot; &quot;$(cat /proc/irq/$irq/smp_affinity_list 2&gt;/dev/null)&quot;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line"># ========== 4. 网卡接收性能参数 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[4] 网卡接收性能参数\033[0m&quot;</span><br><span class="line">sysctl -a 2&gt;/dev/null | grep &quot;net.core.netdev_max_backlog&quot;</span><br><span class="line">ethtool -S $NIC 2&gt;/dev/null | egrep &quot;rx_|tx_&quot; | head -20</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line"># ========== 5. CPU中断与软中断负载 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[5] CPU中断与软中断统计\033[0m&quot;</span><br><span class="line">echo -e &quot;\n🧮 查看单核CPU的软中断(top前几项)：&quot;</span><br><span class="line">mpstat -P ALL 1 1 | grep -v &quot;Average&quot; | grep -v &quot;^$&quot; | head -15</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n🧩 /proc/softirqs 前20行：&quot;</span><br><span class="line">head -20 /proc/softirqs</span><br><span class="line"></span><br><span class="line"># ========== 6. 机器整体性能快照 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[6] 系统整体性能快照\033[0m&quot;</span><br><span class="line">echo -e &quot;\n📊 CPU使用率：&quot;</span><br><span class="line">mpstat 1 1 | tail -10</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n💾 磁盘I/O负载：&quot;</span><br><span class="line">iostat -x -d 1 1 | grep -v &quot;^$&quot;</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n📈 网络流量速率：&quot;</span><br><span class="line">sar -n DEV 1 1 | grep $NIC</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n👀 进程级CPU/IO统计（前5名）：&quot;</span><br><span class="line">pidstat -dru 1 1 | head -20</span><br><span class="line"></span><br><span class="line"># ========== 7. 附加建议 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[7] 附加建议命令（可选手动执行）\033[0m&quot;</span><br><span class="line">cat &lt;&lt;EOF</span><br><span class="line"># 查看中断平衡服务状态（IRQBalance）</span><br><span class="line">systemctl status irqbalance</span><br><span class="line"></span><br><span class="line"># 查看RSS配置与中断CPU亲和性调整建议</span><br><span class="line">grep . /sys/class/net/$NIC/queues/*/rps_cpus</span><br><span class="line">grep . /sys/class/net/$NIC/queues/*/xps_cpus</span><br><span class="line"></span><br><span class="line"># 查看当前活跃连接数</span><br><span class="line">ss -s</span><br><span class="line"></span><br><span class="line"># 实时监控单核CPU中断变化（示例）</span><br><span class="line">watch -n1 &#x27;cat /proc/softirqs | head -20&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n\033[1;32m✅ 完成，以上为网卡与NUMA性能诊断信息。\033[0m&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>🧩 输出逻辑概览（排查顺序）</p>
-<table>
-<thead>
-<tr>
-<th>步骤</th>
-<th>主要目的</th>
-<th>核心命令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1️⃣ NUMA与CPU拓扑</td>
-<td>了解CPU与内存结构</td>
-<td><code>lscpu</code>, <code>numactl</code></td>
-</tr>
-<tr>
-<td>2️⃣ 网卡硬件与队列</td>
-<td>确认网卡队列、RSS能力</td>
-<td><code>ethtool -l</code>, <code>ethtool -x</code></td>
-</tr>
-<tr>
-<td>3️⃣ 中断绑定关系</td>
-<td>分析IRQ与CPU的分布</td>
-<td><code>/proc/interrupts</code>, <code>/proc/irq/</code></td>
-</tr>
-<tr>
-<td>4️⃣ 网络性能参数</td>
-<td>核心队列与缓冲</td>
-<td><code>ethtool -S</code>, <code>sysctl net.core</code></td>
-</tr>
-<tr>
-<td>5️⃣ CPU软中断分析</td>
-<td>检查软中断瓶颈</td>
-<td><code>mpstat</code>, <code>/proc/softirqs</code></td>
-</tr>
-<tr>
-<td>6️⃣ 系统性能快照</td>
-<td>看系统整体健康度</td>
-<td><code>pidstat</code>, <code>iostat</code>, <code>sar</code></td>
-</tr>
-<tr>
-<td>7️⃣ 附加优化</td>
-<td>手动调整指引</td>
-<td>RSS&#x2F;XPS, irqbalance</td>
-</tr>
-</tbody></table>
-<h2 id="irqtop-与-lsirq"><a href="#irqtop-与-lsirq" class="headerlink" title="irqtop 与 lsirq"></a>irqtop 与 lsirq</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#cat /proc/interrupts 格式不够良好</span><br><span class="line">#默认util-linux-2.38才集成了irqtop与lsirq，升级util-linux有一定风险，仅编译安装两个工具</span><br><span class="line">#rpm -q util-linux</span><br><span class="line">util-linux-2.32.1-22.0.1.an8.x86_64</span><br><span class="line"></span><br><span class="line">#Anolis OS 8.2 编译安装</span><br><span class="line">git clone https://github.com/util-linux/util-linux.git</span><br><span class="line">cd util-linux/</span><br><span class="line">./autogen.sh</span><br><span class="line"></span><br><span class="line">#两个工具依赖libsmartcols</span><br><span class="line">./configure --enable-libsmartcols --disable-all-programs --enable-lsirq --enable-irqtop</span><br><span class="line">make</span><br><span class="line">cp lsirq /usr/local/bin/</span><br><span class="line">cp irqtop /usr/local/bin/</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2013,7 +2131,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">159</span>
+          <span class="site-state-item-count">160</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

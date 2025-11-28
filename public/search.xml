@@ -13330,4 +13330,181 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>go</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Go单元测试整理</title>
+    <url>/2025/11/28/Go%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%95%B4%E7%90%86/</url>
+    <content><![CDATA[<h1 id="Go单元测试快速参考表"><a href="#Go单元测试快速参考表" class="headerlink" title="Go单元测试快速参考表"></a>Go单元测试快速参考表</h1><h2 id="📋-一页纸总结"><a href="#📋-一页纸总结" class="headerlink" title="📋 一页纸总结"></a>📋 一页纸总结</h2><h3 id="测试文件命名和位置"><a href="#测试文件命名和位置" class="headerlink" title="测试文件命名和位置"></a>测试文件命名和位置</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">源文件: foo.go          测试文件: foo_test.go (同目录，同package)</span><br><span class="line">源文件: bar.go          测试文件: bar_test.go</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试函数命名"><a href="#测试函数命名" class="headerlink" title="测试函数命名"></a>测试函数命名</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestXxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;           <span class="comment">// 单元测试 ✅</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkXxx</span><span class="params">(b *testing.B)</span></span> &#123; &#125;      <span class="comment">// 性能测试 ✅</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ExampleXxx</span><span class="params">()</span></span> &#123; &#125;                    <span class="comment">// 示例文档 ✅</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">testxxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;           <span class="comment">// 小写，不执行 ❌</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Test</span><span class="params">(t *testing.T)</span></span> &#123; &#125;              <span class="comment">// 无后缀，不执行 ❌</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🚀-常用命令速查表"><a href="#🚀-常用命令速查表" class="headerlink" title="🚀 常用命令速查表"></a>🚀 常用命令速查表</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>快速测试</strong></td>
+<td><code>go test ./...</code></td>
+<td>运行所有包的测试</td>
+</tr>
+<tr>
+<td><strong>详细输出</strong></td>
+<td><code>go test -v ./...</code></td>
+<td>显示每个测试函数名</td>
+</tr>
+<tr>
+<td><strong>特定测试</strong></td>
+<td><code>go test -run TestName ./...</code></td>
+<td>只运行匹配的测试</td>
+</tr>
+<tr>
+<td><strong>特定包</strong></td>
+<td><code>go test -v ./pkg/util/color</code></td>
+<td>测试指定包</td>
+</tr>
+<tr>
+<td><strong>设置超时</strong></td>
+<td><code>go test -timeout 30s ./...</code></td>
+<td>30秒超时</td>
+</tr>
+<tr>
+<td><strong>竞态检测</strong></td>
+<td><code>go test -race ./...</code></td>
+<td>检测数据竞争</td>
+</tr>
+<tr>
+<td><strong>代码覆盖率</strong></td>
+<td><code>go test -cover ./...</code></td>
+<td>显示覆盖率百分比</td>
+</tr>
+<tr>
+<td><strong>覆盖率文件</strong></td>
+<td><code>go test -coverprofile=cov.out ./...</code></td>
+<td>生成覆盖率文件</td>
+</tr>
+<tr>
+<td><strong>覆盖率HTML</strong></td>
+<td><code>go tool cover -html=cov.out</code></td>
+<td>HTML格式报告</td>
+</tr>
+<tr>
+<td><strong>基准测试</strong></td>
+<td><code>go test -bench=. ./...</code></td>
+<td>运行所有基准测试</td>
+</tr>
+<tr>
+<td><strong>基准+内存</strong></td>
+<td><code>go test -bench=. -benchmem ./...</code></td>
+<td>基准+内存统计</td>
+</tr>
+<tr>
+<td><strong>并行运行</strong></td>
+<td><code>go test -parallel 4 ./...</code></td>
+<td>4个并发运行</td>
+</tr>
+<tr>
+<td><strong>运行N次</strong></td>
+<td><code>go test -count 3 ./...</code></td>
+<td>运行3次</td>
+</tr>
+<tr>
+<td><strong>跳过长测</strong></td>
+<td><code>go test -short ./...</code></td>
+<td>跳过耗时测试</td>
+</tr>
+<tr>
+<td><strong>显示日志</strong></td>
+<td><code>go test -v -run Test ./...</code></td>
+<td>显示t.Log输出</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="📝-testing-T-常用方法"><a href="#📝-testing-T-常用方法" class="headerlink" title="📝 testing.T 常用方法"></a>📝 testing.T 常用方法</h2><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestExample</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 日志输出（仅失败或-v时显示）</span></span><br><span class="line">    t.Log(<span class="string">&quot;message&quot;</span>)          <span class="comment">// 输出日志</span></span><br><span class="line">    t.Logf(<span class="string">&quot;format: %v&quot;</span>, x)   <span class="comment">// 格式化日志</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 标记失败但继续</span></span><br><span class="line">    t.Error(<span class="string">&quot;message&quot;</span>)        <span class="comment">// 失败+继续</span></span><br><span class="line">    t.Errorf(<span class="string">&quot;format: %v&quot;</span>, x) <span class="comment">// 格式化失败+继续</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 标记失败并停止</span></span><br><span class="line">    t.Fatal(<span class="string">&quot;message&quot;</span>)        <span class="comment">// 失败+停止</span></span><br><span class="line">    t.Fatalf(<span class="string">&quot;format: %v&quot;</span>, x) <span class="comment">// 格式化失败+停止</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 跳过测试</span></span><br><span class="line">    t.Skip(<span class="string">&quot;reason&quot;</span>)          <span class="comment">// 跳过</span></span><br><span class="line">    t.Skipf(<span class="string">&quot;format: %v&quot;</span>, x)  <span class="comment">// 格式化跳过</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 其他</span></span><br><span class="line">    t.Fail()                  <span class="comment">// 标记失败（不输出），继续</span></span><br><span class="line">    t.FailNow()               <span class="comment">// 标记失败（不输出），停止</span></span><br><span class="line">    t.Helper()                <span class="comment">// 标记为辅助函数（用于自定义assert）</span></span><br><span class="line">    t.Name()                  <span class="comment">// 获取测试名称</span></span><br><span class="line">    t.Run(<span class="string">&quot;subtest&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;&#125;)  <span class="comment">// 子测试</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🎯-常见场景速解"><a href="#🎯-常见场景速解" class="headerlink" title="🎯 常见场景速解"></a>🎯 常见场景速解</h2><h3 id="场景1：运行单个测试文件"><a href="#场景1：运行单个测试文件" class="headerlink" title="场景1：运行单个测试文件"></a>场景1：运行单个测试文件</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># color_test.go</span></span><br><span class="line">go <span class="built_in">test</span> color_test.go color.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或使用包路径</span></span><br><span class="line">go <span class="built_in">test</span> code.geelib.net/pkg/util/color</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景2：运行特定测试函数"><a href="#场景2：运行特定测试函数" class="headerlink" title="场景2：运行特定测试函数"></a>场景2：运行特定测试函数</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 只运行 TestAll 函数</span></span><br><span class="line">go <span class="built_in">test</span> -run ^TestAll$ ./pkg/util/color</span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行所有 Test 开头的函数</span></span><br><span class="line">go <span class="built_in">test</span> -run Test ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行 TestWrap 和 TestColor 函数</span></span><br><span class="line">go <span class="built_in">test</span> -run <span class="string">&#x27;TestWrap|TestColor&#x27;</span> ./...</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景3：调试失败的测试"><a href="#场景3：调试失败的测试" class="headerlink" title="场景3：调试失败的测试"></a>场景3：调试失败的测试</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 详细输出 + 显示所有日志</span></span><br><span class="line">go <span class="built_in">test</span> -v -run TestFailing ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示panic堆栈跟踪（不会recover）</span></span><br><span class="line">go <span class="built_in">test</span> -v ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示第一个失败就停止</span></span><br><span class="line">go <span class="built_in">test</span> -failfast ./...</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景4：生成覆盖率报告"><a href="#场景4：生成覆盖率报告" class="headerlink" title="场景4：生成覆盖率报告"></a>场景4：生成覆盖率报告</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第1步：生成覆盖率文件</span></span><br><span class="line">go <span class="built_in">test</span> -coverprofile=coverage.out ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第2步：查看文本摘要</span></span><br><span class="line">go tool cover -func=coverage.out</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第3步：生成HTML报告</span></span><br><span class="line">go tool cover -html=coverage.out -o coverage.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第4步：在浏览器打开</span></span><br><span class="line">open coverage.html</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景5：基准测试"><a href="#场景5：基准测试" class="headerlink" title="场景5：基准测试"></a>场景5：基准测试</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基准测试</span></span><br><span class="line">go <span class="built_in">test</span> -bench=BenchmarkWrap ./pkg/util/color</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示内存分配</span></span><br><span class="line">go <span class="built_in">test</span> -bench=BenchmarkWrap -benchmem ./pkg/util/color</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置运行时间至少5秒</span></span><br><span class="line">go <span class="built_in">test</span> -bench=BenchmarkWrap -benchtime=5s ./pkg/util/color</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景6：竞态检测"><a href="#场景6：竞态检测" class="headerlink" title="场景6：竞态检测"></a>场景6：竞态检测</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 并发场景下的数据竞争检测</span></span><br><span class="line">go <span class="built_in">test</span> -race ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 竞态检测+详细输出</span></span><br><span class="line">go <span class="built_in">test</span> -race -v ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重复运行可能会增加发现竞态的概率</span></span><br><span class="line">go <span class="built_in">test</span> -race -count=10 ./...</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🐛-常见问题"><a href="#🐛-常见问题" class="headerlink" title="🐛 常见问题"></a>🐛 常见问题</h2><h3 id="Q-测试文件在哪里？"><a href="#Q-测试文件在哪里？" class="headerlink" title="Q: 测试文件在哪里？"></a>Q: 测试文件在哪里？</h3><p>A: 与源文件在同一目录，以 <code>_test.go</code> 结尾</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pkg/util/color/</span><br><span class="line">├── color.go          ← 源文件</span><br><span class="line">└── color_test.go     ← 测试文件（同package）</span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-测试函数为什么不运行？"><a href="#Q-测试函数为什么不运行？" class="headerlink" title="Q: 测试函数为什么不运行？"></a>Q: 测试函数为什么不运行？</h3><p>A: 检查是否符合命名规范</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestXxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;     <span class="comment">// ✅ 运行</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">testXxx</span><span class="params">(t *testing.T)</span></span> &#123; &#125;     <span class="comment">// ❌ 不运行（小写）</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">XxxTest</span><span class="params">(t *testing.T)</span></span> &#123; &#125;     <span class="comment">// ❌ 不运行（前缀错）</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestXxx</span><span class="params">(b *testing.B)</span></span> &#123; &#125;     <span class="comment">// ❌ 不运行（参数错）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-如何跳过某个测试？"><a href="#Q-如何跳过某个测试？" class="headerlink" title="Q: 如何跳过某个测试？"></a>Q: 如何跳过某个测试？</h3><p>A: 使用 <code>t.Skip()</code> 或 <code>t.SkipNow()</code></p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestSkip</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> os.Getenv(<span class="string">&quot;SKIP_LONG&quot;</span>) != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">        t.Skip(<span class="string">&quot;跳过长时间测试&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 实际测试代码</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-如何设置测试超时？"><a href="#Q-如何设置测试超时？" class="headerlink" title="Q: 如何设置测试超时？"></a>Q: 如何设置测试超时？</h3><p>A: 使用 <code>-timeout</code> 标志</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">go <span class="built_in">test</span> -<span class="built_in">timeout</span> 30s ./...     <span class="comment"># 30秒</span></span><br><span class="line">go <span class="built_in">test</span> -<span class="built_in">timeout</span> 5m ./...      <span class="comment"># 5分钟</span></span><br><span class="line">go <span class="built_in">test</span> -<span class="built_in">timeout</span> 0 ./...       <span class="comment"># 无限（不推荐）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-为什么测试输出看不到-t-Log？"><a href="#Q-为什么测试输出看不到-t-Log？" class="headerlink" title="Q: 为什么测试输出看不到 t.Log？"></a>Q: 为什么测试输出看不到 t.Log？</h3><p>A: <code>t.Log()</code> 只在失败或使用 <code>-v</code> 时输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">go <span class="built_in">test</span> -v ./...               <span class="comment"># ✅ 显示Log</span></span><br><span class="line">go <span class="built_in">test</span> ./...                  <span class="comment"># ❌ 不显示Log（除非失败）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-如何运行子测试？"><a href="#Q-如何运行子测试？" class="headerlink" title="Q: 如何运行子测试？"></a>Q: 如何运行子测试？</h3><p>A: 使用 <code>t.Run()</code></p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestMain</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">    t.Run(<span class="string">&quot;subtest1&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 子测试1</span></span><br><span class="line">    &#125;)</span><br><span class="line">    t.Run(<span class="string">&quot;subtest2&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 子测试2</span></span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行</span></span><br><span class="line"><span class="keyword">go</span> test -run TestMain/subtest1 ./...</span><br></pre></td></tr></table></figure>
+
+<h3 id="Q-基准测试输出的数字什么意思？"><a href="#Q-基准测试输出的数字什么意思？" class="headerlink" title="Q: 基准测试输出的数字什么意思？"></a>Q: 基准测试输出的数字什么意思？</h3><p>A: 基准测试输出解析</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BenchmarkWrap-8     1000000     1000 ns/op    100 B/op    5 allocs/op</span><br><span class="line">├─ 函数名-8      : 函数在8个G下运行</span><br><span class="line">├─ 1000000       : 循环1,000,000次</span><br><span class="line">├─ 1000 ns/op    : 平均每次操作1000纳秒</span><br><span class="line">├─ 100 B/op      : 平均每次操作分配100字节</span><br><span class="line">└─ 5 allocs/op   : 平均每次操作5次内存分配</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-提交代码前检查清单"><a href="#✅-提交代码前检查清单" class="headerlink" title="✅ 提交代码前检查清单"></a>✅ 提交代码前检查清单</h2><p>在提交代码前运行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 1. 快速测试</span></span><br><span class="line">go <span class="built_in">test</span> -v ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 竞态检测</span></span><br><span class="line">go <span class="built_in">test</span> -race ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 代码覆盖率</span></span><br><span class="line">go <span class="built_in">test</span> -cover ./...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 生成报告（可选）</span></span><br><span class="line">go <span class="built_in">test</span> -coverprofile=coverage.out ./...</span><br><span class="line">go tool cover -html=coverage.out</span><br></pre></td></tr></table></figure>
+
+<p>或使用一条命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">go <span class="built_in">test</span> -v -race -coverprofile=coverage.out ./... &amp;&amp; \</span><br><span class="line">  go tool cover -func=coverage.out &amp;&amp; \</span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;✅ 所有检查通过&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="📊-测试框架对比"><a href="#📊-测试框架对比" class="headerlink" title="📊 测试框架对比"></a>📊 测试框架对比</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>标准testing</th>
+<th>Ginkgo</th>
+<th>testify</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>风格</strong></td>
+<td>程序式</td>
+<td>BDD</td>
+<td>断言库</td>
+</tr>
+<tr>
+<td><strong>学习曲线</strong></td>
+<td>低</td>
+<td>中</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>代码量</strong></td>
+<td>较多</td>
+<td>少</td>
+<td>少</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>通用</td>
+<td>行为驱动</td>
+<td>快速断言</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>go</tag>
+      </tags>
+  </entry>
 </search>
