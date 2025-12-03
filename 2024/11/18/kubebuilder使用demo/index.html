@@ -28,7 +28,7 @@
 <meta property="og:description" content="从头开始去构建一个 CRD 控制器并不容易，需要对 Kubernetes 的 API 有深入了解，并且 RBAC 集成、镜像构建、持续集成和部署等都需要很大工作量。为了解决这个问题，社区就推出了对应的简单易用的 Operator 框架，比较主流的是 kubebuilder 和 Operator Framework。 一、创建项目初始化1234567891011121314#创建go项目mkdi">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-11-18T10:29:03.000Z">
-<meta property="article:modified_time" content="2025-12-03T02:59:31.335Z">
+<meta property="article:modified_time" content="2025-12-03T03:35:20.993Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -219,7 +219,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-12-03 10:59:31" itemprop="dateModified" datetime="2025-12-03T10:59:31+08:00">2025-12-03</time>
+                <time title="修改时间：2025-12-03 11:35:20" itemprop="dateModified" datetime="2025-12-03T11:35:20+08:00">2025-12-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -258,7 +258,6 @@
 <li>internal&#x2F;controller&#x2F;loadbalance_controller.go</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#变更spec：</span></span><br><span class="line">vim api/v1alpha1/loadbalance_types.go</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">#关注 Reconcile 方法实现业务逻辑</span></span><br><span class="line">vim internal/controller/loadbalance_controller.go</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">#重新生成crd等文件</span></span><br><span class="line">make manifests generate</span><br><span class="line"><span class="comment">#查看生成的yaml：</span></span><br><span class="line"><span class="built_in">ls</span> config/crd/bases/network.k8s.test.net_loadbalances.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装crd到k8s集群,这里用于kustomize</span></span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看crd是否安装成功</span></span><br><span class="line">kubectl get crd</span><br><span class="line"></span><br><span class="line"><span class="comment">#启动controller</span></span><br><span class="line">make run</span><br></pre></td></tr></table></figure>
-
 <h3 id="②另一终端验证"><a href="#②另一终端验证" class="headerlink" title="②另一终端验证"></a>②另一终端验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 部署cr</span></span><br><span class="line">kubectl apply -f config/samples/network_v1_loadbalance.yaml</span><br><span class="line"></span><br><span class="line">kubectl get loadbalance</span><br></pre></td></tr></table></figure>
 
 <h3 id="③删除资源"><a href="#③删除资源" class="headerlink" title="③删除资源"></a>③删除资源</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete loadbalance loadbalance-sample</span><br><span class="line"></span><br><span class="line"><span class="comment"># ctrl + c 停止程序,卸载crd</span></span><br><span class="line">make uninstall</span><br></pre></td></tr></table></figure>
@@ -266,6 +265,114 @@
 <h2 id="三、构建镜像–-部署–-卸载部署"><a href="#三、构建镜像–-部署–-卸载部署" class="headerlink" title="三、构建镜像–&gt;部署–&gt;卸载部署"></a>三、构建镜像–&gt;部署–&gt;卸载部署</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1、注意修改Dockfile镜像地址，可能无法拉取</span></span><br><span class="line">sed -i <span class="string">&#x27;s#golang:1.22#swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/golang:1.22.5#&#x27;</span> Dockerfile</span><br><span class="line">sed -i <span class="string">&#x27;s#gcr.io/distroless/static:nonroot#swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/distroless/static:nonroot#&#x27;</span> Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、开始构建镜像（root用户）</span></span><br><span class="line">make docker-build IMG=loadbalance/lb:0.0.1</span><br><span class="line"><span class="comment">#push 到远程仓库，先docker login</span></span><br><span class="line"><span class="comment">#make docker-build docker-push IMG=loadbalance/lb:0.0.1</span></span><br><span class="line">或者</span><br><span class="line">docker build -t loadbalance/lb:0.0.1 .</span><br><span class="line"><span class="comment">#docker push loadbalance/lb:0.0.1 xxxx</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#指定构建平台</span></span><br><span class="line"><span class="comment">#make docker-buildx IMG=loadbalance/lb:0.0.1 PLATFORM=linux/amd64</span></span><br><span class="line"><span class="comment">#支持多种平台构建</span></span><br><span class="line"><span class="comment">#docker buildx build --platform linux/amd64,linux/arm64 -t loadbalance/lb:0.0.1 .</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看构建的镜像</span></span><br><span class="line"><span class="built_in">sudo</span> docker images</span><br><span class="line">REPOSITORY                  TAG               IMAGE ID       CREATED              SIZE</span><br><span class="line">loadbalance/lb              0.0.1             3d702a7b6e16   About a minute ago   72.1MB</span><br><span class="line"></span><br><span class="line"><span class="comment">#部署到当前集群</span></span><br><span class="line">make deploy IMG=loadbalance/lb:0.0.1</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">kubectl get svc,deploy,pod -n lb-system</span><br><span class="line"></span><br><span class="line"><span class="comment"># 卸载部署</span></span><br><span class="line">make undeploy</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#cronjob test</span><br><span class="line">https://github.com/kubernetes-sigs/kubebuilder/tree/master/docs/book/src/cronjob-tutorial/testdata/project</span><br><span class="line"></span><br><span class="line">https://github.com/kubernetes-sigs/kubebuilder/blob/master/docs/kubebuilder_annotation.md</span><br><span class="line">+[header]:[module]:[submodule]:[key-value elements]</span><br><span class="line"></span><br><span class="line">#云原生社区</span><br><span class="line">https://cloudnative.to/kubebuilder/</span><br><span class="line"></span><br><span class="line">#标记注释</span><br><span class="line">https://cloudpods.csdn.net/657812bcb8e5f01e1e449ece.html</span><br><span class="line"></span><br><span class="line">https://xie.infoq.cn/article/7a315f5168fda5e2e534ca406</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 官网例子</span><br><span class="line">https://github.com/kubernetes/sample-controller</span><br><span class="line">https://github.com/jetstack/kubebuilder-sample-controller</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Kustomize-的作用、背景与原因"><a href="#Kustomize-的作用、背景与原因" class="headerlink" title="Kustomize 的作用、背景与原因"></a>Kustomize 的作用、背景与原因</h2><h3 id="Kustomize-是什么？"><a href="#Kustomize-是什么？" class="headerlink" title="Kustomize 是什么？"></a><strong>Kustomize 是什么？</strong></h3><p>Kustomize 是一个 <strong>声明式 Kubernetes 对象定制工具</strong>，它允许你在不修改原始 YAML 的情况下，通过 kustomization.yaml 文件来管理和组织 Kubernetes 资源。</p>
+<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a><strong>核心概念</strong></h3><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Base</strong></td>
+<td>基础配置集合（如 crd, rbac, manager）</td>
+</tr>
+<tr>
+<td><strong>Overlay</strong></td>
+<td>环境特定的修改集合（如 default 组合所有 base）</td>
+</tr>
+<tr>
+<td><strong>Kustomization</strong></td>
+<td>kustomization.yaml 文件，定义如何组织和修改资源</td>
+</tr>
+</tbody></table>
+<h3 id="项目中的-Kustomize-结构解析"><a href="#项目中的-Kustomize-结构解析" class="headerlink" title="项目中的 Kustomize 结构解析"></a><strong>项目中的 Kustomize 结构解析</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">config/</span><br><span class="line">├── crd/                  # Base: CRD 定义</span><br><span class="line">│   ├── bases/</span><br><span class="line">│   ├── patches/          # 补丁：添加 webhook 注入等</span><br><span class="line">│   └── kustomization.yaml</span><br><span class="line">├── rbac/                 # Base: 角色和权限</span><br><span class="line">│   └── kustomization.yaml</span><br><span class="line">├── manager/              # Base: 控制器部署</span><br><span class="line">│   ├── manager.yaml</span><br><span class="line">│   └── kustomization.yaml</span><br><span class="line">├── default/              # Overlay: 整合所有 base</span><br><span class="line">│   ├── kustomization.yaml</span><br><span class="line">│   ├── manager_metrics_patch.yaml    # 添加指标配置</span><br><span class="line">│   ├── manager_webhook_patch.yaml    # 添加 webhook 配置</span><br><span class="line">│   └── ...</span><br><span class="line">├── webhook/              # 可选：webhook 配置</span><br><span class="line">├── certmanager/          # 可选：证书管理</span><br><span class="line">└── ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="Kustomize-的关键功能"><a href="#Kustomize-的关键功能" class="headerlink" title="Kustomize 的关键功能"></a><strong>Kustomize 的关键功能</strong></h3><h4 id="1-资源组织-resources"><a href="#1-资源组织-resources" class="headerlink" title="1. 资源组织 (resources:)"></a>1. <strong>资源组织</strong> (<code>resources:</code>)</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># config/default/kustomization.yaml</span></span><br><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">../crd</span>          <span class="comment"># 包含 CRD base</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">../rbac</span>         <span class="comment"># 包含 RBAC base</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">../manager</span>      <span class="comment"># 包含 manager base</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-参数修改-namePrefix-namespace"><a href="#2-参数修改-namePrefix-namespace" class="headerlink" title="2. 参数修改 (namePrefix:, namespace:)"></a>2. <strong>参数修改</strong> (<code>namePrefix:</code>, <code>namespace:</code>)</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">namespace:</span> <span class="string">kubebuilderdemo-system</span></span><br><span class="line"><span class="attr">namePrefix:</span> <span class="string">kubebuilderdemo-</span></span><br><span class="line"><span class="comment"># 自动给所有资源名称添加前缀，namespace 设置为特定值</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-补丁应用-patches"><a href="#3-补丁应用-patches" class="headerlink" title="3. 补丁应用 (patches:)"></a>3. <strong>补丁应用</strong> (<code>patches:</code>)</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">patches:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">manager_metrics_patch.yaml</span>    <span class="comment"># 为 Deployment 添加指标端口</span></span><br><span class="line">    <span class="attr">target:</span></span><br><span class="line">      <span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">manager_webhook_patch.yaml</span>    <span class="comment"># 为容器添加 webhook 端口</span></span><br></pre></td></tr></table></figure>
+
+<p>补丁示例（<code>manager_webhook_patch.yaml</code>）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为现有 Deployment 注入 webhook 配置</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">op:</span> <span class="string">add</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">/spec/template/spec/containers/0/ports</span></span><br><span class="line">  <span class="attr">value:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">9443</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">webhook-server</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">TCP</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="4-标签和注解管理-labels"><a href="#4-标签和注解管理-labels" class="headerlink" title="4. 标签和注解管理 (labels:)"></a>4. <strong>标签和注解管理</strong> (<code>labels:</code>)</h4><p>自动为所有资源添加标签，便于选择器使用</p>
+<h3 id="为什么-Kubebuilder-使用-Kustomize？"><a href="#为什么-Kubebuilder-使用-Kustomize？" class="headerlink" title="为什么 Kubebuilder 使用 Kustomize？"></a><strong>为什么 Kubebuilder 使用 Kustomize？</strong></h3><table>
+<thead>
+<tr>
+<th>原因</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>环境管理</strong></td>
+<td>轻松支持 dev&#x2F;staging&#x2F;prod 不同配置</td>
+</tr>
+<tr>
+<td><strong>代码复用</strong></td>
+<td>Base 可被多个 Overlay 重用</td>
+</tr>
+<tr>
+<td><strong>无脚本</strong></td>
+<td>纯声明式，不需要模板语言</td>
+</tr>
+<tr>
+<td><strong>模块化</strong></td>
+<td>清晰的关注点分离</td>
+</tr>
+<tr>
+<td><strong>Kubectl 原生支持</strong></td>
+<td><code>kubectl apply -k</code> 直接支持</td>
+</tr>
+<tr>
+<td><strong>易于调试</strong></td>
+<td><code>kustomize build</code> 可查看最终生成的 YAML</td>
+</tr>
+</tbody></table>
+<h3 id="实际工作流程"><a href="#实际工作流程" class="headerlink" title="实际工作流程"></a><strong>实际工作流程</strong></h3><p>当你执行 <code>make deploy</code> 时：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装，会在当前目录bin下生成二进制文件</span></span><br><span class="line">make kustomize</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">make deploy</span><br><span class="line">  ↓</span><br><span class="line">kustomize build config/default &gt; 最终的 YAML 文件</span><br><span class="line">  ↓</span><br><span class="line">kubectl apply -f (最终 YAML)</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看最终结果</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kustomize build config/default</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">kubectl kustomize config/default</span><br></pre></td></tr></table></figure>
+
+<h3 id="与-Helm-的比较"><a href="#与-Helm-的比较" class="headerlink" title="与 Helm 的比较"></a><strong>与 Helm 的比较</strong></h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Kustomize</th>
+<th>Helm</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>学习曲线</strong></td>
+<td>低</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>模板化</strong></td>
+<td>补丁系统</td>
+<td>Go 模板</td>
+</tr>
+<tr>
+<td><strong>包管理</strong></td>
+<td>否</td>
+<td>是（Helm Hub）</td>
+</tr>
+<tr>
+<td><strong>用途</strong></td>
+<td>开发&#x2F;部署</td>
+<td>生产分发</td>
+</tr>
+<tr>
+<td><strong>复杂度</strong></td>
+<td>简单</td>
+<td>强大</td>
+</tr>
+</tbody></table>
+<hr>
 
     </div>
 
@@ -346,7 +453,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.</span> <span class="nav-text">一、创建项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#webhook-%E6%8C%89%E9%9C%80%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">webhook(按需配置)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%B0%83%E8%AF%95%E5%BC%80%E5%8F%91"><span class="nav-number">2.</span> <span class="nav-text">二、调试开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A0%E9%87%8D%E7%82%B9%E5%A4%84%E7%90%86%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">①重点处理文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A1%E5%8F%A6%E4%B8%80%E7%BB%88%E7%AB%AF%E9%AA%8C%E8%AF%81"><span class="nav-number">2.2.</span> <span class="nav-text">②另一终端验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A2%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90"><span class="nav-number">2.3.</span> <span class="nav-text">③删除资源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F%E2%80%93-%E9%83%A8%E7%BD%B2%E2%80%93-%E5%8D%B8%E8%BD%BD%E9%83%A8%E7%BD%B2"><span class="nav-number">3.</span> <span class="nav-text">三、构建镜像–&gt;部署–&gt;卸载部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.1.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.</span> <span class="nav-text">一、创建项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#webhook-%E6%8C%89%E9%9C%80%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">webhook(按需配置)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%B0%83%E8%AF%95%E5%BC%80%E5%8F%91"><span class="nav-number">2.</span> <span class="nav-text">二、调试开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A0%E9%87%8D%E7%82%B9%E5%A4%84%E7%90%86%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">①重点处理文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A1%E5%8F%A6%E4%B8%80%E7%BB%88%E7%AB%AF%E9%AA%8C%E8%AF%81"><span class="nav-number">2.2.</span> <span class="nav-text">②另一终端验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A2%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90"><span class="nav-number">2.3.</span> <span class="nav-text">③删除资源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F%E2%80%93-%E9%83%A8%E7%BD%B2%E2%80%93-%E5%8D%B8%E8%BD%BD%E9%83%A8%E7%BD%B2"><span class="nav-number">3.</span> <span class="nav-text">三、构建镜像–&gt;部署–&gt;卸载部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.1.</span> <span class="nav-text">参考</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kustomize-%E7%9A%84%E4%BD%9C%E7%94%A8%E3%80%81%E8%83%8C%E6%99%AF%E4%B8%8E%E5%8E%9F%E5%9B%A0"><span class="nav-number">4.</span> <span class="nav-text">Kustomize 的作用、背景与原因</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kustomize-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">4.1.</span> <span class="nav-text">Kustomize 是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="nav-number">4.2.</span> <span class="nav-text">核心概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%9A%84-Kustomize-%E7%BB%93%E6%9E%84%E8%A7%A3%E6%9E%90"><span class="nav-number">4.3.</span> <span class="nav-text">项目中的 Kustomize 结构解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kustomize-%E7%9A%84%E5%85%B3%E9%94%AE%E5%8A%9F%E8%83%BD"><span class="nav-number">4.4.</span> <span class="nav-text">Kustomize 的关键功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%B5%84%E6%BA%90%E7%BB%84%E7%BB%87-resources"><span class="nav-number">4.4.1.</span> <span class="nav-text">1. 资源组织 (resources:)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%8F%82%E6%95%B0%E4%BF%AE%E6%94%B9-namePrefix-namespace"><span class="nav-number">4.4.2.</span> <span class="nav-text">2. 参数修改 (namePrefix:, namespace:)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E8%A1%A5%E4%B8%81%E5%BA%94%E7%94%A8-patches"><span class="nav-number">4.4.3.</span> <span class="nav-text">3. 补丁应用 (patches:)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E6%A0%87%E7%AD%BE%E5%92%8C%E6%B3%A8%E8%A7%A3%E7%AE%A1%E7%90%86-labels"><span class="nav-number">4.4.4.</span> <span class="nav-text">4. 标签和注解管理 (labels:)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Kubebuilder-%E4%BD%BF%E7%94%A8-Kustomize%EF%BC%9F"><span class="nav-number">4.5.</span> <span class="nav-text">为什么 Kubebuilder 使用 Kustomize？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">4.6.</span> <span class="nav-text">实际工作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E-Helm-%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">4.7.</span> <span class="nav-text">与 Helm 的比较</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
