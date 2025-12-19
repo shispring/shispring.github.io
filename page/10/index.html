@@ -184,6 +184,76 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/27/openstack%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/27/openstack%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">openstack一些命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-27 17:09:23 / 修改时间：17:12:00" itemprop="dateCreated datePublished" datetime="2024-12-27T17:09:23+08:00">2024-12-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/openstack/" itemprop="url" rel="index"><span itemprop="name">openstack</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="常规操作命令"><a href="#常规操作命令" class="headerlink" title="常规操作命令"></a>常规操作命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">#计算</span><br><span class="line">openstack compute service list</span><br><span class="line"></span><br><span class="line">#网络</span><br><span class="line">openstack network agent list</span><br><span class="line">openstack network list</span><br><span class="line">openstack subnet list</span><br><span class="line">openstack router list</span><br><span class="line"></span><br><span class="line">#存储</span><br><span class="line">openstack volume list</span><br><span class="line">openstack volume snapshot list</span><br><span class="line"></span><br><span class="line">#安全组</span><br><span class="line">openstack security group list</span><br><span class="line"></span><br><span class="line">#配额</span><br><span class="line">openstack quota show --all-projects</span><br><span class="line"></span><br><span class="line">#项目</span><br><span class="line">openstack project list</span><br><span class="line"></span><br><span class="line">#镜像</span><br><span class="line">openstack image list</span><br><span class="line"></span><br><span class="line">#主机</span><br><span class="line">openstack host list</span><br><span class="line"></span><br><span class="line">#主机操作</span><br><span class="line">openstack server list</span><br><span class="line">openstack server create</span><br><span class="line">openstack server show</span><br><span class="line"></span><br><span class="line">#主机规格</span><br><span class="line">openstack flavor</span><br><span class="line"></span><br><span class="line">#端口</span><br><span class="line">openstack port list</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">openstack router</span><br><span class="line"></span><br><span class="line">#登录地址</span><br><span class="line">openstack console url show INSTANCE_UUID</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="metadata数据查询"><a href="#metadata数据查询" class="headerlink" title="metadata数据查询"></a>metadata数据查询</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#在OpenStack云主机上通过请求Metadata元数据API，来获取云主机上的主机名、IP地址、SSH公钥等信息。</span><br><span class="line">#通过这些信息可以通过编写脚本来对云主机的标准化进行定制。</span><br><span class="line"></span><br><span class="line">curl http://169.254.169.254/</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/26/useful-tools/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1443,97 +1513,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/16/expect%E8%B7%B3%E8%BD%ACtips/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/16/expect%E8%B7%B3%E8%BD%ACtips/" class="post-title-link" itemprop="url">expect跳转tips</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-12-16 15:22:13" itemprop="dateCreated datePublished" datetime="2024-12-16T15:22:13+08:00">2024-12-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-11-17 19:16:22" itemprop="dateModified" datetime="2025-11-17T19:16:22+08:00">2025-11-17</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、单次跳转"><a href="#一、单次跳转" class="headerlink" title="一、单次跳转"></a>一、单次跳转</h2><ul>
-<li>① shell脚本拼凑登录信息</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">#!/opt/homebrew/bin/bash</span><br><span class="line">###---------------###</span><br><span class="line">#mac安装新版本bash: 支持declare -A xxx</span><br><span class="line">#brew install bash</span><br><span class="line">#</span><br><span class="line">###---------------###</span><br><span class="line"></span><br><span class="line"># 全局变量</span><br><span class="line">PORT=&quot;22&quot;</span><br><span class="line">USER=&quot;xxx&quot;</span><br><span class="line">PASSWORD=&quot;xxx&quot;</span><br><span class="line"></span><br><span class="line"># ANSI 转义码定义颜色</span><br><span class="line">RESET=&quot;\033[0m&quot;</span><br><span class="line">RED=&quot;\033[31m&quot;</span><br><span class="line">GREEN=&quot;\033[32m&quot;</span><br><span class="line">YELLOW=&quot;\033[33m&quot;</span><br><span class="line"></span><br><span class="line"># 函数：打印日志（支持颜色）</span><br><span class="line">log_message() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    local message=$2</span><br><span class="line">    local color</span><br><span class="line"></span><br><span class="line">    case $level in</span><br><span class="line">        INFO)</span><br><span class="line">            color=$GREEN</span><br><span class="line">            ;;</span><br><span class="line">        WARN)</span><br><span class="line">            color=$YELLOW</span><br><span class="line">            ;;</span><br><span class="line">        ERROR)</span><br><span class="line">            color=$RED</span><br><span class="line">            ;;</span><br><span class="line">        *)</span><br><span class="line">            color=$RESET</span><br><span class="line">            ;;</span><br><span class="line">    esac</span><br><span class="line"></span><br><span class="line">    echo -e &quot;$(date &#x27;+%Y-%m-%dT%H:%M:%S&#x27;) [$&#123;color&#125;$&#123;level&#125;$&#123;RESET&#125;] $message&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 函数：定义 IP 映射</span><br><span class="line">declare -A IP_MAP</span><br><span class="line">IP_MAP[&quot;dev_194&quot;]=&quot;10.xxx.xxx.194&quot;</span><br><span class="line">IP_MAP[&quot;jump_113&quot;]=&quot;10.xxx.xxx.113&quot;</span><br><span class="line"></span><br><span class="line"># 函数：获取 IP 地址</span><br><span class="line">get_ip() &#123;</span><br><span class="line">    local key=&quot;$&#123;1&#125;_$&#123;2&#125;&quot;</span><br><span class="line">    echo &quot;$&#123;IP_MAP[$key]&#125;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 参数检查</span><br><span class="line">if [[ $# -lt 2 ]]; then</span><br><span class="line">    log_message &quot;ERROR&quot; &quot;Usage: $0 &lt;environment&gt; &lt;option&gt;&quot;</span><br><span class="line">    log_message &quot;INFO&quot; &quot;Examples: $0 dev 194&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># 获取参数</span><br><span class="line">ENVIRONMENT=$1</span><br><span class="line">OPTION=$2</span><br><span class="line"></span><br><span class="line"># 获取目标 IP</span><br><span class="line">IP=$(get_ip &quot;$ENVIRONMENT&quot; &quot;$OPTION&quot;)</span><br><span class="line">echo $IP</span><br><span class="line">if [[ -z $IP ]]; then</span><br><span class="line">    log_message &quot;ERROR&quot; &quot;Invalid environment or option: $ENVIRONMENT $OPTION&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># 调用 Expect 脚本</span><br><span class="line">log_message &quot;INFO&quot; &quot;Connecting to $IP with user $USER on port $PORT&quot;</span><br><span class="line"></span><br><span class="line">expect /Users/xxx/shell/expectLogin.exp &quot;$IP&quot; &quot;$PORT&quot; &quot;$USER&quot; &quot;$PASSWORD&quot;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>② 配合的expectLogin.exp脚本</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/expect -f</span><br><span class="line"></span><br><span class="line"># 获取参数</span><br><span class="line">set ip [lindex $argv 0]</span><br><span class="line">set port [lindex $argv 1]</span><br><span class="line">set user [lindex $argv 2]</span><br><span class="line">set password [lindex $argv 3]</span><br><span class="line"></span><br><span class="line"># 设置超时时间</span><br><span class="line">set timeout 0.5</span><br><span class="line"></span><br><span class="line"># 打印日志</span><br><span class="line">puts &quot;[clock format [clock seconds] -format %Y-%m-%dT%H:%M:%S] Connecting to $ip&quot;</span><br><span class="line"></span><br><span class="line"># 执行 SSH 登录（ssh config 可自动处理免密情况）</span><br><span class="line">spawn ssh -p $port $user@$ip</span><br><span class="line"></span><br><span class="line"># 通过循环处理可能的交互情况</span><br><span class="line">while &#123;1&#125; &#123;</span><br><span class="line">    expect &#123;</span><br><span class="line">        -re &quot;Are you sure you want to continue connecting.*\\(yes/no\\)\\?&quot; &#123;</span><br><span class="line">            send -- &quot;yes\r&quot;</span><br><span class="line">            exp_continue</span><br><span class="line">        &#125;</span><br><span class="line">        -re &quot;(?i)password:&quot; &#123;</span><br><span class="line">            # 如果传入的密码为空，说明可能是免密登录，不发送密码</span><br><span class="line">            if &#123;$password ne &quot;&quot;&#125; &#123;</span><br><span class="line">                send --  &quot;$password\r&quot;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                # 若密码为空则直接进入交互模式</span><br><span class="line">                break</span><br><span class="line">            &#125;</span><br><span class="line">            exp_continue</span><br><span class="line">        &#125;</span><br><span class="line">        -re &#123;([\$#] $)&#125; &#123;</span><br><span class="line">            # 匹配到标准 shell 提示符（支持$或#结尾），登录成功</span><br><span class="line">            break</span><br><span class="line">        &#125;</span><br><span class="line">        timeout &#123;</span><br><span class="line">            # 如果等待超时，也尝试结束循环进入交互模式</span><br><span class="line">            # puts &quot;等待响应超时，尝试进入交互模式，请注意确认登录状态。&quot;</span><br><span class="line">            # send -- &quot;\r&quot;</span><br><span class="line">	    break</span><br><span class="line">        &#125;</span><br><span class="line">        eof &#123;</span><br><span class="line">            break</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 进入交互模式</span><br><span class="line">interact</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="两次跳转登录"><a href="#两次跳转登录" class="headerlink" title="两次跳转登录"></a>两次跳转登录</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/expect</span><br><span class="line">#############################################</span><br><span class="line">#</span><br><span class="line">#脚本目的：从本地mac ---经跳板机---&gt; 跳到IDC主机</span><br><span class="line">#使用方法：</span><br><span class="line">#1、chmod +x jump.exp</span><br><span class="line">#2、可在.bash_profile 定义脚本别名 alias jump=&#x27;xxxx/jump.exp&#x27;</span><br><span class="line">#3、登录机器 jump &#123;hostname&#125;</span><br><span class="line">#############################################</span><br><span class="line"></span><br><span class="line">set port 22</span><br><span class="line">set user xxx</span><br><span class="line">set password xxx</span><br><span class="line">set jumper xxx</span><br><span class="line"></span><br><span class="line"># 定义登录主机名</span><br><span class="line">set hostname [lindex $argv 0]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if &#123; $argc &lt; 1 &#125; &#123;</span><br><span class="line">    puts &quot;please input: jump &#123;hostname&#125; &quot;</span><br><span class="line">    exit</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if &#123; $argc == 1 &#125; &#123;</span><br><span class="line"></span><br><span class="line">    # 关闭mac层连接的标准输出</span><br><span class="line">    log_user 0</span><br><span class="line"></span><br><span class="line">    #特殊处理主机,该主机配置了无密码登录，可以不再设置密码登录</span><br><span class="line">    if &#123;$hostname == $jumper&#125; &#123;</span><br><span class="line"></span><br><span class="line">        spawn ssh -p $port $user@$hostname</span><br><span class="line">        expect &#123;</span><br><span class="line">            &quot;*yes/no&quot; &#123; </span><br><span class="line">                send -- &quot;yes\r&quot;; exp_continue </span><br><span class="line">            &#125;</span><br><span class="line">            &quot;*password:*&quot; &#123; </span><br><span class="line">                send -- &quot;$password\r;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">            &quot;$&quot; &#123;</span><br><span class="line">                send -- &quot;\r;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        # spawn 是 expect 环境的内部命令，它主要的功能是给 ssh 运行进程加个壳，用来传递交互指令。</span><br><span class="line">        spawn ssh -p $port $user@$jumper</span><br><span class="line"></span><br><span class="line">        # expect 也是 expect 环境的一个内部命令，用来判断上一个指令输入之后的得到输出结果是否包含 &quot;&quot; 双引号里的字符串，-re 表示通过正则来匹配。</span><br><span class="line">        # 如果是第一次登录，会出现 &quot;yes/no&quot; 的字符串，就发送（send）指令 &quot;yes\r&quot;，然后继续（exp_continue）。</span><br><span class="line">        expect &#123;</span><br><span class="line">            &quot;*yes/no&quot; &#123;    send -- &quot;yes\r&quot;; exp_continue &#125;</span><br><span class="line">            &quot;*password:*&quot; &#123;   send -- &quot;$password\r&quot;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        # 关闭mac层连接的标准输出</span><br><span class="line">        log_user 0</span><br><span class="line"></span><br><span class="line">        expect &quot;@&quot; &#123; send -- &quot;ssh -p $port $user@$hostname\r&quot;&#125;</span><br><span class="line">        expect &#123;</span><br><span class="line">            &quot;*yes/no&quot; &#123;    send -- &quot;yes\r&quot;; exp_continue &#125;</span><br><span class="line">            &quot;*password*&quot; &#123;   send -- &quot;$password\r&quot;&#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    #保持交互状态，把控制权交给控制台。</span><br><span class="line">    interact</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="tips"><a href="#tips" class="headerlink" title="tips"></a>tips</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-- 表示 “后面所有内容都视为纯文本，不再解释特殊字符”。</span><br><span class="line">这可以彻底避免 @、$、\ 等特殊字符被解释。</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1601,7 +1584,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-count">161</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
