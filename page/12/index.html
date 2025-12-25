@@ -1249,7 +1249,7 @@ validate</p>
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-12-25 11:51:37" itemprop="dateModified" datetime="2025-12-25T11:51:37+08:00">2025-12-25</time>
+                <time title="修改时间：2025-12-25 11:54:18" itemprop="dateModified" datetime="2025-12-25T11:54:18+08:00">2025-12-25</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1377,7 +1377,7 @@ validate</p>
 </li>
 </ol>
 <hr>
-<h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#推送</span><br><span class="line">helm chart 模式：安装cm-push插件</span><br><span class="line">helm plugin install https://github.com/chartmuseum/helm-push.git</span><br><span class="line">helm chart 模式：查看已安装插件</span><br><span class="line">helm plugin list</span><br><span class="line">helm chart 模式：推送</span><br><span class="line">HELM_REPO_USERNAME=xxx HELM_REPO_PASSWORD=xxx helm cm-push ingress-nginx-1.11.5.tgz &lt;repo&gt;</span><br><span class="line"></span><br><span class="line">#比较差异</span><br><span class="line">helm plugin install https://github.com/databus23/helm-diff.git</span><br><span class="line">helm diff revision ingress-nginx 1 2</span><br></pre></td></tr></table></figure>
+<h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#推送</span><br><span class="line">helm chart 模式：安装cm-push插件</span><br><span class="line">helm plugin install https://github.com/chartmuseum/helm-push.git</span><br><span class="line">helm chart 模式：查看已安装插件</span><br><span class="line">helm plugin list</span><br><span class="line">helm chart 模式：推送</span><br><span class="line">HELM_REPO_USERNAME=xxx HELM_REPO_PASSWORD=xxx helm cm-push ingress-nginx-1.11.5.tgz &lt;repo&gt;</span><br><span class="line"></span><br><span class="line">#比较差异</span><br><span class="line">helm plugin install https://github.com/databus23/helm-diff --verify=false</span><br><span class="line">helm diff revision ingress-nginx 1 2</span><br></pre></td></tr></table></figure>
 
       
     </div>
