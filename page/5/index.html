@@ -184,6 +184,88 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/19/cAdvisor%E5%88%9D%E6%8E%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/06/19/cAdvisor%E5%88%9D%E6%8E%A2/" class="post-title-link" itemprop="url">cAdvisor初探</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-06-19 14:16:57 / 修改时间：14:19:11" itemprop="dateCreated datePublished" datetime="2025-06-19T14:16:57+08:00">2025-06-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="cgroup-namespace"><a href="#cgroup-namespace" class="headerlink" title="cgroup &amp; namespace"></a>cgroup &amp; namespace</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>含义</th>
+<th>示例作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cgroup</code></td>
+<td>控制组，限制容器的 CPU、内存等</td>
+<td><code>cpu.shares</code>, <code>memory.limit_in_bytes</code></td>
+</tr>
+<tr>
+<td><code>namespace</code></td>
+<td>名字空间，隔离容器运行环境</td>
+<td><code>net</code>, <code>pid</code>, <code>mnt</code>, <code>ipc</code>, <code>uts</code>, <code>user</code></td>
+</tr>
+</tbody></table>
+<h2 id="cAdvisor"><a href="#cAdvisor" class="headerlink" title="cAdvisor"></a>cAdvisor</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cAdvisor 直接读取:</span><br><span class="line">• /sys/fs/cgroup（CPU、memory、blkio）</span><br><span class="line">• /proc/&lt;pid&gt;/net/dev（网络）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="cAdvisor-读取磁盘-I-O-指标的原理"><a href="#cAdvisor-读取磁盘-I-O-指标的原理" class="headerlink" title="cAdvisor 读取磁盘 I&#x2F;O 指标的原理"></a>cAdvisor 读取磁盘 I&#x2F;O 指标的原理</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. 从 cgroup blkio 子系统读取 I/O 限制与统计数据</span><br><span class="line">/sys/fs/cgroup/blkio/docker/&lt;container-id&gt;/</span><br><span class="line"></span><br><span class="line">2. 通过 /proc/&lt;pid&gt;/io 读取进程级磁盘数据</span><br><span class="line">/proc/&lt;container-pid&gt;/io</span><br><span class="line"></span><br><span class="line">cAdvisor 会汇总属于某个容器所有进程的 /proc/&lt;pid&gt;/io 统计。</span><br></pre></td></tr></table></figure>
+
+<h2 id="模拟-cAdvisor-的行为"><a href="#模拟-cAdvisor-的行为" class="headerlink" title="模拟 cAdvisor 的行为"></a>模拟 cAdvisor 的行为</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker ps | grep kubelet</span><br><span class="line"></span><br><span class="line">docker inspect f965002cb995 | grep -w &quot;Id&quot;</span><br><span class="line">或</span><br><span class="line">docker inspect f965002cb995 | jq &#x27;.[].Id&#x27;</span><br><span class="line"></span><br><span class="line">#查看容器 blkio 数据</span><br><span class="line">cat /sys/fs/cgroup/blkio/docker/f965002cb995390b763ab8abacd86cc987d223101ace612a9e16c3bac9767a80/blkio.throttle.io_service_bytes</span><br><span class="line"></span><br><span class="line">查看某容器主进程的 PID：</span><br><span class="line">docker inspect f965002cb995 | grep -w &quot;Pid&quot;</span><br><span class="line">或</span><br><span class="line">docker inspect f965002cb995 | jq &#x27;.[].State.Pid&#x27;</span><br><span class="line"></span><br><span class="line">cat /proc/6687/io</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/19/curl%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E8%80%97%E6%97%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1245,102 +1327,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/05/21/shell%E8%84%9A%E6%9C%AC%E5%8A%A0%E5%9B%BA%E5%8A%9E%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/05/21/shell%E8%84%9A%E6%9C%AC%E5%8A%A0%E5%9B%BA%E5%8A%9E%E6%B3%95/" class="post-title-link" itemprop="url">高质量shell脚本tips</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-05-21 10:44:55 / 修改时间：11:01:36" itemprop="dateCreated datePublished" datetime="2025-05-21T10:44:55+08:00">2025-05-21</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="shell-目标"><a href="#shell-目标" class="headerlink" title="shell 目标"></a>shell 目标</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">严谨、健壮、自检、自愈、可读</span><br></pre></td></tr></table></figure>
-<h3 id="首行加固"><a href="#首行加固" class="headerlink" title="首行加固"></a>首行加固</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set -euo pipefail</span><br></pre></td></tr></table></figure>
-
-<h3 id="安全读取变量"><a href="#安全读取变量" class="headerlink" title="安全读取变量"></a>安全读取变量</h3><table>
-<thead>
-<tr>
-<th>${VAR:-}</th>
-<th>如果未定义，返回空字符串</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>${VAR:&#x3D;默认}</td>
-<td>如果未定义，赋值为默认值</td>
-</tr>
-<tr>
-<td>${VAR:+替代}</td>
-<td>如果已定义，返回替代值</td>
-</tr>
-<tr>
-<td>${VAR:?错误信息}</td>
-<td>如果未定义，抛出指定错误</td>
-</tr>
-</tbody></table>
-<h3 id="让路径永远基于脚本本身，无论哪里执行都正确"><a href="#让路径永远基于脚本本身，无论哪里执行都正确" class="headerlink" title="让路径永远基于脚本本身，无论哪里执行都正确"></a>让路径永远基于脚本本身，无论哪里执行都正确</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;$&#123;BASH_SOURCE[0]&#125;&quot;)&quot; &amp;&amp; pwd)&quot;</span><br><span class="line">cd &quot;$SCRIPT_DIR&quot;</span><br></pre></td></tr></table></figure>
-
-<h3 id="检查命令执行结果"><a href="#检查命令执行结果" class="headerlink" title="检查命令执行结果"></a>检查命令执行结果</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#优雅的写法</span><br><span class="line">wget xxx || &#123; echo &quot;下载失败&quot;; exit 1; &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="保持脚本输出清晰简洁，尤其是日志信息"><a href="#保持脚本输出清晰简洁，尤其是日志信息" class="headerlink" title="保持脚本输出清晰简洁，尤其是日志信息"></a>保持脚本输出清晰简洁，尤其是日志信息</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、打印正在做什么</span><br><span class="line">2、成功/失败都提示</span><br><span class="line">3、错误信息清晰</span><br></pre></td></tr></table></figure>
-
-<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/lBAsqOIB72FtawjckiVrDg">https://mp.weixin.qq.com/s/lBAsqOIB72FtawjckiVrDg</a> </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line">SCRIPT_DIR=&quot;$(cd &quot;$(dirname &quot;$&#123;BASH_SOURCE[0]&#125;&quot;)&quot; &amp;&amp; pwd)&quot;</span><br><span class="line">cd &quot;$SCRIPT_DIR&quot;</span><br><span class="line"></span><br><span class="line"># 加载.env</span><br><span class="line">if [ -f &quot;.env&quot; ]; then</span><br><span class="line">    export $(grep -v &#x27;^#&#x27; .env | xargs)</span><br><span class="line">else</span><br><span class="line">    echo &quot;❌ .env文件不存在&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># 示例逻辑</span><br><span class="line">echo &quot;🚀 开始任务...&quot;</span><br></pre></td></tr></table></figure>
-<hr>
-<h3 id="颜色配置"><a href="#颜色配置" class="headerlink" title="颜色配置"></a>颜色配置</h3><ul>
-<li>mac下兼容 Bash 3 的方式：用 case + if else 实现颜色映射<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"># 颜色定义</span><br><span class="line">readonly RED=&#x27;\033[0;31m&#x27;</span><br><span class="line">readonly GREEN=&#x27;\033[0;32m&#x27;</span><br><span class="line">readonly YELLOW=&#x27;\033[0;33m&#x27;</span><br><span class="line">readonly BLUE=&#x27;\033[0;34m&#x27;</span><br><span class="line">readonly NC=&#x27;\033[0m&#x27; # No Color</span><br><span class="line"></span><br><span class="line"># 日志函数</span><br><span class="line">log() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    shift</span><br><span class="line">    local timestamp=$(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)</span><br><span class="line">    local message=&quot;[$&#123;timestamp&#125;] [$&#123;level&#125;] $*&quot;</span><br><span class="line"></span><br><span class="line">    case &quot;$level&quot; in</span><br><span class="line">        &quot;ERROR&quot;) color=$RED ;;</span><br><span class="line">        &quot;WARNING&quot;) color=$YELLOW ;;</span><br><span class="line">        &quot;INFO&quot;) color=$BLUE ;;</span><br><span class="line">        &quot;SUCCESS&quot;) color=$GREEN ;;</span><br><span class="line">        *) color=$NC ;;</span><br><span class="line">    esac</span><br><span class="line"></span><br><span class="line">    echo -e &quot;$&#123;color&#125;$&#123;message&#125;$&#123;NC&#125;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">log &quot;SUCCESS&quot; &quot;✅ All done.&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-<li>linux下<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line"># 颜色定义</span><br><span class="line">readonly RED=&#x27;\033[0;31m&#x27;</span><br><span class="line">readonly GREEN=&#x27;\033[0;32m&#x27;</span><br><span class="line">readonly YELLOW=&#x27;\033[0;33m&#x27;</span><br><span class="line">readonly BLUE=&#x27;\033[0;34m&#x27;</span><br><span class="line">readonly NC=&#x27;\033[0m&#x27;</span><br><span class="line"></span><br><span class="line"># 日志级别颜色映射</span><br><span class="line">declare -A LOG_COLORS=(</span><br><span class="line">    [&quot;ERROR&quot;]=&quot;$&#123;RED&#125;&quot;</span><br><span class="line">    [&quot;WARNING&quot;]=&quot;$&#123;YELLOW&#125;&quot;</span><br><span class="line">    [&quot;INFO&quot;]=&quot;$&#123;BLUE&#125;&quot;</span><br><span class="line">    [&quot;SUCCESS&quot;]=&quot;$&#123;GREEN&#125;&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 日志函数</span><br><span class="line">log() &#123;</span><br><span class="line">    local level=$1</span><br><span class="line">    shift</span><br><span class="line">    local color=$&#123;LOG_COLORS[$level]:-$NC&#125;</span><br><span class="line">    local timestamp=$(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)</span><br><span class="line">    local message=&quot;[$&#123;timestamp&#125;] [$&#123;level&#125;] $*&quot;</span><br><span class="line">    echo -e &quot;$&#123;color&#125;$&#123;message&#125;$&#123;NC&#125;&quot; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">log INFO &quot;这是信息日志&quot;</span><br></pre></td></tr></table></figure></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1412,7 +1398,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">161</span>
+          <span class="site-state-item-count">162</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

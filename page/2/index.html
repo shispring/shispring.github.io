@@ -184,6 +184,68 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/07/iperf%E5%8E%8B%E6%B5%8B%E5%B8%A6%E5%AE%BD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/07/iperf%E5%8E%8B%E6%B5%8B%E5%B8%A6%E5%AE%BD/" class="post-title-link" itemprop="url">iperf压测带宽</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-11-07 10:17:24 / 修改时间：10:30:03" itemprop="dateCreated datePublished" datetime="2025-11-07T10:17:24+08:00">2025-11-07</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 iperf3</span></span><br><span class="line">yum install -y iperf3  <span class="comment"># CentOS/RHEL</span></span><br><span class="line"><span class="comment">#查看系统架构及版本</span></span><br><span class="line"><span class="built_in">uname</span> -m &amp;&amp; <span class="built_in">cat</span> /etc/os-release | egrep <span class="string">&quot;NAME|VERSION&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------</span></span><br><span class="line"><span class="comment"># 1. 启动 iperf3 服务端</span></span><br><span class="line"><span class="comment"># ---------------------------</span></span><br><span class="line">iperf3 -s -p 5201</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或后台运行</span></span><br><span class="line">iperf3 -s -D</span><br></pre></td></tr></table></figure>
+
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改为实际服务器 IP</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------------------------</span></span><br><span class="line"><span class="comment"># 2. 客户端梯度压测</span></span><br><span class="line"><span class="comment"># ---------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 打满带宽：单线程 TCP 测试</span></span><br><span class="line">iperf3 -c &lt;server_ip&gt; -t 30</span><br><span class="line"></span><br><span class="line"><span class="comment"># 多线程（并发10连接）</span></span><br><span class="line">iperf3 -c &lt;server_ip&gt; -P 10 -t 30</span><br><span class="line"></span><br><span class="line"><span class="comment"># 梯度测试（1G、5G、10G）</span></span><br><span class="line">iperf3 -c &lt;server_ip&gt; -b 1G -t 30</span><br><span class="line">iperf3 -c &lt;server_ip&gt; -b 5G -t 30</span><br><span class="line">iperf3 -c &lt;server_ip&gt; -b 10G -t 30</span><br><span class="line"></span><br><span class="line"><span class="comment"># UDP 模式下验证包丢率</span></span><br><span class="line">iperf3 -u -b 10G -c &lt;server_ip&gt; -t 30</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/05/%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF%E6%B1%87%E6%80%BB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1575,80 +1637,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/10/%E5%86%85%E5%AD%98%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%E6%95%B4%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/10/%E5%86%85%E5%AD%98%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">内存相关信息整理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-09-10 14:15:38" itemprop="dateCreated datePublished" datetime="2025-09-10T14:15:38+08:00">2025-09-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-09-11 15:09:05" itemprop="dateModified" datetime="2025-09-11T15:09:05+08:00">2025-09-11</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="slab"><a href="#slab" class="headerlink" title="slab"></a>slab</h2><ul>
-<li>SUnreclaim（非可回收 slab）</li>
-<li>SReclaimable（可回收 slab, 如 inode&#x2F;dentry cache）<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">#几个计算关系</span><br><span class="line">#Slab = 内核维护对象的缓存（inode、dentry、socket buffer 等）</span><br><span class="line">Slab = SReclaimable + SUnreclaim</span><br><span class="line">#含义</span><br><span class="line">SUnreclaim – Non-reclaimable slab memory (kernel objects) 占比稳定，内核不可回收部分</span><br><span class="line">SReclaimable – Potentially reclaimable slab memory (e.g., inode cache) 占比较高，内核可回收部分</span><br><span class="line"></span><br><span class="line"># buff/cache 可回收内存，SReclaimable高、回收慢可持续增高，从而出现“可回收但实际上回收不掉” </span><br><span class="line">buff/cache ≈ Buffers + Cached + SReclaimable</span><br><span class="line"></span><br><span class="line">#MemAvailable</span><br><span class="line">MemAvailable ≈ MemFree + Buffers + Cached + SReclaimable - 一些不可回收部分</span><br><span class="line"></span><br><span class="line">#观察方式：</span><br><span class="line">top</span><br><span class="line">watch -n1 &quot;grep -E &#x27;MemTotal|MemFree|MemAvailable|Cached|Slab|SReclaimable|SUnreclaim&#x27; /proc/meminfo&quot;</span><br><span class="line"></span><br><span class="line">#查看内核内存参数</span><br><span class="line">sysctl -a | grep vm</span><br><span class="line"></span><br><span class="line">#查看slab信息: cat /proc/slabinfo</span><br><span class="line">#看具体哪些 slab 类型涨得多,如果 top 几项是 dentry/inode_cache → 说明 VFS 元数据。</span><br><span class="line">cat /proc/slabinfo | egrep -i &#x27;dentry|inode|path|ext4|xfs&#x27; </span><br><span class="line"></span><br><span class="line">#或者命令</span><br><span class="line">slabtop</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="内存回收-vfs-cache-pressure"><a href="#内存回收-vfs-cache-pressure" class="headerlink" title="内存回收:vfs_cache_pressure"></a>内存回收:vfs_cache_pressure</h2><blockquote>
-<p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/ygq13572549874/article/details/148332587">https://blog.csdn.net/ygq13572549874/article/details/148332587</a> </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#查看虚拟文件系统</span><br><span class="line">cat /proc/sys/vm/vfs_cache_pressure</span><br><span class="line"></span><br><span class="line">含义：控制内核回收 inode 和 dentry 缓存的倾向程度：</span><br><span class="line">- inode 缓存：存储文件系统的元数据（如文件权限、所有者、时间戳等）</span><br><span class="line">- dentry 缓存：存储目录项缓存（如文件名到 inode 的映射关系）</span><br><span class="line"></span><br><span class="line">参数值范围为 0-1000，默认值为 100：</span><br><span class="line">- 值越小：内核越倾向于保留 inode/dentry 缓存（即使内存紧张）</span><br><span class="line">- 值越大：内核越倾向于优先回收 inode/dentry 缓存</span><br><span class="line"></span><br><span class="line">当系统内存紧张时，内核需要决定如何平衡回收不同类型的缓存：</span><br><span class="line">- 页面缓存（page cache）：文件内容的缓存</span><br><span class="line">- inode/dentry 缓存：文件系统元数据的缓存</span><br><span class="line">-交换空间（swap）：内存到磁盘的交换</span><br></pre></td></tr></table></figure>
-
-<h2 id="drop-caches"><a href="#drop-caches" class="headerlink" title="drop caches"></a>drop caches</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#drop caches（测试是否可回收）</span><br><span class="line"># 1=pagecache, 2=dentries+inodes, 3=both</span><br><span class="line">sudo sync</span><br><span class="line">sudo sh -c &#x27;echo 2 &gt; /proc/sys/vm/drop_caches&#x27;</span><br><span class="line"># 之后重新检查 /proc/meminfo 的 Slab/SReclaimable 是否显著下降</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1720,7 +1708,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">161</span>
+          <span class="site-state-item-count">162</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
