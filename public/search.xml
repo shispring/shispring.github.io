@@ -13787,4 +13787,172 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>进程调度chrt</title>
+    <url>/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/</url>
+    <content><![CDATA[<h1 id="ps-eo-常用字段速查（最佳实践）"><a href="#ps-eo-常用字段速查（最佳实践）" class="headerlink" title="ps -eo 常用字段速查（最佳实践）"></a><code>ps -eo</code> 常用字段速查（最佳实践）</h1><h2 id="1️⃣-调度-性能诊断必备组合"><a href="#1️⃣-调度-性能诊断必备组合" class="headerlink" title="1️⃣ 调度&#x2F;性能诊断必备组合"></a>1️⃣ 调度&#x2F;性能诊断必备组合</h2><h3 id="🔹-看调度类-优先级"><a href="#🔹-看调度类-优先级" class="headerlink" title="🔹 看调度类 + 优先级"></a>🔹 看调度类 + 优先级</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>区分 CFS &#x2F; RT &#x2F; DL</li>
+<li>判断 RT 是否抢占系统</li>
+</ul>
+<hr>
+<h3 id="🔹-看-nice-值"><a href="#🔹-看-nice-值" class="headerlink" title="🔹 看 nice 值"></a>🔹 看 nice 值</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,ni,pri</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>分析 CFS 内部竞争</li>
+<li>判断是否需要 <code>renice</code></li>
+</ul>
+<hr>
+<h3 id="🔹-看-CPU-亲和性（配合-taskset）"><a href="#🔹-看-CPU-亲和性（配合-taskset）" class="headerlink" title="🔹 看 CPU 亲和性（配合 taskset）"></a>🔹 看 CPU 亲和性（配合 taskset）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,psr</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>psr</code></td>
+<td>当前运行 CPU</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔹-看上下文切换压力"><a href="#🔹-看上下文切换压力" class="headerlink" title="🔹 看上下文切换压力"></a>🔹 看上下文切换压力</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cswch,nvcswch</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cswch</code></td>
+<td>自愿上下文切换</td>
+</tr>
+<tr>
+<td><code>nvcswch</code></td>
+<td>被动抢占</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔹-看调度延迟相关（高级）"><a href="#🔹-看调度延迟相关（高级）" class="headerlink" title="🔹 看调度延迟相关（高级）"></a>🔹 看调度延迟相关（高级）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,etime,<span class="built_in">stat</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>D</code> 状态频繁 → IO &#x2F; 调度阻塞</li>
+<li><code>R</code> 但运行慢 → 被抢占</li>
+</ul>
+<hr>
+<h2 id="2️⃣-一条「万能调度观察命令」"><a href="#2️⃣-一条「万能调度观察命令」" class="headerlink" title="2️⃣ 一条「万能调度观察命令」"></a>2️⃣ 一条「万能调度观察命令」</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio,ni,psr,<span class="built_in">stat</span> --<span class="built_in">sort</span>=-pri</span><br></pre></td></tr></table></figure>
+
+<p>📌 <strong>建议你直接 alias 掉</strong></p>
+<hr>
+<h1 id="chrt：调度策略的“手术刀”"><a href="#chrt：调度策略的“手术刀”" class="headerlink" title="chrt：调度策略的“手术刀”"></a><code>chrt</code>：调度策略的“手术刀”</h1><blockquote>
+<p><code>chrt</code> &#x3D; change &#x2F; show real-time scheduling attributes</p>
+</blockquote>
+<hr>
+<h2 id="1️⃣-查看进程调度策略"><a href="#1️⃣-查看进程调度策略" class="headerlink" title="1️⃣ 查看进程调度策略"></a>1️⃣ 查看进程调度策略</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">chrt -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<p>示例输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pid 13&#x27;s current scheduling policy: SCHED_OTHER</span><br><span class="line">pid 13&#x27;s current scheduling priority: 0</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li><code>SCHED_OTHER</code> &#x3D; CFS</li>
+<li>priority&#x3D;0 对 CFS 没意义（RT 才用）</li>
+</ul>
+<hr>
+<h2 id="2️⃣-修改为-RT（⚠️-慎用）"><a href="#2️⃣-修改为-RT（⚠️-慎用）" class="headerlink" title="2️⃣ 修改为 RT（⚠️ 慎用）"></a>2️⃣ 修改为 RT（⚠️ 慎用）</h2><h3 id="🔹-改为-FIFO（强实时）"><a href="#🔹-改为-FIFO（强实时）" class="headerlink" title="🔹 改为 FIFO（强实时）"></a>🔹 改为 FIFO（强实时）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">chrt -f -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-f</code> &#x3D; SCHED_FIFO</li>
+<li><code>20</code> &#x3D; RT priority（1–99）</li>
+</ul>
+<p>⚠️ <strong>风险极高</strong>：</p>
+<ul>
+<li>不主动 <code>yield</code> 会霸占 CPU</li>
+<li>可直接卡死系统</li>
+</ul>
+<hr>
+<h3 id="🔹-改为-RR（可轮转）"><a href="#🔹-改为-RR（可轮转）" class="headerlink" title="🔹 改为 RR（可轮转）"></a>🔹 改为 RR（可轮转）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">chrt -r -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>更安全</li>
+<li>适合周期性内核线程（如网络）</li>
+</ul>
+<hr>
+<h2 id="3️⃣-只“稍微扶一把”：nice-而不是-RT"><a href="#3️⃣-只“稍微扶一把”：nice-而不是-RT" class="headerlink" title="3️⃣ 只“稍微扶一把”：nice 而不是 RT"></a>3️⃣ 只“稍微扶一把”：nice 而不是 RT</h2><h3 id="🔹-推荐方案（ksoftirqd-场景）"><a href="#🔹-推荐方案（ksoftirqd-场景）" class="headerlink" title="🔹 推荐方案（ksoftirqd 场景）"></a>🔹 推荐方案（ksoftirqd 场景）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">renice -n -5 -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<ul>
+<li>仍是 CFS</li>
+<li>但 vruntime 增长更慢</li>
+<li><strong>显著降低被饿死概率</strong></li>
+</ul>
+<p>👉 <strong>这是生产环境首选</strong></p>
+<hr>
+<h2 id="4️⃣-一次性批量调整-ksoftirqd"><a href="#4️⃣-一次性批量调整-ksoftirqd" class="headerlink" title="4️⃣ 一次性批量调整 ksoftirqd"></a>4️⃣ 一次性批量调整 ksoftirqd</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> $(pgrep ksoftirqd); <span class="keyword">do</span></span><br><span class="line">  renice -n -5 -p <span class="variable">$p</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>📌 通常 <code>-5</code> 已足够<br>📌 不建议 &lt; -10</p>
+<hr>
+<h1 id="调度相关的其他关键观测工具"><a href="#调度相关的其他关键观测工具" class="headerlink" title="调度相关的其他关键观测工具"></a>调度相关的其他关键观测工具</h1><h2 id="1️⃣-proc-sched"><a href="#1️⃣-proc-sched" class="headerlink" title="1️⃣ /proc/&lt;pid&gt;/sched"></a>1️⃣ <code>/proc/&lt;pid&gt;/sched</code></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/13/sched</span><br></pre></td></tr></table></figure>
+
+<p>你能看到：</p>
+<ul>
+<li>vruntime</li>
+<li>nr_switches</li>
+<li>se.exec_start</li>
+</ul>
+<p>👉 <strong>这是理解“为什么被饿死”的核心文件</strong></p>
+<hr>
+<h2 id="2️⃣-schedstat（系统级）"><a href="#2️⃣-schedstat（系统级）" class="headerlink" title="2️⃣ schedstat（系统级）"></a>2️⃣ <code>schedstat</code>（系统级）</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/schedstat</span><br></pre></td></tr></table></figure>
+
+<p>适合：</p>
+<ul>
+<li>NUMA &#x2F; 大核系统</li>
+<li>分析 runqueue 压力</li>
+</ul>
+<hr>
+<h2 id="3️⃣-perf-sched"><a href="#3️⃣-perf-sched" class="headerlink" title="3️⃣ perf sched"></a>3️⃣ <code>perf sched</code></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">perf <span class="built_in">sched</span> record</span><br><span class="line">perf <span class="built_in">sched</span> latency</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>精确看到谁在抢 CPU</li>
+<li>定位调度延迟根因</li>
+</ul>
+<hr>
+<h2 id="4️⃣-eBPF（你已经在用的最高阶）"><a href="#4️⃣-eBPF（你已经在用的最高阶）" class="headerlink" title="4️⃣ eBPF（你已经在用的最高阶）"></a>4️⃣ eBPF（你已经在用的最高阶）</h2><ul>
+<li><code>sched:sched_switch</code></li>
+<li><code>irq:softirq_raise</code></li>
+<li><code>irq:softirq_entry</code></li>
+</ul>
+<p>👉 你现在做的事情，<strong>已经是调度问题的最深水区</strong></p>
+<hr>
+<h1 id="五、结合你当前问题的结论性建议"><a href="#五、结合你当前问题的结论性建议" class="headerlink" title="五、结合你当前问题的结论性建议"></a>五、结合你当前问题的结论性建议</h1><h3 id="✅-关于-ksoftirqd："><a href="#✅-关于-ksoftirqd：" class="headerlink" title="✅ 关于 ksoftirqd："></a>✅ 关于 <code>ksoftirqd</code>：</h3><ul>
+<li><p><strong>不是随机 CPU</strong></p>
+</li>
+<li><p>是 <strong>per-cpu 绑定线程</strong></p>
+</li>
+<li><p>被饿死 ≠ 优先级低，而是：</p>
+<ul>
+<li>CFS 公平性</li>
+<li>与业务进程同级竞争</li>
+</ul>
+</li>
+</ul>
+<h3 id="✅-推荐干预顺序（控制变量）："><a href="#✅-推荐干预顺序（控制变量）：" class="headerlink" title="✅ 推荐干预顺序（控制变量）："></a>✅ 推荐干预顺序（控制变量）：</h3><ol>
+<li>❌ 不启 RPS</li>
+<li>✅ <code>renice -5 ksoftirqd/*</code></li>
+<li>✅ IRQ 绑核（同 NUMA）</li>
+<li>⛔ 谨慎使用 <code>chrt</code></li>
+</ol>
+]]></content>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
 </search>

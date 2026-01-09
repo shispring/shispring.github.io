@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="ps -eo 常用字段速查（最佳实践）1️⃣ 调度&#x2F;性能诊断必备组合🔹 看调度类 + 优先级1ps -eo pid,comm,cls,pri,rtprio  用途：  区分 CFS &#x2F; RT &#x2F; DL 判断 RT 是否抢占系统   🔹 看 nice 值1ps -eo pid,comm,ni,pri  用途：  分析 CFS 内部竞争 判断是否需要 renice">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程调度chrt">
+<meta property="og:url" content="https://shispring.github.io/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="ps -eo 常用字段速查（最佳实践）1️⃣ 调度&#x2F;性能诊断必备组合🔹 看调度类 + 优先级1ps -eo pid,comm,cls,pri,rtprio  用途：  区分 CFS &#x2F; RT &#x2F; DL 判断 RT 是否抢占系统   🔹 看 nice 值1ps -eo pid,comm,ni,pri  用途：  分析 CFS 内部竞争 判断是否需要 renice">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-09T10:37:19.000Z">
+<meta property="article:modified_time" content="2026-01-09T10:40:53.608Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>进程调度chrt | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          进程调度chrt
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-09 18:37:19 / 修改时间：18:40:53" itemprop="dateCreated datePublished" datetime="2026-01-09T18:37:19+08:00">2026-01-09</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="ps-eo-常用字段速查（最佳实践）"><a href="#ps-eo-常用字段速查（最佳实践）" class="headerlink" title="ps -eo 常用字段速查（最佳实践）"></a><code>ps -eo</code> 常用字段速查（最佳实践）</h1><h2 id="1️⃣-调度-性能诊断必备组合"><a href="#1️⃣-调度-性能诊断必备组合" class="headerlink" title="1️⃣ 调度&#x2F;性能诊断必备组合"></a>1️⃣ 调度&#x2F;性能诊断必备组合</h2><h3 id="🔹-看调度类-优先级"><a href="#🔹-看调度类-优先级" class="headerlink" title="🔹 看调度类 + 优先级"></a>🔹 看调度类 + 优先级</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>区分 CFS &#x2F; RT &#x2F; DL</li>
+<li>判断 RT 是否抢占系统</li>
+</ul>
+<hr>
+<h3 id="🔹-看-nice-值"><a href="#🔹-看-nice-值" class="headerlink" title="🔹 看 nice 值"></a>🔹 看 nice 值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,ni,pri</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>分析 CFS 内部竞争</li>
+<li>判断是否需要 <code>renice</code></li>
+</ul>
+<hr>
+<h3 id="🔹-看-CPU-亲和性（配合-taskset）"><a href="#🔹-看-CPU-亲和性（配合-taskset）" class="headerlink" title="🔹 看 CPU 亲和性（配合 taskset）"></a>🔹 看 CPU 亲和性（配合 taskset）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,psr</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>psr</code></td>
+<td>当前运行 CPU</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔹-看上下文切换压力"><a href="#🔹-看上下文切换压力" class="headerlink" title="🔹 看上下文切换压力"></a>🔹 看上下文切换压力</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cswch,nvcswch</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cswch</code></td>
+<td>自愿上下文切换</td>
+</tr>
+<tr>
+<td><code>nvcswch</code></td>
+<td>被动抢占</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔹-看调度延迟相关（高级）"><a href="#🔹-看调度延迟相关（高级）" class="headerlink" title="🔹 看调度延迟相关（高级）"></a>🔹 看调度延迟相关（高级）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,etime,<span class="built_in">stat</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>D</code> 状态频繁 → IO &#x2F; 调度阻塞</li>
+<li><code>R</code> 但运行慢 → 被抢占</li>
+</ul>
+<hr>
+<h2 id="2️⃣-一条「万能调度观察命令」"><a href="#2️⃣-一条「万能调度观察命令」" class="headerlink" title="2️⃣ 一条「万能调度观察命令」"></a>2️⃣ 一条「万能调度观察命令」</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio,ni,psr,<span class="built_in">stat</span> --<span class="built_in">sort</span>=-pri</span><br></pre></td></tr></table></figure>
+
+<p>📌 <strong>建议你直接 alias 掉</strong></p>
+<hr>
+<h1 id="chrt：调度策略的“手术刀”"><a href="#chrt：调度策略的“手术刀”" class="headerlink" title="chrt：调度策略的“手术刀”"></a><code>chrt</code>：调度策略的“手术刀”</h1><blockquote>
+<p><code>chrt</code> &#x3D; change &#x2F; show real-time scheduling attributes</p>
+</blockquote>
+<hr>
+<h2 id="1️⃣-查看进程调度策略"><a href="#1️⃣-查看进程调度策略" class="headerlink" title="1️⃣ 查看进程调度策略"></a>1️⃣ 查看进程调度策略</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<p>示例输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pid 13&#x27;s current scheduling policy: SCHED_OTHER</span><br><span class="line">pid 13&#x27;s current scheduling priority: 0</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li><code>SCHED_OTHER</code> &#x3D; CFS</li>
+<li>priority&#x3D;0 对 CFS 没意义（RT 才用）</li>
+</ul>
+<hr>
+<h2 id="2️⃣-修改为-RT（⚠️-慎用）"><a href="#2️⃣-修改为-RT（⚠️-慎用）" class="headerlink" title="2️⃣ 修改为 RT（⚠️ 慎用）"></a>2️⃣ 修改为 RT（⚠️ 慎用）</h2><h3 id="🔹-改为-FIFO（强实时）"><a href="#🔹-改为-FIFO（强实时）" class="headerlink" title="🔹 改为 FIFO（强实时）"></a>🔹 改为 FIFO（强实时）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -f -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-f</code> &#x3D; SCHED_FIFO</li>
+<li><code>20</code> &#x3D; RT priority（1–99）</li>
+</ul>
+<p>⚠️ <strong>风险极高</strong>：</p>
+<ul>
+<li>不主动 <code>yield</code> 会霸占 CPU</li>
+<li>可直接卡死系统</li>
+</ul>
+<hr>
+<h3 id="🔹-改为-RR（可轮转）"><a href="#🔹-改为-RR（可轮转）" class="headerlink" title="🔹 改为 RR（可轮转）"></a>🔹 改为 RR（可轮转）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -r -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>更安全</li>
+<li>适合周期性内核线程（如网络）</li>
+</ul>
+<hr>
+<h2 id="3️⃣-只“稍微扶一把”：nice-而不是-RT"><a href="#3️⃣-只“稍微扶一把”：nice-而不是-RT" class="headerlink" title="3️⃣ 只“稍微扶一把”：nice 而不是 RT"></a>3️⃣ 只“稍微扶一把”：nice 而不是 RT</h2><h3 id="🔹-推荐方案（ksoftirqd-场景）"><a href="#🔹-推荐方案（ksoftirqd-场景）" class="headerlink" title="🔹 推荐方案（ksoftirqd 场景）"></a>🔹 推荐方案（ksoftirqd 场景）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">renice -n -5 -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<ul>
+<li>仍是 CFS</li>
+<li>但 vruntime 增长更慢</li>
+<li><strong>显著降低被饿死概率</strong></li>
+</ul>
+<p>👉 <strong>这是生产环境首选</strong></p>
+<hr>
+<h2 id="4️⃣-一次性批量调整-ksoftirqd"><a href="#4️⃣-一次性批量调整-ksoftirqd" class="headerlink" title="4️⃣ 一次性批量调整 ksoftirqd"></a>4️⃣ 一次性批量调整 ksoftirqd</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> $(pgrep ksoftirqd); <span class="keyword">do</span></span><br><span class="line">  renice -n -5 -p <span class="variable">$p</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>📌 通常 <code>-5</code> 已足够<br>📌 不建议 &lt; -10</p>
+<hr>
+<h1 id="调度相关的其他关键观测工具"><a href="#调度相关的其他关键观测工具" class="headerlink" title="调度相关的其他关键观测工具"></a>调度相关的其他关键观测工具</h1><h2 id="1️⃣-proc-sched"><a href="#1️⃣-proc-sched" class="headerlink" title="1️⃣ /proc/&lt;pid&gt;/sched"></a>1️⃣ <code>/proc/&lt;pid&gt;/sched</code></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/13/sched</span><br></pre></td></tr></table></figure>
+
+<p>你能看到：</p>
+<ul>
+<li>vruntime</li>
+<li>nr_switches</li>
+<li>se.exec_start</li>
+</ul>
+<p>👉 <strong>这是理解“为什么被饿死”的核心文件</strong></p>
+<hr>
+<h2 id="2️⃣-schedstat（系统级）"><a href="#2️⃣-schedstat（系统级）" class="headerlink" title="2️⃣ schedstat（系统级）"></a>2️⃣ <code>schedstat</code>（系统级）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/schedstat</span><br></pre></td></tr></table></figure>
+
+<p>适合：</p>
+<ul>
+<li>NUMA &#x2F; 大核系统</li>
+<li>分析 runqueue 压力</li>
+</ul>
+<hr>
+<h2 id="3️⃣-perf-sched"><a href="#3️⃣-perf-sched" class="headerlink" title="3️⃣ perf sched"></a>3️⃣ <code>perf sched</code></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">perf <span class="built_in">sched</span> record</span><br><span class="line">perf <span class="built_in">sched</span> latency</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>精确看到谁在抢 CPU</li>
+<li>定位调度延迟根因</li>
+</ul>
+<hr>
+<h2 id="4️⃣-eBPF（你已经在用的最高阶）"><a href="#4️⃣-eBPF（你已经在用的最高阶）" class="headerlink" title="4️⃣ eBPF（你已经在用的最高阶）"></a>4️⃣ eBPF（你已经在用的最高阶）</h2><ul>
+<li><code>sched:sched_switch</code></li>
+<li><code>irq:softirq_raise</code></li>
+<li><code>irq:softirq_entry</code></li>
+</ul>
+<p>👉 你现在做的事情，<strong>已经是调度问题的最深水区</strong></p>
+<hr>
+<h1 id="五、结合你当前问题的结论性建议"><a href="#五、结合你当前问题的结论性建议" class="headerlink" title="五、结合你当前问题的结论性建议"></a>五、结合你当前问题的结论性建议</h1><h3 id="✅-关于-ksoftirqd："><a href="#✅-关于-ksoftirqd：" class="headerlink" title="✅ 关于 ksoftirqd："></a>✅ 关于 <code>ksoftirqd</code>：</h3><ul>
+<li><p><strong>不是随机 CPU</strong></p>
+</li>
+<li><p>是 <strong>per-cpu 绑定线程</strong></p>
+</li>
+<li><p>被饿死 ≠ 优先级低，而是：</p>
+<ul>
+<li>CFS 公平性</li>
+<li>与业务进程同级竞争</li>
+</ul>
+</li>
+</ul>
+<h3 id="✅-推荐干预顺序（控制变量）："><a href="#✅-推荐干预顺序（控制变量）：" class="headerlink" title="✅ 推荐干预顺序（控制变量）："></a>✅ 推荐干预顺序（控制变量）：</h3><ol>
+<li>❌ 不启 RPS</li>
+<li>✅ <code>renice -5 ksoftirqd/*</code></li>
+<li>✅ IRQ 绑核（同 NUMA）</li>
+<li>⛔ 谨慎使用 <code>chrt</code></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/12/30/perf%E8%BF%9B%E9%98%B6/" rel="prev" title="perf进阶">
+      <i class="fa fa-chevron-left"></i> perf进阶
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ps-eo-%E5%B8%B8%E7%94%A8%E5%AD%97%E6%AE%B5%E9%80%9F%E6%9F%A5%EF%BC%88%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">ps -eo 常用字段速查（最佳实践）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E8%B0%83%E5%BA%A6-%E6%80%A7%E8%83%BD%E8%AF%8A%E6%96%AD%E5%BF%85%E5%A4%87%E7%BB%84%E5%90%88"><span class="nav-number">1.1.</span> <span class="nav-text">1️⃣ 调度&#x2F;性能诊断必备组合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E7%9C%8B%E8%B0%83%E5%BA%A6%E7%B1%BB-%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">1.1.1.</span> <span class="nav-text">🔹 看调度类 + 优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E7%9C%8B-nice-%E5%80%BC"><span class="nav-number">1.1.2.</span> <span class="nav-text">🔹 看 nice 值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E7%9C%8B-CPU-%E4%BA%B2%E5%92%8C%E6%80%A7%EF%BC%88%E9%85%8D%E5%90%88-taskset%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">🔹 看 CPU 亲和性（配合 taskset）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E7%9C%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%E5%8E%8B%E5%8A%9B"><span class="nav-number">1.1.4.</span> <span class="nav-text">🔹 看上下文切换压力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E7%9C%8B%E8%B0%83%E5%BA%A6%E5%BB%B6%E8%BF%9F%E7%9B%B8%E5%85%B3%EF%BC%88%E9%AB%98%E7%BA%A7%EF%BC%89"><span class="nav-number">1.1.5.</span> <span class="nav-text">🔹 看调度延迟相关（高级）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E4%B8%80%E6%9D%A1%E3%80%8C%E4%B8%87%E8%83%BD%E8%B0%83%E5%BA%A6%E8%A7%82%E5%AF%9F%E5%91%BD%E4%BB%A4%E3%80%8D"><span class="nav-number">1.2.</span> <span class="nav-text">2️⃣ 一条「万能调度观察命令」</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#chrt%EF%BC%9A%E8%B0%83%E5%BA%A6%E7%AD%96%E7%95%A5%E7%9A%84%E2%80%9C%E6%89%8B%E6%9C%AF%E5%88%80%E2%80%9D"><span class="nav-number">2.</span> <span class="nav-text">chrt：调度策略的“手术刀”</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E6%9F%A5%E7%9C%8B%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E7%AD%96%E7%95%A5"><span class="nav-number">2.1.</span> <span class="nav-text">1️⃣ 查看进程调度策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E4%BF%AE%E6%94%B9%E4%B8%BA-RT%EF%BC%88%E2%9A%A0%EF%B8%8F-%E6%85%8E%E7%94%A8%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">2️⃣ 修改为 RT（⚠️ 慎用）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E6%94%B9%E4%B8%BA-FIFO%EF%BC%88%E5%BC%BA%E5%AE%9E%E6%97%B6%EF%BC%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">🔹 改为 FIFO（强实时）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E6%94%B9%E4%B8%BA-RR%EF%BC%88%E5%8F%AF%E8%BD%AE%E8%BD%AC%EF%BC%89"><span class="nav-number">2.2.2.</span> <span class="nav-text">🔹 改为 RR（可轮转）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E5%8F%AA%E2%80%9C%E7%A8%8D%E5%BE%AE%E6%89%B6%E4%B8%80%E6%8A%8A%E2%80%9D%EF%BC%9Anice-%E8%80%8C%E4%B8%8D%E6%98%AF-RT"><span class="nav-number">2.3.</span> <span class="nav-text">3️⃣ 只“稍微扶一把”：nice 而不是 RT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E6%8E%A8%E8%8D%90%E6%96%B9%E6%A1%88%EF%BC%88ksoftirqd-%E5%9C%BA%E6%99%AF%EF%BC%89"><span class="nav-number">2.3.1.</span> <span class="nav-text">🔹 推荐方案（ksoftirqd 场景）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%EF%B8%8F%E2%83%A3-%E4%B8%80%E6%AC%A1%E6%80%A7%E6%89%B9%E9%87%8F%E8%B0%83%E6%95%B4-ksoftirqd"><span class="nav-number">2.4.</span> <span class="nav-text">4️⃣ 一次性批量调整 ksoftirqd</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E7%9B%B8%E5%85%B3%E7%9A%84%E5%85%B6%E4%BB%96%E5%85%B3%E9%94%AE%E8%A7%82%E6%B5%8B%E5%B7%A5%E5%85%B7"><span class="nav-number">3.</span> <span class="nav-text">调度相关的其他关键观测工具</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-proc-sched"><span class="nav-number">3.1.</span> <span class="nav-text">1️⃣ &#x2F;proc&#x2F;&lt;pid&gt;&#x2F;sched</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-schedstat%EF%BC%88%E7%B3%BB%E7%BB%9F%E7%BA%A7%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">2️⃣ schedstat（系统级）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-perf-sched"><span class="nav-number">3.3.</span> <span class="nav-text">3️⃣ perf sched</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%EF%B8%8F%E2%83%A3-eBPF%EF%BC%88%E4%BD%A0%E5%B7%B2%E7%BB%8F%E5%9C%A8%E7%94%A8%E7%9A%84%E6%9C%80%E9%AB%98%E9%98%B6%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">4️⃣ eBPF（你已经在用的最高阶）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%BB%93%E5%90%88%E4%BD%A0%E5%BD%93%E5%89%8D%E9%97%AE%E9%A2%98%E7%9A%84%E7%BB%93%E8%AE%BA%E6%80%A7%E5%BB%BA%E8%AE%AE"><span class="nav-number">4.</span> <span class="nav-text">五、结合你当前问题的结论性建议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-%E5%85%B3%E4%BA%8E-ksoftirqd%EF%BC%9A"><span class="nav-number">4.0.1.</span> <span class="nav-text">✅ 关于 ksoftirqd：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-%E6%8E%A8%E8%8D%90%E5%B9%B2%E9%A2%84%E9%A1%BA%E5%BA%8F%EF%BC%88%E6%8E%A7%E5%88%B6%E5%8F%98%E9%87%8F%EF%BC%89%EF%BC%9A"><span class="nav-number">4.0.2.</span> <span class="nav-text">✅ 推荐干预顺序（控制变量）：</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">163</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
