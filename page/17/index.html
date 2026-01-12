@@ -184,6 +184,80 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2022/10/31/shell-date-%E6%89%93%E5%8D%B0%E6%9C%88%E6%97%A5%E6%9C%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/31/shell-date-%E6%89%93%E5%8D%B0%E6%9C%88%E6%97%A5%E6%9C%9F/" class="post-title-link" itemprop="url">shell根据输入月份，遍历当月日期</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-31 10:29:47" itemprop="dateCreated datePublished" datetime="2022-10-31T10:29:47+08:00">2022-10-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-09-29 14:46:16" itemprop="dateModified" datetime="2024-09-29T14:46:16+08:00">2024-09-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="shell脚本详情"><a href="#shell脚本详情" class="headerlink" title="shell脚本详情"></a>shell脚本详情</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">echo &quot;年月格式：2022年5月，则输入2022-05&quot;</span><br><span class="line">read -p &quot;请输入年月份：&quot; VAR</span><br><span class="line"></span><br><span class="line">#VAR=&quot;2022-06&quot;</span><br><span class="line"></span><br><span class="line">#当月第一天</span><br><span class="line">firstDay=`date  -d &quot;$&#123;VAR&#125;-01&quot; +%Y-%m-%d`</span><br><span class="line">#当月最后一天</span><br><span class="line">lastDay=`date  -d &quot;+1month -1day $&#123;VAR&#125;-01&quot;  +%Y-%m-%d`</span><br><span class="line"></span><br><span class="line">#使用数组存储每一天</span><br><span class="line">array_date=()</span><br><span class="line"></span><br><span class="line">#遍历月分的每一天</span><br><span class="line">firstDayTimestamp=`date -d &quot;$firstDay&quot; +%s`</span><br><span class="line">lastDayTimestamp=`date -d &quot;$lastDay&quot; +%s`</span><br><span class="line"></span><br><span class="line">for((currentTimestamp=$firstDayTimestamp; currentTimestamp &lt;= lastDayTimestamp; ));</span><br><span class="line">do</span><br><span class="line">    currentDay=`date -d@$currentTimestamp +%Y-%m-%d`</span><br><span class="line">    array_date[$&#123;#array_date[@]&#125;]=$currentDay</span><br><span class="line">    currentTimestamp=`expr $currentTimestamp + 86400`</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo $&#123;#array_date[*]&#125;</span><br><span class="line">echo $&#123;array_date[*]&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2022/04/27/linux%E4%B8%8Bgo%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -512,7 +586,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">163</span>
+          <span class="site-state-item-count">164</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

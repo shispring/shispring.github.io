@@ -184,6 +184,189 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/07/07/%E5%85%B3%E4%BA%8EFQDN/" class="post-title-link" itemprop="url">关于FQDN</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-07-07 15:23:24 / 修改时间：15:24:58" itemprop="dateCreated datePublished" datetime="2025-07-07T15:23:24+08:00">2025-07-07</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>这是个很有技术深度的问题。在 Kubernetes 的网络架构中，<strong>FQDN（Fully Qualified Domain Name，完全限定域名）</strong> 是集群内部和外部通信中非常关键的一环。你提到的 <code>FQDN</code> 和 <code>RQDN</code>（可能是 Relative Qualified Domain Name 的意思，见下文）概念，都可以围绕 DNS 来系统理解。</p>
+<hr>
+<h2 id="✅-一、什么是-FQDN？"><a href="#✅-一、什么是-FQDN？" class="headerlink" title="✅ 一、什么是 FQDN？"></a>✅ 一、什么是 FQDN？</h2><p><strong>FQDN（Fully Qualified Domain Name）</strong> 是指一个完全的、绝对的 DNS 名字，它<strong>从主机名开始，一直到根域（<code>.</code>）结束</strong>。</p>
+<h3 id="🔹-举例："><a href="#🔹-举例：" class="headerlink" title="🔹 举例："></a>🔹 举例：</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>my-service.default.svc.cluster.local.</code></td>
+<td>✅ FQDN，在 K8s 中完整的 service 解析域名</td>
+</tr>
+<tr>
+<td><code>my-service.default.svc.cluster.local</code></td>
+<td>✅ 几乎等价（根 <code>.</code> 可省略）</td>
+</tr>
+<tr>
+<td><code>my-service</code></td>
+<td>❌ 不是 FQDN，属于相对域名（可解析依赖 search 域）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="✅-二、Kubernetes-中的-FQDN-使用场景"><a href="#✅-二、Kubernetes-中的-FQDN-使用场景" class="headerlink" title="✅ 二、Kubernetes 中的 FQDN 使用场景"></a>✅ 二、Kubernetes 中的 FQDN 使用场景</h2><p>在 Kubernetes 内部，所有服务、Pod 都可以通过 DNS 名称访问，而 <strong>KubeDNS&#x2F;CoreDNS</strong> 按如下规则拼接域名：</p>
+<h3 id="🚀-Service-默认-FQDN："><a href="#🚀-Service-默认-FQDN：" class="headerlink" title="🚀 Service 默认 FQDN："></a>🚀 Service 默认 FQDN：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>svc.cluster.local</code> 是 service 的默认 DNS 域名后缀，定义在 kubelet 或 CoreDNS 配置中。</p>
+</blockquote>
+<p>比如你有一个 service 叫 <code>nginx</code> 在 <code>prod</code> 命名空间，那么它的 FQDN 是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx.prod.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<p>可以从任何命名空间使用这个 FQDN 访问该服务。</p>
+<hr>
+<h2 id="✅-三、FQDN-与非-FQDN-的区别"><a href="#✅-三、FQDN-与非-FQDN-的区别" class="headerlink" title="✅ 三、FQDN 与非 FQDN 的区别"></a>✅ 三、FQDN 与非 FQDN 的区别</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>示例</th>
+<th>是否全局唯一</th>
+<th>是否依赖 search 域</th>
+<th>是否推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FQDN</td>
+<td><code>nginx.prod.svc.cluster.local</code></td>
+<td>✅ 是</td>
+<td>❌ 不依赖</td>
+<td>✅ 推荐</td>
+</tr>
+<tr>
+<td>非 FQDN（短域名）</td>
+<td><code>nginx</code> 或 <code>nginx.prod</code></td>
+<td>❌ 可能冲突</td>
+<td>✅ 依赖</td>
+<td>❌ 不推荐跨命名空间</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="✅-四、使用-FQDN-的好处"><a href="#✅-四、使用-FQDN-的好处" class="headerlink" title="✅ 四、使用 FQDN 的好处"></a>✅ 四、使用 FQDN 的好处</h2><ol>
+<li><p><strong>跨命名空间通信稳定</strong></p>
+<ul>
+<li>使用完整域名 <code>svc.ns.svc.cluster.local</code> 不依赖 DNS search path</li>
+</ul>
+</li>
+<li><p><strong>更高的安全性和确定性</strong></p>
+<ul>
+<li>避免访问到其他命名空间中重名的 service（比如 <code>nginx</code>）</li>
+</ul>
+</li>
+<li><p><strong>跨集群 DNS 联通（例如 Service Mesh、多集群）</strong></p>
+<ul>
+<li>多集群环境中可以借助 FQDN 显式指定服务源</li>
+</ul>
+</li>
+<li><p><strong>自动证书绑定（如 Istio、cert-manager）</strong></p>
+<ul>
+<li>证书签发常用 FQDN 作为 <code>CommonName</code> 或 <code>SAN</code></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="✅-五、K8s-真实案例"><a href="#✅-五、K8s-真实案例" class="headerlink" title="✅ 五、K8s 真实案例"></a>✅ 五、K8s 真实案例</h2><h3 id="🔸-kubectl-exec-调试时："><a href="#🔸-kubectl-exec-调试时：" class="headerlink" title="🔸 kubectl exec 调试时："></a>🔸 <code>kubectl exec</code> 调试时：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl nginx.default.svc.cluster.local:80</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔸-Ingress、Istio-中配置主机名路由："><a href="#🔸-Ingress、Istio-中配置主机名路由：" class="headerlink" title="🔸 Ingress、Istio 中配置主机名路由："></a>🔸 Ingress、Istio 中配置主机名路由：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">host:</span> <span class="string">my-app.dev.svc.cluster.local</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔸-cert-manager-Issuer-中的-DNS-SAN-配置："><a href="#🔸-cert-manager-Issuer-中的-DNS-SAN-配置：" class="headerlink" title="🔸 cert-manager Issuer 中的 DNS SAN 配置："></a>🔸 cert-manager Issuer 中的 DNS SAN 配置：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">dnsNames:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">rancher.qihoo.net</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">harbor.qa.qihoo.net</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-六、如何查看当前集群-FQDN-后缀？"><a href="#✅-六、如何查看当前集群-FQDN-后缀？" class="headerlink" title="✅ 六、如何查看当前集群 FQDN 后缀？"></a>✅ 六、如何查看当前集群 FQDN 后缀？</h2><p>你可以查看 kubelet 或 CoreDNS 的 DNS 配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">search default.svc.cluster.local svc.cluster.local cluster.local</span><br><span class="line">nameserver 10.43.0.10</span><br></pre></td></tr></table></figure>
+
+<p>这表示你在 <code>default</code> 命名空间时，短域名会自动补齐成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;name&gt;.default.svc.cluster.local</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="✅-总结表格"><a href="#✅-总结表格" class="headerlink" title="✅ 总结表格"></a>✅ 总结表格</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>描述</th>
+<th>典型示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FQDN</td>
+<td>完全限定域名，从主机名到根域的全路径</td>
+<td><code>svc.ns.svc.cluster.local</code></td>
+</tr>
+<tr>
+<td>简短域名</td>
+<td>极简写法，仅用于当前 namespace 内</td>
+<td><code>svc</code></td>
+</tr>
+<tr>
+<td>推荐场景</td>
+<td>跨命名空间访问 &#x2F; TLS 绑定 &#x2F; 多集群 &#x2F; Istio 等</td>
+<td>必须使用 FQDN</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/01/%E5%B8%B8%E8%A7%81runtime-socket/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1188,89 +1371,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/05/26/%E4%BB%8Emain-go%E6%96%87%E4%BB%B6%E5%88%B0%E9%83%A8%E7%BD%B2k8s%E9%9B%86%E7%BE%A4%E7%9A%84%E6%AD%A5%E9%AA%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/05/26/%E4%BB%8Emain-go%E6%96%87%E4%BB%B6%E5%88%B0%E9%83%A8%E7%BD%B2k8s%E9%9B%86%E7%BE%A4%E7%9A%84%E6%AD%A5%E9%AA%A4/" class="post-title-link" itemprop="url">从main.go文件到部署k8s集群的步骤</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-05-26 16:09:46" itemprop="dateCreated datePublished" datetime="2025-05-26T16:09:46+08:00">2025-05-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-06-09 16:42:40" itemprop="dateModified" datetime="2025-06-09T16:42:40+08:00">2025-06-09</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1、初始化-Go-Modules"><a href="#1、初始化-Go-Modules" class="headerlink" title="1、初始化 Go Modules"></a>1、初始化 Go Modules</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">go mod init myapp</span><br><span class="line">go mod tidy</span><br><span class="line"></span><br><span class="line">#注意</span><br><span class="line">.</span><br><span class="line">├── main.go</span><br><span class="line">├── go.mod      &lt;-- 必须有</span><br><span class="line">├── go.sum      &lt;-- 自动生成</span><br><span class="line">├── Dockerfile</span><br></pre></td></tr></table></figure>
-<p>解释：</p>
-<ul>
-<li>go mod init myapp：初始化模块，生成 go.mod</li>
-<li>go mod tidy：自动下载并写入依赖</li>
-</ul>
-<p>💡 如果你的 main.go 依赖了一些 k8s.io&#x2F;client-go 等模块，这个步骤会自动下载并记录这些依赖。</p>
-<h2 id="2、最佳-Dockerfile（支持依赖构建）"><a href="#2、最佳-Dockerfile（支持依赖构建）" class="headerlink" title="2、最佳 Dockerfile（支持依赖构建）"></a>2、最佳 Dockerfile（支持依赖构建）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># 第一阶段：构建 Go 应用</span><br><span class="line">FROM golang:1.24.0 as builder</span><br><span class="line"></span><br><span class="line">WORKDIR /app</span><br><span class="line"></span><br><span class="line"># 复制 go.mod 和 go.sum，先下载依赖（避免每次构建都拉取）</span><br><span class="line">COPY go.mod go.sum ./</span><br><span class="line">RUN go mod download</span><br><span class="line"></span><br><span class="line"># 复制源码</span><br><span class="line">COPY main.go .</span><br><span class="line"></span><br><span class="line"># 构建静态二进制</span><br><span class="line">RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app main.go</span><br><span class="line"></span><br><span class="line"># 第二阶段：构建最小运行镜像</span><br><span class="line">FROM alpine:latest</span><br><span class="line">WORKDIR /root/</span><br><span class="line">COPY --from=builder /app/app .</span><br><span class="line"></span><br><span class="line">ENTRYPOINT [&quot;./app&quot;]</span><br></pre></td></tr></table></figure>
-
-<h2 id="3、构建并推送镜像"><a href="#3、构建并推送镜像" class="headerlink" title="3、构建并推送镜像"></a>3、构建并推送镜像</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker build -t harbor.yourdomain.com/your-project/workqueue:latest .</span><br><span class="line"></span><br><span class="line">#注意替换变量</span><br><span class="line">echo &quot;$AUTH_PASS&quot; | docker login &quot;$DEST_REGISTRY&quot; -u &quot;$AUTH_USER&quot; --password-stdin || &#123; log &quot;登录失败&quot;; exit 1; &#125;</span><br><span class="line"></span><br><span class="line">docker push harbor.yourdomain.com/your-project/workqueue:latest</span><br></pre></td></tr></table></figure>
-<h2 id="4、运行kubectl命令"><a href="#4、运行kubectl命令" class="headerlink" title="4、运行kubectl命令"></a>4、运行kubectl命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">kubectl run workqueue --rm -it --restart=Never --namespace=default --image=harbor.yourdomain.com/your-project/workqueue:latest</span><br><span class="line"></span><br><span class="line">✅ 使用场景说明</span><br><span class="line">•临时创建 Pod 来调试代码、API、网络连通性等</span><br><span class="line">•不需要 Deployment 或长期运行的 Pod</span><br><span class="line">•用完即删，保持集群整洁</span><br><span class="line">•常用于开发测试阶段、快速验证镜像是否能正常运行</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">私有仓库：</span><br><span class="line">kubectl create secret docker-registry my-harbor-secret \</span><br><span class="line">  --docker-server=harborqa.xxx.xxx \</span><br><span class="line">  --docker-username=&lt;你的用户名&gt; \</span><br><span class="line">  --docker-password=&lt;你的密码&gt; </span><br><span class="line"></span><br><span class="line">kubectl run workqueue \</span><br><span class="line">  --rm -it \</span><br><span class="line">  --restart=Never \</span><br><span class="line">  --image=harbor.yourdomain.com/your-project/workqueue:latest \</span><br><span class="line">  --namespace=default \</span><br><span class="line">  --image-pull-secrets=my-harbor-secret</span><br></pre></td></tr></table></figure>
-
-<h2 id="5、注意ServiceAccount权限-测试"><a href="#5、注意ServiceAccount权限-测试" class="headerlink" title="5、注意ServiceAccount权限(测试)"></a>5、注意ServiceAccount权限(测试)</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">kind: Role</span><br><span class="line">metadata:</span><br><span class="line">  name: pod-reader</span><br><span class="line">  namespace: default</span><br><span class="line">rules:</span><br><span class="line">- apiGroups: [&quot;&quot;]</span><br><span class="line">  resources: [&quot;pods&quot;]</span><br><span class="line">  verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;]</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">kind: RoleBinding</span><br><span class="line">metadata:</span><br><span class="line">  name: read-pods-binding</span><br><span class="line">  namespace: default</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: default   # 就是报错里的 default</span><br><span class="line">  namespace: default</span><br><span class="line">roleRef:</span><br><span class="line">  kind: Role</span><br><span class="line">  name: pod-reader</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br></pre></td></tr></table></figure>
-<ul>
-<li>kubectl apply -f rbac.yaml</li>
-</ul>
-<h2 id="参看"><a href="#参看" class="headerlink" title="参看"></a>参看</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go">https://github.com/kubernetes/client-go/blob/master/examples/workqueue/main.go</a></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1342,7 +1442,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">163</span>
+          <span class="site-state-item-count">164</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
