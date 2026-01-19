@@ -184,6 +184,392 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/" class="post-title-link" itemprop="url">安装部署k3s</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-11-13 17:12:18 / 修改时间：23:00:10" itemprop="dateCreated datePublished" datetime="2025-11-13T17:12:18+08:00">2025-11-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://forums.rancher.cn/t/k3s/3314">https://forums.rancher.cn/t/k3s/3314</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | \</span><br><span class="line">  INSTALL_K3S_MIRROR=cn \</span><br><span class="line">  INSTALL_K3S_SKIP_SELINUX_RPM=true \</span><br><span class="line">  K3S_TOKEN=12345 sh -s - \</span><br><span class="line">  --system-default-registry=registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
+<p>📘 说明：<br>• INSTALL_K3S_SKIP_SELINUX_RPM&#x3D;true：告诉安装脚本跳过 k3s-selinux 安装；</p>
+<h3 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl status k3s</span><br><span class="line"></span><br><span class="line">k3s --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="🧠-K3s-的-kubeconfig-默认路径"><a href="#🧠-K3s-的-kubeconfig-默认路径" class="headerlink" title="🧠 K3s 的 kubeconfig 默认路径"></a>🧠 K3s 的 kubeconfig 默认路径</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#默认路径</span><br><span class="line">/etc/rancher/k3s/k3s.yaml</span><br><span class="line"></span><br><span class="line">#kubectl 使用时需要显式指定该配置文件，或者将其复制到 $HOME/.kube/config。</span><br><span class="line">kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get nodes</span><br><span class="line"></span><br><span class="line">#copy</span><br><span class="line">sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config</span><br></pre></td></tr></table></figure>
+
+<h3 id="部署helm"><a href="#部署helm" class="headerlink" title="部署helm"></a>部署helm</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#helm与k8s版本兼容匹配：https://helm.sh/zh/docs/topics/version_skew</span><br><span class="line">wget https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">tar zxvf helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">mv linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="部署cert-manager"><a href="#部署cert-manager" class="headerlink" title="部署cert-manager"></a>部署cert-manager</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#安装certcert-manager</span><br><span class="line">#安装CRD： https://github.com/cert-manager/cert-manager/releases</span><br><span class="line"></span><br><span class="line">kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/&lt;VERSION&gt;/cert-manager.crds.yaml</span><br><span class="line">eg:</span><br><span class="line">https://github.com/cert-manager/cert-manager/releases/download/v1.19.1/cert-manager.crds.yaml</span><br><span class="line"></span><br><span class="line">#使用helm安装</span><br><span class="line">helm repo add jetstack https://charts.jetstack.io</span><br><span class="line"></span><br><span class="line">helm repo update</span><br><span class="line">helm install cert-manager jetstack/cert-manager \</span><br><span class="line"> --namespace cert-manager \</span><br><span class="line"> --create-namespace</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/13/%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/13/%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">系统性能测试完全指南</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-11-13 14:14:11 / 修改时间：14:15:06" itemprop="dateCreated datePublished" datetime="2025-11-13T14:14:11+08:00">2025-11-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Linux系统性能测试完全指南-🚀"><a href="#Linux系统性能测试完全指南-🚀" class="headerlink" title="Linux系统性能测试完全指南 🚀"></a>Linux系统性能测试完全指南 🚀</h1><h2 id="一、截图命令分析"><a href="#一、截图命令分析" class="headerlink" title="一、截图命令分析"></a>一、截图命令分析</h2><h3 id="📊-系统状态概览"><a href="#📊-系统状态概览" class="headerlink" title="📊 系统状态概览"></a>📊 系统状态概览</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">top - 12:49:30 up 7 days, 1:57, 3 <span class="built_in">users</span>, load average: 12.87, 10.83, 7.73</span><br></pre></td></tr></table></figure>
+
+<p><strong>解析：</strong></p>
+<ul>
+<li><code>12:49:30</code> - 当前系统时间</li>
+<li><code>up 7 days, 1:57</code> - 系统运行了7天1小时57分钟</li>
+<li><code>3 users</code> - 3个用户登录</li>
+<li><code>load average: 12.87, 10.83, 7.73</code> - <strong>系统负载（1分钟、5分钟、15分钟平均值）</strong><ul>
+<li>💡 <strong>这个值很高！</strong> 对于一个CPU核心，理想值应该 &lt; 1.0</li>
+<li>如果你有20核CPU，12.87意味着60%的负载，尚可接受</li>
+<li>如果只有8核，说明系统严重过载（160%负载）</li>
+</ul>
+</li>
+</ul>
+<h3 id="💾-内存使用情况"><a href="#💾-内存使用情况" class="headerlink" title="💾 内存使用情况"></a>💾 内存使用情况</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MiB Mem : 191787.3 total, 40167.1 free, 124708.3 used, 26912.0 buff/cache</span><br><span class="line">MiB Swap: 4096.0 total, 3892.9 free, 203.1 used. 50499.3 avail Mem</span><br></pre></td></tr></table></figure>
+
+<p><strong>解析：</strong></p>
+<ul>
+<li><strong>物理内存：</strong> 192GB总量<ul>
+<li>已用：124GB (65%)</li>
+<li>空闲：40GB (21%)</li>
+<li>缓存：27GB (14%)</li>
+<li><strong>可用内存：50GB</strong> （包含可回收的缓存）</li>
+</ul>
+</li>
+<li><strong>Swap交换分区：</strong> 4GB<ul>
+<li>已用：203MB (5%) - 正常，说明内存压力不大</li>
+</ul>
+</li>
+</ul>
+<p><strong>评估：</strong> ✅ 内存使用率65%，尚有余量，健康状态</p>
+<h3 id="🔥-进程分析"><a href="#🔥-进程分析" class="headerlink" title="🔥 进程分析"></a>🔥 进程分析</h3><p>从截图中看到大量 <code>stress-ng</code> 和 <code>dd</code> 命令：</p>
+<h4 id="1-stress-ng-命令"><a href="#1-stress-ng-命令" class="headerlink" title="1. stress-ng 命令"></a><strong>1. stress-ng 命令</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stress-ng --vm 3 --vm-bytes 28.05G --vm-method all --vm-hang 0 --<span class="built_in">timeout</span> 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>含义：</strong></p>
+<ul>
+<li><code>--vm 3</code> - 启动3个虚拟内存压测进程</li>
+<li><code>--vm-bytes 28.05G</code> - 每个进程分配28GB内存</li>
+<li><code>--vm-method all</code> - 使用所有内存压测方法（读写、复制、排序等）</li>
+<li><code>--vm-hang 0</code> - 不挂起进程</li>
+<li><code>--timeout 0</code> - 无限期运行（直到手动停止）</li>
+</ul>
+<p><strong>目的：</strong> 对内存进行压力测试</p>
+<h4 id="2-stress-ng-CPU-测试"><a href="#2-stress-ng-CPU-测试" class="headerlink" title="2. stress-ng CPU 测试"></a><strong>2. stress-ng CPU 测试</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stress-ng --cpu 21 --cpu-method matrixprod --<span class="built_in">timeout</span> 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>含义：</strong></p>
+<ul>
+<li><code>--cpu 21</code> - 启动21个CPU压测进程</li>
+<li><code>--cpu-method matrixprod</code> - 使用矩阵乘法算法（高强度计算）</li>
+<li><code>--timeout 0</code> - 持续运行</li>
+</ul>
+<p><strong>目的：</strong> 对CPU进行满负载压力测试</p>
+<h4 id="3-dd-磁盘测试"><a href="#3-dd-磁盘测试" class="headerlink" title="3. dd 磁盘测试"></a><strong>3. dd 磁盘测试</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/dev/shm/memhog_5 bs=1G count=5 iflag=fullblock</span><br></pre></td></tr></table></figure>
+
+<p><strong>含义：</strong></p>
+<ul>
+<li><code>if=/dev/zero</code> - 输入源：无限产生0字节的设备</li>
+<li><code>of=/dev/shm/memhog_5</code> - 输出到共享内存（RAM磁盘）</li>
+<li><code>bs=1G</code> - 块大小1GB</li>
+<li><code>count=5</code> - 写入5个块（总共5GB）</li>
+<li><code>iflag=fullblock</code> - 确保读取完整块</li>
+</ul>
+<p><strong>目的：</strong> 测试内存写入性能（这里测试的是RAM，不是磁盘）</p>
+<h4 id="4-ping-命令"><a href="#4-ping-命令" class="headerlink" title="4. ping 命令"></a><strong>4. ping 命令</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping -f -s 1 127.0.0.1</span><br></pre></td></tr></table></figure>
+
+<p><strong>含义：</strong></p>
+<ul>
+<li><code>-f</code> - 洪水ping（尽可能快地发送数据包）</li>
+<li><code>-s 1</code> - 数据包大小1字节</li>
+<li><code>127.0.0.1</code> - 本地回环接口</li>
+</ul>
+<p><strong>目的：</strong> 测试网络栈和本地网络性能</p>
+<hr>
+<h2 id="二、CPU性能测试最佳实践"><a href="#二、CPU性能测试最佳实践" class="headerlink" title="二、CPU性能测试最佳实践"></a>二、CPU性能测试最佳实践</h2><h3 id="🔧-工具1-stress-ng-推荐"><a href="#🔧-工具1-stress-ng-推荐" class="headerlink" title="🔧 工具1: stress-ng (推荐)"></a>🔧 工具1: stress-ng (推荐)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="built_in">sudo</span> apt install stress-ng  <span class="comment"># Debian/Ubuntu</span></span><br><span class="line"><span class="built_in">sudo</span> yum install stress-ng  <span class="comment"># CentOS/RHEL</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础CPU测试（使用所有核心）</span></span><br><span class="line">stress-ng --cpu 0 --cpu-method all --metrics --<span class="built_in">timeout</span> 60s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定核心数测试（例如测试8核）</span></span><br><span class="line">stress-ng --cpu 8 --cpu-method matrixprod --metrics --<span class="built_in">timeout</span> 60s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 多种方法综合测试</span></span><br><span class="line">stress-ng --cpu 4 --cpu-method int64 --<span class="built_in">timeout</span> 30s</span><br><span class="line">stress-ng --cpu 4 --cpu-method <span class="built_in">float</span> --<span class="built_in">timeout</span> 30s</span><br><span class="line">stress-ng --cpu 4 --cpu-method ackermann --<span class="built_in">timeout</span> 30s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有可用的CPU测试方法</span></span><br><span class="line">stress-ng --cpu-method <span class="built_in">which</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>推荐配置：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生产环境预演测试（70%负载，持续5分钟）</span></span><br><span class="line">NUM_CORES=$(<span class="built_in">nproc</span>)</span><br><span class="line">LOAD_CORES=$((NUM_CORES * <span class="number">70</span> / <span class="number">100</span>))</span><br><span class="line">stress-ng --cpu <span class="variable">$LOAD_CORES</span> --cpu-method matrixprod --metrics --<span class="built_in">timeout</span> 300s</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具2-sysbench"><a href="#🔧-工具2-sysbench" class="headerlink" title="🔧 工具2: sysbench"></a>🔧 工具2: sysbench</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="built_in">sudo</span> apt install sysbench</span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU性能测试</span></span><br><span class="line">sysbench cpu --cpu-max-prime=20000 --threads=8 run</span><br><span class="line"></span><br><span class="line"><span class="comment"># 多线程测试（测试线程扩展性）</span></span><br><span class="line"><span class="keyword">for</span> threads <span class="keyword">in</span> 1 2 4 8 16; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Testing with <span class="variable">$threads</span> threads&quot;</span></span><br><span class="line">    sysbench cpu --cpu-max-prime=20000 --threads=<span class="variable">$threads</span> run</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具3-htop-top-实时监控"><a href="#🔧-工具3-htop-top-实时监控" class="headerlink" title="🔧 工具3: htop&#x2F;top 实时监控"></a>🔧 工具3: htop&#x2F;top 实时监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装htop（更友好）</span></span><br><span class="line"><span class="built_in">sudo</span> apt install htop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动htop</span></span><br><span class="line">htop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按键说明：</span></span><br><span class="line"><span class="comment"># F2 - 设置</span></span><br><span class="line"><span class="comment"># F5 - 树状视图</span></span><br><span class="line"><span class="comment"># F6 - 排序选择</span></span><br><span class="line"><span class="comment"># P - 按CPU使用率排序</span></span><br><span class="line"><span class="comment"># M - 按内存使用率排序</span></span><br><span class="line"><span class="comment"># T - 按运行时间排序</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具4-mpstat-多核详细监控"><a href="#🔧-工具4-mpstat-多核详细监控" class="headerlink" title="🔧 工具4: mpstat (多核详细监控)"></a>🔧 工具4: mpstat (多核详细监控)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装sysstat包</span></span><br><span class="line"><span class="built_in">sudo</span> apt install sysstat</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每2秒输出一次，显示每个CPU核心的使用率</span></span><br><span class="line">mpstat -P ALL 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 持续监控30秒</span></span><br><span class="line">mpstat -P ALL 2 15</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出解释：</span></span><br><span class="line"><span class="comment"># %usr - 用户态CPU时间</span></span><br><span class="line"><span class="comment"># %sys - 内核态CPU时间</span></span><br><span class="line"><span class="comment"># %idle - 空闲时间</span></span><br><span class="line"><span class="comment"># %iowait - 等待I/O的时间（高则说明磁盘瓶颈）</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、内存性能测试最佳实践"><a href="#三、内存性能测试最佳实践" class="headerlink" title="三、内存性能测试最佳实践"></a>三、内存性能测试最佳实践</h2><h3 id="🔧-工具1-stress-ng-内存测试"><a href="#🔧-工具1-stress-ng-内存测试" class="headerlink" title="🔧 工具1: stress-ng 内存测试"></a>🔧 工具1: stress-ng 内存测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基础内存压测（分配80%可用内存）</span></span><br><span class="line">TOTAL_MEM=$(free -g | awk <span class="string">&#x27;/^Mem:/&#123;print $2&#125;&#x27;</span>)</span><br><span class="line">TEST_MEM=$((TOTAL_MEM * <span class="number">80</span> / <span class="number">100</span>))</span><br><span class="line">stress-ng --vm 4 --vm-bytes <span class="variable">$&#123;TEST_MEM&#125;</span>G --vm-method all --<span class="built_in">timeout</span> 300s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内存读写性能测试</span></span><br><span class="line">stress-ng --vm 2 --vm-bytes 4G --vm-method write64 --metrics --<span class="built_in">timeout</span> 60s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内存带宽测试</span></span><br><span class="line">stress-ng --stream 4 --stream-L3-size 8M --metrics --<span class="built_in">timeout</span> 60s</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具2-memtester-内存稳定性测试"><a href="#🔧-工具2-memtester-内存稳定性测试" class="headerlink" title="🔧 工具2: memtester (内存稳定性测试)"></a>🔧 工具2: memtester (内存稳定性测试)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="built_in">sudo</span> apt install memtester</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试2GB内存，运行5次</span></span><br><span class="line"><span class="built_in">sudo</span> memtester 2G 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># 警告：会占用真实物理内存，可能导致OOM</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具3-sysbench-内存测试"><a href="#🔧-工具3-sysbench-内存测试" class="headerlink" title="🔧 工具3: sysbench 内存测试"></a>🔧 工具3: sysbench 内存测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 内存连续读写测试</span></span><br><span class="line">sysbench memory --memory-block-size=1K --memory-total-size=10G run</span><br><span class="line"></span><br><span class="line"><span class="comment"># 随机访问测试</span></span><br><span class="line">sysbench memory --memory-block-size=1K --memory-total-size=10G \</span><br><span class="line">    --memory-access-mode=rnd run</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具4-vmstat-内存动态监控"><a href="#🔧-工具4-vmstat-内存动态监控" class="headerlink" title="🔧 工具4: vmstat (内存动态监控)"></a>🔧 工具4: vmstat (内存动态监控)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每2秒刷新一次</span></span><br><span class="line">vmstat 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出解释：</span></span><br><span class="line"><span class="comment"># swpd - 使用的swap大小（持续非0说明内存不足）</span></span><br><span class="line"><span class="comment"># free - 空闲内存</span></span><br><span class="line"><span class="comment"># buff - 缓冲区内存</span></span><br><span class="line"><span class="comment"># cache - 缓存内存</span></span><br><span class="line"><span class="comment"># si - 从swap读入内存（非0说明内存压力大）</span></span><br><span class="line"><span class="comment"># so - 从内存写入swap（非0说明内存压力大）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具5-free-命令详解"><a href="#🔧-工具5-free-命令详解" class="headerlink" title="🔧 工具5: free 命令详解"></a>🔧 工具5: free 命令详解</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以人类可读方式显示</span></span><br><span class="line">free -h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 持续监控（每2秒刷新）</span></span><br><span class="line">watch -n 2 free -h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 详细输出</span></span><br><span class="line">free -h -w</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="四、磁盘I-O性能测试最佳实践"><a href="#四、磁盘I-O性能测试最佳实践" class="headerlink" title="四、磁盘I&#x2F;O性能测试最佳实践"></a>四、磁盘I&#x2F;O性能测试最佳实践</h2><h3 id="🔧-工具1-fio-最专业的磁盘测试工具"><a href="#🔧-工具1-fio-最专业的磁盘测试工具" class="headerlink" title="🔧 工具1: fio (最专业的磁盘测试工具)"></a>🔧 工具1: fio (最专业的磁盘测试工具)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="built_in">sudo</span> apt install fio</span><br><span class="line"></span><br><span class="line"><span class="comment"># 随机读测试（4K块，IOPS性能）</span></span><br><span class="line">fio --name=random-read --ioengine=libaio --rw=randread --bs=4k \</span><br><span class="line">    --numjobs=4 --iodepth=32 --runtime=60 --time_based \</span><br><span class="line">    --filename=/tmp/test.fio --size=1G</span><br><span class="line"></span><br><span class="line"><span class="comment"># 随机写测试</span></span><br><span class="line">fio --name=random-write --ioengine=libaio --rw=randwrite --bs=4k \</span><br><span class="line">    --numjobs=4 --iodepth=32 --runtime=60 --time_based \</span><br><span class="line">    --filename=/tmp/test.fio --size=1G</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顺序读测试（带宽性能）</span></span><br><span class="line">fio --name=seq-read --ioengine=libaio --rw=<span class="built_in">read</span> --bs=1M \</span><br><span class="line">    --numjobs=1 --iodepth=32 --runtime=60 --time_based \</span><br><span class="line">    --filename=/tmp/test.fio --size=2G</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顺序写测试</span></span><br><span class="line">fio --name=seq-write --ioengine=libaio --rw=write --bs=1M \</span><br><span class="line">    --numjobs=1 --iodepth=32 --runtime=60 --time_based \</span><br><span class="line">    --filename=/tmp/test.fio --size=2G</span><br><span class="line"></span><br><span class="line"><span class="comment"># 混合读写测试（70%读，30%写）</span></span><br><span class="line">fio --name=randrw --ioengine=libaio --rw=randrw --rwmixread=70 \</span><br><span class="line">    --bs=4k --numjobs=4 --iodepth=32 --runtime=60 --time_based \</span><br><span class="line">    --filename=/tmp/test.fio --size=1G</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具2-dd-简单快速测试"><a href="#🔧-工具2-dd-简单快速测试" class="headerlink" title="🔧 工具2: dd (简单快速测试)"></a>🔧 工具2: dd (简单快速测试)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写入测试（测试写入速度）</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/tmp/test.img bs=1G count=1 oflag=direct</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取测试（清空缓存后测试）</span></span><br><span class="line"><span class="built_in">sudo</span> sh -c <span class="string">&quot;sync; echo 3 &gt; /proc/sys/vm/drop_caches&quot;</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/tmp/test.img of=/dev/null bs=1G count=1 iflag=direct</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清理测试文件</span></span><br><span class="line"><span class="built_in">rm</span> -f /tmp/test.img</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具3-hdparm-磁盘设备测试"><a href="#🔧-工具3-hdparm-磁盘设备测试" class="headerlink" title="🔧 工具3: hdparm (磁盘设备测试)"></a>🔧 工具3: hdparm (磁盘设备测试)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="built_in">sudo</span> apt install hdparm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试磁盘读取速度</span></span><br><span class="line"><span class="built_in">sudo</span> hdparm -t /dev/sda</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试缓存读取速度</span></span><br><span class="line"><span class="built_in">sudo</span> hdparm -T /dev/sda</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看磁盘详细信息</span></span><br><span class="line"><span class="built_in">sudo</span> hdparm -I /dev/sda</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具4-iostat-I-O实时监控"><a href="#🔧-工具4-iostat-I-O实时监控" class="headerlink" title="🔧 工具4: iostat (I&#x2F;O实时监控)"></a>🔧 工具4: iostat (I&#x2F;O实时监控)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装（包含在sysstat中）</span></span><br><span class="line"><span class="built_in">sudo</span> apt install sysstat</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每2秒刷新一次，显示扩展信息</span></span><br><span class="line">iostat -x 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示特定设备</span></span><br><span class="line">iostat -x /dev/sda 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出解释：</span></span><br><span class="line"><span class="comment"># %util - 磁盘繁忙程度（&gt;80%说明磁盘瓶颈）</span></span><br><span class="line"><span class="comment"># r/s - 每秒读请求数</span></span><br><span class="line"><span class="comment"># w/s - 每秒写请求数</span></span><br><span class="line"><span class="comment"># rkB/s - 每秒读取KB</span></span><br><span class="line"><span class="comment"># wkB/s - 每秒写入KB</span></span><br><span class="line"><span class="comment"># await - 平均等待时间（ms）</span></span><br><span class="line"><span class="comment"># svctm - 平均服务时间（ms）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具5-iotop-查看哪个进程占用I-O"><a href="#🔧-工具5-iotop-查看哪个进程占用I-O" class="headerlink" title="🔧 工具5: iotop (查看哪个进程占用I&#x2F;O)"></a>🔧 工具5: iotop (查看哪个进程占用I&#x2F;O)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="built_in">sudo</span> apt install iotop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动iotop</span></span><br><span class="line"><span class="built_in">sudo</span> iotop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示有I/O活动的进程</span></span><br><span class="line"><span class="built_in">sudo</span> iotop -o</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按键说明：</span></span><br><span class="line"><span class="comment"># 左右箭头 - 改变排序列</span></span><br><span class="line"><span class="comment"># r - 反向排序</span></span><br><span class="line"><span class="comment"># o - 只显示有I/O的进程</span></span><br><span class="line"><span class="comment"># p - 按PID排序</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、网络性能测试最佳实践"><a href="#五、网络性能测试最佳实践" class="headerlink" title="五、网络性能测试最佳实践"></a>五、网络性能测试最佳实践</h2><h3 id="🔧-工具1-iperf3-带宽测试"><a href="#🔧-工具1-iperf3-带宽测试" class="headerlink" title="🔧 工具1: iperf3 (带宽测试)"></a>🔧 工具1: iperf3 (带宽测试)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="built_in">sudo</span> apt install iperf3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在服务器端启动（假设服务器IP: 192.168.1.100）</span></span><br><span class="line">iperf3 -s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在客户端测试（带宽测试）</span></span><br><span class="line">iperf3 -c 192.168.1.100 -t 60</span><br><span class="line"></span><br><span class="line"><span class="comment"># TCP并发测试（10个并发流）</span></span><br><span class="line">iperf3 -c 192.168.1.100 -P 10 -t 60</span><br><span class="line"></span><br><span class="line"><span class="comment"># UDP带宽测试（指定带宽1Gbps）</span></span><br><span class="line">iperf3 -c 192.168.1.100 -u -b 1G -t 60</span><br><span class="line"></span><br><span class="line"><span class="comment"># 反向测试（服务器向客户端发送）</span></span><br><span class="line">iperf3 -c 192.168.1.100 -R -t 60</span><br><span class="line"></span><br><span class="line"><span class="comment"># 双向测试</span></span><br><span class="line">iperf3 -c 192.168.1.100 --bidir -t 60</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具2-ping-延迟测试"><a href="#🔧-工具2-ping-延迟测试" class="headerlink" title="🔧 工具2: ping (延迟测试)"></a>🔧 工具2: ping (延迟测试)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基础ping测试</span></span><br><span class="line">ping -c 100 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 大包ping（测试MTU）</span></span><br><span class="line">ping -c 100 -s 1472 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 洪水ping（需要root权限）</span></span><br><span class="line"><span class="built_in">sudo</span> ping -f -c 10000 192.168.1.100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计摘要</span></span><br><span class="line">ping -c 100 -q 8.8.8.8</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具3-netstat-ss-连接状态监控"><a href="#🔧-工具3-netstat-ss-连接状态监控" class="headerlink" title="🔧 工具3: netstat&#x2F;ss (连接状态监控)"></a>🔧 工具3: netstat&#x2F;ss (连接状态监控)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有TCP连接</span></span><br><span class="line">ss -ant</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看监听端口</span></span><br><span class="line">ss -lntp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计连接状态</span></span><br><span class="line">ss -s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看连接最多的IP</span></span><br><span class="line">ss -ant | awk <span class="string">&#x27;&#123;print $5&#125;&#x27;</span> | <span class="built_in">cut</span> -d: -f1 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -rn | <span class="built_in">head</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-工具4-sar-网络历史数据"><a href="#🔧-工具4-sar-网络历史数据" class="headerlink" title="🔧 工具4: sar (网络历史数据)"></a>🔧 工具4: sar (网络历史数据)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看网络接口统计（每2秒一次）</span></span><br><span class="line">sar -n DEV 2 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看TCP统计</span></span><br><span class="line">sar -n TCP 2 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看错误统计</span></span><br><span class="line">sar -n EDEV 2 10</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="六、综合压力测试脚本"><a href="#六、综合压力测试脚本" class="headerlink" title="六、综合压力测试脚本"></a>六、综合压力测试脚本</h2><h3 id="📝-完整的系统压测脚本"><a href="#📝-完整的系统压测脚本" class="headerlink" title="📝 完整的系统压测脚本"></a>📝 完整的系统压测脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 系统全面性能测试脚本</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line">LOG_DIR=<span class="string">&quot;./performance_test_<span class="subst">$(date +%Y%m%d_%H%M%S)</span>&quot;</span></span><br><span class="line"><span class="built_in">mkdir</span> -p <span class="string">&quot;<span class="variable">$LOG_DIR</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 系统性能测试开始 ===&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;日志目录: <span class="variable">$LOG_DIR</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 系统信息收集</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;收集系统信息...&quot;</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== 系统信息 ===&quot;</span></span><br><span class="line">    <span class="built_in">uname</span> -a</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== CPU信息 ===&quot;</span></span><br><span class="line">    lscpu</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== 内存信息 ===&quot;</span></span><br><span class="line">    free -h</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== 磁盘信息 ===&quot;</span></span><br><span class="line">    <span class="built_in">df</span> -h</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== 负载信息 ===&quot;</span></span><br><span class="line">    <span class="built_in">uptime</span></span><br><span class="line">&#125; &gt; <span class="string">&quot;<span class="variable">$LOG_DIR</span>/system_info.txt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. CPU压力测试（60秒）</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;开始CPU压力测试（60秒）...&quot;</span></span><br><span class="line">NUM_CORES=$(<span class="built_in">nproc</span>)</span><br><span class="line">stress-ng --cpu <span class="variable">$NUM_CORES</span> --cpu-method matrixprod --metrics \</span><br><span class="line">    --<span class="built_in">timeout</span> 60s &gt; <span class="string">&quot;<span class="variable">$LOG_DIR</span>/cpu_stress.log&quot;</span> 2&gt;&amp;1 &amp;</span><br><span class="line">STRESS_PID=$!</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时监控</span></span><br><span class="line">mpstat -P ALL 2 30 &gt; <span class="string">&quot;<span class="variable">$LOG_DIR</span>/cpu_monitor.log&quot;</span> &amp;</span><br><span class="line"><span class="built_in">sleep</span> 60</span><br><span class="line"><span class="built_in">wait</span> <span class="variable">$STRESS_PID</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 内存压力测试（60秒）</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;开始内存压力测试（60秒）...&quot;</span></span><br><span class="line">TOTAL_MEM=$(free -g | awk <span class="string">&#x27;/^Mem:/&#123;print $2&#125;&#x27;</span>)</span><br><span class="line">TEST_MEM=$((TOTAL_MEM * <span class="number">50</span> / <span class="number">100</span>))</span><br><span class="line">stress-ng --vm 4 --vm-bytes <span class="variable">$&#123;TEST_MEM&#125;</span>G --vm-method all \</span><br><span class="line">    --<span class="built_in">timeout</span> 60s --metrics &gt; <span class="string">&quot;<span class="variable">$LOG_DIR</span>/memory_stress.log&quot;</span> 2&gt;&amp;1 &amp;</span><br><span class="line">STRESS_PID=$!</span><br><span class="line"></span><br><span class="line">vmstat 2 30 &gt; <span class="string">&quot;<span class="variable">$LOG_DIR</span>/memory_monitor.log&quot;</span> &amp;</span><br><span class="line"><span class="built_in">sleep</span> 60</span><br><span class="line"><span class="built_in">wait</span> <span class="variable">$STRESS_PID</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 磁盘I/O测试</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;开始磁盘I/O测试（60秒）...&quot;</span></span><br><span class="line">fio --name=disk-test --ioengine=libaio --rw=randrw --rwmixread=70 \</span><br><span class="line">    --bs=4k --numjobs=4 --iodepth=32 --runtime=60 --time_based \</span><br><span class="line">    --filename=/tmp/fio_test.tmp --size=1G \</span><br><span class="line">    --output=<span class="string">&quot;<span class="variable">$LOG_DIR</span>/disk_io.log&quot;</span> &amp;</span><br><span class="line">FIO_PID=$!</span><br><span class="line"></span><br><span class="line">iostat -x 2 30 &gt; <span class="string">&quot;<span class="variable">$LOG_DIR</span>/iostat_monitor.log&quot;</span> &amp;</span><br><span class="line"><span class="built_in">sleep</span> 60</span><br><span class="line"><span class="built_in">wait</span> <span class="variable">$FIO_PID</span></span><br><span class="line"><span class="built_in">rm</span> -f /tmp/fio_test.tmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 生成测试报告</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;生成测试报告...&quot;</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;===================================&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;   系统性能测试报告&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;   测试时间: <span class="subst">$(date)</span>&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;===================================&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;详细日志请查看 <span class="variable">$LOG_DIR</span> 目录&quot;</span></span><br><span class="line">&#125; &gt; <span class="string">&quot;<span class="variable">$LOG_DIR</span>/REPORT.txt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 测试完成 ===&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;报告保存在: <span class="variable">$LOG_DIR</span>/REPORT.txt&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>使用方法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x performance_test.sh</span><br><span class="line"><span class="built_in">sudo</span> ./performance_test.sh</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="七、监控命令速查表"><a href="#七、监控命令速查表" class="headerlink" title="七、监控命令速查表"></a>七、监控命令速查表</h2><table>
+<thead>
+<tr>
+<th>监控对象</th>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>综合监控</strong></td>
+<td><code>top</code> &#x2F; <code>htop</code></td>
+<td>实时系统资源监控</td>
+</tr>
+<tr>
+<td><strong>CPU</strong></td>
+<td><code>mpstat -P ALL 2</code></td>
+<td>每个核心的使用率</td>
+</tr>
+<tr>
+<td></td>
+<td><code>sar -u 2 10</code></td>
+<td>CPU历史统计</td>
+</tr>
+<tr>
+<td></td>
+<td><code>lscpu</code></td>
+<td>CPU详细信息</td>
+</tr>
+<tr>
+<td><strong>内存</strong></td>
+<td><code>free -h</code></td>
+<td>内存使用概览</td>
+</tr>
+<tr>
+<td></td>
+<td><code>vmstat 2</code></td>
+<td>内存动态监控</td>
+</tr>
+<tr>
+<td></td>
+<td><code>sar -r 2 10</code></td>
+<td>内存历史统计</td>
+</tr>
+<tr>
+<td><strong>磁盘I&#x2F;O</strong></td>
+<td><code>iostat -x 2</code></td>
+<td>磁盘I&#x2F;O统计</td>
+</tr>
+<tr>
+<td></td>
+<td><code>iotop</code></td>
+<td>进程I&#x2F;O排行</td>
+</tr>
+<tr>
+<td></td>
+<td><code>df -h</code></td>
+<td>磁盘空间使用</td>
+</tr>
+<tr>
+<td><strong>网络</strong></td>
+<td><code>iftop</code></td>
+<td>实时网络流量</td>
+</tr>
+<tr>
+<td></td>
+<td><code>nethogs</code></td>
+<td>进程网络使用</td>
+</tr>
+<tr>
+<td></td>
+<td><code>ss -ant</code></td>
+<td>网络连接状态</td>
+</tr>
+<tr>
+<td><strong>进程</strong></td>
+<td>&#96;ps aux –sort&#x3D;-%cpu</td>
+<td>head&#96;</td>
+</tr>
+<tr>
+<td></td>
+<td>&#96;ps aux –sort&#x3D;-%mem</td>
+<td>head&#96;</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="八、性能测试注意事项-⚠️"><a href="#八、性能测试注意事项-⚠️" class="headerlink" title="八、性能测试注意事项 ⚠️"></a>八、性能测试注意事项 ⚠️</h2><h3 id="🔴-关键警告"><a href="#🔴-关键警告" class="headerlink" title="🔴 关键警告"></a>🔴 关键警告</h3><ol>
+<li><p><strong>生产环境慎用</strong></p>
+<ul>
+<li><code>stress-ng</code> 会造成真实负载，可能影响业务</li>
+<li>建议在非高峰期或测试环境执行</li>
+<li>先小范围测试，再逐步增加强度</li>
+</ul>
+</li>
+<li><p><strong>磁盘测试风险</strong></p>
+<ul>
+<li><code>dd</code> 和 <code>fio</code> 会写入大量数据</li>
+<li>确保有足够磁盘空间</li>
+<li>避免在系统盘根目录测试</li>
+</ul>
+</li>
+<li><p><strong>内存测试风险</strong></p>
+<ul>
+<li>分配过多内存可能触发OOM Killer</li>
+<li>建议不超过可用内存的80%</li>
+<li>注意监控swap使用率</li>
+</ul>
+</li>
+<li><p><strong>监控数据保存</strong></p>
+<ul>
+<li>所有测试应保存日志，便于后续分析</li>
+<li>建议使用 <code>tee</code> 命令同时输出和保存</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="九、性能基准值参考"><a href="#九、性能基准值参考" class="headerlink" title="九、性能基准值参考"></a>九、性能基准值参考</h2><h3 id="CPU"><a href="#CPU" class="headerlink" title="CPU"></a>CPU</h3><ul>
+<li><strong>负载平均值：</strong> 应 &lt; 核心数</li>
+<li><strong>%idle：</strong> 正常应 &gt; 20%</li>
+<li><strong>%iowait：</strong> 应 &lt; 10%（高则磁盘瓶颈）</li>
+</ul>
+<h3 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h3><ul>
+<li><strong>可用内存：</strong> 应 &gt; 总量的20%</li>
+<li><strong>Swap使用：</strong> 应 &lt; 10%</li>
+<li><strong>si&#x2F;so：</strong> 应接近0（频繁swap说明内存不足）</li>
+</ul>
+<h3 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h3><ul>
+<li><strong>%util：</strong> 应 &lt; 80%</li>
+<li><strong>await：</strong> SSD &lt; 10ms，HDD &lt; 20ms</li>
+<li><strong>IOPS：</strong> SSD &gt; 10000，HDD &gt; 100</li>
+</ul>
+<h3 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h3><ul>
+<li><strong>带宽利用率：</strong> 应 &lt; 80%</li>
+<li><strong>丢包率：</strong> 应 &lt; 0.1%</li>
+<li><strong>延迟：</strong> 局域网 &lt; 1ms，公网 &lt; 100ms</li>
+</ul>
+<hr>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/07/%E4%B8%AD%E6%96%AD%E6%95%85%E4%BA%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1574,269 +1960,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/" class="post-title-link" itemprop="url">容器文件系统挂载</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-09-19 12:36:25 / 修改时间：12:44:45" itemprop="dateCreated datePublished" datetime="2025-09-19T12:36:25+08:00">2025-09-19</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-查看挂载情况"><a href="#1-查看挂载情况" class="headerlink" title="1. 查看挂载情况"></a>1. 查看挂载情况</h2><ul>
-<li><p><strong>看挂载情况</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep /run/containerd/io.containerd.runtime.v2.task/k8s.io</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>看是否有进程占用</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y psmisc</span><br><span class="line">fuser -vm /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
-
-<p>或者：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof | grep 200ab1146de</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>看 containerd 里是否有残留 metadata</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io containers list | grep 200ab1146de</span><br><span class="line">ctr -n k8s.io tasks list | grep 200ab1146de</span><br></pre></td></tr></table></figure></li>
-</ul>
-<ol>
-<li><strong><code>ctr -n k8s.io tasks list | grep 200ab1146de</code> → 状态 STOPPED</strong></li>
-<li><strong><code>fuser -vm</code> 显示很多 <code>containerd-shim</code>、<code>qemu-system-x86</code>、<code>virtiofsd</code> 等进程引用这个目录</strong><ul>
-<li>说明这个目录（mountpoint）仍然被多个进程占用着。</li>
-<li>注意：这里的 “F.c..” &#x2F; “frc..” 表示打开了这个目录的 <strong>文件描述符</strong>，并且有读写&#x2F;控制引用。</li>
-</ul>
-</li>
-<li><strong>整体情况</strong><ul>
-<li>内核 <code>overlayfs</code> 挂载点还在，inode 没回收。</li>
-<li>容器已经 “STOPPED”（不可用），但是挂载点被其他 shim &#x2F; qemu &#x2F; virtiofsd 引用，所以无法自动卸载。</li>
-</ul>
-</li>
-</ol>
-<hr>
-<h2 id="2-mount-l-命令含义："><a href="#2-mount-l-命令含义：" class="headerlink" title="2. mount -l 命令含义："></a>2. mount -l 命令含义：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep <span class="string">&#x27;/run/containerd/io.containerd.runtime.v2.task/k8s.io&#x27;</span> | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | xargs -r <span class="built_in">sudo</span> umount -l</span><br></pre></td></tr></table></figure>
-
-<h3 id="这个命令会做什么？"><a href="#这个命令会做什么？" class="headerlink" title="这个命令会做什么？"></a>这个命令会做什么？</h3><ul>
-<li>找出所有挂载在 <code>/run/containerd/io.containerd.runtime.v2.task/k8s.io/*</code> 下的 mount point。</li>
-<li>对它们执行 <code>umount -l</code>（lazy umount）。</li>
-</ul>
-<p><strong>lazy umount 含义</strong>：</p>
-<ul>
-<li>马上把挂载点从 mount namespace 里“摘掉”，进程不再能通过路径访问它。</li>
-<li>如果有进程仍然持有 fd，会等它们关闭 fd 之后再真正释放资源（inode、dentry、slab）。</li>
-<li>这样避免了 <code>umount</code> 报错 “busy”，算是比较温和的方式。</li>
-</ul>
-<hr>
-<h2 id="3-对当前系统的影响"><a href="#3-对当前系统的影响" class="headerlink" title="3. 对当前系统的影响"></a>3. 对当前系统的影响</h2><ul>
-<li><p><strong>如果容器仍然活跃</strong>：对应 Pod 会立刻失效，因为 rootfs 被摘掉了，里面的文件系统消失。</p>
-</li>
-<li><p><strong>如果容器已经 STOPPED</strong>（像你这种）：</p>
-<ul>
-<li>大多数情况下影响有限，等价于清理垃圾挂载点。</li>
-<li>不过要小心：如果 containerd metadata 里还记录这个容器存在，containerd 在后续 GC 或者回收时可能会发现找不到挂载点，从而报错。</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h2 id="4-建议操作顺序"><a href="#4-建议操作顺序" class="headerlink" title="4. 建议操作顺序"></a>4. 建议操作顺序</h2><p>更温和的方案可以这样分级：</p>
-<ol>
-<li><p><strong>优先让 containerd 清理</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io tasks <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br><span class="line">ctr -n k8s.io containers <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
-
-<p>（如果卡住，说明 shim&#x2F;进程依赖还在）</p>
-</li>
-<li><p><strong>确认 mount</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep 200ab1146de</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>再 lazy umount</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> umount -l /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9/rootfs</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>最后清理目录</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>如果有大量残留</strong>，你那个 <code>awk | xargs umount -l</code> 可以作为批量清理手段，但最好在确认这些容器都已经 STOPPED 或已被 K8s 删除的前提下做。</p>
-</li>
-</ol>
-<hr>
-<p>✅ 结论：</p>
-<ul>
-<li>你的 <code>umount -l</code> 是温和可行的，不会直接 kill 进程，但会让容器 rootfs 消失。</li>
-<li><strong>如果只是清理 STOPPED 的残留容器</strong>，几乎没副作用，还能回收 inode&#x2F;slab。</li>
-<li>建议 <strong>先用 ctr rm</strong> 尝试让 containerd 自己清理，再手动 umount + rm 兜底。</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">MTU完整指南和故障排查</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-09-16 11:03:44" itemprop="dateCreated datePublished" datetime="2025-09-16T11:03:44+08:00">2025-09-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-10-27 10:54:04" itemprop="dateModified" datetime="2025-10-27T10:54:04+08:00">2025-10-27</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="🎯-MTU快速理解"><a href="#🎯-MTU快速理解" class="headerlink" title="🎯 MTU快速理解"></a>🎯 MTU快速理解</h2><h3 id="什么是MTU？"><a href="#什么是MTU？" class="headerlink" title="什么是MTU？"></a>什么是MTU？</h3><p><strong>MTU (Maximum Transmission Unit)</strong> &#x3D; 网络接口一次能传输的最大数据包大小（字节）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">简单类比：</span><br><span class="line">MTU就像货车的载重限制</span><br><span class="line">- 货车限重5吨，装6吨就超载了</span><br><span class="line">- 网卡MTU=1500，发送1600字节包就会有问题</span><br></pre></td></tr></table></figure>
-
-<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">标准以太网MTU = 1500字节</span><br><span class="line">├── IP头: 20字节</span><br><span class="line">├── TCP头: 20字节  </span><br><span class="line">└── 数据载荷: 最大1460字节</span><br><span class="line"></span><br><span class="line">虚拟化环境MTU &lt; 1500字节</span><br><span class="line">├── 原始数据: 1460字节</span><br><span class="line">├── TCP/IP头: 40字节</span><br><span class="line">├── 虚拟化开销: 50字节</span><br><span class="line">└── 总计: 1550字节 &gt; 1500字节 ❌超出限制</span><br></pre></td></tr></table></figure>
-
-<h2 id="🔍-MTU检测和查看命令"><a href="#🔍-MTU检测和查看命令" class="headerlink" title="🔍 MTU检测和查看命令"></a>🔍 MTU检测和查看命令</h2><h3 id="1-查看当前MTU值"><a href="#1-查看当前MTU值" class="headerlink" title="1. 查看当前MTU值"></a>1. 查看当前MTU值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有网络接口MTU</span></span><br><span class="line">ip <span class="built_in">link</span> show</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">ifconfig</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定接口</span></span><br><span class="line">ip <span class="built_in">link</span> show eth0</span><br><span class="line">ip <span class="built_in">link</span> show docker0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 一行命令查看所有接口MTU</span></span><br><span class="line">ip -o <span class="built_in">link</span> show | awk <span class="string">&#x27;&#123;print $2, $5&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-测试MTU大小"><a href="#2-测试MTU大小" class="headerlink" title="2. 测试MTU大小"></a>2. 测试MTU大小</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ping测试MTU (Linux)</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 8.8.8.8    <span class="comment"># 1472 + 28(ICMP头) = 1500</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1500 8.8.8.8    <span class="comment"># 会失败，因为加上头部超过MTU</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Windows下测试</span></span><br><span class="line">ping -f -l 1472 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动发现路径MTU</span></span><br><span class="line">tracepath google.com</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-Docker-MTU查看"><a href="#3-Docker-MTU查看" class="headerlink" title="3. Docker MTU查看"></a>3. Docker MTU查看</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看Docker网络MTU</span></span><br><span class="line">docker network <span class="built_in">ls</span></span><br><span class="line">docker network inspect bridge | grep -i mtu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器网络MTU</span></span><br><span class="line">docker <span class="built_in">exec</span> &lt;container&gt; ip <span class="built_in">link</span> show eth0</span><br></pre></td></tr></table></figure>
-
-<h2 id="⚙️-MTU配置方法"><a href="#⚙️-MTU配置方法" class="headerlink" title="⚙️ MTU配置方法"></a>⚙️ MTU配置方法</h2><h3 id="1-临时修改MTU"><a href="#1-临时修改MTU" class="headerlink" title="1. 临时修改MTU"></a>1. 临时修改MTU</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改网络接口MTU</span></span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev eth0 mtu 1450</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 mtu 1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改Docker桥接MTU</span></span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 down</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 mtu 1450</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 up</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-永久配置MTU"><a href="#2-永久配置MTU" class="headerlink" title="2. 永久配置MTU"></a>2. 永久配置MTU</h3><h4 id="Docker-daemon配置"><a href="#Docker-daemon配置" class="headerlink" title="Docker daemon配置"></a>Docker daemon配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;mtu&quot;</span>: 1450,</span><br><span class="line">  <span class="string">&quot;bridge&quot;</span>: <span class="string">&quot;docker0&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启Docker服务</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br></pre></td></tr></table></figure>
-
-<h4 id="系统网络接口配置"><a href="#系统网络接口配置" class="headerlink" title="系统网络接口配置"></a>系统网络接口配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CentOS/RHEL: /etc/sysconfig/network-scripts/ifcfg-eth0</span></span><br><span class="line">MTU=1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu: /etc/netplan/01-netcfg.yaml</span></span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      mtu: 1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># 应用配置</span></span><br><span class="line"><span class="built_in">sudo</span> netplan apply</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-Kubernetes环境MTU配置"><a href="#3-Kubernetes环境MTU配置" class="headerlink" title="3. Kubernetes环境MTU配置"></a>3. Kubernetes环境MTU配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CNI插件配置 (以Calico为例)</span></span><br><span class="line"><span class="comment"># /etc/cni/net.d/10-calico.conf</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;name&quot;</span>: <span class="string">&quot;k8s-pod-network&quot;</span>,</span><br><span class="line">  <span class="string">&quot;cniVersion&quot;</span>: <span class="string">&quot;0.3.1&quot;</span>,</span><br><span class="line">  <span class="string">&quot;plugins&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;type&quot;</span>: <span class="string">&quot;calico&quot;</span>,</span><br><span class="line">      <span class="string">&quot;mtu&quot;</span>: 1450</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="🚨-需要关注MTU的场景"><a href="#🚨-需要关注MTU的场景" class="headerlink" title="🚨 需要关注MTU的场景"></a>🚨 需要关注MTU的场景</h2><h3 id="1-虚拟化环境-⭐⭐⭐"><a href="#1-虚拟化环境-⭐⭐⭐" class="headerlink" title="1. 虚拟化环境 ⭐⭐⭐"></a>1. 虚拟化环境 ⭐⭐⭐</h3><p><strong>场景</strong>: VMware、KVM、Hyper-V等虚拟机</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">ip <span class="built_in">link</span> show | grep mtu</span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 &lt;target&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- VM网卡MTU=1500，但物理网卡实际支持&lt;1500</span><br><span class="line">- 多层虚拟化叠加导致MTU递减</span><br><span class="line">- VXLAN/GRE隧道额外开销</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-容器环境-⭐⭐⭐"><a href="#2-容器环境-⭐⭐⭐" class="headerlink" title="2. 容器环境 ⭐⭐⭐"></a>2. 容器环境 ⭐⭐⭐</h3><p><strong>场景</strong>: Docker、Kubernetes、容器网络</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">docker network inspect bridge</span><br><span class="line">kubectl get nodes -o custom-columns=<span class="string">&quot;NAME:.metadata.name,MTU:.status.addresses[0].type&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- Docker桥接网络MTU不匹配</span><br><span class="line">- Overlay网络额外封装</span><br><span class="line">- CNI插件配置错误</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-云环境-⭐⭐"><a href="#3-云环境-⭐⭐" class="headerlink" title="3. 云环境 ⭐⭐"></a>3. 云环境 ⭐⭐</h3><p><strong>场景</strong>: AWS、阿里云、腾讯云等公有云</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- 云主机默认MTU可能&lt;1500</span><br><span class="line">- VPC网络间MTU不一致</span><br><span class="line">- 跨可用区网络MTU差异</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-SD-WAN-隧道网络-⭐⭐"><a href="#4-SD-WAN-隧道网络-⭐⭐" class="headerlink" title="4. SD-WAN&#x2F;隧道网络 ⭐⭐"></a>4. SD-WAN&#x2F;隧道网络 ⭐⭐</h3><p><strong>场景</strong>: VPN、专线、隧道连接</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">tracepath &lt;remote-host&gt;</span><br><span class="line">mtr --report &lt;remote-host&gt;</span><br><span class="line">mtr -rn www.baidu.com</span><br><span class="line"></span><br><span class="line"><span class="comment">#参考</span></span><br><span class="line">https://www.cnblogs.com/xzongblogs/p/15062134.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- VPN隧道额外开销</span><br><span class="line">- MPLS网络MTU限制</span><br><span class="line">- 跨运营商网络MTU不统一</span><br></pre></td></tr></table></figure>
-
-<h2 id="🛠️-MTU故障排查流程"><a href="#🛠️-MTU故障排查流程" class="headerlink" title="🛠️ MTU故障排查流程"></a>🛠️ MTU故障排查流程</h2><h3 id="阶段1-症状识别"><a href="#阶段1-症状识别" class="headerlink" title="阶段1: 症状识别"></a>阶段1: 症状识别</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 常见症状</span></span><br><span class="line">✓ 大文件传输失败或很慢</span><br><span class="line">✓ SSH连接建立后命令执行卡死</span><br><span class="line">✓ HTTP请求间歇性失败</span><br><span class="line">✓ 数据库连接超时</span><br><span class="line">✓ 文件上传失败</span><br><span class="line"></span><br><span class="line"><span class="comment"># 快速检测命令</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 &lt;target&gt;     <span class="comment"># 测试是否能通</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1400 &lt;target&gt;     <span class="comment"># 降低测试</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="阶段2-MTU路径发现"><a href="#阶段2-MTU路径发现" class="headerlink" title="阶段2: MTU路径发现"></a>阶段2: MTU路径发现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法1: tracepath (推荐)</span></span><br><span class="line">tracepath google.com</span><br><span class="line"><span class="comment"># 输出会显示路径上的MTU值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法2: ping二分法测试</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">find_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> host=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> low=1</span><br><span class="line">    <span class="built_in">local</span> high=1500</span><br><span class="line">    <span class="keyword">while</span> [ <span class="variable">$low</span> -lt <span class="variable">$high</span> ]; <span class="keyword">do</span></span><br><span class="line">        <span class="built_in">local</span> mid=$(( (low + high + <span class="number">1</span>) / <span class="number">2</span> ))</span><br><span class="line">        <span class="keyword">if</span> ping -c 1 -M <span class="keyword">do</span> -s <span class="variable">$mid</span> <span class="variable">$host</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">            low=<span class="variable">$mid</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            high=$((mid - <span class="number">1</span>))</span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;最大MTU: <span class="subst">$((low + 28)</span>)&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: find_mtu google.com</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="阶段3-分层排查"><a href="#阶段3-分层排查" class="headerlink" title="阶段3: 分层排查"></a>阶段3: 分层排查</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 主机网络层</span></span><br><span class="line">ip <span class="built_in">link</span> show                    <span class="comment"># 查看接口MTU</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/route             <span class="comment"># 查看路由表</span></span><br><span class="line">netstat -i                      <span class="comment"># 查看网络统计</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 虚拟化层</span></span><br><span class="line"><span class="comment"># VMware</span></span><br><span class="line">vmware-toolbox-cmd <span class="built_in">stat</span> speed</span><br><span class="line"><span class="comment"># KVM</span></span><br><span class="line">virsh domiflist &lt;vm-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 容器层</span></span><br><span class="line">docker network inspect bridge</span><br><span class="line">kubectl describe node | grep -i mtu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 应用层</span></span><br><span class="line">ss -i                           <span class="comment"># 查看TCP连接信息</span></span><br><span class="line">netstat -s | grep -i fragment   <span class="comment"># 查看分片统计</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="阶段4-性能验证"><a href="#阶段4-性能验证" class="headerlink" title="阶段4: 性能验证"></a>阶段4: 性能验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试脚本</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="comment"># mtu_test.sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== MTU性能测试 ===&quot;</span></span><br><span class="line"><span class="keyword">for</span> size <span class="keyword">in</span> 1400 1450 1472 1500; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> -n <span class="string">&quot;测试 MTU <span class="variable">$size</span>: &quot;</span></span><br><span class="line">    <span class="keyword">if</span> ping -c 3 -M <span class="keyword">do</span> -s $((size-<span class="number">28</span>)) 8.8.8.8 &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;✓ 通过&quot;</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;✗ 失败&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="📊-不同场景的MTU推荐值"><a href="#📊-不同场景的MTU推荐值" class="headerlink" title="📊 不同场景的MTU推荐值"></a>📊 不同场景的MTU推荐值</h2><h3 id="标准网络环境"><a href="#标准网络环境" class="headerlink" title="标准网络环境"></a>标准网络环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">以太网: 1500          <span class="comment"># 标准值</span></span><br><span class="line">千兆以太网: 9000      <span class="comment"># Jumbo Frame</span></span><br><span class="line">Wi-Fi: 1500           <span class="comment"># 通常与以太网相同</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="虚拟化环境"><a href="#虚拟化环境" class="headerlink" title="虚拟化环境"></a>虚拟化环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">VMware vSphere: 1450-1480    <span class="comment"># 考虑VXLAN开销</span></span><br><span class="line">KVM/QEMU: 1450               <span class="comment"># 保守值</span></span><br><span class="line">Hyper-V: 1500                <span class="comment"># 通常支持标准值</span></span><br><span class="line">Docker: 1450-1480            <span class="comment"># 取决于底层网络</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="云环境"><a href="#云环境" class="headerlink" title="云环境"></a>云环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">AWS EC2: 1500 (enhanced networking)</span><br><span class="line">       : 1500-9000 (placement group)</span><br><span class="line">阿里云ECS: 1500</span><br><span class="line">腾讯云CVM: 1500</span><br><span class="line">Azure VM: 1500</span><br></pre></td></tr></table></figure>
-
-<h3 id="容器网络"><a href="#容器网络" class="headerlink" title="容器网络"></a>容器网络</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Docker bridge: 1450-1480</span><br><span class="line">Kubernetes:</span><br><span class="line">  - Flannel: 1450</span><br><span class="line">  - Calico: 1440-1480  </span><br><span class="line">  - Weave: 1376</span><br><span class="line">  - Cilium: 1450</span><br></pre></td></tr></table></figure>
-
-<h2 id="🔧-自动化MTU管理脚本"><a href="#🔧-自动化MTU管理脚本" class="headerlink" title="🔧 自动化MTU管理脚本"></a>🔧 自动化MTU管理脚本</h2><h3 id="MTU检测脚本"><a href="#MTU检测脚本" class="headerlink" title="MTU检测脚本"></a>MTU检测脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># auto_mtu_detect.sh</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">detect_optimal_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> target=<span class="variable">$&#123;1:-8.8.8.8&#125;</span></span><br><span class="line">    <span class="built_in">local</span> max_mtu=1500</span><br><span class="line">    <span class="built_in">local</span> min_mtu=1200</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;正在检测到 <span class="variable">$target</span> 的最优MTU...&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> ((mtu=max_mtu; mtu&gt;=min_mtu; mtu-=<span class="number">50</span>)); <span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> ping -c 2 -M <span class="keyword">do</span> -s $((mtu-<span class="number">28</span>)) <span class="variable">$target</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;发现可用MTU: <span class="variable">$mtu</span>&quot;</span></span><br><span class="line">            <span class="comment"># 精确搜索</span></span><br><span class="line">            <span class="keyword">for</span> ((i=mtu; i&lt;=mtu+<span class="number">50</span>; i++)); <span class="keyword">do</span></span><br><span class="line">                <span class="keyword">if</span> ! ping -c 1 -M <span class="keyword">do</span> -s $((i-<span class="number">28</span>)) <span class="variable">$target</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">                    <span class="built_in">echo</span> <span class="string">&quot;最优MTU: <span class="subst">$((i-1)</span>)&quot;</span></span><br><span class="line">                    <span class="built_in">return</span></span><br><span class="line">                <span class="keyword">fi</span></span><br><span class="line">            <span class="keyword">done</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;未能检测到合适的MTU值&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用</span></span><br><span class="line">detect_optimal_mtu</span><br></pre></td></tr></table></figure>
-
-<h3 id="系统MTU配置脚本"><a href="#系统MTU配置脚本" class="headerlink" title="系统MTU配置脚本"></a>系统MTU配置脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># set_system_mtu.sh</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">set_system_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> mtu=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> interface=<span class="variable">$&#123;2:-eth0&#125;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;设置 <span class="variable">$interface</span> MTU为 <span class="variable">$mtu</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 临时设置</span></span><br><span class="line">    <span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev <span class="variable">$interface</span> mtu <span class="variable">$mtu</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 永久设置 (Ubuntu)</span></span><br><span class="line">    <span class="keyword">if</span> [[ -f /etc/netplan/01-netcfg.yaml ]]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">sudo</span> sed -i <span class="string">&quot;/mtu:/d&quot;</span> /etc/netplan/01-netcfg.yaml</span><br><span class="line">        <span class="built_in">sudo</span> sed -i <span class="string">&quot;/dhcp4: true/a\\      mtu: <span class="variable">$mtu</span>&quot;</span> /etc/netplan/01-netcfg.yaml</span><br><span class="line">        <span class="built_in">sudo</span> netplan apply</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Docker配置</span></span><br><span class="line">    <span class="keyword">if</span> systemctl is-active --quiet docker; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;配置Docker MTU...&quot;</span></span><br><span class="line">        <span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /etc/docker</span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&#x27;&#123;&quot;mtu&quot;: &#x27;</span><span class="variable">$mtu</span><span class="string">&#x27;&#125;&#x27;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/docker/daemon.json</span><br><span class="line">        <span class="built_in">sudo</span> systemctl restart docker</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;MTU配置完成&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: set_system_mtu 1450</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="⚠️-注意事项和最佳实践"><a href="#⚠️-注意事项和最佳实践" class="headerlink" title="⚠️ 注意事项和最佳实践"></a>⚠️ 注意事项和最佳实践</h2><h3 id="安全注意事项"><a href="#安全注意事项" class="headerlink" title="安全注意事项"></a>安全注意事项</h3><ul>
-<li><strong>生产环境修改要谨慎</strong>: MTU修改可能导致网络中断</li>
-<li><strong>逐步调整</strong>: 从小值开始，逐步调整到最优值</li>
-<li><strong>备份配置</strong>: 修改前备份网络配置文件</li>
-<li><strong>测试验证</strong>: 修改后充分测试网络连通性</li>
-</ul>
-<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><ol>
-<li><strong>自动发现优于手动配置</strong>: 使用工具自动检测最优MTU</li>
-<li><strong>分层一致性</strong>: 确保各网络层MTU配置一致</li>
-<li><strong>监控告警</strong>: 监控网络分片和丢包情况</li>
-<li><strong>文档记录</strong>: 记录MTU配置的原因和数值</li>
-</ol>
-<h3 id="常见误区"><a href="#常见误区" class="headerlink" title="常见误区"></a>常见误区</h3><p>❌ <strong>认为MTU越大越好</strong>: 不是的，要匹配网络环境<br>❌ <strong>只设置应用层MTU</strong>: 需要全链路一致<br>❌ <strong>忽略虚拟化开销</strong>: 虚拟环境需要预留开销<br>❌ <strong>设置后不验证</strong>: 必须通过实际测试验证效果</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1908,7 +2031,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-count">166</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1921,7 +2044,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-count">22</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

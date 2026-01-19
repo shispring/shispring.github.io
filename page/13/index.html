@@ -184,6 +184,150 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/13/kubectl-%E7%9B%B8%E5%85%B3%E8%84%9A%E6%9C%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/13/kubectl-%E7%9B%B8%E5%85%B3%E8%84%9A%E6%9C%AC/" class="post-title-link" itemprop="url">kubectl 相关脚本</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-13 11:57:20 / 修改时间：12:01:59" itemprop="dateCreated datePublished" datetime="2024-11-13T11:57:20+08:00">2024-11-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="统计node上pod数量"><a href="#统计node上pod数量" class="headerlink" title="统计node上pod数量"></a>统计node上pod数量</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for node in $(kubectl get nodes -o name | egrep -v &quot;docker01|docker23|docker08|docker15&quot;); do</span><br><span class="line">  echo &quot;$node: $(kubectl get pods -n wdfwd --field-selector spec.nodeName=$&#123;node##*/&#125; --no-headers | wc -l) Pods&quot;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除处理Terminating的pod"><a href="#删除处理Terminating的pod" class="headerlink" title="删除处理Terminating的pod"></a>删除处理Terminating的pod</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods --all-namespaces | grep Terminating | while read line; do</span><br><span class="line">  pod_name=$(echo $line | awk &#x27;&#123;print $2&#125;&#x27; ) \</span><br><span class="line">  name_space=$(echo $line | awk &#x27;&#123;print $1&#125;&#x27; ); \</span><br><span class="line">  kubectl delete pods $pod_name -n $name_space --grace-period=0 --force</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看当前集群所有pod状态"><a href="#查看当前集群所有pod状态" class="headerlink" title="查看当前集群所有pod状态"></a>查看当前集群所有pod状态</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">k get pod -A | awk &#x27;&#123;print $4&#125;&#x27; | sort | uniq -c | sort -rn</span><br></pre></td></tr></table></figure>
+
+<h2 id="统计制定命名空间下pod的镜像、环境变量、执行参数"><a href="#统计制定命名空间下pod的镜像、环境变量、执行参数" class="headerlink" title="统计制定命名空间下pod的镜像、环境变量、执行参数"></a>统计制定命名空间下pod的镜像、环境变量、执行参数</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># 定义要统计的命名空间，可以自行修改或添加</span><br><span class="line">NAMESPACES=(&quot;default&quot; &quot;kube-system&quot;) </span><br><span class="line"></span><br><span class="line"># 遍历每个命名空间</span><br><span class="line">for ns in &quot;$&#123;NAMESPACES[@]&#125;&quot;; do</span><br><span class="line">  echo &quot;命名空间: $ns&quot;</span><br><span class="line">  echo &quot;===============================&quot;</span><br><span class="line"></span><br><span class="line">  # 获取当前命名空间中的所有Pod信息</span><br><span class="line">  kubectl get pods -n &quot;$ns&quot; -o json | jq -c &#x27;.items[]&#x27; | while read -r pod; do</span><br><span class="line">    pod_name=$(echo &quot;$pod&quot; | jq -r &#x27;.metadata.name&#x27;)</span><br><span class="line">    echo &quot;Pod: $pod_name&quot;</span><br><span class="line">    echo &quot;-------------------&quot;</span><br><span class="line"></span><br><span class="line">    # 获取Pod中的容器列表</span><br><span class="line">    echo &quot;$pod&quot; | jq -c &#x27;.spec.containers[]&#x27; | while read -r container; do</span><br><span class="line">      container_name=$(echo &quot;$container&quot; | jq -r &#x27;.name&#x27;)</span><br><span class="line">      image=$(echo &quot;$container&quot; | jq -r &#x27;.image&#x27;)</span><br><span class="line"></span><br><span class="line">      echo &quot;  容器名: $container_name&quot;</span><br><span class="line">      echo &quot;  镜像: $image&quot;</span><br><span class="line"></span><br><span class="line">      # 获取环境变量</span><br><span class="line">      echo &quot;  环境变量:&quot;</span><br><span class="line">      envs=$(echo &quot;$container&quot; | jq -c &#x27;.env[]?&#x27;)</span><br><span class="line">      if [[ -z &quot;$envs&quot; ]]; then</span><br><span class="line">        echo &quot;    无&quot;</span><br><span class="line">      else</span><br><span class="line">        echo &quot;$envs&quot; | while read -r env; do</span><br><span class="line">          env_name=$(echo &quot;$env&quot; | jq -r &#x27;.name&#x27;)</span><br><span class="line">          env_value=$(echo &quot;$env&quot; | jq -r &#x27;.value // empty&#x27;)</span><br><span class="line">          value_from=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom // empty&#x27;)</span><br><span class="line"></span><br><span class="line">          if [[ -n &quot;$env_value&quot; ]]; then</span><br><span class="line">            echo &quot;    $env_name: $env_value&quot;</span><br><span class="line">          elif [[ -n &quot;$value_from&quot; ]]; then</span><br><span class="line">            # 处理 valueFrom 来源信息</span><br><span class="line">            config_map_ref=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom.configMapKeyRef.name // empty&#x27;)</span><br><span class="line">            secret_ref=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom.secretKeyRef.name // empty&#x27;)</span><br><span class="line">            field_ref=$(echo &quot;$env&quot; | jq -r &#x27;.valueFrom.fieldRef.fieldPath // empty&#x27;)</span><br><span class="line">            </span><br><span class="line">            if [[ -n &quot;$config_map_ref&quot; ]]; then</span><br><span class="line">              echo &quot;    $env_name (from ConfigMap: $config_map_ref)&quot;</span><br><span class="line">            elif [[ -n &quot;$secret_ref&quot; ]]; then</span><br><span class="line">              echo &quot;    $env_name (from Secret: $secret_ref)&quot;</span><br><span class="line">            elif [[ -n &quot;$field_ref&quot; ]]; then</span><br><span class="line">              echo &quot;    $env_name (from FieldRef: $field_ref)&quot;</span><br><span class="line">            else</span><br><span class="line">              echo &quot;    $env_name: 未知来源&quot;</span><br><span class="line">            fi</span><br><span class="line">          fi</span><br><span class="line">        done</span><br><span class="line">      fi</span><br><span class="line"></span><br><span class="line">      # 获取执行参数</span><br><span class="line">      echo &quot;  执行参数:&quot;</span><br><span class="line">      args=$(echo &quot;$container&quot; | jq -c &#x27;.args // []&#x27;)</span><br><span class="line">      if [[ &quot;$args&quot; == &quot;[]&quot; ]]; then</span><br><span class="line">        echo &quot;    无&quot;</span><br><span class="line">      else</span><br><span class="line">        echo &quot;$args&quot; | jq -r &#x27;.[] | &quot;    \(. // &quot;null&quot;)&quot;&#x27;</span><br><span class="line">      fi</span><br><span class="line"></span><br><span class="line">      echo &quot;-------------------&quot;</span><br><span class="line">    done</span><br><span class="line">    echo &quot;&quot;</span><br><span class="line">  done</span><br><span class="line">  echo &quot;===============================&quot;</span><br><span class="line">  echo &quot;&quot;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/nginx-demo-service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/08/nginx-demo-service/" class="post-title-link" itemprop="url">nginx demo service</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-08 20:13:31 / 修改时间：20:15:11" itemprop="dateCreated datePublished" datetime="2024-11-08T20:13:31+08:00">2024-11-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx/" itemprop="url" rel="index"><span itemprop="name">nginx</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="配置nginx服务"><a href="#配置nginx服务" class="headerlink" title="配置nginx服务"></a>配置nginx服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOL &gt; /Users/xxx/share/nginx.conf</span><br><span class="line">events &#123;&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name localhost;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root /usr/share/nginx/html;</span><br><span class="line">            autoindex on; # 启用目录列表功能</span><br><span class="line">            autoindex_exact_size off; # 以KB或MB显示文件大小</span><br><span class="line">            autoindex_localtime on; # 以本地时间显示文件的修改时间</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOL</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动docker服务"><a href="#启动docker服务" class="headerlink" title="启动docker服务"></a>启动docker服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx</span><br><span class="line"></span><br><span class="line">docker run --name nginx-share -d \</span><br><span class="line">    -p 8080:80 \</span><br><span class="line">    -v /Users/xxx/share:/usr/share/nginx/html \</span><br><span class="line">    -v /Users/xxx/share/nginx.conf:/etc/nginx/nginx.conf:ro \</span><br><span class="line">    nginx</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E4%BA%8C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1142,219 +1286,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/31/nginx-%E6%A8%A1%E5%9D%97%E5%8F%8A%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">nginx 模块及配置</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-10-31 12:05:49 / 修改时间：18:28:43" itemprop="dateCreated datePublished" datetime="2024-10-31T12:05:49+08:00">2024-10-31</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/nginx/" itemprop="url" rel="index"><span itemprop="name">nginx</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="统计连接数"><a href="#统计连接数" class="headerlink" title="统计连接数"></a>统计连接数</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#netstat</span><br><span class="line">netstat -ant | awk &#x27;NR &gt; 2 &#123;print $NF&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#ss</span><br><span class="line">ss -tan | awk &#x27;NR &gt; 2 &#123;print $1&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#读取/proc/net/tcp文件</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;print $4&#125;&#x27; | cut -d&#x27;:&#x27; -f2 | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#含义介绍</span><br><span class="line">TCP_ESTABLISHED:1   TCP_SYN_SENT:2</span><br><span class="line">TCP_SYN_RECV:3      TCP_FIN_WAIT1:4</span><br><span class="line">TCP_FIN_WAIT2:5     TCP_TIME_WAIT:6</span><br><span class="line">TCP_CLOSE:7         TCP_CLOSE_WAIT:8</span><br><span class="line">TCP_LAST_ACL:9      TCP_LISTEN:10</span><br><span class="line">TCP_CLOSING:11</span><br><span class="line"></span><br><span class="line">#获取linux服务器上数据</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;</span><br><span class="line">    status=sprintf(&quot;%02X&quot;, strtonum(&quot;0x&quot;$4));</span><br><span class="line">    tcp_states[&quot;01&quot;]=&quot;TCP_ESTABLISHED&quot;;</span><br><span class="line">    tcp_states[&quot;02&quot;]=&quot;TCP_SYN_SENT&quot;;</span><br><span class="line">    tcp_states[&quot;03&quot;]=&quot;TCP_SYN_RECV&quot;;</span><br><span class="line">    tcp_states[&quot;04&quot;]=&quot;TCP_FIN_WAIT1&quot;;</span><br><span class="line">    tcp_states[&quot;05&quot;]=&quot;TCP_FIN_WAIT2&quot;;</span><br><span class="line">    tcp_states[&quot;06&quot;]=&quot;TCP_TIME_WAIT&quot;;</span><br><span class="line">    tcp_states[&quot;07&quot;]=&quot;TCP_CLOSE&quot;;</span><br><span class="line">    tcp_states[&quot;08&quot;]=&quot;TCP_CLOSE_WAIT&quot;;</span><br><span class="line">    tcp_states[&quot;09&quot;]=&quot;TCP_LAST_ACK&quot;;</span><br><span class="line">    tcp_states[&quot;0A&quot;]=&quot;TCP_LISTEN&quot;;</span><br><span class="line">    tcp_states[&quot;0B&quot;]=&quot;TCP_CLOSING&quot;;</span><br><span class="line">    print tcp_states[status];</span><br><span class="line">&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line"></span><br><span class="line">#获取容器上的网络数据</span><br><span class="line">kubectl exec -it &lt;pod-name&gt; -n &lt;namespace&gt; -- sh -c &quot;</span><br><span class="line">cat /proc/net/tcp | awk &#x27;NR &gt; 1 &#123;</span><br><span class="line">    status=\$4;</span><br><span class="line">    tcp_states[\&quot;01\&quot;]=\&quot;TCP_ESTABLISHED\&quot;;</span><br><span class="line">    tcp_states[\&quot;02\&quot;]=\&quot;TCP_SYN_SENT\&quot;;</span><br><span class="line">    tcp_states[\&quot;03\&quot;]=\&quot;TCP_SYN_RECV\&quot;;</span><br><span class="line">    tcp_states[\&quot;04\&quot;]=\&quot;TCP_FIN_WAIT1\&quot;;</span><br><span class="line">    tcp_states[\&quot;05\&quot;]=\&quot;TCP_FIN_WAIT2\&quot;;</span><br><span class="line">    tcp_states[\&quot;06\&quot;]=\&quot;TCP_TIME_WAIT\&quot;;</span><br><span class="line">    tcp_states[\&quot;07\&quot;]=\&quot;TCP_CLOSE\&quot;;</span><br><span class="line">    tcp_states[\&quot;08\&quot;]=\&quot;TCP_CLOSE_WAIT\&quot;;</span><br><span class="line">    tcp_states[\&quot;09\&quot;]=\&quot;TCP_LAST_ACK\&quot;;</span><br><span class="line">    tcp_states[\&quot;0A\&quot;]=\&quot;TCP_LISTEN\&quot;;</span><br><span class="line">    tcp_states[\&quot;0B\&quot;]=\&quot;TCP_CLOSING\&quot;;</span><br><span class="line">    status=sprintf(\&quot;%02X\&quot;, \&quot;0x\&quot; substr(status, 1, 2));</span><br><span class="line">    print tcp_states[status];</span><br><span class="line">&#125;&#x27; | sort | uniq -c | sort -nr</span><br><span class="line">&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031145102.png" alt="tcp" title="tcp1"></p>
-<hr>
-<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031120653.png" alt="nginx架构" title="nginx2"></p>
-<h3 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h3><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20241031120448.png" alt="nginx模块" title="nginx1"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/29/k8s-patch-%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/29/k8s-patch-%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">k8s patch 用法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-10-29 13:59:10" itemprop="dateCreated datePublished" datetime="2024-10-29T13:59:10+08:00">2024-10-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-10-29 18:15:14" itemprop="dateModified" datetime="2025-10-29T18:15:14+08:00">2025-10-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="3-种-patch-类型"><a href="#3-种-patch-类型" class="headerlink" title="3 种 patch 类型"></a>3 种 patch 类型</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">参考：</span><br><span class="line"> https://xie.infoq.cn/article/8fbdf51461881b87333b904cf</span><br><span class="line"></span><br><span class="line">1 strategic patch（默认）：根据不同字段 patchStrategy 决定具体的合并 patch 策略。 Strategic merge patch 并非通用的 RFC 标准，而是 Kubernetes 特有的一种更新 Kubernetes 资源对象的方式。与 JSON merge patch 和 JSON patch 相比，strategic merge patch 更为强大。</span><br><span class="line"></span><br><span class="line">2 JSON merge patch：遵循 JSON Merge Patch, RFC 7386[1] 规范，根据 patch 中提供的期望更改的字段及其对应的值，更新到目标中。</span><br><span class="line"></span><br><span class="line">3 JSON patch：遵循 JSON Patch, RFC 6902[2] 规范，通过明确的指令表示具体的操作。</span><br><span class="line">`kubectl patch` 的 `--type=&#x27;json&#x27;` 方式是一种非常灵活的 JSON Patch 操作，可以实现 添加、删除、更新多个字段 的功能。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="使用-JSON-patch-更新资源"><a href="#使用-JSON-patch-更新资源" class="headerlink" title="使用 JSON patch 更新资源"></a>使用 JSON patch 更新资源</h2><p>JSON Patch 遵循 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6902">RFC 6902</a> 标准。常用操作有：  </p>
-<ul>
-<li><code>add</code>：向指定路径添加新字段。</li>
-<li><code>remove</code>：删除指定路径的字段。</li>
-<li><code>replace</code>：更新已有字段的值。</li>
-<li><code>copy</code>：复制一个字段到另一个位置。</li>
-<li><code>move</code>：移动字段。</li>
-<li><code>test</code>：用于断言字段是否存在，常用于保证安全更新。</li>
-</ul>
-<hr>
-<h3 id="1-更新已有字段的值（replace）"><a href="#1-更新已有字段的值（replace）" class="headerlink" title="1. 更新已有字段的值（replace）"></a>1. 更新已有字段的值（<code>replace</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[&#123;&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1.2 TLSv1.3&quot;&#125;]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;replace&quot;</code>：替换现有字段值。</li>
-<li><code>path: &quot;/data/ssl-protocols&quot;</code>：要更新的字段路径。</li>
-<li><code>value</code>：新的值。</li>
-</ul>
-<hr>
-<h3 id="2-添加多个新字段（add）"><a href="#2-添加多个新字段（add）" class="headerlink" title="2. 添加多个新字段（add）"></a>2. 添加多个新字段（<code>add</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1 TLSv1.1 TLSv1.2 TLSv1.3&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;, &quot;value&quot;: &quot;ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:@SECLEVEL=0&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;add&quot;</code>：为 ConfigMap 增加新的键值对。</li>
-<li>多个字段用数组表示，每个 JSON Patch 操作为一个对象。</li>
-</ul>
-<hr>
-<h3 id="3-删除多个字段（remove）"><a href="#3-删除多个字段（remove）" class="headerlink" title="3. 删除多个字段（remove）"></a>3. 删除多个字段（<code>remove</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#检查主机port占用</span></span><br><span class="line">kubectl get deploy ingress-nginx-controller -n ingress-nginx -o jsonpath=<span class="string">&#x27;&#123;.spec.template.spec.containers[0].ports&#125;&#x27;</span> | jq</span><br><span class="line"></span><br><span class="line"><span class="comment">#删除主机port</span></span><br><span class="line">kubectl patch deploy ingress-nginx-controller -n ingress-nginx \</span><br><span class="line">--<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/spec/template/spec/containers/0/ports/0/hostPort&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/spec/template/spec/containers/0/ports/1/hostPort&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/spec/template/spec/containers/0/ports/2/hostPort&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;remove&quot;</code>：删除指定字段。</li>
-<li>如果字段不存在，会报错，可以先用 <code>kubectl get</code> 检查字段。</li>
-</ul>
-<hr>
-<h3 id="4-复制字段（copy）"><a href="#4-复制字段（copy）" class="headerlink" title="4. 复制字段（copy）"></a>4. 复制字段（<code>copy</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[&#123;&quot;op&quot;: &quot;copy&quot;, &quot;from&quot;: &quot;/data/ssl-protocols&quot;, &quot;path&quot;: &quot;/data/backup-ssl-protocols&quot;&#125;]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;copy&quot;</code>：从 <code>/data/ssl-protocols</code> 复制值到 <code>/data/backup-ssl-protocols</code>。</li>
-</ul>
-<hr>
-<h3 id="5-条件测试字段（test）并更新"><a href="#5-条件测试字段（test）并更新" class="headerlink" title="5. 条件测试字段（test）并更新"></a>5. 条件测试字段（<code>test</code>）并更新</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;test&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1 TLSv1.2&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1.2 TLSv1.3&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;test&quot;</code>：检查 <code>ssl-protocols</code> 的值是否匹配。如果不匹配，则不会执行替换操作。</li>
-</ul>
-<hr>
-<h3 id="6-merge-json-用法"><a href="#6-merge-json-用法" class="headerlink" title="6. merge &amp; json 用法"></a>6. merge &amp; json 用法</h3><table>
-<thead>
-<tr>
-<th align="left">项目</th>
-<th align="left">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><code>merge</code></td>
-<td align="left">直接将指定字段合并到现有资源，不要求父节点已存在（最适合补充 annotations）</td>
-</tr>
-<tr>
-<td align="left"><code>json</code></td>
-<td align="left">纯 JSON Patch 语义，要求每一层路径存在，不存在就会 400 错误（适合复杂 patch）</td>
-</tr>
-</tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">#在 JSON patch 语义中，如果父节点 (annotations) 不存在，直接 patch 子字段（annotations.xxx）是非法的，会被服务器拒绝。</span><br><span class="line"></span><br><span class="line">kubectl patch ingress nginx-demo -n xxx \</span><br><span class="line">--type=&#x27;merge&#x27; \</span><br><span class="line">-p=&#x27;&#123;</span><br><span class="line">  &quot;metadata&quot;: &#123;</span><br><span class="line">    &quot;annotations&quot;: &#123;</span><br><span class="line">      &quot;nginx.ingress.kubernetes.io/proxy-connect-timeout&quot;: &quot;60&quot;,</span><br><span class="line">      &quot;nginx.ingress.kubernetes.io/proxy-send-timeout&quot;: &quot;600&quot;,</span><br><span class="line">      &quot;nginx.ingress.kubernetes.io/proxy-read-timeout&quot;: &quot;600&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;&#x27;</span><br><span class="line"></span><br><span class="line">#json使用</span><br><span class="line">kubectl patch ingress nginx-demo -n xxx \</span><br><span class="line">  --type=&#x27;json&#x27; \</span><br><span class="line">  -p=&#x27;[</span><br><span class="line">    &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/metadata/annotations/nginx.ingress.kubernetes.io~1proxy-connect-timeout&quot;,  &quot;value&quot;: &quot;60&quot;&#125;,</span><br><span class="line">    &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/metadata/annotations/nginx.ingress.kubernetes.io~1proxy-send-timeout&quot;,  &quot;value&quot;: &quot;600&quot;&#125;,</span><br><span class="line">    &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/metadata/annotations/nginx.ingress.kubernetes.io~1proxy-read-timeout&quot;,  &quot;value&quot;: &quot;600&quot;&#125;</span><br><span class="line">  ]&#x27;</span><br></pre></td></tr></table></figure>
-<hr>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>使用 <code>--type=&#39;json&#39;</code> 进行 PATCH 操作非常灵活，特别适合批量修改配置。  </p>
-<ul>
-<li><code>add</code>：新增字段。</li>
-<li><code>replace</code>：更新现有字段。</li>
-<li><code>remove</code>：删除不需要的字段。</li>
-<li><code>copy</code> 和 <code>move</code>：在 JSON 中重构结构。</li>
-<li><code>test</code>：用于确保一致性，避免不正确的更新。</li>
-</ul>
-<p>这些操作特别适合集群自动化运维和精细化的配置变更。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1426,7 +1357,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-count">166</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1439,7 +1370,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-count">22</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

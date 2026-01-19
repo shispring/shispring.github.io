@@ -184,6 +184,269 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/" class="post-title-link" itemprop="url">容器文件系统挂载</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-19 12:36:25 / 修改时间：12:44:45" itemprop="dateCreated datePublished" datetime="2025-09-19T12:36:25+08:00">2025-09-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="1-查看挂载情况"><a href="#1-查看挂载情况" class="headerlink" title="1. 查看挂载情况"></a>1. 查看挂载情况</h2><ul>
+<li><p><strong>看挂载情况</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep /run/containerd/io.containerd.runtime.v2.task/k8s.io</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>看是否有进程占用</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y psmisc</span><br><span class="line">fuser -vm /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof | grep 200ab1146de</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>看 containerd 里是否有残留 metadata</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io containers list | grep 200ab1146de</span><br><span class="line">ctr -n k8s.io tasks list | grep 200ab1146de</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol>
+<li><strong><code>ctr -n k8s.io tasks list | grep 200ab1146de</code> → 状态 STOPPED</strong></li>
+<li><strong><code>fuser -vm</code> 显示很多 <code>containerd-shim</code>、<code>qemu-system-x86</code>、<code>virtiofsd</code> 等进程引用这个目录</strong><ul>
+<li>说明这个目录（mountpoint）仍然被多个进程占用着。</li>
+<li>注意：这里的 “F.c..” &#x2F; “frc..” 表示打开了这个目录的 <strong>文件描述符</strong>，并且有读写&#x2F;控制引用。</li>
+</ul>
+</li>
+<li><strong>整体情况</strong><ul>
+<li>内核 <code>overlayfs</code> 挂载点还在，inode 没回收。</li>
+<li>容器已经 “STOPPED”（不可用），但是挂载点被其他 shim &#x2F; qemu &#x2F; virtiofsd 引用，所以无法自动卸载。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="2-mount-l-命令含义："><a href="#2-mount-l-命令含义：" class="headerlink" title="2. mount -l 命令含义："></a>2. mount -l 命令含义：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep <span class="string">&#x27;/run/containerd/io.containerd.runtime.v2.task/k8s.io&#x27;</span> | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | xargs -r <span class="built_in">sudo</span> umount -l</span><br></pre></td></tr></table></figure>
+
+<h3 id="这个命令会做什么？"><a href="#这个命令会做什么？" class="headerlink" title="这个命令会做什么？"></a>这个命令会做什么？</h3><ul>
+<li>找出所有挂载在 <code>/run/containerd/io.containerd.runtime.v2.task/k8s.io/*</code> 下的 mount point。</li>
+<li>对它们执行 <code>umount -l</code>（lazy umount）。</li>
+</ul>
+<p><strong>lazy umount 含义</strong>：</p>
+<ul>
+<li>马上把挂载点从 mount namespace 里“摘掉”，进程不再能通过路径访问它。</li>
+<li>如果有进程仍然持有 fd，会等它们关闭 fd 之后再真正释放资源（inode、dentry、slab）。</li>
+<li>这样避免了 <code>umount</code> 报错 “busy”，算是比较温和的方式。</li>
+</ul>
+<hr>
+<h2 id="3-对当前系统的影响"><a href="#3-对当前系统的影响" class="headerlink" title="3. 对当前系统的影响"></a>3. 对当前系统的影响</h2><ul>
+<li><p><strong>如果容器仍然活跃</strong>：对应 Pod 会立刻失效，因为 rootfs 被摘掉了，里面的文件系统消失。</p>
+</li>
+<li><p><strong>如果容器已经 STOPPED</strong>（像你这种）：</p>
+<ul>
+<li>大多数情况下影响有限，等价于清理垃圾挂载点。</li>
+<li>不过要小心：如果 containerd metadata 里还记录这个容器存在，containerd 在后续 GC 或者回收时可能会发现找不到挂载点，从而报错。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="4-建议操作顺序"><a href="#4-建议操作顺序" class="headerlink" title="4. 建议操作顺序"></a>4. 建议操作顺序</h2><p>更温和的方案可以这样分级：</p>
+<ol>
+<li><p><strong>优先让 containerd 清理</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io tasks <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br><span class="line">ctr -n k8s.io containers <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+
+<p>（如果卡住，说明 shim&#x2F;进程依赖还在）</p>
+</li>
+<li><p><strong>确认 mount</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep 200ab1146de</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>再 lazy umount</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> umount -l /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9/rootfs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>最后清理目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>如果有大量残留</strong>，你那个 <code>awk | xargs umount -l</code> 可以作为批量清理手段，但最好在确认这些容器都已经 STOPPED 或已被 K8s 删除的前提下做。</p>
+</li>
+</ol>
+<hr>
+<p>✅ 结论：</p>
+<ul>
+<li>你的 <code>umount -l</code> 是温和可行的，不会直接 kill 进程，但会让容器 rootfs 消失。</li>
+<li><strong>如果只是清理 STOPPED 的残留容器</strong>，几乎没副作用，还能回收 inode&#x2F;slab。</li>
+<li>建议 <strong>先用 ctr rm</strong> 尝试让 containerd 自己清理，再手动 umount + rm 兜底。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">MTU完整指南和故障排查</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-16 11:03:44" itemprop="dateCreated datePublished" datetime="2025-09-16T11:03:44+08:00">2025-09-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-27 10:54:04" itemprop="dateModified" datetime="2025-10-27T10:54:04+08:00">2025-10-27</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="🎯-MTU快速理解"><a href="#🎯-MTU快速理解" class="headerlink" title="🎯 MTU快速理解"></a>🎯 MTU快速理解</h2><h3 id="什么是MTU？"><a href="#什么是MTU？" class="headerlink" title="什么是MTU？"></a>什么是MTU？</h3><p><strong>MTU (Maximum Transmission Unit)</strong> &#x3D; 网络接口一次能传输的最大数据包大小（字节）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">简单类比：</span><br><span class="line">MTU就像货车的载重限制</span><br><span class="line">- 货车限重5吨，装6吨就超载了</span><br><span class="line">- 网卡MTU=1500，发送1600字节包就会有问题</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">标准以太网MTU = 1500字节</span><br><span class="line">├── IP头: 20字节</span><br><span class="line">├── TCP头: 20字节  </span><br><span class="line">└── 数据载荷: 最大1460字节</span><br><span class="line"></span><br><span class="line">虚拟化环境MTU &lt; 1500字节</span><br><span class="line">├── 原始数据: 1460字节</span><br><span class="line">├── TCP/IP头: 40字节</span><br><span class="line">├── 虚拟化开销: 50字节</span><br><span class="line">└── 总计: 1550字节 &gt; 1500字节 ❌超出限制</span><br></pre></td></tr></table></figure>
+
+<h2 id="🔍-MTU检测和查看命令"><a href="#🔍-MTU检测和查看命令" class="headerlink" title="🔍 MTU检测和查看命令"></a>🔍 MTU检测和查看命令</h2><h3 id="1-查看当前MTU值"><a href="#1-查看当前MTU值" class="headerlink" title="1. 查看当前MTU值"></a>1. 查看当前MTU值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有网络接口MTU</span></span><br><span class="line">ip <span class="built_in">link</span> show</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">ifconfig</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定接口</span></span><br><span class="line">ip <span class="built_in">link</span> show eth0</span><br><span class="line">ip <span class="built_in">link</span> show docker0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 一行命令查看所有接口MTU</span></span><br><span class="line">ip -o <span class="built_in">link</span> show | awk <span class="string">&#x27;&#123;print $2, $5&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-测试MTU大小"><a href="#2-测试MTU大小" class="headerlink" title="2. 测试MTU大小"></a>2. 测试MTU大小</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ping测试MTU (Linux)</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 8.8.8.8    <span class="comment"># 1472 + 28(ICMP头) = 1500</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1500 8.8.8.8    <span class="comment"># 会失败，因为加上头部超过MTU</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Windows下测试</span></span><br><span class="line">ping -f -l 1472 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动发现路径MTU</span></span><br><span class="line">tracepath google.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Docker-MTU查看"><a href="#3-Docker-MTU查看" class="headerlink" title="3. Docker MTU查看"></a>3. Docker MTU查看</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看Docker网络MTU</span></span><br><span class="line">docker network <span class="built_in">ls</span></span><br><span class="line">docker network inspect bridge | grep -i mtu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器网络MTU</span></span><br><span class="line">docker <span class="built_in">exec</span> &lt;container&gt; ip <span class="built_in">link</span> show eth0</span><br></pre></td></tr></table></figure>
+
+<h2 id="⚙️-MTU配置方法"><a href="#⚙️-MTU配置方法" class="headerlink" title="⚙️ MTU配置方法"></a>⚙️ MTU配置方法</h2><h3 id="1-临时修改MTU"><a href="#1-临时修改MTU" class="headerlink" title="1. 临时修改MTU"></a>1. 临时修改MTU</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改网络接口MTU</span></span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev eth0 mtu 1450</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 mtu 1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改Docker桥接MTU</span></span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 down</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 mtu 1450</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev docker0 up</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-永久配置MTU"><a href="#2-永久配置MTU" class="headerlink" title="2. 永久配置MTU"></a>2. 永久配置MTU</h3><h4 id="Docker-daemon配置"><a href="#Docker-daemon配置" class="headerlink" title="Docker daemon配置"></a>Docker daemon配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;mtu&quot;</span>: 1450,</span><br><span class="line">  <span class="string">&quot;bridge&quot;</span>: <span class="string">&quot;docker0&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启Docker服务</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h4 id="系统网络接口配置"><a href="#系统网络接口配置" class="headerlink" title="系统网络接口配置"></a>系统网络接口配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CentOS/RHEL: /etc/sysconfig/network-scripts/ifcfg-eth0</span></span><br><span class="line">MTU=1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu: /etc/netplan/01-netcfg.yaml</span></span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">  ethernets:</span><br><span class="line">    eth0:</span><br><span class="line">      mtu: 1450</span><br><span class="line"></span><br><span class="line"><span class="comment"># 应用配置</span></span><br><span class="line"><span class="built_in">sudo</span> netplan apply</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Kubernetes环境MTU配置"><a href="#3-Kubernetes环境MTU配置" class="headerlink" title="3. Kubernetes环境MTU配置"></a>3. Kubernetes环境MTU配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CNI插件配置 (以Calico为例)</span></span><br><span class="line"><span class="comment"># /etc/cni/net.d/10-calico.conf</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;name&quot;</span>: <span class="string">&quot;k8s-pod-network&quot;</span>,</span><br><span class="line">  <span class="string">&quot;cniVersion&quot;</span>: <span class="string">&quot;0.3.1&quot;</span>,</span><br><span class="line">  <span class="string">&quot;plugins&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;type&quot;</span>: <span class="string">&quot;calico&quot;</span>,</span><br><span class="line">      <span class="string">&quot;mtu&quot;</span>: 1450</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="🚨-需要关注MTU的场景"><a href="#🚨-需要关注MTU的场景" class="headerlink" title="🚨 需要关注MTU的场景"></a>🚨 需要关注MTU的场景</h2><h3 id="1-虚拟化环境-⭐⭐⭐"><a href="#1-虚拟化环境-⭐⭐⭐" class="headerlink" title="1. 虚拟化环境 ⭐⭐⭐"></a>1. 虚拟化环境 ⭐⭐⭐</h3><p><strong>场景</strong>: VMware、KVM、Hyper-V等虚拟机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">ip <span class="built_in">link</span> show | grep mtu</span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 &lt;target&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- VM网卡MTU=1500，但物理网卡实际支持&lt;1500</span><br><span class="line">- 多层虚拟化叠加导致MTU递减</span><br><span class="line">- VXLAN/GRE隧道额外开销</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-容器环境-⭐⭐⭐"><a href="#2-容器环境-⭐⭐⭐" class="headerlink" title="2. 容器环境 ⭐⭐⭐"></a>2. 容器环境 ⭐⭐⭐</h3><p><strong>场景</strong>: Docker、Kubernetes、容器网络</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">docker network inspect bridge</span><br><span class="line">kubectl get nodes -o custom-columns=<span class="string">&quot;NAME:.metadata.name,MTU:.status.addresses[0].type&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- Docker桥接网络MTU不匹配</span><br><span class="line">- Overlay网络额外封装</span><br><span class="line">- CNI插件配置错误</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-云环境-⭐⭐"><a href="#3-云环境-⭐⭐" class="headerlink" title="3. 云环境 ⭐⭐"></a>3. 云环境 ⭐⭐</h3><p><strong>场景</strong>: AWS、阿里云、腾讯云等公有云</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- 云主机默认MTU可能&lt;1500</span><br><span class="line">- VPC网络间MTU不一致</span><br><span class="line">- 跨可用区网络MTU差异</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-SD-WAN-隧道网络-⭐⭐"><a href="#4-SD-WAN-隧道网络-⭐⭐" class="headerlink" title="4. SD-WAN&#x2F;隧道网络 ⭐⭐"></a>4. SD-WAN&#x2F;隧道网络 ⭐⭐</h3><p><strong>场景</strong>: VPN、专线、隧道连接</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查命令</span></span><br><span class="line">tracepath &lt;remote-host&gt;</span><br><span class="line">mtr --report &lt;remote-host&gt;</span><br><span class="line">mtr -rn www.baidu.com</span><br><span class="line"></span><br><span class="line"><span class="comment">#参考</span></span><br><span class="line">https://www.cnblogs.com/xzongblogs/p/15062134.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见问题</span></span><br><span class="line">- VPN隧道额外开销</span><br><span class="line">- MPLS网络MTU限制</span><br><span class="line">- 跨运营商网络MTU不统一</span><br></pre></td></tr></table></figure>
+
+<h2 id="🛠️-MTU故障排查流程"><a href="#🛠️-MTU故障排查流程" class="headerlink" title="🛠️ MTU故障排查流程"></a>🛠️ MTU故障排查流程</h2><h3 id="阶段1-症状识别"><a href="#阶段1-症状识别" class="headerlink" title="阶段1: 症状识别"></a>阶段1: 症状识别</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 常见症状</span></span><br><span class="line">✓ 大文件传输失败或很慢</span><br><span class="line">✓ SSH连接建立后命令执行卡死</span><br><span class="line">✓ HTTP请求间歇性失败</span><br><span class="line">✓ 数据库连接超时</span><br><span class="line">✓ 文件上传失败</span><br><span class="line"></span><br><span class="line"><span class="comment"># 快速检测命令</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1472 &lt;target&gt;     <span class="comment"># 测试是否能通</span></span><br><span class="line">ping -M <span class="keyword">do</span> -s 1400 &lt;target&gt;     <span class="comment"># 降低测试</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="阶段2-MTU路径发现"><a href="#阶段2-MTU路径发现" class="headerlink" title="阶段2: MTU路径发现"></a>阶段2: MTU路径发现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法1: tracepath (推荐)</span></span><br><span class="line">tracepath google.com</span><br><span class="line"><span class="comment"># 输出会显示路径上的MTU值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法2: ping二分法测试</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">find_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> host=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> low=1</span><br><span class="line">    <span class="built_in">local</span> high=1500</span><br><span class="line">    <span class="keyword">while</span> [ <span class="variable">$low</span> -lt <span class="variable">$high</span> ]; <span class="keyword">do</span></span><br><span class="line">        <span class="built_in">local</span> mid=$(( (low + high + <span class="number">1</span>) / <span class="number">2</span> ))</span><br><span class="line">        <span class="keyword">if</span> ping -c 1 -M <span class="keyword">do</span> -s <span class="variable">$mid</span> <span class="variable">$host</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">            low=<span class="variable">$mid</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            high=$((mid - <span class="number">1</span>))</span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;最大MTU: <span class="subst">$((low + 28)</span>)&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: find_mtu google.com</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="阶段3-分层排查"><a href="#阶段3-分层排查" class="headerlink" title="阶段3: 分层排查"></a>阶段3: 分层排查</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 主机网络层</span></span><br><span class="line">ip <span class="built_in">link</span> show                    <span class="comment"># 查看接口MTU</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/route             <span class="comment"># 查看路由表</span></span><br><span class="line">netstat -i                      <span class="comment"># 查看网络统计</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 虚拟化层</span></span><br><span class="line"><span class="comment"># VMware</span></span><br><span class="line">vmware-toolbox-cmd <span class="built_in">stat</span> speed</span><br><span class="line"><span class="comment"># KVM</span></span><br><span class="line">virsh domiflist &lt;vm-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 容器层</span></span><br><span class="line">docker network inspect bridge</span><br><span class="line">kubectl describe node | grep -i mtu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 应用层</span></span><br><span class="line">ss -i                           <span class="comment"># 查看TCP连接信息</span></span><br><span class="line">netstat -s | grep -i fragment   <span class="comment"># 查看分片统计</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="阶段4-性能验证"><a href="#阶段4-性能验证" class="headerlink" title="阶段4: 性能验证"></a>阶段4: 性能验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试脚本</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="comment"># mtu_test.sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== MTU性能测试 ===&quot;</span></span><br><span class="line"><span class="keyword">for</span> size <span class="keyword">in</span> 1400 1450 1472 1500; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> -n <span class="string">&quot;测试 MTU <span class="variable">$size</span>: &quot;</span></span><br><span class="line">    <span class="keyword">if</span> ping -c 3 -M <span class="keyword">do</span> -s $((size-<span class="number">28</span>)) 8.8.8.8 &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;✓ 通过&quot;</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;✗ 失败&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="📊-不同场景的MTU推荐值"><a href="#📊-不同场景的MTU推荐值" class="headerlink" title="📊 不同场景的MTU推荐值"></a>📊 不同场景的MTU推荐值</h2><h3 id="标准网络环境"><a href="#标准网络环境" class="headerlink" title="标准网络环境"></a>标准网络环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">以太网: 1500          <span class="comment"># 标准值</span></span><br><span class="line">千兆以太网: 9000      <span class="comment"># Jumbo Frame</span></span><br><span class="line">Wi-Fi: 1500           <span class="comment"># 通常与以太网相同</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="虚拟化环境"><a href="#虚拟化环境" class="headerlink" title="虚拟化环境"></a>虚拟化环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">VMware vSphere: 1450-1480    <span class="comment"># 考虑VXLAN开销</span></span><br><span class="line">KVM/QEMU: 1450               <span class="comment"># 保守值</span></span><br><span class="line">Hyper-V: 1500                <span class="comment"># 通常支持标准值</span></span><br><span class="line">Docker: 1450-1480            <span class="comment"># 取决于底层网络</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="云环境"><a href="#云环境" class="headerlink" title="云环境"></a>云环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">AWS EC2: 1500 (enhanced networking)</span><br><span class="line">       : 1500-9000 (placement group)</span><br><span class="line">阿里云ECS: 1500</span><br><span class="line">腾讯云CVM: 1500</span><br><span class="line">Azure VM: 1500</span><br></pre></td></tr></table></figure>
+
+<h3 id="容器网络"><a href="#容器网络" class="headerlink" title="容器网络"></a>容器网络</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Docker bridge: 1450-1480</span><br><span class="line">Kubernetes:</span><br><span class="line">  - Flannel: 1450</span><br><span class="line">  - Calico: 1440-1480  </span><br><span class="line">  - Weave: 1376</span><br><span class="line">  - Cilium: 1450</span><br></pre></td></tr></table></figure>
+
+<h2 id="🔧-自动化MTU管理脚本"><a href="#🔧-自动化MTU管理脚本" class="headerlink" title="🔧 自动化MTU管理脚本"></a>🔧 自动化MTU管理脚本</h2><h3 id="MTU检测脚本"><a href="#MTU检测脚本" class="headerlink" title="MTU检测脚本"></a>MTU检测脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># auto_mtu_detect.sh</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">detect_optimal_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> target=<span class="variable">$&#123;1:-8.8.8.8&#125;</span></span><br><span class="line">    <span class="built_in">local</span> max_mtu=1500</span><br><span class="line">    <span class="built_in">local</span> min_mtu=1200</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;正在检测到 <span class="variable">$target</span> 的最优MTU...&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> ((mtu=max_mtu; mtu&gt;=min_mtu; mtu-=<span class="number">50</span>)); <span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> ping -c 2 -M <span class="keyword">do</span> -s $((mtu-<span class="number">28</span>)) <span class="variable">$target</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;发现可用MTU: <span class="variable">$mtu</span>&quot;</span></span><br><span class="line">            <span class="comment"># 精确搜索</span></span><br><span class="line">            <span class="keyword">for</span> ((i=mtu; i&lt;=mtu+<span class="number">50</span>; i++)); <span class="keyword">do</span></span><br><span class="line">                <span class="keyword">if</span> ! ping -c 1 -M <span class="keyword">do</span> -s $((i-<span class="number">28</span>)) <span class="variable">$target</span> &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">                    <span class="built_in">echo</span> <span class="string">&quot;最优MTU: <span class="subst">$((i-1)</span>)&quot;</span></span><br><span class="line">                    <span class="built_in">return</span></span><br><span class="line">                <span class="keyword">fi</span></span><br><span class="line">            <span class="keyword">done</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;未能检测到合适的MTU值&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用</span></span><br><span class="line">detect_optimal_mtu</span><br></pre></td></tr></table></figure>
+
+<h3 id="系统MTU配置脚本"><a href="#系统MTU配置脚本" class="headerlink" title="系统MTU配置脚本"></a>系统MTU配置脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># set_system_mtu.sh</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">set_system_mtu</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> mtu=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> interface=<span class="variable">$&#123;2:-eth0&#125;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;设置 <span class="variable">$interface</span> MTU为 <span class="variable">$mtu</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 临时设置</span></span><br><span class="line">    <span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> dev <span class="variable">$interface</span> mtu <span class="variable">$mtu</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 永久设置 (Ubuntu)</span></span><br><span class="line">    <span class="keyword">if</span> [[ -f /etc/netplan/01-netcfg.yaml ]]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">sudo</span> sed -i <span class="string">&quot;/mtu:/d&quot;</span> /etc/netplan/01-netcfg.yaml</span><br><span class="line">        <span class="built_in">sudo</span> sed -i <span class="string">&quot;/dhcp4: true/a\\      mtu: <span class="variable">$mtu</span>&quot;</span> /etc/netplan/01-netcfg.yaml</span><br><span class="line">        <span class="built_in">sudo</span> netplan apply</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Docker配置</span></span><br><span class="line">    <span class="keyword">if</span> systemctl is-active --quiet docker; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;配置Docker MTU...&quot;</span></span><br><span class="line">        <span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /etc/docker</span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&#x27;&#123;&quot;mtu&quot;: &#x27;</span><span class="variable">$mtu</span><span class="string">&#x27;&#125;&#x27;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/docker/daemon.json</span><br><span class="line">        <span class="built_in">sudo</span> systemctl restart docker</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;MTU配置完成&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: set_system_mtu 1450</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="⚠️-注意事项和最佳实践"><a href="#⚠️-注意事项和最佳实践" class="headerlink" title="⚠️ 注意事项和最佳实践"></a>⚠️ 注意事项和最佳实践</h2><h3 id="安全注意事项"><a href="#安全注意事项" class="headerlink" title="安全注意事项"></a>安全注意事项</h3><ul>
+<li><strong>生产环境修改要谨慎</strong>: MTU修改可能导致网络中断</li>
+<li><strong>逐步调整</strong>: 从小值开始，逐步调整到最优值</li>
+<li><strong>备份配置</strong>: 修改前备份网络配置文件</li>
+<li><strong>测试验证</strong>: 修改后充分测试网络连通性</li>
+</ul>
+<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><ol>
+<li><strong>自动发现优于手动配置</strong>: 使用工具自动检测最优MTU</li>
+<li><strong>分层一致性</strong>: 确保各网络层MTU配置一致</li>
+<li><strong>监控告警</strong>: 监控网络分片和丢包情况</li>
+<li><strong>文档记录</strong>: 记录MTU配置的原因和数值</li>
+</ol>
+<h3 id="常见误区"><a href="#常见误区" class="headerlink" title="常见误区"></a>常见误区</h3><p>❌ <strong>认为MTU越大越好</strong>: 不是的，要匹配网络环境<br>❌ <strong>只设置应用层MTU</strong>: 需要全链路一致<br>❌ <strong>忽略虚拟化开销</strong>: 虚拟环境需要预留开销<br>❌ <strong>设置后不验证</strong>: 必须通过实际测试验证效果</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1259,340 +1522,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/13/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">网络故障模拟工具及常用命令</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-13 12:09:51 / 修改时间：12:17:56" itemprop="dateCreated datePublished" datetime="2025-08-13T12:09:51+08:00">2025-08-13</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="网络故障模拟工具与常用命令"><a href="#网络故障模拟工具与常用命令" class="headerlink" title="网络故障模拟工具与常用命令"></a>网络故障模拟工具与常用命令</h1><p>本文档提供了一系列网络故障模拟工具和常用命令，用于测试应用程序在各种网络条件下的行为，特别是长连接（如SSE、WebSocket）的稳定性测试。</p>
-<h2 id="1-常用网络故障模拟工具对比"><a href="#1-常用网络故障模拟工具对比" class="headerlink" title="1. 常用网络故障模拟工具对比"></a>1. 常用网络故障模拟工具对比</h2><table>
-<thead>
-<tr>
-<th>工具名称</th>
-<th>主要功能</th>
-<th>优势</th>
-<th>局限性</th>
-<th>适用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>tc&#x2F;netem</strong></td>
-<td>延迟、丢包、重排、复制、损坏</td>
-<td>内置Linux内核，精确控制</td>
-<td>配置较复杂</td>
-<td>全面的网络条件模拟</td>
-</tr>
-<tr>
-<td><strong>iptables</strong></td>
-<td>过滤、拦截、重定向</td>
-<td>灵活精确，低级别控制</td>
-<td>语法复杂</td>
-<td>精确控制特定连接</td>
-</tr>
-<tr>
-<td><strong>tcpkill</strong></td>
-<td>中断TCP连接</td>
-<td>简单直接</td>
-<td>功能单一</td>
-<td>模拟连接中断</td>
-</tr>
-<tr>
-<td><strong>Comcast</strong></td>
-<td>延迟、带宽限制、丢包等</td>
-<td>简单易用，GUI工具也有</td>
-<td>精度不如tc</td>
-<td>快速简易测试</td>
-</tr>
-<tr>
-<td><strong>toxiproxy</strong></td>
-<td>延迟、带宽限制、超时、中断等</td>
-<td>提供API，易于集成</td>
-<td>需要单独部署</td>
-<td>CI&#x2F;CD集成测试</td>
-</tr>
-<tr>
-<td><strong>Charles&#x2F;Fiddler</strong></td>
-<td>流量拦截、修改、限速</td>
-<td>图形界面，易于使用</td>
-<td>主要针对HTTP(S)</td>
-<td>应用层协议测试</td>
-</tr>
-<tr>
-<td><strong>WANem</strong></td>
-<td>全面网络模拟</td>
-<td>开箱即用，界面友好</td>
-<td>需要独立设备&#x2F;VM</td>
-<td>完整WAN环境模拟</td>
-</tr>
-</tbody></table>
-<h2 id="2-tc-Traffic-Control-详解"><a href="#2-tc-Traffic-Control-详解" class="headerlink" title="2. tc (Traffic Control) 详解"></a>2. tc (Traffic Control) 详解</h2><p><code>tc</code>是Linux内核的流量控制工具，通过<code>netem</code>模块可以模拟各种网络条件。这是最强大、最灵活的网络故障模拟工具。</p>
-<h3 id="基本使用模式"><a href="#基本使用模式" class="headerlink" title="基本使用模式"></a>基本使用模式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查找 dnf search iproute</span></span><br><span class="line"><span class="built_in">sudo</span> dnf install iproute-tc -y</span><br><span class="line">tc -V</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tc qdisc add dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换现有规则</span></span><br><span class="line">tc qdisc change dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除规则</span></span><br><span class="line">tc qdisc del dev INTERFACE root</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟常见网络问题的命令"><a href="#模拟常见网络问题的命令" class="headerlink" title="模拟常见网络问题的命令"></a>模拟常见网络问题的命令</h3><h4 id="1-延迟模拟"><a href="#1-延迟模拟" class="headerlink" title="1. 延迟模拟"></a>1. 延迟模拟</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加固定延迟(100ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟及抖动(100ms ±10ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加正态分布的延迟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 20ms distribution normal</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加相关性延迟(上一个包的延迟对当前包有25%影响)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms 25%</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-丢包模拟"><a href="#2-丢包模拟" class="headerlink" title="2. 丢包模拟"></a>2. 丢包模拟</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机丢包(10%)</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基于状态的丢包模型(Gilbert-Elliott)</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss gemodel 10% 50% 70% 20%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢包与成功相关</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10% 25%</span><br></pre></td></tr></table></figure>
-
-<h4 id="3-数据包损坏"><a href="#3-数据包损坏" class="headerlink" title="3. 数据包损坏"></a>3. 数据包损坏</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机损坏5%的数据包</span></span><br><span class="line">tc qdisc add dev eth0 root netem corrupt 5%</span><br></pre></td></tr></table></figure>
-
-<h4 id="4-数据包重复"><a href="#4-数据包重复" class="headerlink" title="4. 数据包重复"></a>4. 数据包重复</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机重复1%的数据包</span></span><br><span class="line">tc qdisc add dev eth0 root netem duplicate 1%</span><br></pre></td></tr></table></figure>
-
-<h4 id="5-数据包乱序"><a href="#5-数据包乱序" class="headerlink" title="5. 数据包乱序"></a>5. 数据包乱序</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 25%的数据包将被延迟10ms以造成乱序</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 10ms reorder 25% 50%</span><br></pre></td></tr></table></figure>
-
-<h4 id="6-带宽限制"><a href="#6-带宽限制" class="headerlink" title="6. 带宽限制"></a>6. 带宽限制</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制带宽为1Mbit/s</span></span><br><span class="line">tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms</span><br></pre></td></tr></table></figure>
-
-<h4 id="7-组合多种故障"><a href="#7-组合多种故障" class="headerlink" title="7. 组合多种故障"></a>7. 组合多种故障</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 组合延迟、丢包和乱序</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms distribution normal loss 5% reorder 25%</span><br></pre></td></tr></table></figure>
-
-<h4 id="8-精确模拟TCP重传"><a href="#8-精确模拟TCP重传" class="headerlink" title="8. 精确模拟TCP重传"></a>8. 精确模拟TCP重传</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过组合延迟和随机丢包来触发重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 200ms loss random 15%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络拥塞</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 50ms loss 5% 25%</span><br></pre></td></tr></table></figure>
-
-<h3 id="针对特定流量的故障模拟"><a href="#针对特定流量的故障模拟" class="headerlink" title="针对特定流量的故障模拟"></a>针对特定流量的故障模拟</h3><p>使用tc与iptables结合，可以只对特定流量应用网络故障模拟：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建标记特定流量的iptables规则</span></span><br><span class="line">iptables -A FORWARD -t mangle -p tcp --dport 80 -j MARK --set-mark 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为标记的流量创建队列规则</span></span><br><span class="line">tc qdisc add dev eth0 root handle 1: prio</span><br><span class="line">tc qdisc add dev eth0 parent 1:3 handle 30: netem delay 100ms loss 10%</span><br><span class="line">tc filter add dev eth0 protocol ip parent 1:0 prio 3 handle 1 fw flowid 1:3</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-iptables-模拟网络故障"><a href="#3-iptables-模拟网络故障" class="headerlink" title="3. iptables 模拟网络故障"></a>3. iptables 模拟网络故障</h2><p>iptables可以用于模拟网络层面的多种故障，尤其擅长精确控制特定连接。</p>
-<h3 id="RST包和连接重置"><a href="#RST包和连接重置" class="headerlink" title="RST包和连接重置"></a>RST包和连接重置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 向特定连接发送RST包</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -j REJECT --reject-with tcp-reset</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只针对特定条件的连接发送RST</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -m statistic --mode random --probability 0.3 -j REJECT --reject-with tcp-reset</span><br></pre></td></tr></table></figure>
-
-<h3 id="丢弃数据包"><a href="#丢弃数据包" class="headerlink" title="丢弃数据包"></a>丢弃数据包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 丢弃所有发往特定主机端口的数据包</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 192.168.1.100 --dport 80 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢弃30%的数据包(随机)</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 192.168.1.100 -m statistic --mode random --probability 0.3 -j DROP</span><br></pre></td></tr></table></figure>
-
-<h3 id="限制连接数"><a href="#限制连接数" class="headerlink" title="限制连接数"></a>限制连接数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制同时连接数</span></span><br><span class="line">iptables -A FORWARD -p tcp --syn --dport 80 -m connlimit --connlimit-above 10 -j DROP</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟防火墙策略变更"><a href="#模拟防火墙策略变更" class="headerlink" title="模拟防火墙策略变更"></a>模拟防火墙策略变更</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 突然阻断所有连接</span></span><br><span class="line">iptables -I FORWARD 1 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 之后移除此规则恢复连接</span></span><br><span class="line">iptables -D FORWARD 1</span><br></pre></td></tr></table></figure>
-
-<h2 id="4-tcpkill-及相关工具详解"><a href="#4-tcpkill-及相关工具详解" class="headerlink" title="4. tcpkill 及相关工具详解"></a>4. tcpkill 及相关工具详解</h2><p>tcpkill属于dsniff工具集，主要用于中断TCP连接，但功能相对单一。同一工具集的其他工具可以模拟更多类型的网络攻击。</p>
-<h3 id="tcpkill-基本用法"><a href="#tcpkill-基本用法" class="headerlink" title="tcpkill 基本用法"></a>tcpkill 基本用法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 中断所有到达特定主机和端口的连接</span></span><br><span class="line">tcpkill -i eth0 host 192.168.1.100 and port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断指定协议的连接</span></span><br><span class="line">tcpkill -i eth0 port 443 and tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断特定源IP发起的连接</span></span><br><span class="line">tcpkill -i eth0 src 10.0.0.1 and dst port 22</span><br></pre></td></tr></table></figure>
-
-<h3 id="tcpkill-能模拟的其他攻击"><a href="#tcpkill-能模拟的其他攻击" class="headerlink" title="tcpkill 能模拟的其他攻击"></a>tcpkill 能模拟的其他攻击</h3><p>tcpkill本身功能有限，主要用于发送RST包中断连接。但dsniff工具集中的其他工具可以模拟更多攻击：</p>
-<ol>
-<li><p><strong>tcpnice</strong>: 通过操纵TCP窗口大小降低连接速度</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpnice -i eth0 host target.example.com</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>filesnarf</strong>: 捕获NFS文件传输</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">filesnarf -i eth0</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>mailsnarf</strong>: 捕获邮件内容</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mailsnarf -i eth0</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>msgsnarf</strong>: 捕获即时通讯消息</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msgsnarf -i eth0</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="tcpreplay-回放捕获的数据包"><a href="#tcpreplay-回放捕获的数据包" class="headerlink" title="tcpreplay: 回放捕获的数据包"></a>tcpreplay: 回放捕获的数据包</h3><p>tcpreplay可以重放之前捕获的数据包，用于模拟各种网络场景：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 回放之前捕获的数据包</span></span><br><span class="line">tcpreplay -i eth0 capture.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 调整回放速度</span></span><br><span class="line">tcpreplay -M 10.0 -i eth0 capture.pcap  <span class="comment"># 10倍速播放</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 循环播放</span></span><br><span class="line">tcpreplay -l 5 -i eth0 capture.pcap  <span class="comment"># 播放5次</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="5-其他高级网络模拟工具"><a href="#5-其他高级网络模拟工具" class="headerlink" title="5. 其他高级网络模拟工具"></a>5. 其他高级网络模拟工具</h2><h3 id="1-Toxiproxy"><a href="#1-Toxiproxy" class="headerlink" title="1. Toxiproxy"></a>1. Toxiproxy</h3><p>Toxiproxy是一个为测试设计的代理服务，可以模拟各种网络条件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动toxiproxy服务</span></span><br><span class="line">toxiproxy-server</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建代理</span></span><br><span class="line">toxiproxy-cli create myproxy --listen 0.0.0.0:8474 --upstream example.com:80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t latency -a latency=1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加随机延迟</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t latency -a jitter=500</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t bandwidth -a rate=100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟断开连接</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t <span class="built_in">timeout</span> -a <span class="built_in">timeout</span>=5000</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-Comcast"><a href="#2-Comcast" class="headerlink" title="2. Comcast"></a>2. Comcast</h3><p>一个简单易用的网络条件模拟工具：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">go get github.com/tylertreat/comcast</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟和丢包</span></span><br><span class="line">comcast --device=eth0 --latency=250 --packet-loss=10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止模拟</span></span><br><span class="line">comcast --stop</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-pumba-Docker环境"><a href="#3-pumba-Docker环境" class="headerlink" title="3. pumba (Docker环境)"></a>3. pumba (Docker环境)</h3><p>专门为Docker容器设计的网络混沌测试工具：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为指定容器添加延迟</span></span><br><span class="line">pumba netem --interface eth0 delay --time 3000 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络中断</span></span><br><span class="line">pumba netem --interface eth0 loss --percent 100 --correlation 100 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">pumba netem --interface eth0 rate --rate 1kbit my_container</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-Chaos-Mesh-Kubernetes环境"><a href="#4-Chaos-Mesh-Kubernetes环境" class="headerlink" title="4. Chaos Mesh (Kubernetes环境)"></a>4. Chaos Mesh (Kubernetes环境)</h3><p>为Kubernetes设计的混沌工程平台：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络延迟示例</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">chaos-mesh.org/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">NetworkChaos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">network-delay-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">action:</span> <span class="string">delay</span></span><br><span class="line">  <span class="attr">mode:</span> <span class="string">one</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">namespaces:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line">    <span class="attr">labelSelectors:</span></span><br><span class="line">      <span class="attr">&quot;app&quot;:</span> <span class="string">&quot;web-server&quot;</span></span><br><span class="line">  <span class="attr">delay:</span></span><br><span class="line">    <span class="attr">latency:</span> <span class="string">&quot;10ms&quot;</span></span><br><span class="line">    <span class="attr">correlation:</span> <span class="string">&quot;100&quot;</span></span><br><span class="line">    <span class="attr">jitter:</span> <span class="string">&quot;0ms&quot;</span></span><br><span class="line">  <span class="attr">duration:</span> <span class="string">&quot;30s&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="6-具体网络问题模拟方案"><a href="#6-具体网络问题模拟方案" class="headerlink" title="6. 具体网络问题模拟方案"></a>6. 具体网络问题模拟方案</h2><h3 id="模拟TCP重传"><a href="#模拟TCP重传" class="headerlink" title="模拟TCP重传"></a>模拟TCP重传</h3><p>TCP重传通常是由丢包、超时或网络拥塞引起的。要模拟TCP重传：</p>
-<h4 id="使用tc模拟"><a href="#使用tc模拟" class="headerlink" title="使用tc模拟:"></a>使用tc模拟:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机丢包引起的重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss random 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拥塞引起的重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 40ms distribution normal loss 5% 25%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 仅对特定流量引起重传</span></span><br><span class="line">tc qdisc add dev eth0 root handle 1: prio</span><br><span class="line">tc qdisc add dev eth0 parent 1:3 handle 30: netem loss 15%</span><br><span class="line">tc filter add dev eth0 parent 1: protocol ip prio 3 u32 match ip dport 80 0xffff flowid 1:3</span><br></pre></td></tr></table></figure>
-
-<h4 id="验证重传是否发生"><a href="#验证重传是否发生" class="headerlink" title="验证重传是否发生:"></a>验证重传是否发生:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用tcpdump观察重传</span></span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-fin|tcp-rst|tcp-push) != 0 and port 80&quot;</span> -v</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找标记为&quot;retransmission&quot;的数据包</span></span><br><span class="line">tcpdump -i eth0 -v tcp | grep -i retransmission</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟网络分区"><a href="#模拟网络分区" class="headerlink" title="模拟网络分区"></a>模拟网络分区</h3><p>网络分区是指网络被分割成多个无法相互通信的部分：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用iptables模拟网络分区</span></span><br><span class="line">iptables -A FORWARD -s 192.168.1.0/24 -d 192.168.2.0/24 -j DROP</span><br><span class="line">iptables -A FORWARD -s 192.168.2.0/24 -d 192.168.1.0/24 -j DROP</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟慢启动和拥塞控制"><a href="#模拟慢启动和拥塞控制" class="headerlink" title="模拟慢启动和拥塞控制"></a>模拟慢启动和拥塞控制</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制初始拥塞窗口大小</span></span><br><span class="line">ip route change default via 192.168.1.1 dev eth0 initcwnd 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 恢复默认设置</span></span><br><span class="line">ip route change default via 192.168.1.1 dev eth0 initcwnd 10</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟网络风暴"><a href="#模拟网络风暴" class="headerlink" title="模拟网络风暴"></a>模拟网络风暴</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用hping3模拟SYN泛洪</span></span><br><span class="line">hping3 -S --flood -p 80 target.example.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用iperf3模拟高流量</span></span><br><span class="line">iperf3 -c target.example.com -b 1G -t 60</span><br></pre></td></tr></table></figure>
-
-<h2 id="7-常用命令总结"><a href="#7-常用命令总结" class="headerlink" title="7. 常用命令总结"></a>7. 常用命令总结</h2><h3 id="基本网络故障模拟命令"><a href="#基本网络故障模拟命令" class="headerlink" title="基本网络故障模拟命令"></a>基本网络故障模拟命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 添加延迟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 丢包率</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 限制带宽</span></span><br><span class="line">tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 数据包损坏</span></span><br><span class="line">tc qdisc add dev eth0 root netem corrupt 5%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 模拟RST包</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -j REJECT --reject-with tcp-reset</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 中断特定连接</span></span><br><span class="line">tcpkill -i eth0 host 192.168.1.100 and port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 7. 模拟TCP重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss random 15% delay 200ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 8. 重置所有网络模拟</span></span><br><span class="line">tc qdisc del dev eth0 root</span><br><span class="line">iptables -F</span><br></pre></td></tr></table></figure>
-
-<h3 id="监控网络问题命令"><a href="#监控网络问题命令" class="headerlink" title="监控网络问题命令"></a>监控网络问题命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看TCP重传和其他统计信息</span></span><br><span class="line">netstat -s | grep -i retrans</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络接口统计</span></span><br><span class="line">netstat -i</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时监控特定主机的网络连接</span></span><br><span class="line">watch -n 1 <span class="string">&quot;netstat -tunapl | grep 192.168.1.100&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用tcpdump查看重传</span></span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-fin|tcp-rst|tcp-push) != 0&quot;</span> -v | grep -i retransmission</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查丢包情况</span></span><br><span class="line">ping -c 100 192.168.1.100 | grep <span class="string">&quot;packet loss&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络路由</span></span><br><span class="line">traceroute -T 192.168.1.100</span><br></pre></td></tr></table></figure>
-
-<h3 id="常用组合场景命令"><a href="#常用组合场景命令" class="headerlink" title="常用组合场景命令"></a>常用组合场景命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 场景1: 不稳定的网络连接</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 50ms distribution normal loss 5% 25% duplicate 1% corrupt 2%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景2: 移动网络环境模拟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 200ms 100ms loss 3% reorder 5% rate 1mbit</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景3: 高丢包率环境下的TCP重传测试</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 20% delay 100ms 30ms &amp;&amp; \</span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;host 192.168.1.100&quot;</span> -v | grep -i retransmission</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景4: 周期性网络抖动(脚本示例)</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span>; <span class="keyword">do</span></span><br><span class="line">  <span class="comment"># 网络正常</span></span><br><span class="line">  tc qdisc del dev eth0 root</span><br><span class="line">  <span class="built_in">sleep</span> 30</span><br><span class="line">  <span class="comment"># 网络抖动</span></span><br><span class="line">  tc qdisc add dev eth0 root netem delay 500ms 200ms loss 10%</span><br><span class="line">  <span class="built_in">sleep</span> 10</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="8-总结与最佳实践"><a href="#8-总结与最佳实践" class="headerlink" title="8. 总结与最佳实践"></a>8. 总结与最佳实践</h2><p>在测试SSE或WebSocket等长连接时，应考虑以下方面：</p>
-<ol>
-<li><p><strong>模拟不同类型的网络中断</strong>：</p>
-<ul>
-<li>使用FIN包的优雅关闭 (应用层主动关闭)</li>
-<li>使用RST包的强制中断 (网络异常导致)</li>
-<li>临时网络不可达 (数据包丢失)</li>
-</ul>
-</li>
-<li><p><strong>测试客户端重连机制</strong>：</p>
-<ul>
-<li>指数退避重连</li>
-<li>区分不同类型的连接错误</li>
-<li>维持会话状态</li>
-</ul>
-</li>
-<li><p><strong>测试服务端优雅降级</strong>：</p>
-<ul>
-<li>连接突然断开时的资源清理</li>
-<li>部分网络可达时的服务降级</li>
-<li>高负载下的连接管理</li>
-</ul>
-</li>
-<li><p><strong>常见问题及解决方案</strong>：</p>
-<ul>
-<li>僵尸连接：设置合理的keepalive和超时</li>
-<li>资源泄漏：确保连接正确关闭</li>
-<li>重连风暴：客户端实现退避机制</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">tcpkill工作原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-13 11:51:41 / 修改时间：11:54:31" itemprop="dateCreated datePublished" datetime="2025-08-13T11:51:41+08:00">2025-08-13</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="tcpkill-工作原理"><a href="#tcpkill-工作原理" class="headerlink" title="tcpkill 工作原理"></a>tcpkill 工作原理</h2><p><code>tcpkill</code> 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：</p>
-<ol>
-<li><strong>监听网络流量</strong>：在指定网络接口上监听符合过滤条件的数据包</li>
-<li><strong>伪造 RST 包</strong>：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包</li>
-<li><strong>双向发送</strong>：同时向连接的两端发送 RST 包，确保连接被彻底终止</li>
-</ol>
-<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装 sudo yun install -y dsniff</span></span><br><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>-i eth0</code>：在 eth0 网络接口上监听</li>
-<li><code>host 11.123.253.133 and port 80</code>：过滤条件，只处理涉及 IP 11.123.253.133 且端口为 80 的连接</li>
-</ul>
-<h2 id="tcpkill-输出解释"><a href="#tcpkill-输出解释" class="headerlink" title="tcpkill 输出解释"></a>tcpkill 输出解释</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tcpkill: listening on eth0 [host 11.123.253.133 and port 80]</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434213725:434213725(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434214227:434214227(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434215231:434215231(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599879870:599879870(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599880372:599880372(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599881376:599881376(0) win 0</span><br></pre></td></tr></table></figure>
-
-<p>每行格式：<code>源IP:端口 &gt; 目标IP:端口: R 序列号:序列号(数据长度) win 窗口大小</code></p>
-<ul>
-<li><code>R</code>：表示 RST（Reset）标志位</li>
-<li>序列号：TCP 序列号，tcpkill 会尝试不同的序列号以确保 RST 包被接受</li>
-<li><code>(0)</code>：数据长度为 0</li>
-<li><code>win 0</code>：窗口大小为 0</li>
-</ul>
-<h2 id="抓包分析"><a href="#抓包分析" class="headerlink" title="抓包分析"></a>抓包分析</h2><p>从您提供的抓包数据可以看出完整的攻击过程：</p>
-<h3 id="1-正常通信阶段"><a href="#1-正常通信阶段" class="headerlink" title="1. 正常通信阶段"></a>1. 正常通信阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">11:40:00.911181 - 服务器发送 HTTP 数据 (73 字节)</span><br><span class="line">11:40:00.911221 - 客户端发送 ACK 确认</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-RST-攻击阶段"><a href="#2-RST-攻击阶段" class="headerlink" title="2. RST 攻击阶段"></a>2. RST 攻击阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">11:40:01.310146 开始 - tcpkill 发送多个 RST 包</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键观察点</strong>：</p>
-<ol>
-<li><strong>TTL 变化</strong>：正常包 TTL&#x3D;51，RST 包 TTL&#x3D;64，说明 RST 包是本地伪造的</li>
-<li><strong>序列号策略</strong>：tcpkill 发送多个不同序列号的 RST 包，增加成功率</li>
-<li><strong>双向攻击</strong>：既伪造服务器向客户端发送 RST，也伪造客户端向服务器发送 RST</li>
-<li><strong>时间差</strong>：RST 包在正常通信后约 0.4 秒发送</li>
-</ol>
-<h2 id="技术细节"><a href="#技术细节" class="headerlink" title="技术细节"></a>技术细节</h2><p><strong>为什么发送多个 RST 包？</strong></p>
-<ul>
-<li>TCP 只接受序列号在有效窗口范围内的 RST 包</li>
-<li>tcpkill 通过发送不同序列号的 RST 包来提高成功概率</li>
-<li>从抓包可见，序列号呈递增趋势（434213725 → 434214227 → 434215231）</li>
-</ul>
-<p><strong>双向攻击的意义</strong>：</p>
-<ul>
-<li>确保连接两端都收到 RST 包</li>
-<li>即使一方的 RST 包被过滤，另一方仍可能生效</li>
-<li>提高攻击成功率</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1664,7 +1593,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-count">166</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1677,7 +1606,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-count">22</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
