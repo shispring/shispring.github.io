@@ -13994,4 +13994,235 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>tcp半连接/全连接核心参数</title>
+    <url>/2026/01/20/tcp%E5%8D%8A%E8%BF%9E%E6%8E%A5-%E5%85%A8%E8%BF%9E%E6%8E%A5%E6%A0%B8%E5%BF%83%E5%8F%82%E6%95%B0/</url>
+    <content><![CDATA[<h2 id="一、TCP-半连接-全连接核心参数对照表"><a href="#一、TCP-半连接-全连接核心参数对照表" class="headerlink" title="一、TCP 半连接 &#x2F; 全连接核心参数对照表"></a>一、TCP 半连接 &#x2F; 全连接核心参数对照表</h2><h3 id="1️⃣-net-ipv4-tcp-max-syn-backlog"><a href="#1️⃣-net-ipv4-tcp-max-syn-backlog" class="headerlink" title="1️⃣ net.ipv4.tcp_max_syn_backlog"></a>1️⃣ <code>net.ipv4.tcp_max_syn_backlog</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_max_syn_backlog</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>半连接队列（SYN_RECV 阶段）</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>内核允许的最大 <strong>半连接（SYN 已收到，三次握手未完成）</strong> 数量</td>
+</tr>
+<tr>
+<td><strong>典型现象</strong></td>
+<td>队列满时：不回 SYN+ACK 或启用 syncookies</td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><strong>不同值的影响</strong></td>
+<td><ul><li>小：突发连接时大量 SYN 超时</li><li>大：提升并发连接建立能力（需内存）</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_max_syn_backlog</code></td>
+</tr>
+<tr>
+<td><strong>是否单独生效</strong></td>
+<td>❌ 否（受 somaxconn、listen backlog 共同限制）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="2️⃣-net-ipv4-tcp-syncookies"><a href="#2️⃣-net-ipv4-tcp-syncookies" class="headerlink" title="2️⃣ net.ipv4.tcp_syncookies"></a>2️⃣ <code>net.ipv4.tcp_syncookies</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_syncookies</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>半连接队列溢出时</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>半连接队列满时，是否启用 <strong>SYN Cookies</strong></td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><strong>不同值的作用</strong></td>
+<td><ul><li><code>0</code>：关闭（队列满直接丢 SYN）</li><li><code>1</code>：仅队列满时启用（⭐推荐）</li><li><code>2</code>：无条件启用（防 SYN flood）</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_syncookies</code></td>
+</tr>
+<tr>
+<td><strong>注意点</strong></td>
+<td>开启时部分 TCP 扩展（窗口扩大、时间戳）可能受限</td>
+</tr>
+</tbody></table>
+<p>✅ <strong>结论</strong>：你的配置是生产环境<strong>最合理值</strong></p>
+<hr>
+<h3 id="3️⃣-net-core-somaxconn"><a href="#3️⃣-net-core-somaxconn" class="headerlink" title="3️⃣ net.core.somaxconn"></a>3️⃣ <code>net.core.somaxconn</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>somaxconn</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>全连接队列（accept queue）</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>系统层面允许的 <strong>listen backlog 最大值</strong></td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><strong>不同值的影响</strong></td>
+<td><ul><li>小：accept 队列很容易满</li><li>大：支撑高并发 accept</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/core/somaxconn</code></td>
+</tr>
+<tr>
+<td><strong>是否决定最终值</strong></td>
+<td>❌ 否（还取决于应用 listen backlog）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="4️⃣-net-ipv4-tcp-abort-on-overflow"><a href="#4️⃣-net-ipv4-tcp-abort-on-overflow" class="headerlink" title="4️⃣ net.ipv4.tcp_abort_on_overflow"></a>4️⃣ <code>net.ipv4.tcp_abort_on_overflow</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_abort_on_overflow</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>全连接队列满</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>accept 队列满时，如何处理客户端 ACK</td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><strong>不同值的作用</strong></td>
+<td><ul><li><code>0</code>：丢 ACK（客户端重试 → 看起来像超时）</li><li><code>1</code>：回 RST（客户端立刻失败）</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_abort_on_overflow</code></td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td><ul><li>0：线上业务（避免误伤）</li><li>1：压测&#x2F;定位问题</li></ul></td>
+</tr>
+</tbody></table>
+<p>⚠️ <strong>这是排障神器，但不建议长期线上开启 1</strong></p>
+<hr>
+<h3 id="5️⃣-net-ipv4-tcp-synack-retries"><a href="#5️⃣-net-ipv4-tcp-synack-retries" class="headerlink" title="5️⃣ net.ipv4.tcp_synack_retries"></a>5️⃣ <code>net.ipv4.tcp_synack_retries</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_synack_retries</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>半连接保活</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>SYN+ACK 最大重传次数</td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><strong>默认值</strong></td>
+<td>通常是 5</td>
+</tr>
+<tr>
+<td><strong>不同值的影响</strong></td>
+<td><ul><li>大：半连接驻留时间长</li><li>小：更快释放半连接</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_synack_retries</code></td>
+</tr>
+<tr>
+<td><strong>经验值</strong></td>
+<td>2～5（内网服务可适当调小）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、一个非常重要但常被忽略的事实"><a href="#二、一个非常重要但常被忽略的事实" class="headerlink" title="二、一个非常重要但常被忽略的事实"></a>二、一个<strong>非常重要但常被忽略的事实</strong></h2><h3 id="❗-半连接-全连接真正的“生效长度”公式"><a href="#❗-半连接-全连接真正的“生效长度”公式" class="headerlink" title="❗ 半连接 &#x2F; 全连接真正的“生效长度”公式"></a>❗ 半连接 &#x2F; 全连接真正的“生效长度”公式</h3><h4 id="🔹-半连接队列最大长度"><a href="#🔹-半连接队列最大长度" class="headerlink" title="🔹 半连接队列最大长度"></a>🔹 半连接队列最大长度</h4><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">min(</span><br><span class="line">  net.ipv4.tcp_max_syn_backlog,</span><br><span class="line">  net.core.somaxconn,</span><br><span class="line">  listen(backlog)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h4 id="🔹-全连接队列最大长度"><a href="#🔹-全连接队列最大长度" class="headerlink" title="🔹 全连接队列最大长度"></a>🔹 全连接队列最大长度</h4><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">min(</span><br><span class="line">  net.core.somaxconn,</span><br><span class="line">  listen(backlog)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>👉 <strong>只调内核参数，不调应用 backlog &#x3D; 白调</strong></p>
+<hr>
+<h2 id="三、Redis-NGINX-backlog-配置对照"><a href="#三、Redis-NGINX-backlog-配置对照" class="headerlink" title="三、Redis &#x2F; NGINX backlog 配置对照"></a>三、Redis &#x2F; NGINX backlog 配置对照</h2><h3 id="🟥-Redis"><a href="#🟥-Redis" class="headerlink" title="🟥 Redis"></a>🟥 Redis</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># redis.conf</span><br><span class="line">tcp-backlog 511</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>实际生效值：</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">min(tcp-backlog, somaxconn)</span><br></pre></td></tr></table></figure>
+
+<p>📌 建议：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">tcp-backlog 4096</span><br></pre></td></tr></table></figure>
+
+<p>并配合：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sysctl -w net.core.somaxconn=4096</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="🟩-NGINX"><a href="#🟩-NGINX" class="headerlink" title="🟩 NGINX"></a>🟩 NGINX</h3><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">listen</span> <span class="number">80</span> backlog=<span class="number">4096</span>;</span><br></pre></td></tr></table></figure>
+
+<p>⚠️ 如果不显式配置：</p>
+<ul>
+<li>由 NGINX 内部默认值决定</li>
+<li>很多版本默认 <strong>511</strong></li>
+</ul>
+<p>📌 高并发入口（Ingress &#x2F; API Gateway）<strong>一定要显式写 backlog</strong></p>
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
 </search>
