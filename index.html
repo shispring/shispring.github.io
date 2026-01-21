@@ -184,6 +184,68 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/21/BCC-BPF-Compiler-Collection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/21/BCC-BPF-Compiler-Collection/" class="post-title-link" itemprop="url">BCC(BPF Compiler Collection)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-21 15:33:50 / 修改时间：15:34:47" itemprop="dateCreated datePublished" datetime="2026-01-21T15:33:50+08:00">2026-01-21</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="BCC包括的一些工具"><a href="#BCC包括的一些工具" class="headerlink" title="BCC包括的一些工具"></a>BCC包括的一些工具</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://tonydeng.github.io/sdn-handbook/linux/bpf/bcc.html">https://tonydeng.github.io/sdn-handbook/linux/bpf/bcc.html</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#CentOS</span><br><span class="line">yum install -y bcc-tools</span><br><span class="line"></span><br><span class="line">ls /usr/share/bcc/tools</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/20/tcp%E5%8D%8A%E8%BF%9E%E6%8E%A5-%E5%85%A8%E8%BF%9E%E6%8E%A5%E6%A0%B8%E5%BF%83%E5%8F%82%E6%95%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1524,201 +1586,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/20/%E6%9C%AC%E5%9C%B0%E8%B0%83%E8%AF%95k8s-webhook%E6%96%B9%E6%A1%88/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/20/%E6%9C%AC%E5%9C%B0%E8%B0%83%E8%AF%95k8s-webhook%E6%96%B9%E6%A1%88/" class="post-title-link" itemprop="url">本地调试k8s webhook方案</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-11-20 15:07:57 / 修改时间：21:19:29" itemprop="dateCreated datePublished" datetime="2025-11-20T15:07:57+08:00">2025-11-20</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Cloudflared-本地调试-Kubernetes-Webhook"><a href="#Cloudflared-本地调试-Kubernetes-Webhook" class="headerlink" title="Cloudflared 本地调试 Kubernetes Webhook"></a>Cloudflared 本地调试 Kubernetes Webhook</h1><p>本文档介绍如何使用 Cloudflared 隧道技术在本地调试 Kubernetes Webhook，无需暴露公网 IP 或配置复杂的网络环境。</p>
-<h2 id="📋-目录"><a href="#📋-目录" class="headerlink" title="📋 目录"></a>📋 目录</h2><ul>
-<li><a href="#%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94">方案对比</a></li>
-<li><a href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87">环境准备</a></li>
-<li><a href="#%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4">操作步骤</a></li>
-<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98">常见问题</a></li>
-<li><a href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5">最佳实践</a></li>
-</ul>
-<hr>
-<h2 id="方案对比"><a href="#方案对比" class="headerlink" title="方案对比"></a>方案对比</h2><h3 id="Localtunnel-vs-Cloudflared"><a href="#Localtunnel-vs-Cloudflared" class="headerlink" title="Localtunnel vs Cloudflared"></a>Localtunnel vs Cloudflared</h3><table>
-<thead>
-<tr>
-<th>方案</th>
-<th>caBundle 配置</th>
-<th>是否可行</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Localtunnel</strong></td>
-<td>设置为空</td>
-<td>❌ <strong>不可行</strong></td>
-<td>Localtunnel 使用 <code>*.loca.lt</code> 证书，调试会出现 tls: failed to verify certificate: x509: certificate signed by unknown authorityi</td>
-</tr>
-<tr>
-<td><strong>Cloudflared</strong></td>
-<td>设置为空</td>
-<td>✅ <strong>推荐</strong></td>
-<td>Cloudflare 提供企业级稳定隧道服务，证书被系统信任，连接稳定可靠</td>
-</tr>
-</tbody></table>
-<p><strong>结论</strong>：<code>caBundle</code> 设置为空（依赖系统 CA 信任链）， <strong>在稳定性、性能和可靠性上远优于 Localtunnel</strong>，推荐使用 Cloudflared。</p>
-<hr>
-<h3 id="系统默认信任证书"><a href="#系统默认信任证书" class="headerlink" title="系统默认信任证书"></a>系统默认信任证书</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#存放的是证书链</span><br><span class="line">/etc/ssl/certs/ca-certificates.crt</span><br><span class="line"></span><br><span class="line">#查看机器上受信任的证书机构</span><br><span class="line">awk -v cmd=&#x27;openssl x509 -noout -subject&#x27; &#x27; /BEGIN/&#123;close(cmd)&#125;;&#123;print | cmd&#125;&#x27; &lt; /etc/ssl/certs/ca-certificates.crt</span><br><span class="line"></span><br><span class="line">#也可以以下命令分开查看</span><br><span class="line">awk &#x27;/BEGIN/&#123;i++&#125;&#123;print &gt; &quot;cert_&quot;i&quot;.crt&quot;&#125;&#x27; /etc/ssl/certs/ca-certificates.crt</span><br><span class="line"></span><br><span class="line">#查某一个</span><br><span class="line">openssl x509 -in cert_1.crt -noout -text | grep -A1 &quot;Subject Alternative Name&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#检查“系统是否信任某域名的证书”</span><br><span class="line">echo | openssl s_client -connect example.com:443 2&gt;/dev/null | openssl x509 -noout -subject -issuer -text | grep -A1 &quot;Subject Alternative Name&quot;</span><br><span class="line"></span><br><span class="line">- 检查返回是否包含：Verify return code: 0 (ok)</span><br><span class="line">- 如果是 0 → 说明系统信任这个证书。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><h3 id="1-安装-Cloudflared"><a href="#1-安装-Cloudflared" class="headerlink" title="1. 安装 Cloudflared"></a>1. 安装 Cloudflared</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#</span><br><span class="line">https://github.com/cloudflare/cloudflared</span><br><span class="line"></span><br><span class="line"># Linux</span><br><span class="line">rpm -ivh https://github.com/cloudflare/cloudflared/releases/download/2025.11.1/cloudflared-linux-x86_64.rpm</span><br><span class="line"></span><br><span class="line"># 验证安装</span><br><span class="line">cloudflared --version</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h2><h3 id="步骤-0：生成自签名证书"><a href="#步骤-0：生成自签名证书" class="headerlink" title="步骤 0：生成自签名证书"></a>步骤 0：生成自签名证书</h3><p>Webhook Controller 启动时需要 TLS 证书，使用以下脚本生成：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">LOCAL_IP=<span class="string">&quot;10.16.217.194&quot;</span></span><br><span class="line">WEBHOOK_PORT=<span class="string">&quot;11443&quot;</span></span><br><span class="line">VALIDATING_WEBHOOK_CONFIG_NAME=<span class="string">&quot;dev-lbv4-webhook-debug&quot;</span></span><br><span class="line">WEBHOOK_CERT_DIR=<span class="string">&quot;/tmp/k8s-webhook-server/serving-certs&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查网络连通性</span></span><br><span class="line"><span class="keyword">if</span> ! kubectl cluster-info &gt;/dev/null 2&gt;&amp;1; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;❌ 无法连接到Kubernetes集群&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;请检查KUBECONFIG设置：<span class="variable">$KUBECONFIG</span>&quot;</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查端口是否被占用</span></span><br><span class="line"><span class="keyword">if</span> netstat -tlnp 2&gt;/dev/null | grep -q <span class="string">&quot;:<span class="variable">$&#123;WEBHOOK_PORT&#125;</span> &quot;</span>; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;❌ 端口 <span class="variable">$&#123;WEBHOOK_PORT&#125;</span> 已被占用，请先关闭占用进程&quot;</span></span><br><span class="line">    netstat -tlnp | grep <span class="string">&quot;:<span class="variable">$&#123;WEBHOOK_PORT&#125;</span> &quot;</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第1步：重新生成证书</span></span><br><span class="line"><span class="comment"># 否则启动：panic: open /tmp/k8s-webhook-server/serving-certs/tls.crt: no such file or directory</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;第1步：重新生成TLS证书（支持IP: <span class="variable">$&#123;LOCAL_IP&#125;</span>）...&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 清理旧证书</span></span><br><span class="line"><span class="built_in">rm</span> -rf certs/*</span><br><span class="line"><span class="built_in">mkdir</span> -p certs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成新的证书配置</span></span><br><span class="line"><span class="built_in">cat</span> &gt; certs/server.conf &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">[req]</span></span><br><span class="line"><span class="string">distinguished_name = req_distinguished_name</span></span><br><span class="line"><span class="string">req_extensions = v3_req</span></span><br><span class="line"><span class="string">prompt = no</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[req_distinguished_name]</span></span><br><span class="line"><span class="string">C = CN</span></span><br><span class="line"><span class="string">ST = Beijing</span></span><br><span class="line"><span class="string">L = Beijing</span></span><br><span class="line"><span class="string">O = Qihoo</span></span><br><span class="line"><span class="string">OU = DevOps</span></span><br><span class="line"><span class="string">CN = *.qihoo.com</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[v3_req]</span></span><br><span class="line"><span class="string">keyUsage = keyEncipherment, dataEncipherment</span></span><br><span class="line"><span class="string">extendedKeyUsage = serverAuth</span></span><br><span class="line"><span class="string">subjectAltName = @alt_names</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[alt_names]</span></span><br><span class="line"><span class="string">DNS.1 = *.qihoo.com</span></span><br><span class="line"><span class="string">DNS.2 = k8s.qihoo.com</span></span><br><span class="line"><span class="string">IP.1 = 10.16.217.194</span></span><br><span class="line"><span class="string">IP.2 = 127.0.0.1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成CA证书</span></span><br><span class="line">openssl genrsa -out certs/ca.key 2048 &gt;/dev/null 2&gt;&amp;1</span><br><span class="line">openssl req -new -x509 -days 365 -key certs/ca.key -out certs/ca.crt -subj <span class="string">&quot;/CN=*.qihoo.com&quot;</span> &gt;/dev/null 2&gt;&amp;1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成服务器证书</span></span><br><span class="line">openssl genrsa -out certs/tls.key 2048 &gt;/dev/null 2&gt;&amp;1</span><br><span class="line">openssl req -new -key certs/tls.key -out certs/server.csr -config certs/server.conf &gt;/dev/null 2&gt;&amp;1</span><br><span class="line">openssl x509 -req -<span class="keyword">in</span> certs/server.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/tls.crt -days 365 -extensions v3_req -extfile certs/server.conf &gt;/dev/null 2&gt;&amp;1</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;✅ 证书生成完成&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将证书复制到controller-runtime期望的位置</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;复制证书到controller-runtime期望的位置...&quot;</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p <span class="variable">$WEBHOOK_CERT_DIR</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cp</span> certs/tls.crt <span class="variable">$WEBHOOK_CERT_DIR</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cp</span> certs/tls.key <span class="variable">$WEBHOOK_CERT_DIR</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> 644 <span class="variable">$WEBHOOK_CERT_DIR</span>/tls.crt</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> 600 <span class="variable">$WEBHOOK_CERT_DIR</span>/tls.key</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> <span class="variable">$USER</span>:<span class="variable">$USER</span> <span class="variable">$WEBHOOK_CERT_DIR</span>/tls.*</span><br><span class="line"><span class="built_in">sudo</span> tree <span class="variable">$WEBHOOK_CERT_DIR</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;✅ 证书已复制到 <span class="variable">$WEBHOOK_CERT_DIR</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;验证证书内容:&quot;</span></span><br><span class="line">openssl x509 -<span class="keyword">in</span> <span class="variable">$WEBHOOK_CERT_DIR</span>/tls.crt -text -noout | grep -E <span class="string">&quot;(Subject:|DNS:|IP Address:)&quot;</span> | <span class="built_in">head</span> -10</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示使用说明</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;接下来请按照以下步骤操作：&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;1️⃣  在VSCode中设置断点：&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;   - 在 webhook Handle 方法开始处设置断点&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;2️⃣  启动调试器：&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;3️⃣  启动cloudflared，然后根据生成的URL部署validatingwebhookconfiguration&quot;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="步骤-2：启动-Cloudflared-隧道"><a href="#步骤-2：启动-Cloudflared-隧道" class="headerlink" title="步骤 2：启动 Cloudflared 隧道"></a>步骤 2：启动 Cloudflared 隧道</h3><p>使用 <code>--no-tls-verify</code> 参数禁用 Cloudflared 对后端 HTTPS 证书的验证：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cloudflared tunnel --url https://localhost:11443 --no-tls-verify</span><br></pre></td></tr></table></figure>
-
-<p><strong>记录输出的公网 URL</strong>，例如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+--------------------------------------------------------------------------------------------+</span><br><span class="line">|  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |</span><br><span class="line">|  https://since-machinery-ruby-plate.trycloudflare.com                                     |</span><br><span class="line">+--------------------------------------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>⚠️ 注意</strong>：每次启动 Cloudflared 都会生成新的随机域名，你需要更新 Webhook 配置。</p>
-</blockquote>
-<p><strong>保持终端运行</strong>，不要关闭 Cloudflared 进程。</p>
-<hr>
-<h3 id="步骤-3：配置-ValidatingWebhookConfiguration"><a href="#步骤-3：配置-ValidatingWebhookConfiguration" class="headerlink" title="步骤 3：配置 ValidatingWebhookConfiguration"></a>步骤 3：配置 ValidatingWebhookConfiguration</h3><p>创建 Webhook 配置文件 <code>webhook-config.yaml</code>：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">admissionregistration.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ValidatingWebhookConfiguration</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">dev-lv4-webhook-debug</span></span><br><span class="line"><span class="attr">webhooks:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dev.lb4.webhook.validator</span></span><br><span class="line">  <span class="attr">admissionReviewVersions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">v1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">v1beta1</span></span><br><span class="line">  </span><br><span class="line">  <span class="attr">clientConfig:</span></span><br><span class="line">    <span class="comment"># 使用 Cloudflared 提供的公网 URL</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">https://since-machinery-ruby-plate.trycloudflare.com/validate-delete-pods</span></span><br><span class="line">    <span class="comment"># 🔑 关键：caBundle 必须为空</span></span><br><span class="line">    <span class="comment"># 当使用外部 URL 时，API Server 会使用系统信任的 CA 验证证书</span></span><br><span class="line">    <span class="comment"># Cloudflare 的证书已被系统 CA 信任</span></span><br><span class="line">    <span class="attr">caBundle:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 调试阶段设置为 Fail，便于查看错误信息</span></span><br><span class="line">  <span class="comment"># 生产环境可设置为 Ignore</span></span><br><span class="line">  <span class="attr">failurePolicy:</span> <span class="string">Fail</span></span><br><span class="line">  </span><br><span class="line">  <span class="attr">matchPolicy:</span> <span class="string">Equivalent</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 命名空间选择器：仅对 default 命名空间生效</span></span><br><span class="line">  <span class="attr">namespaceSelector:</span></span><br><span class="line">    <span class="attr">matchExpressions:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">kubernetes.io/metadata.name</span></span><br><span class="line">      <span class="attr">operator:</span> <span class="string">In</span></span><br><span class="line">      <span class="attr">values:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">zxtest</span></span><br><span class="line">  </span><br><span class="line">  <span class="attr">objectSelector:</span> &#123;&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 拦截规则：删除 Pod 操作</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">apiGroups:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="attr">apiVersions:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">operations:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">DELETE</span></span><br><span class="line">    <span class="attr">resources:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">pods</span></span><br><span class="line">    <span class="attr">scope:</span> <span class="string">Namespaced</span></span><br><span class="line">  </span><br><span class="line">  <span class="attr">sideEffects:</span> <span class="string">None</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 调试时设置较长超时时间</span></span><br><span class="line">  <span class="attr">timeoutSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>应用配置</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f webhook-config.yaml</span><br></pre></td></tr></table></figure>
-
-<p><strong>验证配置</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 Webhook 配置</span></span><br><span class="line">kubectl get validatingwebhookconfiguration dev-webhook-debug -o yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确认 URL 和 caBundle 设置正确</span></span><br><span class="line">kubectl get validatingwebhookconfiguration dev-webhook-debug \</span><br><span class="line">    -o jsonpath=<span class="string">&#x27;&#123;.webhooks[0].clientConfig&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="步骤-4：测试-Webhook"><a href="#步骤-4：测试-Webhook" class="headerlink" title="步骤 4：测试 Webhook"></a>步骤 4：测试 Webhook</h3><p><strong>触发 Webhook 验证</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除 default 命名空间下Pod，观察 Webhook 是否被调用</span></span><br><span class="line">kubectl delete pod test-pod -n default</span><br></pre></td></tr></table></figure>
-
-<p><strong>预期结果</strong>：</p>
-<ul>
-<li>✅ VSCode 中的断点被触发</li>
-<li>✅ Cloudflared 终端显示请求日志</li>
-<li>✅ Pod 删除成功或被拒绝（取决于你的验证逻辑）</li>
-</ul>
-<hr>
-<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="1-证书验证失败"><a href="#1-证书验证失败" class="headerlink" title="1. 证书验证失败"></a>1. 证书验证失败</h3><p><strong>错误信息</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tls: failed to verify certificate: x509: certificate signed by unknown authority</span><br></pre></td></tr></table></figure>
-
-<p><strong>原因</strong>：Cloudflared 尝试验证后端 HTTPS 证书，但你使用的是自签名证书。</p>
-<p><strong>解决方案</strong>：</p>
-<ul>
-<li>✅ 确保启动 Cloudflared 时使用了 <code>--no-tls-verify</code> 参数</li>
-<li>✅ 或者使用 HTTP 后端（<code>--url http://localhost:8080</code>）</li>
-</ul>
-<hr>
-<h3 id="2-Webhook-超时"><a href="#2-Webhook-超时" class="headerlink" title="2. Webhook 超时"></a>2. Webhook 超时</h3><p><strong>错误信息</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">failed to call webhook: Post &quot;https://xxx.trycloudflare.com/validate-delete-pods?timeout=10s&quot;: context deadline exceeded</span><br></pre></td></tr></table></figure>
-
-<p><strong>原因</strong>：</p>
-<ul>
-<li>网络延迟过高</li>
-<li>Webhook 处理逻辑耗时过长</li>
-<li>Cloudflared 隧道不稳定</li>
-</ul>
-<p><strong>解决方案</strong>：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 增加超时时间</span></span><br><span class="line"><span class="attr">timeoutSeconds:</span> <span class="number">30</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 或临时设置为 Ignore 模式</span></span><br><span class="line"><span class="attr">failurePolicy:</span> <span class="string">Ignore</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="3-Cloudflared-连接断开"><a href="#3-Cloudflared-连接断开" class="headerlink" title="3. Cloudflared 连接断开"></a>3. Cloudflared 连接断开</h3><p><strong>现象</strong>：隧道 URL 无法访问，API Server 调用失败。</p>
-<p><strong>解决方案</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 重启 Cloudflared</span></span><br><span class="line">cloudflared tunnel --url https://localhost:11443 --no-tls-verify</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 更新 Webhook 配置中的新 URL</span></span><br><span class="line">kubectl edit validatingwebhookconfiguration dev-webhook-debug</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 使用命名隧道（生产环境推荐）</span></span><br><span class="line">cloudflared tunnel create my-webhook-tunnel</span><br><span class="line">cloudflared tunnel route dns my-webhook-tunnel webhook.example.com</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="4-API-Server-无法访问公网"><a href="#4-API-Server-无法访问公网" class="headerlink" title="4. API Server 无法访问公网"></a>4. API Server 无法访问公网</h3><p><strong>现象</strong>：集群在私有网络中，无法访问 Cloudflare 隧道。</p>
-<p><strong>解决方案</strong>：在集群内部署 Cloudflared 代理：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">cloudflared-proxy</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">cloudflared</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">cloudflare/cloudflared:latest</span></span><br><span class="line">    <span class="attr">command:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">cloudflared</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">tunnel</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--url</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">http://your-webhook-service:8080</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--no-tls-verify</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="5-调试断点未触发"><a href="#5-调试断点未触发" class="headerlink" title="5. 调试断点未触发"></a>5. 调试断点未触发</h3><p><strong>检查清单</strong>：</p>
-<ol>
-<li><p>✅ Controller 是否正常启动？</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof -i :11443</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>✅ Cloudflared 是否正常运行？</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试隧道连通性</span></span><br><span class="line">curl https://since-machinery-ruby-plate.trycloudflare.com/validate-delete-pods</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>✅ Webhook 配置是否正确？</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get validatingwebhookconfiguration dev-webhook-debug -o yaml</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>✅ Pod 是否在正确的命名空间？</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 确认 namespaceSelector 配置</span></span><br><span class="line">kubectl get pod -n default</span><br></pre></td></tr></table></figure></li>
-</ol>
-<hr>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><h3 id="1-使用持久化隧道（生产环境）"><a href="#1-使用持久化隧道（生产环境）" class="headerlink" title="1. 使用持久化隧道（生产环境）"></a>1. 使用持久化隧道（生产环境）</h3><p>临时隧道每次启动 URL 都会变化，不适合长期使用。创建命名隧道：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 登录 Cloudflare</span></span><br><span class="line">cloudflared tunnel login</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建命名隧道</span></span><br><span class="line">cloudflared tunnel create my-webhook-tunnel</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置路由</span></span><br><span class="line">cloudflared tunnel route dns my-webhook-tunnel webhook.yourdomain.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建配置文件 ~/.cloudflared/config.yml</span></span><br><span class="line"><span class="built_in">cat</span> &gt; ~/.cloudflared/config.yml &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">tunnel: &lt;tunnel-id&gt;</span></span><br><span class="line"><span class="string">credentials-file: /path/to/credentials.json</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">ingress:</span></span><br><span class="line"><span class="string">  - hostname: webhook.yourdomain.com</span></span><br><span class="line"><span class="string">    service: https://localhost:11443</span></span><br><span class="line"><span class="string">    originRequest:</span></span><br><span class="line"><span class="string">      noTLSVerify: true</span></span><br><span class="line"><span class="string">  - service: http_status:404</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动隧道</span></span><br><span class="line">cloudflared tunnel run my-webhook-tunnel</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>使用 Cloudflared 调试 Kubernetes Webhook 的优势：</p>
-<ul>
-<li>✅ <strong>零配置</strong>：无需配置防火墙、NAT 或公网 IP</li>
-<li>✅ <strong>安全</strong>：使用 Cloudflare 企业级安全隧道</li>
-<li>✅ <strong>稳定</strong>：Cloudflare 全球网络保证连接质量</li>
-<li>✅ <strong>快速</strong>：几分钟即可完成配置</li>
-</ul>
-<p><strong>核心要点</strong>：</p>
-<ol>
-<li>使用 <code>--no-tls-verify</code> 跳过后端证书验证</li>
-<li>Webhook 配置中 <code>caBundle</code> 必须为空</li>
-<li>依赖 Cloudflare 的受信任证书完成 TLS 握手</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1790,7 +1657,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">167</span>
+          <span class="site-state-item-count">168</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

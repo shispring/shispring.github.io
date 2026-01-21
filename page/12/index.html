@@ -184,6 +184,149 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/09/metrics%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">metrics的常用命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-09 16:34:29 / 修改时间：16:38:04" itemprop="dateCreated datePublished" datetime="2024-12-09T16:34:29+08:00">2024-12-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="关于-Metrics-的常用命令"><a href="#关于-Metrics-的常用命令" class="headerlink" title="关于 Metrics 的常用命令"></a>关于 Metrics 的常用命令</h3><ol>
+<li><p><strong>查看 Kubelet 的指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>返回 Kubelet 的本地监控指标，主要包括运行时性能和系统状态。</li>
+</ul>
+</li>
+<li><p><strong>查看节点的 cAdvisor 指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/api/v1/nodes/&lt;nodeName&gt;/proxy/metrics/cadvisor&quot;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>获取容器级别的详细性能指标。</li>
+</ul>
+</li>
+<li><p><strong>查看 API Server 的指标</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/metrics&quot;</span> | grep apiserver</span><br></pre></td></tr></table></figure>
+<ul>
+<li>返回 API Server 的性能指标。</li>
+</ul>
+</li>
+<li><p><strong>查看 Controller Manager 的指标</strong>：<br>在 Controller Manager 所在的节点运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10252/metrics</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看 Scheduler 的指标</strong>：<br>在 Scheduler 所在的节点运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:10251/metrics</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看 Metrics Server 的 API</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/nodes&quot;</span></span><br></pre></td></tr></table></figure>
+<p>或查看 Pod 的指标：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw <span class="string">&quot;/apis/metrics.k8s.io/v1beta1/pods&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Prometheus 拉取指标</strong>：<br>如果集群中部署了 Prometheus，可以直接通过其 UI 或 API 获取指标，使用 PromQL 查询资源利用率。</p>
+</li>
+</ol>
+<hr>
+<h3 id="Kubernetes-Metrics-的整体知识架构"><a href="#Kubernetes-Metrics-的整体知识架构" class="headerlink" title="Kubernetes Metrics 的整体知识架构"></a>Kubernetes Metrics 的整体知识架构</h3><h4 id="1-数据来源"><a href="#1-数据来源" class="headerlink" title="1. 数据来源"></a><strong>1. 数据来源</strong></h4><ul>
+<li><strong>Kubelet cAdvisor</strong>：提供节点和容器的资源使用数据。</li>
+<li><strong>Metrics Server</strong>：聚合来自 Kubelet 的指标，用于 Horizontal Pod Autoscaler（HPA）等。</li>
+<li><strong>Prometheus</strong>：一个全面的监控解决方案，用于存储和查询集群中所有相关的指标数据。</li>
+<li><strong>API Server 和 Controller 指标</strong>：暴露组件性能。</li>
+</ul>
+<h4 id="2-相关工具"><a href="#2-相关工具" class="headerlink" title="2. 相关工具"></a><strong>2. 相关工具</strong></h4><ul>
+<li><strong>kubectl top</strong>：快速查看节点和 Pod 的资源使用：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl top nodes</span><br><span class="line">kubectl top pods --namespace=&lt;namespace&gt;</span><br></pre></td></tr></table></figure></li>
+<li><strong>Prometheus&#x2F;Grafana</strong>：用于可视化和分析。</li>
+<li><strong>Custom Metrics Adapter</strong>：支持自定义指标。</li>
+</ul>
+<h4 id="3-最佳实践"><a href="#3-最佳实践" class="headerlink" title="3. 最佳实践"></a><strong>3. 最佳实践</strong></h4><ol>
+<li><strong>启用 Metrics Server</strong>：用于 HPA 和基本资源监控。</li>
+<li><strong>使用 Prometheus</strong>：集中化收集和存储指标。</li>
+<li><strong>建立告警系统</strong>：通过 Alertmanager 或其他工具设置告警。</li>
+<li><strong>分析指标覆盖范围</strong>：确保所有重要组件和工作负载都有相关指标暴露。</li>
+<li><strong>优化监控开销</strong>：根据需要采样和聚合数据，避免监控开销过大。</li>
+</ol>
+<hr>
+<h3 id="推荐文档与资源"><a href="#推荐文档与资源" class="headerlink" title="推荐文档与资源"></a>推荐文档与资源</h3><ol>
+<li><p><strong>Kubernetes 官方文档</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics/">Metrics for Kubernetes Components</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/cluster-administration/monitoring/">Monitoring Architecture</a></li>
+</ul>
+</li>
+<li><p><strong>Prometheus 官方文档</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://prometheus.io/docs/">Prometheus Documentation</a></li>
+</ul>
+</li>
+<li><p><strong>社区工具</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/prometheus-operator/kube-prometheus">Kube-prometheus-stack</a><br>一个推荐的 Prometheus Operator 部署方案。</li>
+</ul>
+</li>
+<li><p><strong>博客与案例</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cncf.io/">CNCF Metrics Best Practices</a><br>关于监控和指标的实践指导。</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/08/k8s-event-controller%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1268,80 +1411,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/18/yq/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/18/yq/" class="post-title-link" itemprop="url">k8s整洁yaml输出（yq）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-11-18 10:13:26" itemprop="dateCreated datePublished" datetime="2024-11-18T10:13:26+08:00">2024-11-18</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-03-25 19:52:49" itemprop="dateModified" datetime="2025-03-25T19:52:49+08:00">2025-03-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="yq"><a href="#yq" class="headerlink" title="yq"></a>yq</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#文档：https://github.com/mikefarah/yq/releases</span></span><br><span class="line">wget https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line">tar vxf yq_linux_amd64.tar.gz ./</span><br><span class="line"><span class="built_in">mv</span> ./yq_linux_amd64 /usr/local/bin/yq</span><br><span class="line"></span><br><span class="line"><span class="comment">#k8s使用yq导出较为整洁的导出yaml</span></span><br><span class="line">kubectl get deployment &lt;deployment&gt; -n &lt;namespace&gt; -o yaml --ignore-not-found | \</span><br><span class="line">yq <span class="string">&#x27;del(.metadata.annotations, .metadata.creationTimestamp, .metadata.generation, .metadata.resourceVersion, .metadata.uid, .status, .spec.template.metadata.creationTimestamp)&#x27;</span></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1413,7 +1482,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">167</span>
+          <span class="site-state-item-count">168</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
