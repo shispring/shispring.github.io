@@ -14233,7 +14233,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
     <title>BCC(BPF Compiler Collection)</title>
     <url>/2026/01/21/BCC-BPF-Compiler-Collection/</url>
     <content><![CDATA[<h2 id="BCC包括的一些工具"><a href="#BCC包括的一些工具" class="headerlink" title="BCC包括的一些工具"></a>BCC包括的一些工具</h2><blockquote>
-<p><a href="https://tonydeng.github.io/sdn-handbook/linux/bpf/bcc.html">https://tonydeng.github.io/sdn-handbook/linux/bpf/bcc.html</a></p>
+<p><a href="https://tonydeng.github.io/sdn-handbook/linux/bpf/bcc.html">https://tonydeng.github.io/sdn-handbook/linux/bpf/bcc.html</a><br><img src="https://raw.githubusercontent.com/shispring/picgo/master/bcc_tracing_tools_2016.png" alt="bcc" title="bcc"></p>
 </blockquote>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#CentOS</span><br><span class="line">yum install -y bcc-tools</span><br><span class="line"></span><br><span class="line">ls /usr/share/bcc/tools</span><br></pre></td></tr></table></figure>
 ]]></content>
