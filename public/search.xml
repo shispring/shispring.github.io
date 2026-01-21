@@ -14241,4 +14241,248 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>理解CNI及实践操作</title>
+    <url>/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/</url>
+    <content><![CDATA[<h1 id="一、分析图片的-3-个步骤"><a href="#一、分析图片的-3-个步骤" class="headerlink" title="一、分析图片的 3 个步骤"></a>一、分析图片的 3 个步骤</h1><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png" alt="cni" title="cni"></p>
+<h2 id="Step-1：给-Pod-插上“网线”（veth）"><a href="#Step-1：给-Pod-插上“网线”（veth）" class="headerlink" title="Step 1：给 Pod 插上“网线”（veth）"></a>Step 1：给 Pod 插上“网线”（veth）</h2><blockquote>
+<p>创建 veth pair，一端进 Pod，一端留在 Node</p>
+</blockquote>
+<h3 id="👍-这是-CNI-的核心职责之一"><a href="#👍-这是-CNI-的核心职责之一" class="headerlink" title="👍 这是 CNI 的核心职责之一"></a>👍 这是 CNI 的<strong>核心职责之一</strong></h3><p><strong>底层原理</strong>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">[ Pod netns ] eth0  &lt;==== veth pair ====  vethXXXX [ Node ]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>veth 是 Linux 提供的“虚拟网线”</li>
+<li>Pod 里看到的是 <code>eth0</code></li>
+<li>Node 上看到的是 <code>vethxxxx</code></li>
+</ul>
+<p>👉 <strong>CNI 插件最基础的职责：</strong></p>
+<blockquote>
+<p>把 Pod 的 network namespace 接入宿主机网络</p>
+</blockquote>
+<hr>
+<h2 id="Step-2：给-Pod-分配-IP（IPAM）"><a href="#Step-2：给-Pod-分配-IP（IPAM）" class="headerlink" title="Step 2：给 Pod 分配 IP（IPAM）"></a>Step 2：给 Pod 分配 IP（IPAM）</h2><blockquote>
+<p>每个 Pod 一个唯一 IP，通常 Node 拿一个子网</p>
+</blockquote>
+<h3 id="👍-这也是-CNI-的标准设计"><a href="#👍-这也是-CNI-的标准设计" class="headerlink" title="👍 这也是 CNI 的标准设计"></a>👍 这也是 CNI 的标准设计</h3><p>你图中描述的是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">  Pod1: 172.16.0.1</span><br><span class="line">  Pod2: 172.16.0.2</span><br><span class="line"></span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
+
+<p>这是：</p>
+<ul>
+<li><strong>Node 级子网划分</strong></li>
+<li>Pod 从 Node 子网里分 IP</li>
+</ul>
+<p>👉 这是非常典型的 <strong>Node-scoped IPAM 模型</strong></p>
+<p><strong>Flannel &#x2F; Calico &#x2F; Cilium 都支持这个模型</strong></p>
+<hr>
+<h2 id="Step-3：配置-IP-路由（L3-通）"><a href="#Step-3：配置-IP-路由（L3-通）" class="headerlink" title="Step 3：配置 IP + 路由（L3 通）"></a>Step 3：配置 IP + 路由（L3 通）</h2><blockquote>
+<p>Pod 能出网，Node 知道怎么把包送回 Pod</p>
+</blockquote>
+<h3 id="👍-这是最容易被低估，但最重要的一步"><a href="#👍-这是最容易被低估，但最重要的一步" class="headerlink" title="👍 这是最容易被低估，但最重要的一步"></a>👍 这是最容易被低估，但最重要的一步</h3><p>图里提到三件事：</p>
+<ol>
+<li>给 Pod eth0 配 IP</li>
+<li>给 Pod 配默认路由</li>
+<li>给 Node 配到 Pod IP 的路由</li>
+</ol>
+<p>这是 <strong>“Pod 能通信”成立的最小条件</strong>。</p>
+<hr>
+<h1 id="二、如果你手动“完整体验一遍-CNI”，应该怎么做？"><a href="#二、如果你手动“完整体验一遍-CNI”，应该怎么做？" class="headerlink" title="二、如果你手动“完整体验一遍 CNI”，应该怎么做？"></a>二、如果你手动“完整体验一遍 CNI”，应该怎么做？</h1><p>下面是一套<strong>完全可手动复现的 CNI 行为</strong></p>
+<hr>
+<h2 id="🔧-实验前准备"><a href="#🔧-实验前准备" class="headerlink" title="🔧 实验前准备"></a>🔧 实验前准备</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建一个模拟 Pod 的 netns</span></span><br><span class="line">ip netns add pod1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-1：创建-veth-pair"><a href="#Step-1：创建-veth-pair" class="headerlink" title="Step 1：创建 veth pair"></a>Step 1：创建 veth pair</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip <span class="built_in">link</span> add veth-pod1 <span class="built_in">type</span> veth peer name veth-host1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-2：把一端放进-Pod-netns"><a href="#Step-2：把一端放进-Pod-netns" class="headerlink" title="Step 2：把一端放进 Pod netns"></a>Step 2：把一端放进 Pod netns</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> veth-pod1 netns pod1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证-1"><a href="#验证-1" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span></span><br></pre></td></tr></table></figure>
+
+<p>你会看到 <code>veth-pod1</code></p>
+<hr>
+<h2 id="Step-3：给-Pod-网卡改名为-eth0-配-IP"><a href="#Step-3：给-Pod-网卡改名为-eth0-配-IP" class="headerlink" title="Step 3：给 Pod 网卡改名为 eth0 + 配 IP"></a>Step 3：给 Pod 网卡改名为 eth0 + 配 IP</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span> <span class="built_in">set</span> veth-pod1 name eth0</span><br><span class="line">ip netns <span class="built_in">exec</span> pod1 ip addr add 172.16.0.2/24 dev eth0</span><br><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span> <span class="built_in">set</span> eth0 up</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-4：配置-Pod-默认路由"><a href="#Step-4：配置-Pod-默认路由" class="headerlink" title="Step 4：配置 Pod 默认路由"></a>Step 4：配置 Pod 默认路由</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip route add default via 172.16.0.1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这个 <code>172.16.0.1</code> 通常就是 Node 侧 veth 的 IP</p>
+</blockquote>
+<hr>
+<h2 id="Step-5：配置-Node-侧-veth"><a href="#Step-5：配置-Node-侧-veth" class="headerlink" title="Step 5：配置 Node 侧 veth"></a>Step 5：配置 Node 侧 veth</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip addr add 172.16.0.1/24 dev veth-host1</span><br><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> veth-host1 up</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-6：Node-→-Pod-路由（如果需要）"><a href="#Step-6：Node-→-Pod-路由（如果需要）" class="headerlink" title="Step 6：Node → Pod 路由（如果需要）"></a>Step 6：Node → Pod 路由（如果需要）</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip route add 172.16.0.2 dev veth-host1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>实际 CNI 中，这步通常由内核自动完成或由更上层组件（BGP &#x2F; overlay）负责</p>
+</blockquote>
+<hr>
+<h2 id="Step-7：验证通信"><a href="#Step-7：验证通信" class="headerlink" title="Step 7：验证通信"></a>Step 7：验证通信</h2><h3 id="Pod-→-Node"><a href="#Pod-→-Node" class="headerlink" title="Pod → Node"></a>Pod → Node</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ping 172.16.0.1</span><br></pre></td></tr></table></figure>
+
+<h3 id="Node-→-Pod"><a href="#Node-→-Pod" class="headerlink" title="Node → Pod"></a>Node → Pod</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ping 172.16.0.2</span><br></pre></td></tr></table></figure>
+
+<p>✅ 通了，说明你已经<strong>手搓了一个最小 CNI</strong></p>
+<hr>
+<h1 id="三、和“真实-CNI-插件”的差距在哪？"><a href="#三、和“真实-CNI-插件”的差距在哪？" class="headerlink" title="三、和“真实 CNI 插件”的差距在哪？"></a>三、和“真实 CNI 插件”的差距在哪？</h1><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>图中是否涉及</th>
+<th>生产 CNI</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>veth 管理</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>IPAM</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Node 间互通</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>Overlay &#x2F; BGP</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>NetworkPolicy</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>生命周期回收</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>高性能</td>
+<td>❌</td>
+<td>eBPF &#x2F; XDP</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="四、“手动-CNI”的真实网络拓扑"><a href="#四、“手动-CNI”的真实网络拓扑" class="headerlink" title="四、“手动 CNI”的真实网络拓扑"></a>四、“手动 CNI”的真实网络拓扑</h1><h2 id="1️⃣-逻辑网络拓扑（强烈推荐先看这个）"><a href="#1️⃣-逻辑网络拓扑（强烈推荐先看这个）" class="headerlink" title="1️⃣ 逻辑网络拓扑（强烈推荐先看这个）"></a>1️⃣ 逻辑网络拓扑（强烈推荐先看这个）</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">+----------------------------------------------------+</span><br><span class="line">|                     Node (Host)                    |</span><br><span class="line">|                                                    |</span><br><span class="line">|   veth-host1                                       |</span><br><span class="line">|   IP: 172.16.0.1/24                                |</span><br><span class="line">|        |                                           |</span><br><span class="line">|        |  (veth pair)                              |</span><br><span class="line">|        |                                           |</span><br><span class="line">|   +----+-----------------------------+             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   |        Pod Network Namespace     |             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   |   eth0                           |             |</span><br><span class="line">|   |   IP: 172.16.0.2/24              |             |</span><br><span class="line">|   |   Default GW: 172.16.0.1         |             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   +----------------------------------+             |</span><br><span class="line">|                                                    |</span><br><span class="line">+----------------------------------------------------+</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2️⃣-数据包流向（ping-时发生了什么）"><a href="#2️⃣-数据包流向（ping-时发生了什么）" class="headerlink" title="2️⃣ 数据包流向（ping 时发生了什么）"></a>2️⃣ 数据包流向（ping 时发生了什么）</h2><h3 id="Pod-→-Node-1"><a href="#Pod-→-Node-1" class="headerlink" title="Pod → Node"></a>Pod → Node</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Pod eth0 (172.16.0.2)</span><br><span class="line">  |</span><br><span class="line">  |  ICMP Echo Request</span><br><span class="line">  |</span><br><span class="line">veth-pod1  ====== veth-host1</span><br><span class="line">                          |</span><br><span class="line">                          |</span><br><span class="line">                    Node 网络协议栈</span><br></pre></td></tr></table></figure>
+
+<h3 id="Node-→-Pod-1"><a href="#Node-→-Pod-1" class="headerlink" title="Node → Pod"></a>Node → Pod</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Node IP stack</span><br><span class="line">  |</span><br><span class="line">  |  查路由：172.16.0.2 dev veth-host1</span><br><span class="line">  |</span><br><span class="line">veth-host1 ====== veth-pod1</span><br><span class="line">                          |</span><br><span class="line">                          |</span><br><span class="line">                      Pod eth0</span><br></pre></td></tr></table></figure>
+
+<p>👉 <strong>关键点</strong></p>
+<ul>
+<li>veth ≈ 一根虚拟网线</li>
+<li>不需要 NAT</li>
+<li>不需要 iptables</li>
+<li>这是纯 L3 路由模型</li>
+</ul>
+<hr>
+<h2 id="3️⃣-用一句话总结你现在的结构"><a href="#3️⃣-用一句话总结你现在的结构" class="headerlink" title="3️⃣ 用一句话总结你现在的结构"></a>3️⃣ 用一句话总结你现在的结构</h2><blockquote>
+<p><strong>Pod 是 Node 网络的一部分，只是通过 veth 被“延长”到了另一个 namespace</strong></p>
+</blockquote>
+<p>这正是 <strong>Kubernetes CNI 的核心哲学</strong>。</p>
+<hr>
+<h1 id="五、完整的「清理步骤（DEL）」"><a href="#五、完整的「清理步骤（DEL）」" class="headerlink" title="五、完整的「清理步骤（DEL）」"></a>五、完整的「清理步骤（DEL）」</h1><p>你现在做的是 <code>ADD</code>，但**生产 CNI 最容易出 bug 的是 <code>DEL</code>**。</p>
+<p>下面是<strong>完全对称、且安全的清理顺序</strong>。</p>
+<hr>
+<h2 id="Step-1：删除-Pod-netns（最彻底）"><a href="#Step-1：删除-Pod-netns（最彻底）" class="headerlink" title="Step 1：删除 Pod netns（最彻底）"></a>Step 1：删除 Pod netns（最彻底）</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip netns del pod1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证-2"><a href="#验证-2" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip netns list</span><br></pre></td></tr></table></figure>
+
+<p>✅ pod1 不存在</p>
+<blockquote>
+<p>⚠️ 注意：<br>如果你删的是 netns，<strong>netns 内的 veth 会被自动回收</strong></p>
+</blockquote>
+<hr>
+<h2 id="Step-2：确认-Node-侧-veth-是否还存在"><a href="#Step-2：确认-Node-侧-veth-是否还存在" class="headerlink" title="Step 2：确认 Node 侧 veth 是否还存在"></a>Step 2：确认 Node 侧 veth 是否还存在</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth-host1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>如果 <strong>还存在</strong>（少见，但可能）：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip <span class="built_in">link</span> del veth-host1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h2 id="Step-3：清理路由（如果你是手动加的）"><a href="#Step-3：清理路由（如果你是手动加的）" class="headerlink" title="Step 3：清理路由（如果你是手动加的）"></a>Step 3：清理路由（如果你是手动加的）</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip route del 172.16.0.2 dev veth-host1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证-3"><a href="#验证-3" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip route | grep 172.16.0.2</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-4：清理-IP（一般随-veth-一起消失）"><a href="#Step-4：清理-IP（一般随-veth-一起消失）" class="headerlink" title="Step 4：清理 IP（一般随 veth 一起消失）"></a>Step 4：清理 IP（一般随 veth 一起消失）</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip addr del 172.16.0.1/24 dev veth-host1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-5：最终验证"><a href="#Step-5：最终验证" class="headerlink" title="Step 5：最终验证"></a>Step 5：最终验证</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth</span><br><span class="line">ip route | grep 172.16</span><br></pre></td></tr></table></figure>
+
+<p>✅ 干净，环境恢复</p>
+<hr>
+<h1 id="六、在“真实-CNI-IPAM”中，这些步骤是如何被管理的？"><a href="#六、在“真实-CNI-IPAM”中，这些步骤是如何被管理的？" class="headerlink" title="六、在“真实 CNI &#x2F; IPAM”中，这些步骤是如何被管理的？"></a>六、在“真实 CNI &#x2F; IPAM”中，这些步骤是如何被管理的？</h1><p>你刚才是<strong>“人肉 IPAM”</strong>，现在我们系统化一下。</p>
+<hr>
+<h2 id="1️⃣-IPAM-的职责边界（非常重要）"><a href="#1️⃣-IPAM-的职责边界（非常重要）" class="headerlink" title="1️⃣ IPAM 的职责边界（非常重要）"></a>1️⃣ IPAM 的职责边界（非常重要）</h2><p><strong>IPAM 只做三件事：</strong></p>
+<ol>
+<li>分配 IP</li>
+<li>回收 IP</li>
+<li>持久化 IP 使用状态</li>
+</ol>
+<p><strong>它不：</strong></p>
+<ul>
+<li>创建 veth</li>
+<li>配路由</li>
+<li>管网络策略</li>
+</ul>
+<hr>
+<h2 id="2️⃣-常见-IPAM-模型-命令抽象"><a href="#2️⃣-常见-IPAM-模型-命令抽象" class="headerlink" title="2️⃣ 常见 IPAM 模型 &amp; 命令抽象"></a>2️⃣ 常见 IPAM 模型 &amp; 命令抽象</h2><h3 id="🔹-模型一：Node-子网（你现在用的）"><a href="#🔹-模型一：Node-子网（你现在用的）" class="headerlink" title="🔹 模型一：Node 子网（你现在用的）"></a>🔹 模型一：Node 子网（你现在用的）</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
+
+<p><strong>IPAM 内部逻辑（抽象）</strong>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">ALLOCATE:</span><br><span class="line">  找一个 free IP</span><br><span class="line">  标记为 used</span><br><span class="line">  返回 IP + mask + gateway</span><br><span class="line"></span><br><span class="line">RELEASE:</span><br><span class="line">  标记 IP 为 free</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="🔹-手动模拟-IPAM-的常见命令"><a href="#🔹-手动模拟-IPAM-的常见命令" class="headerlink" title="🔹 手动模拟 IPAM 的常见命令"></a>🔹 手动模拟 IPAM 的常见命令</h3><h4 id="查看当前-Node-上的-Pod-IP（模拟）"><a href="#查看当前-Node-上的-Pod-IP（模拟）" class="headerlink" title="查看当前 Node 上的 Pod IP（模拟）"></a>查看当前 Node 上的 Pod IP（模拟）</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip addr | grep 172.16</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看“已占用-IP”（粗暴版）"><a href="#查看“已占用-IP”（粗暴版）" class="headerlink" title="查看“已占用 IP”（粗暴版）"></a>查看“已占用 IP”（粗暴版）</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip route | grep veth</span><br></pre></td></tr></table></figure>
+
+<h4 id="回收-IP（本质）"><a href="#回收-IP（本质）" class="headerlink" title="回收 IP（本质）"></a>回收 IP（本质）</h4><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">删除 netns + 删除 veth + 删除路由</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3️⃣-常见真实-IPAM-实现"><a href="#3️⃣-常见真实-IPAM-实现" class="headerlink" title="3️⃣ 常见真实 IPAM 实现"></a>3️⃣ 常见真实 IPAM 实现</h2><table>
+<thead>
+<tr>
+<th>IPAM</th>
+<th>底层</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>host-local</td>
+<td>文件 <code>/var/lib/cni/networks/</code></td>
+</tr>
+<tr>
+<td>calico-ipam</td>
+<td>etcd &#x2F; CRD</td>
+</tr>
+<tr>
+<td>cilium IPAM</td>
+<td>KVStore &#x2F; Kubernetes</td>
+</tr>
+<tr>
+<td>whereabouts</td>
+<td>分布式锁</td>
+</tr>
+</tbody></table>
+<h3 id="以-host-local-IPAM-为例"><a href="#以-host-local-IPAM-为例" class="headerlink" title="以 host-local IPAM 为例"></a>以 <strong>host-local IPAM</strong> 为例</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ls</span> /var/lib/cni/networks/&lt;network-name&gt;/</span><br></pre></td></tr></table></figure>
+
+<p>你会看到：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">172.16.0.2</span><br><span class="line">172.16.0.3</span><br><span class="line">last_reserved_ip</span><br></pre></td></tr></table></figure>
+
+<p>这就是 <strong>最原始的 IPAM 状态存储</strong></p>
+]]></content>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
 </search>

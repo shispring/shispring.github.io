@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="一、分析图片的 3 个步骤 Step 1：给 Pod 插上“网线”（veth） 创建 veth pair，一端进 Pod，一端留在 Node  👍 这是 CNI 的核心职责之一底层原理： 1[ Pod netns ] eth0  &lt;&#x3D;&#x3D;&#x3D;&#x3D; veth pair &#x3D;&#x3D;&#x3D;&#x3D;  vethXXXX [ Node ]   veth 是 Linux 提供的“虚拟网线” Pod 里看到的是 eth0 N">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解CNI及实践操作">
+<meta property="og:url" content="https://shispring.github.io/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、分析图片的 3 个步骤 Step 1：给 Pod 插上“网线”（veth） 创建 veth pair，一端进 Pod，一端留在 Node  👍 这是 CNI 的核心职责之一底层原理： 1[ Pod netns ] eth0  &lt;&#x3D;&#x3D;&#x3D;&#x3D; veth pair &#x3D;&#x3D;&#x3D;&#x3D;  vethXXXX [ Node ]   veth 是 Linux 提供的“虚拟网线” Pod 里看到的是 eth0 N">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png">
+<meta property="article:published_time" content="2026-01-21T14:15:13.000Z">
+<meta property="article:modified_time" content="2026-01-21T14:18:31.728Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png">
+
+<link rel="canonical" href="https://shispring.github.io/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>理解CNI及实践操作 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          理解CNI及实践操作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-21 22:15:13 / 修改时间：22:18:31" itemprop="dateCreated datePublished" datetime="2026-01-21T22:15:13+08:00">2026-01-21</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、分析图片的-3-个步骤"><a href="#一、分析图片的-3-个步骤" class="headerlink" title="一、分析图片的 3 个步骤"></a>一、分析图片的 3 个步骤</h1><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png" alt="cni" title="cni"></p>
+<h2 id="Step-1：给-Pod-插上“网线”（veth）"><a href="#Step-1：给-Pod-插上“网线”（veth）" class="headerlink" title="Step 1：给 Pod 插上“网线”（veth）"></a>Step 1：给 Pod 插上“网线”（veth）</h2><blockquote>
+<p>创建 veth pair，一端进 Pod，一端留在 Node</p>
+</blockquote>
+<h3 id="👍-这是-CNI-的核心职责之一"><a href="#👍-这是-CNI-的核心职责之一" class="headerlink" title="👍 这是 CNI 的核心职责之一"></a>👍 这是 CNI 的<strong>核心职责之一</strong></h3><p><strong>底层原理</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ Pod netns ] eth0  &lt;==== veth pair ====  vethXXXX [ Node ]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>veth 是 Linux 提供的“虚拟网线”</li>
+<li>Pod 里看到的是 <code>eth0</code></li>
+<li>Node 上看到的是 <code>vethxxxx</code></li>
+</ul>
+<p>👉 <strong>CNI 插件最基础的职责：</strong></p>
+<blockquote>
+<p>把 Pod 的 network namespace 接入宿主机网络</p>
+</blockquote>
+<hr>
+<h2 id="Step-2：给-Pod-分配-IP（IPAM）"><a href="#Step-2：给-Pod-分配-IP（IPAM）" class="headerlink" title="Step 2：给 Pod 分配 IP（IPAM）"></a>Step 2：给 Pod 分配 IP（IPAM）</h2><blockquote>
+<p>每个 Pod 一个唯一 IP，通常 Node 拿一个子网</p>
+</blockquote>
+<h3 id="👍-这也是-CNI-的标准设计"><a href="#👍-这也是-CNI-的标准设计" class="headerlink" title="👍 这也是 CNI 的标准设计"></a>👍 这也是 CNI 的标准设计</h3><p>你图中描述的是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">  Pod1: 172.16.0.1</span><br><span class="line">  Pod2: 172.16.0.2</span><br><span class="line"></span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
+
+<p>这是：</p>
+<ul>
+<li><strong>Node 级子网划分</strong></li>
+<li>Pod 从 Node 子网里分 IP</li>
+</ul>
+<p>👉 这是非常典型的 <strong>Node-scoped IPAM 模型</strong></p>
+<p><strong>Flannel &#x2F; Calico &#x2F; Cilium 都支持这个模型</strong></p>
+<hr>
+<h2 id="Step-3：配置-IP-路由（L3-通）"><a href="#Step-3：配置-IP-路由（L3-通）" class="headerlink" title="Step 3：配置 IP + 路由（L3 通）"></a>Step 3：配置 IP + 路由（L3 通）</h2><blockquote>
+<p>Pod 能出网，Node 知道怎么把包送回 Pod</p>
+</blockquote>
+<h3 id="👍-这是最容易被低估，但最重要的一步"><a href="#👍-这是最容易被低估，但最重要的一步" class="headerlink" title="👍 这是最容易被低估，但最重要的一步"></a>👍 这是最容易被低估，但最重要的一步</h3><p>图里提到三件事：</p>
+<ol>
+<li>给 Pod eth0 配 IP</li>
+<li>给 Pod 配默认路由</li>
+<li>给 Node 配到 Pod IP 的路由</li>
+</ol>
+<p>这是 <strong>“Pod 能通信”成立的最小条件</strong>。</p>
+<hr>
+<h1 id="二、如果你手动“完整体验一遍-CNI”，应该怎么做？"><a href="#二、如果你手动“完整体验一遍-CNI”，应该怎么做？" class="headerlink" title="二、如果你手动“完整体验一遍 CNI”，应该怎么做？"></a>二、如果你手动“完整体验一遍 CNI”，应该怎么做？</h1><p>下面是一套<strong>完全可手动复现的 CNI 行为</strong></p>
+<hr>
+<h2 id="🔧-实验前准备"><a href="#🔧-实验前准备" class="headerlink" title="🔧 实验前准备"></a>🔧 实验前准备</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个模拟 Pod 的 netns</span></span><br><span class="line">ip netns add pod1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-1：创建-veth-pair"><a href="#Step-1：创建-veth-pair" class="headerlink" title="Step 1：创建 veth pair"></a>Step 1：创建 veth pair</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> add veth-pod1 <span class="built_in">type</span> veth peer name veth-host1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-2：把一端放进-Pod-netns"><a href="#Step-2：把一端放进-Pod-netns" class="headerlink" title="Step 2：把一端放进 Pod netns"></a>Step 2：把一端放进 Pod netns</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> veth-pod1 netns pod1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证-1"><a href="#验证-1" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span></span><br></pre></td></tr></table></figure>
+
+<p>你会看到 <code>veth-pod1</code></p>
+<hr>
+<h2 id="Step-3：给-Pod-网卡改名为-eth0-配-IP"><a href="#Step-3：给-Pod-网卡改名为-eth0-配-IP" class="headerlink" title="Step 3：给 Pod 网卡改名为 eth0 + 配 IP"></a>Step 3：给 Pod 网卡改名为 eth0 + 配 IP</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span> <span class="built_in">set</span> veth-pod1 name eth0</span><br><span class="line">ip netns <span class="built_in">exec</span> pod1 ip addr add 172.16.0.2/24 dev eth0</span><br><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span> <span class="built_in">set</span> eth0 up</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-4：配置-Pod-默认路由"><a href="#Step-4：配置-Pod-默认路由" class="headerlink" title="Step 4：配置 Pod 默认路由"></a>Step 4：配置 Pod 默认路由</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip route add default via 172.16.0.1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这个 <code>172.16.0.1</code> 通常就是 Node 侧 veth 的 IP</p>
+</blockquote>
+<hr>
+<h2 id="Step-5：配置-Node-侧-veth"><a href="#Step-5：配置-Node-侧-veth" class="headerlink" title="Step 5：配置 Node 侧 veth"></a>Step 5：配置 Node 侧 veth</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip addr add 172.16.0.1/24 dev veth-host1</span><br><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> veth-host1 up</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-6：Node-→-Pod-路由（如果需要）"><a href="#Step-6：Node-→-Pod-路由（如果需要）" class="headerlink" title="Step 6：Node → Pod 路由（如果需要）"></a>Step 6：Node → Pod 路由（如果需要）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route add 172.16.0.2 dev veth-host1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>实际 CNI 中，这步通常由内核自动完成或由更上层组件（BGP &#x2F; overlay）负责</p>
+</blockquote>
+<hr>
+<h2 id="Step-7：验证通信"><a href="#Step-7：验证通信" class="headerlink" title="Step 7：验证通信"></a>Step 7：验证通信</h2><h3 id="Pod-→-Node"><a href="#Pod-→-Node" class="headerlink" title="Pod → Node"></a>Pod → Node</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ping 172.16.0.1</span><br></pre></td></tr></table></figure>
+
+<h3 id="Node-→-Pod"><a href="#Node-→-Pod" class="headerlink" title="Node → Pod"></a>Node → Pod</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping 172.16.0.2</span><br></pre></td></tr></table></figure>
+
+<p>✅ 通了，说明你已经<strong>手搓了一个最小 CNI</strong></p>
+<hr>
+<h1 id="三、和“真实-CNI-插件”的差距在哪？"><a href="#三、和“真实-CNI-插件”的差距在哪？" class="headerlink" title="三、和“真实 CNI 插件”的差距在哪？"></a>三、和“真实 CNI 插件”的差距在哪？</h1><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>图中是否涉及</th>
+<th>生产 CNI</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>veth 管理</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>IPAM</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Node 间互通</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>Overlay &#x2F; BGP</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>NetworkPolicy</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>生命周期回收</td>
+<td>❌</td>
+<td>必须</td>
+</tr>
+<tr>
+<td>高性能</td>
+<td>❌</td>
+<td>eBPF &#x2F; XDP</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="四、“手动-CNI”的真实网络拓扑"><a href="#四、“手动-CNI”的真实网络拓扑" class="headerlink" title="四、“手动 CNI”的真实网络拓扑"></a>四、“手动 CNI”的真实网络拓扑</h1><h2 id="1️⃣-逻辑网络拓扑（强烈推荐先看这个）"><a href="#1️⃣-逻辑网络拓扑（强烈推荐先看这个）" class="headerlink" title="1️⃣ 逻辑网络拓扑（强烈推荐先看这个）"></a>1️⃣ 逻辑网络拓扑（强烈推荐先看这个）</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">+----------------------------------------------------+</span><br><span class="line">|                     Node (Host)                    |</span><br><span class="line">|                                                    |</span><br><span class="line">|   veth-host1                                       |</span><br><span class="line">|   IP: 172.16.0.1/24                                |</span><br><span class="line">|        |                                           |</span><br><span class="line">|        |  (veth pair)                              |</span><br><span class="line">|        |                                           |</span><br><span class="line">|   +----+-----------------------------+             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   |        Pod Network Namespace     |             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   |   eth0                           |             |</span><br><span class="line">|   |   IP: 172.16.0.2/24              |             |</span><br><span class="line">|   |   Default GW: 172.16.0.1         |             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   +----------------------------------+             |</span><br><span class="line">|                                                    |</span><br><span class="line">+----------------------------------------------------+</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2️⃣-数据包流向（ping-时发生了什么）"><a href="#2️⃣-数据包流向（ping-时发生了什么）" class="headerlink" title="2️⃣ 数据包流向（ping 时发生了什么）"></a>2️⃣ 数据包流向（ping 时发生了什么）</h2><h3 id="Pod-→-Node-1"><a href="#Pod-→-Node-1" class="headerlink" title="Pod → Node"></a>Pod → Node</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Pod eth0 (172.16.0.2)</span><br><span class="line">  |</span><br><span class="line">  |  ICMP Echo Request</span><br><span class="line">  |</span><br><span class="line">veth-pod1  ====== veth-host1</span><br><span class="line">                          |</span><br><span class="line">                          |</span><br><span class="line">                    Node 网络协议栈</span><br></pre></td></tr></table></figure>
+
+<h3 id="Node-→-Pod-1"><a href="#Node-→-Pod-1" class="headerlink" title="Node → Pod"></a>Node → Pod</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Node IP stack</span><br><span class="line">  |</span><br><span class="line">  |  查路由：172.16.0.2 dev veth-host1</span><br><span class="line">  |</span><br><span class="line">veth-host1 ====== veth-pod1</span><br><span class="line">                          |</span><br><span class="line">                          |</span><br><span class="line">                      Pod eth0</span><br></pre></td></tr></table></figure>
+
+<p>👉 <strong>关键点</strong></p>
+<ul>
+<li>veth ≈ 一根虚拟网线</li>
+<li>不需要 NAT</li>
+<li>不需要 iptables</li>
+<li>这是纯 L3 路由模型</li>
+</ul>
+<hr>
+<h2 id="3️⃣-用一句话总结你现在的结构"><a href="#3️⃣-用一句话总结你现在的结构" class="headerlink" title="3️⃣ 用一句话总结你现在的结构"></a>3️⃣ 用一句话总结你现在的结构</h2><blockquote>
+<p><strong>Pod 是 Node 网络的一部分，只是通过 veth 被“延长”到了另一个 namespace</strong></p>
+</blockquote>
+<p>这正是 <strong>Kubernetes CNI 的核心哲学</strong>。</p>
+<hr>
+<h1 id="五、完整的「清理步骤（DEL）」"><a href="#五、完整的「清理步骤（DEL）」" class="headerlink" title="五、完整的「清理步骤（DEL）」"></a>五、完整的「清理步骤（DEL）」</h1><p>你现在做的是 <code>ADD</code>，但**生产 CNI 最容易出 bug 的是 <code>DEL</code>**。</p>
+<p>下面是<strong>完全对称、且安全的清理顺序</strong>。</p>
+<hr>
+<h2 id="Step-1：删除-Pod-netns（最彻底）"><a href="#Step-1：删除-Pod-netns（最彻底）" class="headerlink" title="Step 1：删除 Pod netns（最彻底）"></a>Step 1：删除 Pod netns（最彻底）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns del pod1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证-2"><a href="#验证-2" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns list</span><br></pre></td></tr></table></figure>
+
+<p>✅ pod1 不存在</p>
+<blockquote>
+<p>⚠️ 注意：<br>如果你删的是 netns，<strong>netns 内的 veth 会被自动回收</strong></p>
+</blockquote>
+<hr>
+<h2 id="Step-2：确认-Node-侧-veth-是否还存在"><a href="#Step-2：确认-Node-侧-veth-是否还存在" class="headerlink" title="Step 2：确认 Node 侧 veth 是否还存在"></a>Step 2：确认 Node 侧 veth 是否还存在</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth-host1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>如果 <strong>还存在</strong>（少见，但可能）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> del veth-host1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h2 id="Step-3：清理路由（如果你是手动加的）"><a href="#Step-3：清理路由（如果你是手动加的）" class="headerlink" title="Step 3：清理路由（如果你是手动加的）"></a>Step 3：清理路由（如果你是手动加的）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route del 172.16.0.2 dev veth-host1</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证-3"><a href="#验证-3" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route | grep 172.16.0.2</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-4：清理-IP（一般随-veth-一起消失）"><a href="#Step-4：清理-IP（一般随-veth-一起消失）" class="headerlink" title="Step 4：清理 IP（一般随 veth 一起消失）"></a>Step 4：清理 IP（一般随 veth 一起消失）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr del 172.16.0.1/24 dev veth-host1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Step-5：最终验证"><a href="#Step-5：最终验证" class="headerlink" title="Step 5：最终验证"></a>Step 5：最终验证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth</span><br><span class="line">ip route | grep 172.16</span><br></pre></td></tr></table></figure>
+
+<p>✅ 干净，环境恢复</p>
+<hr>
+<h1 id="六、在“真实-CNI-IPAM”中，这些步骤是如何被管理的？"><a href="#六、在“真实-CNI-IPAM”中，这些步骤是如何被管理的？" class="headerlink" title="六、在“真实 CNI &#x2F; IPAM”中，这些步骤是如何被管理的？"></a>六、在“真实 CNI &#x2F; IPAM”中，这些步骤是如何被管理的？</h1><p>你刚才是<strong>“人肉 IPAM”</strong>，现在我们系统化一下。</p>
+<hr>
+<h2 id="1️⃣-IPAM-的职责边界（非常重要）"><a href="#1️⃣-IPAM-的职责边界（非常重要）" class="headerlink" title="1️⃣ IPAM 的职责边界（非常重要）"></a>1️⃣ IPAM 的职责边界（非常重要）</h2><p><strong>IPAM 只做三件事：</strong></p>
+<ol>
+<li>分配 IP</li>
+<li>回收 IP</li>
+<li>持久化 IP 使用状态</li>
+</ol>
+<p><strong>它不：</strong></p>
+<ul>
+<li>创建 veth</li>
+<li>配路由</li>
+<li>管网络策略</li>
+</ul>
+<hr>
+<h2 id="2️⃣-常见-IPAM-模型-命令抽象"><a href="#2️⃣-常见-IPAM-模型-命令抽象" class="headerlink" title="2️⃣ 常见 IPAM 模型 &amp; 命令抽象"></a>2️⃣ 常见 IPAM 模型 &amp; 命令抽象</h2><h3 id="🔹-模型一：Node-子网（你现在用的）"><a href="#🔹-模型一：Node-子网（你现在用的）" class="headerlink" title="🔹 模型一：Node 子网（你现在用的）"></a>🔹 模型一：Node 子网（你现在用的）</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
+
+<p><strong>IPAM 内部逻辑（抽象）</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ALLOCATE:</span><br><span class="line">  找一个 free IP</span><br><span class="line">  标记为 used</span><br><span class="line">  返回 IP + mask + gateway</span><br><span class="line"></span><br><span class="line">RELEASE:</span><br><span class="line">  标记 IP 为 free</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="🔹-手动模拟-IPAM-的常见命令"><a href="#🔹-手动模拟-IPAM-的常见命令" class="headerlink" title="🔹 手动模拟 IPAM 的常见命令"></a>🔹 手动模拟 IPAM 的常见命令</h3><h4 id="查看当前-Node-上的-Pod-IP（模拟）"><a href="#查看当前-Node-上的-Pod-IP（模拟）" class="headerlink" title="查看当前 Node 上的 Pod IP（模拟）"></a>查看当前 Node 上的 Pod IP（模拟）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr | grep 172.16</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看“已占用-IP”（粗暴版）"><a href="#查看“已占用-IP”（粗暴版）" class="headerlink" title="查看“已占用 IP”（粗暴版）"></a>查看“已占用 IP”（粗暴版）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route | grep veth</span><br></pre></td></tr></table></figure>
+
+<h4 id="回收-IP（本质）"><a href="#回收-IP（本质）" class="headerlink" title="回收 IP（本质）"></a>回收 IP（本质）</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">删除 netns + 删除 veth + 删除路由</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3️⃣-常见真实-IPAM-实现"><a href="#3️⃣-常见真实-IPAM-实现" class="headerlink" title="3️⃣ 常见真实 IPAM 实现"></a>3️⃣ 常见真实 IPAM 实现</h2><table>
+<thead>
+<tr>
+<th>IPAM</th>
+<th>底层</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>host-local</td>
+<td>文件 <code>/var/lib/cni/networks/</code></td>
+</tr>
+<tr>
+<td>calico-ipam</td>
+<td>etcd &#x2F; CRD</td>
+</tr>
+<tr>
+<td>cilium IPAM</td>
+<td>KVStore &#x2F; Kubernetes</td>
+</tr>
+<tr>
+<td>whereabouts</td>
+<td>分布式锁</td>
+</tr>
+</tbody></table>
+<h3 id="以-host-local-IPAM-为例"><a href="#以-host-local-IPAM-为例" class="headerlink" title="以 host-local IPAM 为例"></a>以 <strong>host-local IPAM</strong> 为例</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /var/lib/cni/networks/&lt;network-name&gt;/</span><br></pre></td></tr></table></figure>
+
+<p>你会看到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">172.16.0.2</span><br><span class="line">172.16.0.3</span><br><span class="line">last_reserved_ip</span><br></pre></td></tr></table></figure>
+
+<p>这就是 <strong>最原始的 IPAM 状态存储</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/01/21/BCC-BPF-Compiler-Collection/" rel="prev" title="BCC(BPF Compiler Collection)">
+      <i class="fa fa-chevron-left"></i> BCC(BPF Compiler Collection)
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%88%86%E6%9E%90%E5%9B%BE%E7%89%87%E7%9A%84-3-%E4%B8%AA%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.</span> <span class="nav-text">一、分析图片的 3 个步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-1%EF%BC%9A%E7%BB%99-Pod-%E6%8F%92%E4%B8%8A%E2%80%9C%E7%BD%91%E7%BA%BF%E2%80%9D%EF%BC%88veth%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">Step 1：给 Pod 插上“网线”（veth）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%91%8D-%E8%BF%99%E6%98%AF-CNI-%E7%9A%84%E6%A0%B8%E5%BF%83%E8%81%8C%E8%B4%A3%E4%B9%8B%E4%B8%80"><span class="nav-number">1.1.1.</span> <span class="nav-text">👍 这是 CNI 的核心职责之一</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-2%EF%BC%9A%E7%BB%99-Pod-%E5%88%86%E9%85%8D-IP%EF%BC%88IPAM%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">Step 2：给 Pod 分配 IP（IPAM）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%91%8D-%E8%BF%99%E4%B9%9F%E6%98%AF-CNI-%E7%9A%84%E6%A0%87%E5%87%86%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.2.1.</span> <span class="nav-text">👍 这也是 CNI 的标准设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-3%EF%BC%9A%E9%85%8D%E7%BD%AE-IP-%E8%B7%AF%E7%94%B1%EF%BC%88L3-%E9%80%9A%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">Step 3：配置 IP + 路由（L3 通）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%91%8D-%E8%BF%99%E6%98%AF%E6%9C%80%E5%AE%B9%E6%98%93%E8%A2%AB%E4%BD%8E%E4%BC%B0%EF%BC%8C%E4%BD%86%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E4%B8%80%E6%AD%A5"><span class="nav-number">1.3.1.</span> <span class="nav-text">👍 这是最容易被低估，但最重要的一步</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%89%8B%E5%8A%A8%E2%80%9C%E5%AE%8C%E6%95%B4%E4%BD%93%E9%AA%8C%E4%B8%80%E9%81%8D-CNI%E2%80%9D%EF%BC%8C%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">二、如果你手动“完整体验一遍 CNI”，应该怎么做？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%A7-%E5%AE%9E%E9%AA%8C%E5%89%8D%E5%87%86%E5%A4%87"><span class="nav-number">2.1.</span> <span class="nav-text">🔧 实验前准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-1%EF%BC%9A%E5%88%9B%E5%BB%BA-veth-pair"><span class="nav-number">2.2.</span> <span class="nav-text">Step 1：创建 veth pair</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">2.2.1.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-2%EF%BC%9A%E6%8A%8A%E4%B8%80%E7%AB%AF%E6%94%BE%E8%BF%9B-Pod-netns"><span class="nav-number">2.3.</span> <span class="nav-text">Step 2：把一端放进 Pod netns</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-3%EF%BC%9A%E7%BB%99-Pod-%E7%BD%91%E5%8D%A1%E6%94%B9%E5%90%8D%E4%B8%BA-eth0-%E9%85%8D-IP"><span class="nav-number">2.4.</span> <span class="nav-text">Step 3：给 Pod 网卡改名为 eth0 + 配 IP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-4%EF%BC%9A%E9%85%8D%E7%BD%AE-Pod-%E9%BB%98%E8%AE%A4%E8%B7%AF%E7%94%B1"><span class="nav-number">2.5.</span> <span class="nav-text">Step 4：配置 Pod 默认路由</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-5%EF%BC%9A%E9%85%8D%E7%BD%AE-Node-%E4%BE%A7-veth"><span class="nav-number">2.6.</span> <span class="nav-text">Step 5：配置 Node 侧 veth</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-6%EF%BC%9ANode-%E2%86%92-Pod-%E8%B7%AF%E7%94%B1%EF%BC%88%E5%A6%82%E6%9E%9C%E9%9C%80%E8%A6%81%EF%BC%89"><span class="nav-number">2.7.</span> <span class="nav-text">Step 6：Node → Pod 路由（如果需要）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-7%EF%BC%9A%E9%AA%8C%E8%AF%81%E9%80%9A%E4%BF%A1"><span class="nav-number">2.8.</span> <span class="nav-text">Step 7：验证通信</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pod-%E2%86%92-Node"><span class="nav-number">2.8.1.</span> <span class="nav-text">Pod → Node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-%E2%86%92-Pod"><span class="nav-number">2.8.2.</span> <span class="nav-text">Node → Pod</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%92%8C%E2%80%9C%E7%9C%9F%E5%AE%9E-CNI-%E6%8F%92%E4%BB%B6%E2%80%9D%E7%9A%84%E5%B7%AE%E8%B7%9D%E5%9C%A8%E5%93%AA%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">三、和“真实 CNI 插件”的差距在哪？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E2%80%9C%E6%89%8B%E5%8A%A8-CNI%E2%80%9D%E7%9A%84%E7%9C%9F%E5%AE%9E%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91"><span class="nav-number">4.</span> <span class="nav-text">四、“手动 CNI”的真实网络拓扑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E9%80%BB%E8%BE%91%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91%EF%BC%88%E5%BC%BA%E7%83%88%E6%8E%A8%E8%8D%90%E5%85%88%E7%9C%8B%E8%BF%99%E4%B8%AA%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">1️⃣ 逻辑网络拓扑（强烈推荐先看这个）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E6%95%B0%E6%8D%AE%E5%8C%85%E6%B5%81%E5%90%91%EF%BC%88ping-%E6%97%B6%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">2️⃣ 数据包流向（ping 时发生了什么）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pod-%E2%86%92-Node-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">Pod → Node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-%E2%86%92-Pod-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">Node → Pod</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E7%94%A8%E4%B8%80%E5%8F%A5%E8%AF%9D%E6%80%BB%E7%BB%93%E4%BD%A0%E7%8E%B0%E5%9C%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">4.3.</span> <span class="nav-text">3️⃣ 用一句话总结你现在的结构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%AE%8C%E6%95%B4%E7%9A%84%E3%80%8C%E6%B8%85%E7%90%86%E6%AD%A5%E9%AA%A4%EF%BC%88DEL%EF%BC%89%E3%80%8D"><span class="nav-number">5.</span> <span class="nav-text">五、完整的「清理步骤（DEL）」</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-1%EF%BC%9A%E5%88%A0%E9%99%A4-Pod-netns%EF%BC%88%E6%9C%80%E5%BD%BB%E5%BA%95%EF%BC%89"><span class="nav-number">5.1.</span> <span class="nav-text">Step 1：删除 Pod netns（最彻底）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-2"><span class="nav-number">5.1.1.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-2%EF%BC%9A%E7%A1%AE%E8%AE%A4-Node-%E4%BE%A7-veth-%E6%98%AF%E5%90%A6%E8%BF%98%E5%AD%98%E5%9C%A8"><span class="nav-number">5.2.</span> <span class="nav-text">Step 2：确认 Node 侧 veth 是否还存在</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-3%EF%BC%9A%E6%B8%85%E7%90%86%E8%B7%AF%E7%94%B1%EF%BC%88%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%98%AF%E6%89%8B%E5%8A%A8%E5%8A%A0%E7%9A%84%EF%BC%89"><span class="nav-number">5.3.</span> <span class="nav-text">Step 3：清理路由（如果你是手动加的）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-3"><span class="nav-number">5.3.1.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-4%EF%BC%9A%E6%B8%85%E7%90%86-IP%EF%BC%88%E4%B8%80%E8%88%AC%E9%9A%8F-veth-%E4%B8%80%E8%B5%B7%E6%B6%88%E5%A4%B1%EF%BC%89"><span class="nav-number">5.4.</span> <span class="nav-text">Step 4：清理 IP（一般随 veth 一起消失）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-5%EF%BC%9A%E6%9C%80%E7%BB%88%E9%AA%8C%E8%AF%81"><span class="nav-number">5.5.</span> <span class="nav-text">Step 5：最终验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%9C%A8%E2%80%9C%E7%9C%9F%E5%AE%9E-CNI-IPAM%E2%80%9D%E4%B8%AD%EF%BC%8C%E8%BF%99%E4%BA%9B%E6%AD%A5%E9%AA%A4%E6%98%AF%E5%A6%82%E4%BD%95%E8%A2%AB%E7%AE%A1%E7%90%86%E7%9A%84%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">六、在“真实 CNI &#x2F; IPAM”中，这些步骤是如何被管理的？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-IPAM-%E7%9A%84%E8%81%8C%E8%B4%A3%E8%BE%B9%E7%95%8C%EF%BC%88%E9%9D%9E%E5%B8%B8%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">1️⃣ IPAM 的职责边界（非常重要）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E5%B8%B8%E8%A7%81-IPAM-%E6%A8%A1%E5%9E%8B-%E5%91%BD%E4%BB%A4%E6%8A%BD%E8%B1%A1"><span class="nav-number">6.2.</span> <span class="nav-text">2️⃣ 常见 IPAM 模型 &amp; 命令抽象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E6%A8%A1%E5%9E%8B%E4%B8%80%EF%BC%9ANode-%E5%AD%90%E7%BD%91%EF%BC%88%E4%BD%A0%E7%8E%B0%E5%9C%A8%E7%94%A8%E7%9A%84%EF%BC%89"><span class="nav-number">6.2.1.</span> <span class="nav-text">🔹 模型一：Node 子网（你现在用的）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%B9-%E6%89%8B%E5%8A%A8%E6%A8%A1%E6%8B%9F-IPAM-%E7%9A%84%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4"><span class="nav-number">6.2.2.</span> <span class="nav-text">🔹 手动模拟 IPAM 的常见命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D-Node-%E4%B8%8A%E7%9A%84-Pod-IP%EF%BC%88%E6%A8%A1%E6%8B%9F%EF%BC%89"><span class="nav-number">6.2.2.1.</span> <span class="nav-text">查看当前 Node 上的 Pod IP（模拟）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E2%80%9C%E5%B7%B2%E5%8D%A0%E7%94%A8-IP%E2%80%9D%EF%BC%88%E7%B2%97%E6%9A%B4%E7%89%88%EF%BC%89"><span class="nav-number">6.2.2.2.</span> <span class="nav-text">查看“已占用 IP”（粗暴版）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E6%94%B6-IP%EF%BC%88%E6%9C%AC%E8%B4%A8%EF%BC%89"><span class="nav-number">6.2.2.3.</span> <span class="nav-text">回收 IP（本质）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E5%B8%B8%E8%A7%81%E7%9C%9F%E5%AE%9E-IPAM-%E5%AE%9E%E7%8E%B0"><span class="nav-number">6.3.</span> <span class="nav-text">3️⃣ 常见真实 IPAM 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5-host-local-IPAM-%E4%B8%BA%E4%BE%8B"><span class="nav-number">6.3.1.</span> <span class="nav-text">以 host-local IPAM 为例</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">169</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

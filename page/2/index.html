@@ -184,6 +184,166 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/27/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/27/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">Go并发编程最佳实践指南</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-11-27 17:55:54" itemprop="dateCreated datePublished" datetime="2025-11-27T17:55:54+08:00">2025-11-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-12-22 18:38:14" itemprop="dateModified" datetime="2025-12-22T18:38:14+08:00">2025-12-22</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Go-并发编程最佳实践指南"><a href="#Go-并发编程最佳实践指南" class="headerlink" title="Go 并发编程最佳实践指南"></a>Go 并发编程最佳实践指南</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li>errgroup</li>
+<li>sync.WaitGroup</li>
+<li>sync.Mutex</li>
+<li>Channel</li>
+<li>Context</li>
+<li>最佳实践总结</li>
+</ol>
+<hr>
+<h2 id="errgroup"><a href="#errgroup" class="headerlink" title="errgroup"></a>errgroup</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><code>errgroup</code> 提供了一种优雅的方式来管理一组并发的 goroutine，并统一处理错误。它是 <code>golang.org/x/sync/errgroup</code> 包中的功能。</p>
+<h3 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h3><ul>
+<li>并发执行多个任务</li>
+<li>任意一个任务失败，整体失败</li>
+<li>支持 context 取消</li>
+<li>支持并发限制</li>
+</ul>
+<h3 id="基础用法"><a href="#基础用法" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;golang.org/x/sync/errgroup&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 创建 errgroup</span></span><br><span class="line">  group, _ := errgroup.WithContext(context.Background())</span><br><span class="line"></span><br><span class="line">  concurrencyCount := <span class="number">5</span></span><br><span class="line">  group.SetLimit(concurrencyCount)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 并发执行多个任务</span></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= concurrencyCount; i++ &#123;</span><br><span class="line">    i := i <span class="comment">// 避免闭包问题</span></span><br><span class="line">    group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d started\n&quot;</span>, i)</span><br><span class="line">      time.Sleep(time.Second)</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待所有任务完成</span></span><br><span class="line">  <span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">&quot;Error: %v\n&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="带并发限制的用法"><a href="#带并发限制的用法" class="headerlink" title="带并发限制的用法"></a>带并发限制的用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;golang.org/x/sync/errgroup&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  group, _ := errgroup.WithContext(context.Background())</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 限制并发数为 3</span></span><br><span class="line">  group.SetLimit(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 并发执行 10 个任务</span></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">10</span>; i++ &#123;</span><br><span class="line">    i := i</span><br><span class="line">    group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d started\n&quot;</span>, i)</span><br><span class="line">      time.Sleep(time.Second)</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">&quot;Error: %v\n&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;golang.org/x/sync/errgroup&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  group, ctx := errgroup.WithContext(context.Background())</span><br><span class="line"></span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;Task 1&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;Task 2&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;task 2 failed&quot;</span>)</span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;Task 3&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Wait 返回第一个错误</span></span><br><span class="line">  <span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">&quot;First error: %v\n&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="sync-WaitGroup"><a href="#sync-WaitGroup" class="headerlink" title="sync.WaitGroup"></a>sync.WaitGroup</h2><h3 id="简介-1"><a href="#简介-1" class="headerlink" title="简介"></a>简介</h3><p><code>WaitGroup</code> 用于等待一组 goroutine 完成，不关心错误处理。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 添加 3 个 goroutine</span></span><br><span class="line">  wg.Add(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++ &#123;</span><br><span class="line">    i := i</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      <span class="keyword">defer</span> wg.Done() <span class="comment">// 任务完成时调用</span></span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      time.Sleep(time.Second)</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待所有 goroutine 完成</span></span><br><span class="line">  wg.Wait()</span><br><span class="line">  fmt.Println(<span class="string">&quot;All tasks completed&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="vs-errgroup"><a href="#vs-errgroup" class="headerlink" title="vs errgroup"></a>vs errgroup</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>WaitGroup</th>
+<th>errgroup</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>错误处理</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>并发限制</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>Context 支持</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>使用场景</td>
+<td>简单并发</td>
+<td>复杂并发</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="sync-Mutex"><a href="#sync-Mutex" class="headerlink" title="sync.Mutex"></a>sync.Mutex</h2><h3 id="简介-2"><a href="#简介-2" class="headerlink" title="简介"></a>简介</h3><p>用于保护共享数据的互斥锁。</p>
+<h3 id="基础用法-1"><a href="#基础用法-1" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> mu sync.Mutex</span><br><span class="line">  counter := <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      mu.Lock()</span><br><span class="line">      counter++</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Counter: %d\n&quot;</span>, counter)</span><br><span class="line">      mu.Unlock()</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待所有 goroutine 完成</span></span><br><span class="line">  time.Sleep(time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="sync-RWMutex（读写锁）"><a href="#sync-RWMutex（读写锁）" class="headerlink" title="sync.RWMutex（读写锁）"></a>sync.RWMutex（读写锁）</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> rwmu sync.RWMutex</span><br><span class="line">  data := <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span>&#123;<span class="string">&quot;count&quot;</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 写操作</span></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    rwmu.Lock()</span><br><span class="line">    data[<span class="string">&quot;count&quot;</span>]++</span><br><span class="line">    rwmu.Unlock()</span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 读操作（可以并发）</span></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      rwmu.RLock()</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Count: %d\n&quot;</span>, data[<span class="string">&quot;count&quot;</span>])</span><br><span class="line">      rwmu.RUnlock()</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  time.Sleep(time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h2><h3 id="简介-3"><a href="#简介-3" class="headerlink" title="简介"></a>简介</h3><p>Channel 是 Go 中用于 goroutine 之间通信的机制。</p>
+<h3 id="基础用法-2"><a href="#基础用法-2" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 创建 channel</span></span><br><span class="line">  ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">int</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    ch &lt;- <span class="number">42</span> <span class="comment">// 发送</span></span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  value := &lt;-ch <span class="comment">// 接收</span></span><br><span class="line">  fmt.Printf(<span class="string">&quot;Received: %d\n&quot;</span>, value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用-select-处理多个-channel"><a href="#使用-select-处理多个-channel" class="headerlink" title="使用 select 处理多个 channel"></a>使用 select 处理多个 channel</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  ch1 := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">string</span>)</span><br><span class="line">  ch2 := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">string</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    time.Sleep(time.Second)</span><br><span class="line">    ch1 &lt;- <span class="string">&quot;result 1&quot;</span></span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    time.Sleep(<span class="number">2</span> * time.Second)</span><br><span class="line">    ch2 &lt;- <span class="string">&quot;result 2&quot;</span></span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待第一个完成的</span></span><br><span class="line">  <span class="keyword">select</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> res1 := &lt;-ch1:</span><br><span class="line">    fmt.Println(<span class="string">&quot;Got:&quot;</span>, res1)</span><br><span class="line">  <span class="keyword">case</span> res2 := &lt;-ch2:</span><br><span class="line">    fmt.Println(<span class="string">&quot;Got:&quot;</span>, res2)</span><br><span class="line">  <span class="keyword">case</span> &lt;-time.After(<span class="number">3</span> * time.Second):</span><br><span class="line">    fmt.Println(<span class="string">&quot;Timeout&quot;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><h3 id="简介-4"><a href="#简介-4" class="headerlink" title="简介"></a>简介</h3><p>Context 用于控制 goroutine 的生命周期、超时和取消。</p>
+<h3 id="基础用法-3"><a href="#基础用法-3" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 创建带超时的 context</span></span><br><span class="line">  ctx, cancel := context.WithTimeout(context.Background(), <span class="number">2</span>*time.Second)</span><br><span class="line">  <span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 模拟耗时操作</span></span><br><span class="line">  <span class="keyword">select</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> &lt;-time.After(<span class="number">3</span> * time.Second):</span><br><span class="line">    fmt.Println(<span class="string">&quot;Operation completed&quot;</span>)</span><br><span class="line">  <span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">    fmt.Println(<span class="string">&quot;Operation cancelled:&quot;</span>, ctx.Err())</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="取消-Context"><a href="#取消-Context" class="headerlink" title="取消 Context"></a>取消 Context</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</span><br><span class="line">    wg.Add(<span class="number">1</span>)</span><br><span class="line">    i := i</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      <span class="keyword">defer</span> wg.Done()</span><br><span class="line">      <span class="keyword">select</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> &lt;-time.After(<span class="number">5</span> * time.Second):</span><br><span class="line">        fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      <span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">        fmt.Printf(<span class="string">&quot;Task %d cancelled\n&quot;</span>, i)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2 秒后取消所有 goroutine</span></span><br><span class="line">  time.Sleep(<span class="number">2</span> * time.Second)</span><br><span class="line">  cancel()</span><br><span class="line"></span><br><span class="line">  wg.Wait()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="最佳实践总结"><a href="#最佳实践总结" class="headerlink" title="最佳实践总结"></a>最佳实践总结</h2><h3 id="1-优先使用-errgroup"><a href="#1-优先使用-errgroup" class="headerlink" title="1. 优先使用 errgroup"></a>1. 优先使用 errgroup</h3><p>当需要管理多个 goroutine 且需要错误处理时，优先使用 <code>errgroup</code>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">group, ctx := errgroup.WithContext(context.Background())</span><br><span class="line">group.SetLimit(<span class="number">10</span>) <span class="comment">// 限制并发</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> item := <span class="keyword">range</span> items &#123;</span><br><span class="line">  item := item</span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> processItem(ctx, item)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  log.Error(<span class="string">&quot;Processing failed:&quot;</span>, err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-避免闭包陷阱"><a href="#2-避免闭包陷阱" class="headerlink" title="2. 避免闭包陷阱"></a>2. 避免闭包陷阱</h3><p><strong>错误方式：</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(i) <span class="comment">// 可能打印 10 次</span></span><br><span class="line">  &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>正确方式：</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">  i := i <span class="comment">// 创建本地副本</span></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(i)</span><br><span class="line">  &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-使用-Context-控制超时和取消"><a href="#3-使用-Context-控制超时和取消" class="headerlink" title="3. 使用 Context 控制超时和取消"></a>3. 使用 Context 控制超时和取消</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ctx, cancel := context.WithTimeout(context.Background(), <span class="number">5</span>*time.Second)</span><br><span class="line"><span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">group, groupCtx := errgroup.WithContext(ctx)</span><br><span class="line"><span class="comment">// 在 groupCtx 中检查取消信号</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-合理设置并发限制"><a href="#4-合理设置并发限制" class="headerlink" title="4. 合理设置并发限制"></a>4. 合理设置并发限制</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">group := errgroup.Group&#123;&#125;</span><br><span class="line">group.SetLimit(runtime.NumCPU()) <span class="comment">// 根据 CPU 核心数限制</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-优雅的错误包装"><a href="#5-优雅的错误包装" class="headerlink" title="5. 优雅的错误包装"></a>5. 优雅的错误包装</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> err := processItem(ctx, item); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;process item %d: %w&quot;</span>, item.ID, err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://golang.org/pkg/sync/">Go sync 包文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://golang.org/pkg/context/">Go context 包文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://pkg.go.dev/golang.org/x/sync/errgroup">golang.org&#x2F;x&#x2F;sync&#x2F;errgroup</a></li>
+<li><a target="_blank" rel="noopener" href="https://golang.org/doc/effective_go#concurrency">Effective Go - Concurrency</a></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/20/%E6%9C%AC%E5%9C%B0%E8%B0%83%E8%AF%95k8s-webhook%E6%96%B9%E6%A1%88/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1800,418 +1960,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/10/31/numactl%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/10/31/numactl%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">numactl使用指南</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-10-31 15:18:20" itemprop="dateCreated datePublished" datetime="2025-10-31T15:18:20+08:00">2025-10-31</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-12-05 16:43:55" itemprop="dateModified" datetime="2025-12-05T16:43:55+08:00">2025-12-05</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="numactl-完整使用指南"><a href="#numactl-完整使用指南" class="headerlink" title="numactl 完整使用指南"></a>numactl 完整使用指南</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Xinenhui/p/18316326">https://www.cnblogs.com/Xinenhui/p/18316326</a></p>
-</blockquote>
-<h2 id="一、numactl-是什么"><a href="#一、numactl-是什么" class="headerlink" title="一、numactl 是什么"></a>一、numactl 是什么</h2><p><strong>numactl</strong> 是一个控制 NUMA 策略和内存分配的工具，允许你：</p>
-<ul>
-<li>将进程绑定到特定 NUMA 节点</li>
-<li>控制进程的内存分配策略</li>
-<li>查看 NUMA 拓扑和统计信息</li>
-<li>优化多核服务器性能</li>
-</ul>
-<hr>
-<h2 id="二、安装-numactl"><a href="#二、安装-numactl" class="headerlink" title="二、安装 numactl"></a>二、安装 numactl</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CentOS / RHEL</span></span><br><span class="line">yum install -y numactl</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu / Debian</span></span><br><span class="line">apt-get install -y numactl</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line">numactl --version</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="三、查看-NUMA-信息"><a href="#三、查看-NUMA-信息" class="headerlink" title="三、查看 NUMA 信息"></a>三、查看 NUMA 信息</h2><h3 id="3-1-查看-NUMA-节点数量"><a href="#3-1-查看-NUMA-节点数量" class="headerlink" title="3.1 查看 NUMA 节点数量"></a>3.1 查看 NUMA 节点数量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法 1: 使用 lscpu</span></span><br><span class="line">lscpu | grep NUMA</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出示例:</span></span><br><span class="line"><span class="comment"># NUMA node(s):            2</span></span><br><span class="line"><span class="comment"># NUMA node0 CPU(s):       0-15,32-47</span></span><br><span class="line"><span class="comment"># NUMA node1 CPU(s):       16-31,48-63</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>解释</strong>:</p>
-<ul>
-<li><code>NUMA node(s): 2</code> - 系统有 2 个 NUMA 节点</li>
-<li><code>NUMA node0 CPU(s): 0-15,32-47</code> - 节点 0 包含 CPU 0-15 和 32-47（超线程）</li>
-<li><code>NUMA node1 CPU(s): 16-31,48-63</code> - 节点 1 包含 CPU 16-31 和 48-63</li>
-</ul>
-<h3 id="3-2-查看详细-NUMA-拓扑"><a href="#3-2-查看详细-NUMA-拓扑" class="headerlink" title="3.2 查看详细 NUMA 拓扑"></a>3.2 查看详细 NUMA 拓扑</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">numactl --hardware</span><br><span class="line"><span class="comment"># 或简写</span></span><br><span class="line">numactl -H</span><br></pre></td></tr></table></figure>
-
-<p><strong>输出示例</strong>:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">available: 2 nodes (0-1)</span><br><span class="line">node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15</span><br><span class="line">node 0 size: 65536 MB</span><br><span class="line">node 0 free: 32768 MB</span><br><span class="line">node 1 cpus: 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31</span><br><span class="line">node 1 size: 65536 MB</span><br><span class="line">node 1 free: 45678 MB</span><br><span class="line">node distances:</span><br><span class="line">node   0   1 </span><br><span class="line">  0:  10  21 </span><br><span class="line">  1:  21  10</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键信息解读</strong>:</p>
-<ul>
-<li><code>node 0 cpus</code> - 节点 0 的 CPU 编号</li>
-<li><code>node 0 size</code> - 节点 0 的总内存</li>
-<li><code>node 0 free</code> - 节点 0 的空闲内存</li>
-<li><code>node distances</code> - 节点间访问成本（10&#x3D;本地，21&#x3D;远程）</li>
-</ul>
-<h3 id="3-3-查看当前进程的-NUMA-策略"><a href="#3-3-查看当前进程的-NUMA-策略" class="headerlink" title="3.3 查看当前进程的 NUMA 策略"></a>3.3 查看当前进程的 NUMA 策略</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看指定进程的 NUMA 策略</span></span><br><span class="line">numactl --show</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出示例:</span></span><br><span class="line"><span class="comment"># policy: default</span></span><br><span class="line"><span class="comment"># preferred node: current</span></span><br><span class="line"><span class="comment"># physcpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31</span></span><br><span class="line"><span class="comment"># cpubind: 0 1</span></span><br><span class="line"><span class="comment"># nodebind: 0 1</span></span><br><span class="line"><span class="comment"># membind: 0 1</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="四、核心功能和常用命令"><a href="#四、核心功能和常用命令" class="headerlink" title="四、核心功能和常用命令"></a>四、核心功能和常用命令</h2><h3 id="4-1-绑定进程到指定-NUMA-节点"><a href="#4-1-绑定进程到指定-NUMA-节点" class="headerlink" title="4.1 绑定进程到指定 NUMA 节点"></a>4.1 绑定进程到指定 NUMA 节点</h3><h4 id="✅-绑定到节点-0"><a href="#✅-绑定到节点-0" class="headerlink" title="✅ 绑定到节点 0"></a>✅ 绑定到节点 0</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将进程绑定到 NUMA 节点 0 的 CPU 和内存</span></span><br><span class="line">numactl --cpunodebind=0 --membind=0 &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例: 在节点 0 运行 nginx</span></span><br><span class="line">numactl --cpunodebind=0 --membind=0 nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例: 在节点 1 运行 MySQL</span></span><br><span class="line">numactl --cpunodebind=1 --membind=1 mysqld</span><br></pre></td></tr></table></figure>
-
-<h4 id="✅-绑定到特定-CPU"><a href="#✅-绑定到特定-CPU" class="headerlink" title="✅ 绑定到特定 CPU"></a>✅ 绑定到特定 CPU</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 绑定到 CPU 0-7</span></span><br><span class="line">numactl --physcpubind=0-7 --membind=0 &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绑定到特定 CPU 列表</span></span><br><span class="line">numactl --physcpubind=0,2,4,6 &lt;<span class="built_in">command</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-2-内存分配策略"><a href="#4-2-内存分配策略" class="headerlink" title="4.2 内存分配策略"></a>4.2 内存分配策略</h3><h4 id="策略-1-本地分配（默认）"><a href="#策略-1-本地分配（默认）" class="headerlink" title="策略 1: 本地分配（默认）"></a>策略 1: 本地分配（默认）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># localalloc - 优先从进程运行的节点分配内存</span></span><br><span class="line">numactl --localalloc &lt;<span class="built_in">command</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<h4 id="策略-2-交错分配"><a href="#策略-2-交错分配" class="headerlink" title="策略 2: 交错分配"></a>策略 2: 交错分配</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># interleave - 在所有节点间轮询分配内存（适合大内存应用）</span></span><br><span class="line">numactl --interleave=all &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在特定节点间交错</span></span><br><span class="line">numactl --interleave=0,1 &lt;<span class="built_in">command</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<h4 id="策略-3-优先节点"><a href="#策略-3-优先节点" class="headerlink" title="策略 3: 优先节点"></a>策略 3: 优先节点</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># preferred - 优先从指定节点分配，不足时使用其他节点</span></span><br><span class="line">numactl --preferred=0 &lt;<span class="built_in">command</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<h4 id="策略-4-严格绑定"><a href="#策略-4-严格绑定" class="headerlink" title="策略 4: 严格绑定"></a>策略 4: 严格绑定</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># membind - 严格只从指定节点分配（内存不足会失败）</span></span><br><span class="line">numactl --membind=0 &lt;<span class="built_in">command</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-3-查看网卡的-NUMA-节点"><a href="#4-3-查看网卡的-NUMA-节点" class="headerlink" title="4.3 查看网卡的 NUMA 节点"></a>4.3 查看网卡的 NUMA 节点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法 1: 直接查看</span></span><br><span class="line"><span class="built_in">cat</span> /sys/class/net/eth0/device/numa_node</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出: 0 (表示在 NUMA 节点 0)</span></span><br><span class="line"><span class="comment"># 输出: -1 (表示未绑定或不支持)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法 2: 查看所有网卡</span></span><br><span class="line"><span class="keyword">for</span> nic <span class="keyword">in</span> /sys/class/net/*; <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">if</span> [ -f <span class="string">&quot;<span class="variable">$nic</span>/device/numa_node&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;<span class="subst">$(basename $nic)</span>: <span class="subst">$(cat $nic/device/numa_node)</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出示例:</span></span><br><span class="line"><span class="comment"># eth0: 0</span></span><br><span class="line"><span class="comment"># eth1: 1</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="4-4-查看-NUMA-统计信息"><a href="#4-4-查看-NUMA-统计信息" class="headerlink" title="4.4 查看 NUMA 统计信息"></a>4.4 查看 NUMA 统计信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 NUMA 内存统计</span></span><br><span class="line">numastat</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出示例:</span></span><br><span class="line"><span class="comment">#                            node0           node1</span></span><br><span class="line"><span class="comment"># numa_hit              1234567890      9876543210</span></span><br><span class="line"><span class="comment"># numa_miss                  12345           54321</span></span><br><span class="line"><span class="comment"># numa_foreign               54321           12345</span></span><br><span class="line"><span class="comment"># interleave_hit              1234            5678</span></span><br><span class="line"><span class="comment"># local_node            1234500000      9876500000</span></span><br><span class="line"><span class="comment"># other_node                 67890           43210</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>关键指标</strong>:</p>
-<ul>
-<li><code>numa_hit</code> - 进程从本地节点分配内存的次数（✅ 越高越好）</li>
-<li><code>numa_miss</code> - 进程从远程节点分配内存的次数（❌ 应该低）</li>
-<li><code>numa_foreign</code> - 其他进程访问本节点内存的次数</li>
-<li><code>local_node</code> - 进程在本地节点运行并访问本地内存</li>
-<li><code>other_node</code> - 进程在本地节点运行但访问远程内存（❌ 性能杀手）</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按进程查看 NUMA 统计</span></span><br><span class="line">numastat -p &lt;pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按进程名查看</span></span><br><span class="line">numastat nginx</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="五、实战场景"><a href="#五、实战场景" class="headerlink" title="五、实战场景"></a>五、实战场景</h2><h3 id="场景-1-网络服务优化（Nginx）"><a href="#场景-1-网络服务优化（Nginx）" class="headerlink" title="场景 1: 网络服务优化（Nginx）"></a>场景 1: 网络服务优化（Nginx）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看网卡所在节点</span></span><br><span class="line">NUMA_NODE=$(<span class="built_in">cat</span> /sys/class/net/eth0/device/numa_node)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;eth0 在 NUMA 节点: <span class="variable">$NUMA_NODE</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 绑定 Nginx 到相同节点</span></span><br><span class="line">numactl --cpunodebind=<span class="variable">$NUMA_NODE</span> --membind=<span class="variable">$NUMA_NODE</span> nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 验证</span></span><br><span class="line">ps aux | grep nginx</span><br><span class="line">numactl --show $(pidof nginx | awk <span class="string">&#x27;&#123;print $1&#125;&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="场景-2-数据库优化（MySQL-PostgreSQL）"><a href="#场景-2-数据库优化（MySQL-PostgreSQL）" class="headerlink" title="场景 2: 数据库优化（MySQL&#x2F;PostgreSQL）"></a>场景 2: 数据库优化（MySQL&#x2F;PostgreSQL）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设数据库在节点 1</span></span><br><span class="line">numactl --cpunodebind=1 --membind=1 --interleave=1 mysqld</span><br><span class="line"></span><br><span class="line"><span class="comment"># 说明:</span></span><br><span class="line"><span class="comment"># --cpunodebind=1: CPU 绑定到节点 1</span></span><br><span class="line"><span class="comment"># --membind=1: 内存从节点 1 分配</span></span><br><span class="line"><span class="comment"># --interleave=1: 在节点 1 内交错分配（大内存应用）</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="场景-3-高性能计算"><a href="#场景-3-高性能计算" class="headerlink" title="场景 3: 高性能计算"></a>场景 3: 高性能计算</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将计算任务均匀分布到所有节点</span></span><br><span class="line">numactl --interleave=all ./my_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 适用于:</span></span><br><span class="line"><span class="comment"># - 大规模矩阵运算</span></span><br><span class="line"><span class="comment"># - 科学计算</span></span><br><span class="line"><span class="comment"># - 大数据处理</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="场景-4-网卡中断绑核配合-NUMA"><a href="#场景-4-网卡中断绑核配合-NUMA" class="headerlink" title="场景 4: 网卡中断绑核配合 NUMA"></a>场景 4: 网卡中断绑核配合 NUMA</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 优化网络性能：中断和应用都绑定到网卡所在节点</span></span><br><span class="line"></span><br><span class="line">NIC=<span class="string">&quot;eth0&quot;</span></span><br><span class="line">NUMA_NODE=$(<span class="built_in">cat</span> /sys/class/net/<span class="variable">$NIC</span>/device/numa_node)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$NUMA_NODE</span>&quot;</span> = <span class="string">&quot;-1&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;网卡未绑定 NUMA 节点&quot;</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;网卡 <span class="variable">$NIC</span> 在 NUMA 节点 <span class="variable">$NUMA_NODE</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 获取该节点的 CPU 列表</span></span><br><span class="line">NODE_CPUS=$(<span class="built_in">cat</span> /sys/devices/system/node/node<span class="variable">$&#123;NUMA_NODE&#125;</span>/cpulist)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;节点 <span class="variable">$NUMA_NODE</span> 的 CPU: <span class="variable">$NODE_CPUS</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 绑定网卡中断到该节点的前 8 个 CPU</span></span><br><span class="line">START_CPU=$(<span class="built_in">echo</span> <span class="variable">$NODE_CPUS</span> | <span class="built_in">cut</span> -d<span class="string">&#x27;-&#x27;</span> -f1)</span><br><span class="line">END_CPU=$((START_CPU + <span class="number">7</span>))</span><br><span class="line">IRQ_CPUS=<span class="string">&quot;<span class="variable">$&#123;START_CPU&#125;</span>-<span class="variable">$&#123;END_CPU&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;绑定中断到 CPU: <span class="variable">$IRQ_CPUS</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> irq <span class="keyword">in</span> $(grep <span class="variable">$NIC</span> /proc/interrupts | awk -F: <span class="string">&#x27;&#123;print $1&#125;&#x27;</span> | <span class="built_in">tr</span> -d <span class="string">&#x27; &#x27;</span>); <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$IRQ_CPUS</span> &gt; /proc/irq/<span class="variable">$irq</span>/smp_affinity_list</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;IRQ <span class="variable">$irq</span> -&gt; CPU <span class="variable">$IRQ_CPUS</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 启动应用程序到相同节点</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;启动应用到 NUMA 节点 <span class="variable">$NUMA_NODE</span>&quot;</span></span><br><span class="line">numactl --cpunodebind=<span class="variable">$NUMA_NODE</span> --membind=<span class="variable">$NUMA_NODE</span> ./my_network_app</span><br></pre></td></tr></table></figure>
-
-<h3 id="场景-5-容器化应用"><a href="#场景-5-容器化应用" class="headerlink" title="场景 5: 容器化应用"></a>场景 5: 容器化应用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Docker 容器绑定 NUMA</span></span><br><span class="line">docker run --cpuset-cpus=<span class="string">&quot;0-15&quot;</span> --cpuset-mems=<span class="string">&quot;0&quot;</span> \</span><br><span class="line">    --name my-app nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># Kubernetes Pod 配置 (添加到 pod spec)</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx-numa</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: nginx</span><br><span class="line">    image: nginx</span><br><span class="line">    resources:</span><br><span class="line">      limits:</span><br><span class="line">        cpu: <span class="string">&quot;16&quot;</span></span><br><span class="line">        memory: <span class="string">&quot;64Gi&quot;</span></span><br><span class="line">  <span class="comment"># 使用 node selector 选择特定 NUMA 配置的节点</span></span><br><span class="line">  nodeSelector:</span><br><span class="line">    numa.topology: <span class="string">&quot;2-nodes&quot;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="六、性能测试对比"><a href="#六、性能测试对比" class="headerlink" title="六、性能测试对比"></a>六、性能测试对比</h2><h3 id="测试-1-本地-vs-远程内存访问"><a href="#测试-1-本地-vs-远程内存访问" class="headerlink" title="测试 1: 本地 vs 远程内存访问"></a>测试 1: 本地 vs 远程内存访问</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 对比本地和远程内存访问性能</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试本地访问（节点 0）</span></span><br><span class="line">numactl --cpunodebind=0 --membind=0 sysbench memory \</span><br><span class="line">    --memory-block-size=1M \</span><br><span class="line">    --memory-total-size=10G run &gt; local.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试远程访问（CPU在节点0，内存在节点1）</span></span><br><span class="line">numactl --cpunodebind=0 --membind=1 sysbench memory \</span><br><span class="line">    --memory-block-size=1M \</span><br><span class="line">    --memory-total-size=10G run &gt; remote.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对比结果</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;本地访问:&quot;</span></span><br><span class="line">grep <span class="string">&quot;transferred&quot;</span> local.txt</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;远程访问:&quot;</span></span><br><span class="line">grep <span class="string">&quot;transferred&quot;</span> remote.txt</span><br></pre></td></tr></table></figure>
-
-<p><strong>典型结果</strong>:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">本地访问: 10240.00 MiB transferred (25600.00 MiB/sec)</span><br><span class="line">远程访问: 10240.00 MiB transferred (12800.00 MiB/sec)</span><br><span class="line">性能差异: 2倍</span><br></pre></td></tr></table></figure>
-
-<h3 id="测试-2-iperf3-配合-NUMA"><a href="#测试-2-iperf3-配合-NUMA" class="headerlink" title="测试 2: iperf3 配合 NUMA"></a>测试 2: iperf3 配合 NUMA</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 服务端：绑定到网卡所在节点</span></span><br><span class="line">NUMA_NODE=$(<span class="built_in">cat</span> /sys/class/net/eth0/device/numa_node)</span><br><span class="line">numactl --cpunodebind=<span class="variable">$NUMA_NODE</span> --membind=<span class="variable">$NUMA_NODE</span> \</span><br><span class="line">    iperf3 -s -p 5201</span><br><span class="line"></span><br><span class="line"><span class="comment"># 客户端：同样绑定</span></span><br><span class="line">numactl --cpunodebind=<span class="variable">$NUMA_NODE</span> --membind=<span class="variable">$NUMA_NODE</span> \</span><br><span class="line">    iperf3 -c &lt;server_ip&gt; -t 60 -P 10</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="七、监控和调试"><a href="#七、监控和调试" class="headerlink" title="七、监控和调试"></a>七、监控和调试</h2><h3 id="7-1-实时监控-NUMA-状态"><a href="#7-1-实时监控-NUMA-状态" class="headerlink" title="7.1 实时监控 NUMA 状态"></a>7.1 实时监控 NUMA 状态</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 持续监控 NUMA 统计</span></span><br><span class="line">watch -n 1 <span class="string">&#x27;numastat&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 监控特定进程</span></span><br><span class="line">watch -n 1 <span class="string">&#x27;numastat -p $(pidof nginx | head -n1)&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="7-2-查看进程的-NUMA-内存映射"><a href="#7-2-查看进程的-NUMA-内存映射" class="headerlink" title="7.2 查看进程的 NUMA 内存映射"></a>7.2 查看进程的 NUMA 内存映射</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看进程在各节点的内存分布</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;pid&gt;/numa_maps</span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例输出:</span></span><br><span class="line"><span class="comment"># 7f8a00000000 default file=/lib/x86_64-linux-gnu/libc-2.31.so mapped=200 N0=150 N1=50</span></span><br><span class="line"><span class="comment"># 说明: 该内存区域在节点0有150页，节点1有50页</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="7-3-检测-NUMA-不均衡"><a href="#7-3-检测-NUMA-不均衡" class="headerlink" title="7.3 检测 NUMA 不均衡"></a>7.3 检测 NUMA 不均衡</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 检测系统是否存在 NUMA 不均衡</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== NUMA 不均衡检测 ===&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 检查 numa_miss</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n1. NUMA Miss 率:&quot;</span></span><br><span class="line">numastat | awk <span class="string">&#x27;/numa_miss/&#123;print &quot;Node 0:&quot;, $2, &quot;Node 1:&quot;, $3&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查远程访问</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n2. 远程内存访问:&quot;</span></span><br><span class="line">numastat | awk <span class="string">&#x27;/other_node/&#123;print &quot;Node 0:&quot;, $2, &quot;Node 1:&quot;, $3&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 计算不均衡度</span></span><br><span class="line">LOCAL0=$(numastat | awk <span class="string">&#x27;/local_node/&#123;print $2&#125;&#x27;</span>)</span><br><span class="line">OTHER0=$(numastat | awk <span class="string">&#x27;/other_node/&#123;print $2&#125;&#x27;</span>)</span><br><span class="line">RATIO=$(awk <span class="string">&quot;BEGIN &#123;print (<span class="variable">$OTHER0</span> / (<span class="variable">$LOCAL0</span> + <span class="variable">$OTHER0</span>)) * 100&#125;&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n3. 远程访问占比: <span class="variable">$&#123;RATIO&#125;</span>%&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (( $(echo &quot;<span class="variable">$RATIO</span> &gt; <span class="number">10</span>&quot; | bc -l) )); <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;⚠️  警告: 远程访问超过10%，存在 NUMA 不均衡&quot;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;✅ 正常: NUMA 访问模式良好&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="八、常见问题和解决方案"><a href="#八、常见问题和解决方案" class="headerlink" title="八、常见问题和解决方案"></a>八、常见问题和解决方案</h2><h3 id="Q1-如何确定网卡应该绑定到哪个-NUMA-节点？"><a href="#Q1-如何确定网卡应该绑定到哪个-NUMA-节点？" class="headerlink" title="Q1: 如何确定网卡应该绑定到哪个 NUMA 节点？"></a>Q1: 如何确定网卡应该绑定到哪个 NUMA 节点？</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看网卡的物理位置</span></span><br><span class="line">lspci -v -s $(ethtool -i eth0 | grep <span class="string">&quot;bus-info&quot;</span> | awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或直接查看</span></span><br><span class="line"><span class="built_in">cat</span> /sys/class/net/eth0/device/numa_node</span><br></pre></td></tr></table></figure>
-
-<h3 id="Q2-进程运行时可以改变-NUMA-策略吗？"><a href="#Q2-进程运行时可以改变-NUMA-策略吗？" class="headerlink" title="Q2: 进程运行时可以改变 NUMA 策略吗？"></a>Q2: 进程运行时可以改变 NUMA 策略吗？</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 可以，使用 numactl 和 taskset</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 查找进程 PID</span></span><br><span class="line">PID=$(pidof nginx | <span class="built_in">head</span> -n1)</span><br><span class="line">ps -eLo pid,tid,psr,pcpu,<span class="built_in">comm</span> | grep -E &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 迁移到节点 1</span></span><br><span class="line">numactl --cpunodebind=1 --membind=1 -p <span class="variable">$PID</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意：已分配的内存不会迁移，只影响新分配</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#修改运行中进程的 CPU 亲和性</span></span><br><span class="line">❌ 不能直接通过 numactl 修改一个已经运行的进程的 CPU 亲和性。</span><br><span class="line">•numactl 是在 进程启动前 设置 NUMA 策略或 CPU 绑定策略；</span><br><span class="line">•它通过 sched_setaffinity() 和 mbind() 在启动时对目标进程/线程生效；</span><br><span class="line">•一旦进程已经启动，就无法再通过 numactl 修改它的绑定。</span><br><span class="line"></span><br><span class="line">✅ 可行的替代方案：</span><br><span class="line">注意：taskset 仅修改进程主线程（PID）的 CPU affinity，不会自动覆盖已创建的线程。</span><br><span class="line"></span><br><span class="line">taskset -<span class="built_in">cp</span> &lt;cpu_list&gt; &lt;pid&gt;</span><br><span class="line">eg:</span><br><span class="line">taskset -<span class="built_in">cp</span> 0-3 12345</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="Q3-如何处理-NUMA-节点内存不均衡？"><a href="#Q3-如何处理-NUMA-节点内存不均衡？" class="headerlink" title="Q3: 如何处理 NUMA 节点内存不均衡？"></a>Q3: 如何处理 NUMA 节点内存不均衡？</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看各节点内存使用</span></span><br><span class="line">numastat -m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 如果某节点内存不足，可以：</span></span><br><span class="line"><span class="comment">#    a) 迁移部分进程到其他节点</span></span><br><span class="line"><span class="comment">#    b) 使用 interleave 策略</span></span><br><span class="line"><span class="comment">#    c) 重启应用并重新绑定</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 临时清理页缓存（谨慎使用）</span></span><br><span class="line"><span class="built_in">echo</span> 3 &gt; /proc/sys/vm/drop_caches</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="九、最佳实践总结"><a href="#九、最佳实践总结" class="headerlink" title="九、最佳实践总结"></a>九、最佳实践总结</h2><h3 id="✅-推荐做法"><a href="#✅-推荐做法" class="headerlink" title="✅ 推荐做法"></a>✅ 推荐做法</h3><ol>
-<li><p><strong>网络密集型应用</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 绑定到网卡所在 NUMA 节点</span></span><br><span class="line">numactl --cpunodebind=&lt;node&gt; --membind=&lt;node&gt; &lt;app&gt;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>内存密集型应用</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 interleave 分布内存</span></span><br><span class="line">numactl --interleave=all &lt;app&gt;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>混合负载</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不同服务绑定到不同节点</span></span><br><span class="line">numactl --cpunodebind=0 --membind=0 nginx &amp;</span><br><span class="line">numactl --cpunodebind=1 --membind=1 mysql &amp;</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="❌-避免的做法"><a href="#❌-避免的做法" class="headerlink" title="❌ 避免的做法"></a>❌ 避免的做法</h3><ol>
-<li><p><strong>跨 NUMA 访问</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误: CPU 在节点 0，内存在节点 1</span></span><br><span class="line">numactl --cpunodebind=0 --membind=1 &lt;app&gt;  <span class="comment"># ❌</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>忽略网卡位置</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网卡在节点 0，但进程在节点 1</span></span><br><span class="line"><span class="comment"># 导致所有网络数据跨节点传输  # ❌</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>过度绑定</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将太多进程绑定到单个节点</span></span><br><span class="line"><span class="comment"># 导致该节点过载，其他节点空闲  # ❌</span></span><br></pre></td></tr></table></figure></li>
-</ol>
-<hr>
-<h2 id="十、快速参考表"><a href="#十、快速参考表" class="headerlink" title="十、快速参考表"></a>十、快速参考表</h2><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>numactl --hardware</code></td>
-<td>查看 NUMA 拓扑</td>
-</tr>
-<tr>
-<td><code>numactl --show</code></td>
-<td>查看当前 NUMA 策略</td>
-</tr>
-<tr>
-<td><code>numastat</code></td>
-<td>查看 NUMA 统计</td>
-</tr>
-<tr>
-<td><code>numactl --cpunodebind=N &lt;cmd&gt;</code></td>
-<td>CPU 绑定到节点 N</td>
-</tr>
-<tr>
-<td><code>numactl --membind=N &lt;cmd&gt;</code></td>
-<td>内存绑定到节点 N</td>
-</tr>
-<tr>
-<td><code>numactl --interleave=all &lt;cmd&gt;</code></td>
-<td>内存交错分配</td>
-</tr>
-<tr>
-<td><code>numactl --localalloc &lt;cmd&gt;</code></td>
-<td>本地内存优先</td>
-</tr>
-<tr>
-<td><code>numactl --preferred=N &lt;cmd&gt;</code></td>
-<td>优先节点 N</td>
-</tr>
-<tr>
-<td><code>cat /sys/class/net/*/device/numa_node</code></td>
-<td>查看网卡节点</td>
-</tr>
-<tr>
-<td><code>numastat -p &lt;pid&gt;</code></td>
-<td>查看进程 NUMA 统计</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"># CPU 信息</span><br><span class="line">lscpu</span><br><span class="line">nproc  # 查看核心数</span><br><span class="line"></span><br><span class="line"># NUMA 拓扑</span><br><span class="line">lscpu | grep NUMA</span><br><span class="line">numactl --hardware</span><br><span class="line"></span><br><span class="line"># 网卡信息</span><br><span class="line">lspci | grep -i ethernet</span><br><span class="line">ip link show</span><br><span class="line">ethtool eth0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 查看当前队列配置</span><br><span class="line">ethtool -l eth0</span><br><span class="line"></span><br><span class="line"># 查看 RSS 配置</span><br><span class="line">ethtool -x eth0</span><br><span class="line"></span><br><span class="line"># 查看网卡统计</span><br><span class="line">ethtool -S eth0</span><br><span class="line"></span><br><span class="line"># 查看网卡所在 NUMA 节点</span><br><span class="line">cat /sys/class/net/eth0/device/numa_node</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 终端 1: 监控中断</span><br><span class="line">watch -n 1 &#x27;cat /proc/interrupts | grep -E &quot;(CPU|eth)&quot; | head -n 20&#x27;</span><br><span class="line"></span><br><span class="line"># 终端 2: 监控 CPU</span><br><span class="line">mpstat -P ALL 1</span><br><span class="line"></span><br><span class="line"># 终端 3: 监控网络</span><br><span class="line">sar -n DEV 1</span><br></pre></td></tr></table></figure>
-
-<h2 id="🎯-快速参考命令"><a href="#🎯-快速参考命令" class="headerlink" title="🎯 快速参考命令"></a>🎯 快速参考命令</h2><h3 id="信息查询"><a href="#信息查询" class="headerlink" title="信息查询"></a>信息查询</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># NUMA 拓扑</span></span><br><span class="line">lscpu | grep NUMA</span><br><span class="line">numactl --hardware</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网卡队列</span></span><br><span class="line">ethtool -l eth0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断亲和性</span></span><br><span class="line">grep eth0 /proc/interrupts</span><br><span class="line"><span class="built_in">cat</span> /proc/irq/120/smp_affinity_list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网卡 NUMA 节点</span></span><br><span class="line"><span class="built_in">cat</span> /sys/class/net/eth0/device/numa_node</span><br><span class="line"></span><br><span class="line"><span class="comment"># NUMA 统计</span></span><br><span class="line">numastat</span><br><span class="line">numastat -p $(pidof nginx)</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="2-1-启动监控（另一个终端）"><a href="#2-1-启动监控（另一个终端）" class="headerlink" title="2.1 启动监控（另一个终端）"></a>2.1 启动监控（另一个终端）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 终端 1: 监控中断</span></span><br><span class="line">watch -n 1 <span class="string">&#x27;cat /proc/interrupts | grep -E &quot;(CPU|eth)&quot; | head -n 20&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 终端 2: 监控 CPU</span></span><br><span class="line">mpstat -P ALL 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 终端 3: 监控网络</span></span><br><span class="line">sar -n DEV 1</span><br></pre></td></tr></table></figure>
-<h4 id="2-2-客户端测试（测试客户端）"><a href="#2-2-客户端测试（测试客户端）" class="headerlink" title="2.2 客户端测试（测试客户端）"></a>2.2 客户端测试（测试客户端）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 服务端：绑定到网卡所在节点</span></span><br><span class="line"><span class="comment">#NUMA_NODE=$(cat /sys/class/net/eth0/device/numa_node)</span></span><br><span class="line"><span class="comment">#numactl --cpunodebind=$NUMA_NODE --membind=$NUMA_NODE \</span></span><br><span class="line">    iperf3 -s -p 5201</span><br><span class="line"></span><br><span class="line"><span class="comment">#numactl --cpunodebind=$NUMA_NODE --membind=$NUMA_NODE \</span></span><br><span class="line">    iperf3 -c 10.120.64.218 -t 60 -P 10</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;✅ 基准测试完成，记录吞吐量和重传次数&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="2-3-记录关键指标"><a href="#2-3-记录关键指标" class="headerlink" title="2.3 记录关键指标"></a>2.3 记录关键指标</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提取关键数据</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 基准性能 ===&quot;</span> &gt; performance_baseline.txt</span><br><span class="line">grep <span class="string">&quot;sender&quot;</span> baseline_*.txt &gt;&gt; performance_baseline.txt</span><br><span class="line">grep <span class="string">&quot;Retr&quot;</span> baseline_*.txt &gt;&gt; performance_baseline.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查是否有性能问题</span></span><br><span class="line"><span class="comment"># 问题信号:</span></span><br><span class="line"><span class="comment"># 1. 多流吞吐量远低于单流 (&lt; 80%)</span></span><br><span class="line"><span class="comment"># 2. 重传次数高 (&gt; 1000)</span></span><br><span class="line"><span class="comment"># 3. CPU 集中在少数核心</span></span><br><span class="line"><span class="comment"># 4. 有丢包 (UDP 测试)</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="中断类型详解"><a href="#中断类型详解" class="headerlink" title="中断类型详解"></a>中断类型详解</h2><h3 id="中断分类表"><a href="#中断分类表" class="headerlink" title="中断分类表"></a>中断分类表</h3><table>
-<thead>
-<tr>
-<th>中断类型</th>
-<th>编号范围</th>
-<th>触发方式</th>
-<th>典型用途</th>
-<th>处理优先级</th>
-<th>性能影响</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>硬件中断(IRQ)</strong></td>
-<td>0-255+</td>
-<td>硬件触发</td>
-<td>设备通知CPU</td>
-<td>高</td>
-<td>直接影响延迟</td>
-</tr>
-<tr>
-<td><strong>软中断(Softirq)</strong></td>
-<td>0-9</td>
-<td>软件触发</td>
-<td>延迟处理</td>
-<td>中</td>
-<td>影响吞吐量</td>
-</tr>
-<tr>
-<td><strong>网络中断(NET_RX)</strong></td>
-<td>softirq 3</td>
-<td>网卡接收</td>
-<td>数据包接收</td>
-<td>高</td>
-<td>高负载场景瓶颈</td>
-</tr>
-<tr>
-<td><strong>网络中断(NET_TX)</strong></td>
-<td>softirq 4</td>
-<td>网卡发送</td>
-<td>数据包发送</td>
-<td>中</td>
-<td>影响发送性能</td>
-</tr>
-<tr>
-<td><strong>块设备中断</strong></td>
-<td>变化</td>
-<td>磁盘I&#x2F;O</td>
-<td>磁盘读写完成</td>
-<td>中</td>
-<td>影响I&#x2F;O性能</td>
-</tr>
-<tr>
-<td><strong>定时器中断</strong></td>
-<td>softirq 1</td>
-<td>周期触发</td>
-<td>系统时钟</td>
-<td>中</td>
-<td>系统级影响</td>
-</tr>
-<tr>
-<td><strong>调度中断</strong></td>
-<td>softirq 7</td>
-<td>调度触发</td>
-<td>进程调度</td>
-<td>中</td>
-<td>影响响应时间</td>
-</tr>
-<tr>
-<td><strong>RCU中断</strong></td>
-<td>softirq 8,9</td>
-<td>内核同步</td>
-<td>内存回收</td>
-<td>低</td>
-<td>后台影响</td>
-</tr>
-</tbody></table>
-<h3 id="网络中断处理流程"><a href="#网络中断处理流程" class="headerlink" title="网络中断处理流程"></a>网络中断处理流程</h3><table>
-<thead>
-<tr>
-<th>阶段</th>
-<th>类型</th>
-<th>处理位置</th>
-<th>关键操作</th>
-<th>可优化点</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>1. 硬中断</strong></td>
-<td>Hardware IRQ</td>
-<td>中断处理程序(ISR)</td>
-<td>通知内核、禁止中断</td>
-<td>IRQ亲和性绑定</td>
-</tr>
-<tr>
-<td><strong>2. 软中断</strong></td>
-<td>NET_RX_SOFTIRQ</td>
-<td>ksoftirqd线程</td>
-<td>数据包处理、协议栈</td>
-<td>RPS&#x2F;RFS配置</td>
-</tr>
-<tr>
-<td><strong>3. 应用层</strong></td>
-<td>系统调用</td>
-<td>用户空间</td>
-<td>数据读取</td>
-<td>SO_REUSEPORT</td>
-</tr>
-</tbody></table>
-<h3 id="I-O中断类型对比"><a href="#I-O中断类型对比" class="headerlink" title="I&#x2F;O中断类型对比"></a>I&#x2F;O中断类型对比</h3><table>
-<thead>
-<tr>
-<th>对比项</th>
-<th>网络中断</th>
-<th>磁盘I&#x2F;O中断</th>
-<th>NVMe中断</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>频率</strong></td>
-<td>极高(百万级&#x2F;秒)</td>
-<td>中等(万级&#x2F;秒)</td>
-<td>高(十万级&#x2F;秒)</td>
-</tr>
-<tr>
-<td><strong>延迟敏感度</strong></td>
-<td>极高</td>
-<td>中等</td>
-<td>高</td>
-</tr>
-<tr>
-<td><strong>CPU占用</strong></td>
-<td>高</td>
-<td>中</td>
-<td>中高</td>
-</tr>
-<tr>
-<td><strong>优化方法</strong></td>
-<td>中断合并、NAPI</td>
-<td>I&#x2F;O调度器</td>
-<td>中断绑核、轮询</td>
-</tr>
-<tr>
-<td><strong>队列数</strong></td>
-<td>多队列(RSS)</td>
-<td>单队列&#x2F;多队列</td>
-<td>多队列(NVMe队列)</td>
-</tr>
-</tbody></table>
-<h3 id="🎯-核心概念"><a href="#🎯-核心概念" class="headerlink" title="🎯 核心概念"></a>🎯 核心概念</h3><ol>
-<li><p><strong>硬中断 vs 软中断</strong></p>
-<ul>
-<li>**硬中断(IRQ)**：硬件直接触发，处理快速，不可睡眠</li>
-<li>**软中断(Softirq)**：延迟处理，可以被调度，处理复杂逻辑</li>
-</ul>
-</li>
-<li><p><strong>RSS vs RPS vs RFS</strong></p>
-<ul>
-<li><strong>RSS</strong>（硬件）：网卡硬件根据哈希将数据包分发到不同队列</li>
-<li><strong>RPS</strong>（软件）：内核软件层面分发软中断到不同CPU</li>
-<li><strong>RFS</strong>（流感知）：将数据包分发到应用程序所在的CPU核心</li>
-</ul>
-</li>
-<li><p><strong>NAPI机制</strong></p>
-<ul>
-<li>高负载时从中断模式切换到轮询模式</li>
-<li>减少中断次数，提高吞吐量</li>
-<li>降低CPU中断开销</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2283,7 +2031,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">168</span>
+          <span class="site-state-item-count">169</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
