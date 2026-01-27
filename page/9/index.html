@@ -184,6 +184,193 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/14/curl-unix-socket-%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/14/curl-unix-socket-%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">curl --unix-socket 用法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-14 12:10:05" itemprop="dateCreated datePublished" datetime="2025-02-14T12:10:05+08:00">2025-02-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-12-04 14:00:06" itemprop="dateModified" datetime="2025-12-04T14:00:06+08:00">2025-12-04</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="📌-curl-unix-socket-的作用"><a href="#📌-curl-unix-socket-的作用" class="headerlink" title="📌 curl --unix-socket 的作用"></a><strong>📌 <code>curl --unix-socket</code> 的作用</strong></h2><p><code>curl --unix-socket</code> 选项用于 <strong>通过 UNIX 域套接字（Unix Domain Socket, UDS）</strong> 发送 HTTP 请求。它主要用于 <strong>与本地进程通信</strong>，而不依赖 TCP 网络端口。例如：</p>
+<ul>
+<li><strong>与 Docker Daemon 交互</strong>（<code>/var/run/docker.sock</code>）</li>
+<li><strong>与 Podman、Containerd 交互</strong></li>
+<li><strong>与 Nginx、Envoy 代理本地服务</strong></li>
+<li><strong>访问本地 REST API</strong></li>
+</ul>
+<hr>
+<h2 id="📌-curl-unix-socket-var-run-docker-sock-在-Docker-中的常见用法"><a href="#📌-curl-unix-socket-var-run-docker-sock-在-Docker-中的常见用法" class="headerlink" title="📌 curl --unix-socket /var/run/docker.sock 在 Docker 中的常见用法"></a><strong>📌 <code>curl --unix-socket /var/run/docker.sock</code> 在 Docker 中的常见用法</strong></h2><p>Docker 的 **API 服务器监听 <code>/var/run/docker.sock</code>**，可以使用 <code>curl</code> 直接向 <strong>Docker API</strong> 发送 HTTP 请求，而 <strong>不需要 <code>docker</code> CLI 工具</strong>。</p>
+<hr>
+<h3 id="1️⃣-获取-Docker-版本信息"><a href="#1️⃣-获取-Docker-版本信息" class="headerlink" title="1️⃣ 获取 Docker 版本信息"></a><strong>1️⃣ 获取 Docker 版本信息</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock http://localhost/version</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：查询 Docker 服务器的 API 版本。</p>
+<p>📌 <strong>返回示例</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;24.0.5&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;ApiVersion&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.41&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;MinAPIVersion&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.12&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;GitCommit&quot;</span><span class="punctuation">:</span> <span class="string">&quot;abcdef123&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;GoVersion&quot;</span><span class="punctuation">:</span> <span class="string">&quot;go1.20.3&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Os&quot;</span><span class="punctuation">:</span> <span class="string">&quot;linux&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Arch&quot;</span><span class="punctuation">:</span> <span class="string">&quot;amd64&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2️⃣-获取所有运行的容器"><a href="#2️⃣-获取所有运行的容器" class="headerlink" title="2️⃣ 获取所有运行的容器"></a><strong>2️⃣ 获取所有运行的容器</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl -s --unix-socket /var/run/docker.sock http://localhost/containers/json</span><br><span class="line"></span><br><span class="line"><span class="comment"># 服务一般在：/etc/systemd/system </span></span><br><span class="line"></span><br><span class="line">systemctl status docker.service --no-pager</span><br><span class="line">systemctl status cri-docker.service --no-pager</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：返回所有正在运行的 Docker 容器列表（类似 <code>docker ps</code>）。</p>
+<p>📌 <strong>返回示例</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;b9b3f20a9a5f&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Names&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;/nginx&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Image&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nginx:latest&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;State&quot;</span><span class="punctuation">:</span> <span class="string">&quot;running&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Ports&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;PrivatePort&quot;</span><span class="punctuation">:</span> <span class="number">80</span><span class="punctuation">,</span> <span class="attr">&quot;PublicPort&quot;</span><span class="punctuation">:</span> <span class="number">8080</span><span class="punctuation">,</span> <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;tcp&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="3️⃣-获取所有容器（包含已停止的）"><a href="#3️⃣-获取所有容器（包含已停止的）" class="headerlink" title="3️⃣ 获取所有容器（包含已停止的）"></a><strong>3️⃣ 获取所有容器（包含已停止的）</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock <span class="string">&quot;http://localhost/containers/json?all=true&quot;</span></span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：类似 <code>docker ps -a</code>，<strong>列出所有容器</strong>（包括停止的）。</p>
+<hr>
+<h3 id="4️⃣-获取某个容器的详细信息"><a href="#4️⃣-获取某个容器的详细信息" class="headerlink" title="4️⃣ 获取某个容器的详细信息"></a><strong>4️⃣ 获取某个容器的详细信息</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock http://localhost/containers/nginx/json</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：获取 <code>nginx</code> 容器的详细信息。</p>
+<p>📌 <strong>返回示例</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;b9b3f20a9a5f&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;State&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;running&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Running&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Paused&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Restarting&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Config&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Hostname&quot;</span><span class="punctuation">:</span> <span class="string">&quot;b9b3f20a9a5f&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Image&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nginx:latest&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Cmd&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;nginx&quot;</span><span class="punctuation">,</span> <span class="string">&quot;-g&quot;</span><span class="punctuation">,</span> <span class="string">&quot;daemon off;&quot;</span><span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="5️⃣-停止容器"><a href="#5️⃣-停止容器" class="headerlink" title="5️⃣ 停止容器"></a><strong>5️⃣ 停止容器</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock -X POST http://localhost/containers/nginx/stop</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：停止 <code>nginx</code> 容器（类似 <code>docker stop nginx</code>）。</p>
+<hr>
+<h3 id="6️⃣-删除容器"><a href="#6️⃣-删除容器" class="headerlink" title="6️⃣ 删除容器"></a><strong>6️⃣ 删除容器</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock -X DELETE http://localhost/containers/nginx</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：删除 <code>nginx</code> 容器（类似 <code>docker rm nginx</code>）。</p>
+<hr>
+<h3 id="7️⃣-创建并运行容器"><a href="#7️⃣-创建并运行容器" class="headerlink" title="7️⃣ 创建并运行容器"></a><strong>7️⃣ 创建并运行容器</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock -X POST \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">    &quot;Image&quot;: &quot;nginx:latest&quot;,</span></span><br><span class="line"><span class="string">    &quot;Cmd&quot;: [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;],</span></span><br><span class="line"><span class="string">    &quot;HostConfig&quot;: &#123;</span></span><br><span class="line"><span class="string">      &quot;PortBindings&quot;: &#123; &quot;80/tcp&quot;: [&#123; &quot;HostPort&quot;: &quot;8080&quot; &#125;] &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &#125;&#x27;</span> http://localhost/containers/create</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：使用 <code>nginx:latest</code> <strong>创建并运行</strong> 容器，并将容器的 <code>80</code> 端口映射到主机的 <code>8080</code> 端口。</p>
+<p>📌 <strong>返回示例</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;b9b3f20a9a5f...&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Warnings&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>然后，使用以下命令启动该容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock -X POST http://localhost/containers/b9b3f20a9a5f/start</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="8️⃣-获取所有-Docker-镜像"><a href="#8️⃣-获取所有-Docker-镜像" class="headerlink" title="8️⃣ 获取所有 Docker 镜像"></a><strong>8️⃣ 获取所有 Docker 镜像</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock http://localhost/images/json</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：获取本地 Docker 镜像列表（类似 <code>docker images</code>）。</p>
+<p>📌 <strong>返回示例</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:4a27b...&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RepoTags&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;nginx:latest&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Size&quot;</span><span class="punctuation">:</span> <span class="number">1337323</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="9️⃣-拉取-Docker-镜像"><a href="#9️⃣-拉取-Docker-镜像" class="headerlink" title="9️⃣ 拉取 Docker 镜像"></a><strong>9️⃣ 拉取 Docker 镜像</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock -X POST \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123; &quot;fromImage&quot;: &quot;nginx&quot;, &quot;tag&quot;: &quot;latest&quot; &#125;&#x27;</span> \</span><br><span class="line">  http://localhost/images/create</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：拉取 <code>nginx:latest</code> 镜像（类似 <code>docker pull nginx:latest</code>）。</p>
+<hr>
+<h3 id="🔟-监控-Docker-事件"><a href="#🔟-监控-Docker-事件" class="headerlink" title="🔟 监控 Docker 事件"></a><strong>🔟 监控 Docker 事件</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock http://localhost/events</span><br></pre></td></tr></table></figure>
+<p>📌 <strong>作用</strong>：<strong>实时监听 Docker 事件</strong>（如容器创建、删除、启动等）。</p>
+<p>📌 <strong>示例输出</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;start&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;b9b3f20a9a5f...&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;from&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nginx&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;container&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Action&quot;</span><span class="punctuation">:</span> <span class="string">&quot;start&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="📌-总结"><a href="#📌-总结" class="headerlink" title="📌 总结"></a><strong>📌 总结</strong></h2><table>
+<thead>
+<tr>
+<th><strong>命令</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>curl --unix-socket /var/run/docker.sock http://localhost/version</code></td>
+<td>获取 Docker 版本信息</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock http://localhost/containers/json</code></td>
+<td>获取运行中的容器列表</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock &quot;http://localhost/containers/json?all=true&quot;</code></td>
+<td>获取所有容器（包括停止的）</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock http://localhost/containers/nginx/json</code></td>
+<td>获取 <code>nginx</code> 容器信息</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock -X POST http://localhost/containers/nginx/stop</code></td>
+<td>停止 <code>nginx</code> 容器</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock -X DELETE http://localhost/containers/nginx</code></td>
+<td>删除 <code>nginx</code> 容器</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock http://localhost/images/json</code></td>
+<td>获取本地镜像</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock -X POST http://localhost/images/create -d &#39;&#123; &quot;fromImage&quot;: &quot;nginx&quot;, &quot;tag&quot;: &quot;latest&quot; &#125;&#39;</code></td>
+<td>拉取 <code>nginx</code> 镜像</td>
+</tr>
+<tr>
+<td><code>curl --unix-socket /var/run/docker.sock http://localhost/events</code></td>
+<td>监听 Docker 事件</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🚀-你的下一步"><a href="#🚀-你的下一步" class="headerlink" title="🚀 你的下一步"></a><strong>🚀 你的下一步</strong></h2><p>1️⃣ <strong>检查 Docker API 是否开启</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock http://localhost/version</span><br></pre></td></tr></table></figure>
+<p>如果返回 <code>Permission Denied</code>，尝试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> 666 /var/run/docker.sock</span><br></pre></td></tr></table></figure>
+
+<p>2️⃣ <strong>尝试 <code>curl</code> 操作容器</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock http://localhost/containers/json</span><br></pre></td></tr></table></figure>
+
+<p>3️⃣ <strong>测试创建 &amp; 运行容器</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --unix-socket /var/run/docker.sock -X POST http://localhost/containers/create ...</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>🎯 这样，你就可以直接使用 <code>curl --unix-socket</code> 与 Docker 交互，而无需 <code>docker</code> CLI！</strong> 🚀</p>
+<hr>
+<h2 id="curl-URL-耗时分析"><a href="#curl-URL-耗时分析" class="headerlink" title="curl URL  耗时分析"></a>curl URL  耗时分析</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.rockylinux.cn/notes/the-curl-command-detects-the-time-consumption-of-each-stage.html">https://www.rockylinux.cn/notes/the-curl-command-detects-the-time-consumption-of-each-stage.html</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">curl -o /dev/null -s -w time_namelookup:&quot;\t&quot;%&#123;time_namelookup&#125;&quot;\n&quot;time_connect:&quot;\t\t&quot;%&#123;time_connect&#125;&quot;\n&quot;time_appconnect:&quot;\t&quot;%&#123;time_appconnect&#125;&quot;\n&quot;time_pretransfer:&quot;\t&quot;%&#123;time_pretransfer&#125;&quot;\n&quot;time_starttransfer:&quot;\t&quot;%&#123;time_starttransfer&#125;&quot;\n&quot;time_total:&quot;\t\t&quot;%&#123;time_total&#125;&quot;\n&quot;time_redirect:&quot;\t\t&quot;%&#123;time_redirect&#125;&quot;\n&quot; --location &#x27;https://api.rockylinux.cn&#x27; --header &#x27;Content-Type: application/json&#x27; --header &#x27;Cookie: ID=xxx;&#x27; --data &#x27;&#123;&quot;key&quot;:[&quot;xxx&quot;,&quot;xxx&quot;]&#125;&#x27;</span><br><span class="line"></span><br><span class="line">curl 命令的参数非常多，可以使用 curl --help all 命令查看所有参数，这里使用 curl 命令来测试接口性能，下面是每个参数的具体含义： </span><br><span class="line">-o /dev/null：告诉 curl 将下载的数据丢弃，不输出到任何文件中。</span><br><span class="line">&quot;/dev/null&quot; 是一个特殊的设备，它会丢弃所有写入它的数据。 </span><br><span class="line">-s：告诉 curl 在操作过程中不显示进度信息或错误信息。这通常用于在脚本中静默运行 curl。 </span><br><span class="line">-w：允许您设置显示的格式，后面跟的是具体的格式字符串。在这个命令中，它被用来显示各种时间信息。 </span><br><span class="line">time_namelookup：DNS 解析的时间，即从请求开始到域名解析完成的时间。 </span><br><span class="line">time_connect：建立到服务器的 TCP 连接所需的时间。 </span><br><span class="line">time_appconnect：建立到应用级别协议的连接所需的时间。例如，在使用 HTTPS 时，这将包括 SSL 握手的时间。 </span><br><span class="line">time_pretransfer：从请求开始到文件传输即将开始所需的时间。 </span><br><span class="line">time_starttransfer：从请求开始到第一个字节被 curl 接收的时间。 </span><br><span class="line">time_total：整个请求所需的总时间。 </span><br><span class="line">time_redirect：所有重定向步骤所需的时间，包括 DNS 解析、连接、预传输等。 https://api.rockylinux.cn：想要访问的网站的 URL。 这个命令的总体目的是测试访问指定 URL 各个阶段所需时间。</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/14/rke%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1257,97 +1444,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/20/intresting-tools/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/01/20/intresting-tools/" class="post-title-link" itemprop="url">intresting tools</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-01-20 17:34:46" itemprop="dateCreated datePublished" datetime="2025-01-20T17:34:46+08:00">2025-01-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-01-05 19:06:12" itemprop="dateModified" datetime="2026-01-05T19:06:12+08:00">2026-01-05</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="gdu"><a href="#gdu" class="headerlink" title="gdu"></a>gdu</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/dundee/gdu</span><br></pre></td></tr></table></figure>
-
-<h2 id="chsrc"><a href="#chsrc" class="headerlink" title="chsrc"></a>chsrc</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/RubyMetric/chsrc</span><br></pre></td></tr></table></figure>
-
-<h2 id="lnav"><a href="#lnav" class="headerlink" title="lnav"></a>lnav</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/tstack/lnav</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#用法</span><br><span class="line">lnav /var/log/messages</span><br><span class="line">journalctl -a -o json | lnav</span><br><span class="line"></span><br><span class="line">#如果使用 systemd v236 或更新版本，输出字段可以限制为lnav实际识别的字段，以提高效率：</span><br><span class="line">journalctl -o json --output-fields=MESSAGE,PRIORITY,_PID,SYSLOG_IDENTIFIER,_SYSTEMD_UNIT | lnav</span><br></pre></td></tr></table></figure>
-
-<h2 id="lancet"><a href="#lancet" class="headerlink" title="lancet"></a>lancet</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/duke-git/lancet</span><br></pre></td></tr></table></figure>
-
-<h2 id="oha"><a href="#oha" class="headerlink" title="oha"></a>oha</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/hatoo/oha</span><br></pre></td></tr></table></figure>
-
-<h2 id="icones"><a href="#icones" class="headerlink" title="icones"></a>icones</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/antfu-collective/icones</span><br></pre></td></tr></table></figure>
-
-<h2 id="go2rtc"><a href="#go2rtc" class="headerlink" title="go2rtc"></a>go2rtc</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/AlexxIT/go2rtc</span><br></pre></td></tr></table></figure>
-
-<h2 id="白噪音"><a href="#白噪音" class="headerlink" title="白噪音"></a>白噪音</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://moodist.mvze.net/</span><br></pre></td></tr></table></figure>
-<h2 id="freeze-生成代码图片的终端工具"><a href="#freeze-生成代码图片的终端工具" class="headerlink" title="freeze :生成代码图片的终端工具"></a>freeze :生成代码图片的终端工具</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/charmbracelet/freeze</span><br></pre></td></tr></table></figure>
-
-<h2 id="github镜像替换"><a href="#github镜像替换" class="headerlink" title="github镜像替换"></a>github镜像替换</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">github镜像网站1：https://2git.xyz</span><br><span class="line"></span><br><span class="line">github镜像网站2：https://lgithub.xyz</span><br><span class="line"></span><br><span class="line">#github加速</span><br><span class="line">https://gh-proxy.com/</span><br><span class="line"></span><br><span class="line">https://github.com/Alvin9999/new-pac</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1419,7 +1515,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">171</span>
+          <span class="site-state-item-count">172</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

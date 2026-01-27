@@ -14677,4 +14677,94 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>linux内核协议栈</title>
+    <url>/2026/01/27/linux%E5%86%85%E6%A0%B8%E5%8D%8F%E8%AE%AE%E6%A0%88/</url>
+    <content><![CDATA[<h2 id="协议栈"><a href="#协议栈" class="headerlink" title="协议栈"></a>协议栈</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/Network-API-and-data-flow-within-Linux-kernel-1.png" alt="linux-kernel-network" title="linux kernel network"></p>
+<hr>
+<h2 id="🧠-主线口诀"><a href="#🧠-主线口诀" class="headerlink" title="🧠 主线口诀"></a>🧠 主线口诀</h2><h3 id="①-第一条主线：数据方向（最重要）"><a href="#①-第一条主线：数据方向（最重要）" class="headerlink" title="① 第一条主线：数据方向（最重要）"></a>① 第一条主线：数据方向（最重要）</h3><p>只保留 90% 正常流量会经过的路径,忽略异常、重传、边角状态机</p>
+<p>TX：用户 → TCP → IP → 设备 → 网卡<br>RX：网卡 → IP → TCP → Socket → 用户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">用户态</span><br><span class="line"> ↓</span><br><span class="line">系统调用</span><br><span class="line"> ↓</span><br><span class="line">协议栈（L4 → L3 → L2）</span><br><span class="line"> ↓</span><br><span class="line">驱动</span><br><span class="line"> ↓</span><br><span class="line">网卡</span><br></pre></td></tr></table></figure>
+
+<h4 id="发送路径（左半边为主）"><a href="#发送路径（左半边为主）" class="headerlink" title="发送路径（左半边为主）"></a><strong>发送路径（左半边为主）</strong></h4><ul>
+<li>write &#x2F; send &#x2F; sendmsg</li>
+<li>tcp_sendmsg</li>
+<li>tcp_push_one</li>
+<li>ip_output</li>
+<li>dev_queue_xmit</li>
+<li>driver → NIC</li>
+</ul>
+<h4 id="接收路径（右半边为主）"><a href="#接收路径（右半边为主）" class="headerlink" title="接收路径（右半边为主）"></a><strong>接收路径（右半边为主）</strong></h4><ul>
+<li>NIC 中断</li>
+<li>NAPI poll</li>
+<li>netif_receive_skb</li>
+<li>ip_rcv</li>
+<li>tcp_v4_rcv</li>
+<li>sock_recvmsg &#x2F; read</li>
+</ul>
+<h3 id="第二条主线：控制面-vs-数据面"><a href="#第二条主线：控制面-vs-数据面" class="headerlink" title="第二条主线：控制面 vs 数据面"></a>第二条主线：控制面 vs 数据面</h3><p>图中混杂了两类东西，你要强行把它们分开：</p>
+<h4 id="🟨-数据面（你-80-关注的）"><a href="#🟨-数据面（你-80-关注的）" class="headerlink" title="🟨 数据面（你 80% 关注的）"></a>🟨 数据面（你 80% 关注的）</h4><ul>
+<li>skb（sk_buff）</li>
+<li>队列（queue）</li>
+<li>copy &#x2F; zero-copy</li>
+<li>push &#x2F; pull</li>
+</ul>
+<p>关键词：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">skb</span><br><span class="line">queue</span><br><span class="line">xmit</span><br><span class="line">rcv</span><br><span class="line">copy</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="🟥-控制面（暂时只识别，不深挖）"><a href="#🟥-控制面（暂时只识别，不深挖）" class="headerlink" title="🟥 控制面（暂时只识别，不深挖）"></a>🟥 控制面（暂时只识别，不深挖）</h4><ul>
+<li>socket 状态机</li>
+<li>TCP 状态（ESTABLISHED &#x2F; TIME_WAIT）</li>
+<li>ACK &#x2F; 重传 &#x2F; 定时器</li>
+</ul>
+<p>关键词：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">state</span><br><span class="line">timer</span><br><span class="line">ack</span><br><span class="line">retrans</span><br></pre></td></tr></table></figure>
+
+<p>二、工程上该关心什么</p>
+<p>① User &#x2F; Syscall 层</p>
+<p>你关心什么：<br>  • 应用是否阻塞？<br>  • write&#x2F;send 是不是慢？<br>  • 是否频繁系统调用？</p>
+<p>常见问题：<br>  • 小包 write（syscall 过多）<br>  • 未开启 sendfile &#x2F; splice</p>
+<p>⸻</p>
+<p>② TCP 层（tcp_sendmsg &#x2F; tcp_v4_rcv）</p>
+<p>你关心什么：<br>  • 队列是否满？<br>  • 是否在重传？<br>  • 延迟是否在 TCP 内部？</p>
+<p>指标 &#x2F; 工具：</p>
+<p>ss -ti<br>netstat -s</p>
+<p>⸻</p>
+<p>③ IP 层（ip_output &#x2F; ip_rcv）</p>
+<p>你关心什么：<br>  • 路由是否正确？<br>  • 是否被 netfilter &#x2F; iptables 拖慢？<br>  • MTU &#x2F; 分片问题？</p>
+<p>典型场景：<br>  • kube-proxy iptables 模式<br>  • 大量规则导致 ip_rcv 慢</p>
+<p>⸻</p>
+<p>④ Qdisc &#x2F; dev_queue_xmit（性能高发区）</p>
+<p>这是工程事故高发区</p>
+<p>你关心：<br>  • 队列是否堆积？<br>  • qdisc 是否成为瓶颈？<br>  • 网卡 TX 是否 backpressure？</p>
+<p>工具：</p>
+<p>tc -s qdisc</p>
+<p>⸻</p>
+<p>⑤ NAPI &#x2F; softirq（RX 性能关键）</p>
+<p>这是 RX 侧最重要的地方</p>
+<p>你关心：<br>  • softirq 是否打满 CPU？<br>  • backlog 是否丢包？<br>  • 是否进入 ksoftirqd？</p>
+<p>工具：</p>
+<p>cat &#x2F;proc&#x2F;net&#x2F;softnet_stat<br>top<br>perf top</p>
+<p>三、工程级「怎么用这张图」</p>
+<p>场景 1：QPS 上不去，但 CPU 很高</p>
+<p>直接套路径：</p>
+<p>RX → NAPI → netif_receive_skb → tcp_v4_rcv</p>
+<p>优先看：<br>  • softirq<br>  • backlog<br>  • TCP 接收队列</p>
+<p>⸻</p>
+<p>场景 2：延迟高，但没有丢包</p>
+<p>优先怀疑：</p>
+<p>TCP → 队列 → 调度</p>
+<p>排查：<br>  • TCP send&#x2F;recv queue<br>  • Nagle &#x2F; delayed ACK<br>  • cgroup CPU 限制</p>
+<p>⸻</p>
+<p>场景 3：Ingress &#x2F; Service 性能异常</p>
+<p>路径映射：</p>
+<p>NIC<br>→ Linux RX<br>→ iptables &#x2F; conntrack<br>→ Pod veth<br>→ 容器 TCP</p>
+<p>重点：<br>  • netfilter<br>  • conntrack<br>  • veth + qdisc</p>
+<p>⸻</p>
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
 </search>
