@@ -14247,7 +14247,24 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
     <content><![CDATA[<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><blockquote>
 <p><a href="https://cloudpods.csdn.net/6578109cb8e5f01e1e4496fd.html">https://cloudpods.csdn.net/6578109cb8e5f01e1e4496fd.html</a></p>
 </blockquote>
-<h2 id="一、分析图片的-3-个步骤-Step-1：给-Pod-插上“网线”（veth）-创建-veth-pair，一端进-Pod，一端留在-Node-👍-这是-CNI-的核心职责之一底层原理：-veth-是-Linux-提供的“虚拟网线”-Pod-里看到的是-eth0-Node-上看到的是-vethxxxx👉-CNI-插件最基础的职责：-把-Pod-的-network-namespace-接入宿主机网络"><a href="#一、分析图片的-3-个步骤-Step-1：给-Pod-插上“网线”（veth）-创建-veth-pair，一端进-Pod，一端留在-Node-👍-这是-CNI-的核心职责之一底层原理：-veth-是-Linux-提供的“虚拟网线”-Pod-里看到的是-eth0-Node-上看到的是-vethxxxx👉-CNI-插件最基础的职责：-把-Pod-的-network-namespace-接入宿主机网络" class="headerlink" title="# 一、分析图片的 3 个步骤## Step 1：给 Pod 插上“网线”（veth）&gt; 创建 veth pair，一端进 Pod，一端留在 Node### 👍 这是 CNI 的核心职责之一底层原理：* veth 是 Linux 提供的“虚拟网线”* Pod 里看到的是 eth0* Node 上看到的是 vethxxxx👉 CNI 插件最基础的职责：&gt; 把 Pod 的 network namespace 接入宿主机网络"></a><img src="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png" alt="cni" title="cni"><br># 一、分析图片的 3 个步骤<br>## Step 1：给 Pod 插上“网线”（veth）<br>&gt; 创建 veth pair，一端进 Pod，一端留在 Node<br>### 👍 这是 CNI 的<strong>核心职责之一</strong><br><strong>底层原理</strong>：<br><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">[ Pod netns ] eth0  &lt;==== veth pair ====  vethXXXX [ Node ]</span><br></pre></td></tr></table></figure><br>* veth 是 Linux 提供的“虚拟网线”<br>* Pod 里看到的是 <code>eth0</code><br>* Node 上看到的是 <code>vethxxxx</code><br>👉 <strong>CNI 插件最基础的职责：</strong><br>&gt; 把 Pod 的 network namespace 接入宿主机网络</h2><h2 id="Step-2：给-Pod-分配-IP（IPAM）"><a href="#Step-2：给-Pod-分配-IP（IPAM）" class="headerlink" title="Step 2：给 Pod 分配 IP（IPAM）"></a>Step 2：给 Pod 分配 IP（IPAM）</h2><blockquote>
+<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png" alt="cni" title="cni"></p>
+<hr>
+<h1 id="一、分析图片的-3-个步骤"><a href="#一、分析图片的-3-个步骤" class="headerlink" title="一、分析图片的 3 个步骤"></a>一、分析图片的 3 个步骤</h1><h2 id="Step-1：给-Pod-插上“网线”（veth）"><a href="#Step-1：给-Pod-插上“网线”（veth）" class="headerlink" title="Step 1：给 Pod 插上“网线”（veth）"></a>Step 1：给 Pod 插上“网线”（veth）</h2><blockquote>
+<p>创建 veth pair，一端进 Pod，一端留在 Node</p>
+</blockquote>
+<h3 id="👍-这是-CNI-的核心职责之一"><a href="#👍-这是-CNI-的核心职责之一" class="headerlink" title="👍 这是 CNI 的核心职责之一"></a>👍 这是 CNI 的<strong>核心职责之一</strong></h3><p><strong>底层原理</strong>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">[ Pod netns ] eth0  &lt;==== veth pair ====  vethXXXX [ Node ]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>veth 是 Linux 提供的“虚拟网线”</li>
+<li>Pod 里看到的是 <code>eth0</code></li>
+<li>Node 上看到的是 <code>vethxxxx</code><br>👉 <strong>CNI 插件最基础的职责：</strong><blockquote>
+<p>把 Pod 的 network namespace 接入宿主机网络</p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<h2 id="Step-2：给-Pod-分配-IP（IPAM）"><a href="#Step-2：给-Pod-分配-IP（IPAM）" class="headerlink" title="Step 2：给 Pod 分配 IP（IPAM）"></a>Step 2：给 Pod 分配 IP（IPAM）</h2><blockquote>
 <p>每个 Pod 一个唯一 IP，通常 Node 拿一个子网</p>
 </blockquote>
 <h3 id="👍-这也是-CNI-的标准设计"><a href="#👍-这也是-CNI-的标准设计" class="headerlink" title="👍 这也是 CNI 的标准设计"></a>👍 这也是 CNI 的标准设计</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">  Pod1: 172.16.0.1</span><br><span class="line">  Pod2: 172.16.0.2</span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
