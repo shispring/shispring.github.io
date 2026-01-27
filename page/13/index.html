@@ -184,6 +184,203 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/18/kubebuilder%E4%BD%BF%E7%94%A8demo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/18/kubebuilder%E4%BD%BF%E7%94%A8demo/" class="post-title-link" itemprop="url">kubebuilder使用demo</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-11-18 18:29:03" itemprop="dateCreated datePublished" datetime="2024-11-18T18:29:03+08:00">2024-11-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-12-03 16:05:22" itemprop="dateModified" datetime="2025-12-03T16:05:22+08:00">2025-12-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>  从头开始去构建一个 CRD 控制器并不容易，需要对 Kubernetes 的 API 有深入了解，并且 RBAC 集成、镜像构建、持续集成和部署等都需要很大工作量。为了解决这个问题，社区就推出了对应的简单易用的 Operator 框架，比较主流的是 kubebuilder 和 Operator Framework。</p>
+<h2 id="一、创建项目"><a href="#一、创建项目" class="headerlink" title="一、创建项目"></a>一、创建项目</h2><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建go项目</span></span><br><span class="line"><span class="built_in">mkdir</span> lb</span><br><span class="line"><span class="built_in">cd</span> lb</span><br><span class="line">go mod init test.net</span><br><span class="line"></span><br><span class="line"><span class="comment">#设计好GVK表述，以下生成的的crd名为：loadbalances.network.k8s.test.net</span></span><br><span class="line">kubebuilder init --domain k8s.test.net</span><br><span class="line">kubebuilder create api --group network --version v1 --kind LoadBalance</span><br><span class="line"></span><br><span class="line"><span class="comment">#生成crd, 该命令可以确保项目中的Kubernetes资源定义文件是最新的</span></span><br><span class="line">make manifests</span><br><span class="line"></span><br><span class="line"><span class="comment">#tips</span></span><br><span class="line"><span class="comment">#命名空间配置文件：config/default/kustomization.yaml</span></span><br></pre></td></tr></table></figure>
+<h3 id="webhook-按需配置"><a href="#webhook-按需配置" class="headerlink" title="webhook(按需配置)"></a>webhook(按需配置)</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#根据需求选择正确的webhook类型：</span><br><span class="line">1. 只需要验证：</span><br><span class="line">kubebuilder create webhook --group network --version v1 --kind LoadBalance</span><br><span class="line">--programmatic-validation</span><br><span class="line">2. 只需要默认值设置：</span><br><span class="line">kubebuilder create webhook --group network --version v1 --kind LoadBalance --defaulting</span><br><span class="line">3. 同时需要验证和默认值设置：</span><br><span class="line">kubebuilder create webhook --group network --version v1 --kind LoadBalance --programmatic-validation --defaulting</span><br><span class="line">4. 需要版本转换（多版本CRD）：</span><br><span class="line">kubebuilder create webhook --group network --version v1 --kind LoadBalance --conversion</span><br><span class="line"></span><br><span class="line">如果webhook已存在需要修改，添加--force参数：</span><br><span class="line">kubebuilder create webhook --group network --version v1 --kind LoadBalance --programmatic-validation --defaulting --force</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、调试开发"><a href="#二、调试开发" class="headerlink" title="二、调试开发"></a>二、调试开发</h2><h3 id="①重点处理文件"><a href="#①重点处理文件" class="headerlink" title="①重点处理文件"></a>①重点处理文件</h3><ul>
+<li>api&#x2F;v1alpha1&#x2F;loadbalance_types.go</li>
+<li>internal&#x2F;controller&#x2F;loadbalance_controller.go</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#变更spec：</span></span><br><span class="line">vim api/v1alpha1/loadbalance_types.go</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">#关注 Reconcile 方法实现业务逻辑</span></span><br><span class="line">vim internal/controller/loadbalance_controller.go</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">#重新生成crd等文件,CRD YAML 可以通过 make manifests 重新生成（因为是从代码生成的）</span></span><br><span class="line">make manifests generate</span><br><span class="line"><span class="comment">#查看生成的yaml：</span></span><br><span class="line"><span class="built_in">ls</span> config/crd/bases/network.k8s.test.net_loadbalances.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment">#安装crd到k8s集群,这里用于kustomize</span></span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看crd是否安装成功</span></span><br><span class="line">kubectl get crd</span><br><span class="line"></span><br><span class="line"><span class="comment">#启动controller</span></span><br><span class="line">make run</span><br></pre></td></tr></table></figure>
+<h3 id="②另一终端验证"><a href="#②另一终端验证" class="headerlink" title="②另一终端验证"></a>②另一终端验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 部署cr</span></span><br><span class="line">kubectl apply -f config/samples/network_v1_loadbalance.yaml</span><br><span class="line"></span><br><span class="line">kubectl get loadbalance</span><br></pre></td></tr></table></figure>
+
+<h3 id="③删除资源"><a href="#③删除资源" class="headerlink" title="③删除资源"></a>③删除资源</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete loadbalance loadbalance-sample</span><br><span class="line"></span><br><span class="line"><span class="comment"># ctrl + c 停止程序,卸载crd</span></span><br><span class="line">make uninstall</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、构建镜像–-部署–-卸载部署"><a href="#三、构建镜像–-部署–-卸载部署" class="headerlink" title="三、构建镜像–&gt;部署–&gt;卸载部署"></a>三、构建镜像–&gt;部署–&gt;卸载部署</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1、注意修改Dockfile镜像地址，可能无法拉取</span></span><br><span class="line">sed -i <span class="string">&#x27;s#golang:1.22#swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/golang:1.22.5#&#x27;</span> Dockerfile</span><br><span class="line">sed -i <span class="string">&#x27;s#gcr.io/distroless/static:nonroot#swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/distroless/static:nonroot#&#x27;</span> Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment">#2、开始构建镜像（root用户）</span></span><br><span class="line">make docker-build IMG=loadbalance/lb:0.0.1</span><br><span class="line"><span class="comment">#push 到远程仓库，先docker login</span></span><br><span class="line"><span class="comment">#make docker-build docker-push IMG=loadbalance/lb:0.0.1</span></span><br><span class="line">或者</span><br><span class="line">docker build -t loadbalance/lb:0.0.1 .</span><br><span class="line"><span class="comment">#docker push loadbalance/lb:0.0.1 xxxx</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#指定构建平台</span></span><br><span class="line"><span class="comment">#make docker-buildx IMG=loadbalance/lb:0.0.1 PLATFORM=linux/amd64</span></span><br><span class="line"><span class="comment">#支持多种平台构建</span></span><br><span class="line"><span class="comment">#docker buildx build --platform linux/amd64,linux/arm64 -t loadbalance/lb:0.0.1 .</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看构建的镜像</span></span><br><span class="line"><span class="built_in">sudo</span> docker images</span><br><span class="line">REPOSITORY                  TAG               IMAGE ID       CREATED              SIZE</span><br><span class="line">loadbalance/lb              0.0.1             3d702a7b6e16   About a minute ago   72.1MB</span><br><span class="line"></span><br><span class="line"><span class="comment">#部署到当前集群</span></span><br><span class="line">make deploy IMG=loadbalance/lb:0.0.1</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">kubectl get svc,deploy,pod -n lb-system</span><br><span class="line"></span><br><span class="line"><span class="comment"># 卸载部署</span></span><br><span class="line">make undeploy</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#cronjob test</span><br><span class="line">https://github.com/kubernetes-sigs/kubebuilder/tree/master/docs/book/src/cronjob-tutorial/testdata/project</span><br><span class="line"></span><br><span class="line">https://github.com/kubernetes-sigs/kubebuilder/blob/master/docs/kubebuilder_annotation.md</span><br><span class="line">+[header]:[module]:[submodule]:[key-value elements]</span><br><span class="line"></span><br><span class="line">#云原生社区</span><br><span class="line">https://cloudnative.to/kubebuilder/</span><br><span class="line"></span><br><span class="line">#标记注释</span><br><span class="line">https://cloudpods.csdn.net/657812bcb8e5f01e1e449ece.html</span><br><span class="line"></span><br><span class="line">https://xie.infoq.cn/article/7a315f5168fda5e2e534ca406</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 官网例子</span><br><span class="line">https://github.com/kubernetes/sample-controller</span><br><span class="line">https://github.com/jetstack/kubebuilder-sample-controller</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Kustomize-的作用、背景与原因"><a href="#Kustomize-的作用、背景与原因" class="headerlink" title="Kustomize 的作用、背景与原因"></a>Kustomize 的作用、背景与原因</h2><h3 id="Kustomize-是什么？"><a href="#Kustomize-是什么？" class="headerlink" title="Kustomize 是什么？"></a><strong>Kustomize 是什么？</strong></h3><p>Kustomize 是一个 <strong>声明式 Kubernetes 对象定制工具</strong>，它允许你在不修改原始 YAML 的情况下，通过 kustomization.yaml 文件来管理和组织 Kubernetes 资源。</p>
+<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a><strong>核心概念</strong></h3><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Base</strong></td>
+<td>基础配置集合（如 crd, rbac, manager）</td>
+</tr>
+<tr>
+<td><strong>Overlay</strong></td>
+<td>环境特定的修改集合（如 default 组合所有 base）</td>
+</tr>
+<tr>
+<td><strong>Kustomization</strong></td>
+<td>kustomization.yaml 文件，定义如何组织和修改资源</td>
+</tr>
+</tbody></table>
+<h3 id="项目中的-Kustomize-结构解析"><a href="#项目中的-Kustomize-结构解析" class="headerlink" title="项目中的 Kustomize 结构解析"></a><strong>项目中的 Kustomize 结构解析</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">config/</span><br><span class="line">├── crd/                  # Base: CRD 定义</span><br><span class="line">│   ├── bases/</span><br><span class="line">│   ├── patches/          # 补丁：添加 webhook 注入等</span><br><span class="line">│   └── kustomization.yaml</span><br><span class="line">├── rbac/                 # Base: 角色和权限</span><br><span class="line">│   └── kustomization.yaml</span><br><span class="line">├── manager/              # Base: 控制器部署</span><br><span class="line">│   ├── manager.yaml</span><br><span class="line">│   └── kustomization.yaml</span><br><span class="line">├── default/              # Overlay: 整合所有 base</span><br><span class="line">│   ├── kustomization.yaml</span><br><span class="line">│   ├── manager_metrics_patch.yaml    # 添加指标配置</span><br><span class="line">│   ├── manager_webhook_patch.yaml    # 添加 webhook 配置</span><br><span class="line">│   └── ...</span><br><span class="line">├── webhook/              # 可选：webhook 配置</span><br><span class="line">├── certmanager/          # 可选：证书管理</span><br><span class="line">└── ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="Kustomize-的关键功能"><a href="#Kustomize-的关键功能" class="headerlink" title="Kustomize 的关键功能"></a><strong>Kustomize 的关键功能</strong></h3><h4 id="1-资源组织-resources"><a href="#1-资源组织-resources" class="headerlink" title="1. 资源组织 (resources:)"></a>1. <strong>资源组织</strong> (<code>resources:</code>)</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># config/default/kustomization.yaml</span></span><br><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">../crd</span>          <span class="comment"># 包含 CRD base</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">../rbac</span>         <span class="comment"># 包含 RBAC base</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">../manager</span>      <span class="comment"># 包含 manager base</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-参数修改-namePrefix-namespace"><a href="#2-参数修改-namePrefix-namespace" class="headerlink" title="2. 参数修改 (namePrefix:, namespace:)"></a>2. <strong>参数修改</strong> (<code>namePrefix:</code>, <code>namespace:</code>)</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">namespace:</span> <span class="string">kubebuilderdemo-system</span></span><br><span class="line"><span class="attr">namePrefix:</span> <span class="string">kubebuilderdemo-</span></span><br><span class="line"><span class="comment"># 自动给所有资源名称添加前缀，namespace 设置为特定值</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-补丁应用-patches"><a href="#3-补丁应用-patches" class="headerlink" title="3. 补丁应用 (patches:)"></a>3. <strong>补丁应用</strong> (<code>patches:</code>)</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">patches:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">manager_metrics_patch.yaml</span>    <span class="comment"># 为 Deployment 添加指标端口</span></span><br><span class="line">    <span class="attr">target:</span></span><br><span class="line">      <span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">manager_webhook_patch.yaml</span>    <span class="comment"># 为容器添加 webhook 端口</span></span><br></pre></td></tr></table></figure>
+
+<p>补丁示例（<code>manager_webhook_patch.yaml</code>）：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为现有 Deployment 注入 webhook 配置</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">op:</span> <span class="string">add</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">/spec/template/spec/containers/0/ports</span></span><br><span class="line">  <span class="attr">value:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">9443</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">webhook-server</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">TCP</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="4-标签和注解管理-labels"><a href="#4-标签和注解管理-labels" class="headerlink" title="4. 标签和注解管理 (labels:)"></a>4. <strong>标签和注解管理</strong> (<code>labels:</code>)</h4><p>自动为所有资源添加标签，便于选择器使用</p>
+<h3 id="为什么-Kubebuilder-使用-Kustomize？"><a href="#为什么-Kubebuilder-使用-Kustomize？" class="headerlink" title="为什么 Kubebuilder 使用 Kustomize？"></a><strong>为什么 Kubebuilder 使用 Kustomize？</strong></h3><table>
+<thead>
+<tr>
+<th>原因</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>环境管理</strong></td>
+<td>轻松支持 dev&#x2F;staging&#x2F;prod 不同配置</td>
+</tr>
+<tr>
+<td><strong>代码复用</strong></td>
+<td>Base 可被多个 Overlay 重用</td>
+</tr>
+<tr>
+<td><strong>无脚本</strong></td>
+<td>纯声明式，不需要模板语言</td>
+</tr>
+<tr>
+<td><strong>模块化</strong></td>
+<td>清晰的关注点分离</td>
+</tr>
+<tr>
+<td><strong>Kubectl 原生支持</strong></td>
+<td><code>kubectl apply -k</code> 直接支持</td>
+</tr>
+<tr>
+<td><strong>易于调试</strong></td>
+<td><code>kustomize build</code> 可查看最终生成的 YAML</td>
+</tr>
+</tbody></table>
+<h3 id="实际工作流程"><a href="#实际工作流程" class="headerlink" title="实际工作流程"></a><strong>实际工作流程</strong></h3><p>当你执行 <code>make deploy</code> 时：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装，会在当前目录bin下生成二进制文件</span></span><br><span class="line">make kustomize</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">make deploy</span><br><span class="line">  ↓</span><br><span class="line">kustomize build config/default &gt; 最终的 YAML 文件</span><br><span class="line">  ↓</span><br><span class="line">kubectl apply -f (最终 YAML)</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看最终结果</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kustomize build config/default</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">kubectl kustomize config/default</span><br></pre></td></tr></table></figure>
+
+<h3 id="与-Helm-的比较"><a href="#与-Helm-的比较" class="headerlink" title="与 Helm 的比较"></a><strong>与 Helm 的比较</strong></h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Kustomize</th>
+<th>Helm</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>学习曲线</strong></td>
+<td>低</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>模板化</strong></td>
+<td>补丁系统</td>
+<td>Go 模板</td>
+</tr>
+<tr>
+<td><strong>包管理</strong></td>
+<td>否</td>
+<td>是（Helm Hub）</td>
+</tr>
+<tr>
+<td><strong>用途</strong></td>
+<td>开发&#x2F;部署</td>
+<td>生产分发</td>
+</tr>
+<tr>
+<td><strong>复杂度</strong></td>
+<td>简单</td>
+<td>强大</td>
+</tr>
+</tbody></table>
+<hr>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/18/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1208,146 +1405,6 @@ validate</p>
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/01/magick%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">magick工具使用</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-11-01 22:30:35" itemprop="dateCreated datePublished" datetime="2024-11-01T22:30:35+08:00">2024-11-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-11-10 18:11:44" itemprop="dateModified" datetime="2025-11-10T18:11:44+08:00">2025-11-10</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><code>ImageMagick</code> 是一个强大的工具，用于图像操作和格式转换，支持各种操作如裁剪、旋转、调整大小、格式转换等。下面是一些常用的 <code>magick</code> 命令，以便你快速掌握图片处理及PDF操作技巧。以下命令基于 <code>magick</code> 7.1.1-39 版本：</p>
-<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">brew install imagemagick</span><br><span class="line"></span><br><span class="line">magick -version</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="1-图像格式转换"><a href="#1-图像格式转换" class="headerlink" title="1. 图像格式转换"></a>1. 图像格式转换</h3><p>将图像从一种格式转换为另一种格式，适用于支持的多种格式（如 PNG、JPEG、GIF、TIFF 等）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg output.png</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-调整图像大小"><a href="#2-调整图像大小" class="headerlink" title="2. 调整图像大小"></a>2. 调整图像大小</h3><p>按指定比例或像素大小调整图像大小。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -resize 800x600 output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-裁剪图像"><a href="#3-裁剪图像" class="headerlink" title="3. 裁剪图像"></a>3. 裁剪图像</h3><p>裁剪图像为指定大小的区域。例如，裁剪出左上角 200x200 的区域。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -crop 200x200+0+0 output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-旋转图像"><a href="#4-旋转图像" class="headerlink" title="4. 旋转图像"></a>4. 旋转图像</h3><p>顺时针旋转图像 90 度。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -rotate 90 output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="5-添加水印"><a href="#5-添加水印" class="headerlink" title="5. 添加水印"></a>5. 添加水印</h3><p>在图像上添加水印文字（位置在右下角）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -gravity southeast -pointsize 24 -fill white -annotate +10+10 <span class="string">&#x27;Watermark&#x27;</span> output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-调整图像质量"><a href="#6-调整图像质量" class="headerlink" title="6. 调整图像质量"></a>6. 调整图像质量</h3><p>设置图像质量，适用于 JPEG 格式的图片压缩。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -quality 85 output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="7-合并图像（拼接）"><a href="#7-合并图像（拼接）" class="headerlink" title="7. 合并图像（拼接）"></a>7. 合并图像（拼接）</h3><p>水平或垂直拼接多张图像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">magick +append image1.jpg image2.jpg horizontal_output.jpg  <span class="comment"># 水平拼接</span></span><br><span class="line">magick -append image1.jpg image2.jpg vertical_output.jpg    <span class="comment"># 垂直拼接</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="8-添加边框"><a href="#8-添加边框" class="headerlink" title="8. 添加边框"></a>8. 添加边框</h3><p>为图像添加边框。例如，添加一个 5 像素的红色边框。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -bordercolor red -border 5x5 output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="9-转换-PDF-为图像"><a href="#9-转换-PDF-为图像" class="headerlink" title="9. 转换 PDF 为图像"></a>9. 转换 PDF 为图像</h3><p>将 PDF 页面转换为 PNG 格式，指定分辨率（如 300 dpi）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#ImageMagick 在处理 PDF 文件时依赖于 Ghostscript (gs) 来进行 PDF 的渲染和转换</span></span><br><span class="line"><span class="comment">#brew install ghostscript</span></span><br><span class="line"></span><br><span class="line">magick -density 300 -quality 100 original.pdf output_%03d.jpg</span><br><span class="line">参数说明：</span><br><span class="line">• -density 300：设定渲染 DPI（分辨率），300 是高清常用值；</span><br><span class="line">• -quality 100：设定 JPEG 编码质量，范围 1–100，100 为无压缩；</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>如果需要将 PDF 中的每一页保存为单独的 PNG 图像，可以使用如下命令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick -density 300 input.pdf page_%03d.png</span><br></pre></td></tr></table></figure>
-
-<h3 id="10-转换图像为-PDF"><a href="#10-转换图像为-PDF" class="headerlink" title="10. 转换图像为 PDF"></a>10. 转换图像为 PDF</h3><p>将多张图像合并成一个 PDF 文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">magick image1.jpg image2.jpg output.pdf</span><br><span class="line"></span><br><span class="line"><span class="comment">#高质量合成pdf</span></span><br><span class="line">magick -density 300 output_*.jpg -quality 100 final.pdf</span><br><span class="line"></span><br><span class="line"><span class="comment">#多个图片转换</span></span><br><span class="line"><span class="built_in">ls</span> -l | awk <span class="string">&#x27;NR &gt; 1 &#123;print $NF&#125;&#x27;</span> | <span class="built_in">tr</span> <span class="string">&quot;\n&quot;</span> <span class="string">&#x27; &#x27;</span></span><br><span class="line"></span><br><span class="line">magick `<span class="built_in">ls</span> -l | grep jpg | awk <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span> | <span class="built_in">tr</span> <span class="string">&quot;\n&quot;</span> <span class="string">&#x27; &#x27;</span>`  -density 300 -quality 100 output.pdf</span><br><span class="line"></span><br><span class="line"><span class="comment">#按顺序处理组合pdf</span></span><br><span class="line">magick `<span class="built_in">ls</span> -l | grep png | awk <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span> | <span class="built_in">sort</span> -V | <span class="built_in">tr</span> <span class="string">&quot;\n&quot;</span> <span class="string">&#x27; &#x27;</span>`  -density 300 -quality 100 output.pdf</span><br></pre></td></tr></table></figure>
-
-<h3 id="11-批量处理文件"><a href="#11-批量处理文件" class="headerlink" title="11. 批量处理文件"></a>11. 批量处理文件</h3><p>一次性对多个文件进行操作，调整大小为 50%：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick mogrify -resize 50% *.jpg</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注意：<code>mogrify</code> 会直接覆盖原始文件，建议先备份或在不同目录操作。</p>
-</blockquote>
-<h3 id="12-图像格式优化（减小文件大小）"><a href="#12-图像格式优化（减小文件大小）" class="headerlink" title="12. 图像格式优化（减小文件大小）"></a>12. 图像格式优化（减小文件大小）</h3><p>通过移除元数据和设置压缩等级优化图像大小。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -strip -quality 85 output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="13-应用模糊效果"><a href="#13-应用模糊效果" class="headerlink" title="13. 应用模糊效果"></a>13. 应用模糊效果</h3><p>对图像应用模糊效果，可以控制模糊程度。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -blur 0x8 output.jpg  <span class="comment"># 0x8 控制模糊半径和 sigma 值</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="14-翻转和镜像"><a href="#14-翻转和镜像" class="headerlink" title="14. 翻转和镜像"></a>14. 翻转和镜像</h3><p>上下翻转或左右镜像图像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -flip output_flip.jpg        <span class="comment"># 上下翻转</span></span><br><span class="line">magick input.jpg -flop output_flop.jpg        <span class="comment"># 左右镜像</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="15-提取图像信息"><a href="#15-提取图像信息" class="headerlink" title="15. 提取图像信息"></a>15. 提取图像信息</h3><p>查看图像的详细信息，包括尺寸、格式、色彩模式等。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick identify -verbose input.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="16-图像转灰度"><a href="#16-图像转灰度" class="headerlink" title="16. 图像转灰度"></a>16. 图像转灰度</h3><p>将彩色图像转换为灰度。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -colorspace Gray output.jpg</span><br></pre></td></tr></table></figure>
-
-<h3 id="17-添加阴影"><a href="#17-添加阴影" class="headerlink" title="17. 添加阴影"></a>17. 添加阴影</h3><p>为图像添加阴影效果。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick input.jpg -background black -shadow 80x3+5+5 output_with_shadow.png</span><br></pre></td></tr></table></figure>
-
-<h3 id="18-动态GIF操作"><a href="#18-动态GIF操作" class="headerlink" title="18. 动态GIF操作"></a>18. 动态GIF操作</h3><p>创建或分解 GIF 动画。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">magick -delay 20 -loop 0 frame_*.jpg output.gif  <span class="comment"># 创建 GIF，20ms 间隔</span></span><br><span class="line">magick input.gif frame_%03d.png                   <span class="comment"># 将 GIF 分解成多帧 PNG 图像</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="19-将-PDF-分解成多张-PNG（每页一张）"><a href="#19-将-PDF-分解成多张-PNG（每页一张）" class="headerlink" title="19. 将 PDF 分解成多张 PNG（每页一张）"></a>19. 将 PDF 分解成多张 PNG（每页一张）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">magick -density 300 input.pdf output_page_%03d.png</span><br></pre></td></tr></table></figure>
-
-<h3 id="20-从视频中提取帧并生成-GIF"><a href="#20-从视频中提取帧并生成-GIF" class="headerlink" title="20. 从视频中提取帧并生成 GIF"></a>20. 从视频中提取帧并生成 GIF</h3><p>将视频中的帧生成 GIF 动画。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i input.mp4 -r 10 <span class="string">&#x27;frame_%03d.png&#x27;</span>  <span class="comment"># 使用 FFmpeg 提取帧</span></span><br><span class="line">magick -delay 10 frame_*.png output.gif      <span class="comment"># 使用提取帧生成 GIF</span></span><br></pre></td></tr></table></figure>
-
-<p>这些 <code>magick</code> 用法可以满足大多数日常图片和PDF转换的需求。更多高级用法可以查阅 <a target="_blank" rel="noopener" href="https://imagemagick.org/index.php">ImageMagick 官方文档</a> 或 <code>magick</code> 的帮助页面：<code>magick -help</code>。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1419,7 +1476,7 @@ validate</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">169</span>
+          <span class="site-state-item-count">170</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

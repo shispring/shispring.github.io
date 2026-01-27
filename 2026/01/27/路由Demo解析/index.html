@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="时序流程图（Mermaid）  一、“总纲式结论” 跨三层通信的本质是：  IP 地址：端到端不变（逻辑寻址） MAC 地址：逐跳改变（物理转发） ARP：只解决“下一跳是谁”，而不是“最终是谁”    二、拓扑与角色明确拓扑如下（你给的）： 1Host1 — Router A — Router B — Router C — Host2   Host1 的默认网关：Router A Host2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="路由Demo解析">
+<meta property="og:url" content="https://shispring.github.io/2026/01/27/%E8%B7%AF%E7%94%B1Demo%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="时序流程图（Mermaid）  一、“总纲式结论” 跨三层通信的本质是：  IP 地址：端到端不变（逻辑寻址） MAC 地址：逐跳改变（物理转发） ARP：只解决“下一跳是谁”，而不是“最终是谁”    二、拓扑与角色明确拓扑如下（你给的）： 1Host1 — Router A — Router B — Router C — Host2   Host1 的默认网关：Router A Host2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/shispring/picgo/master/route-case.png">
+<meta property="article:published_time" content="2026-01-27T07:34:10.000Z">
+<meta property="article:modified_time" content="2026-01-27T07:38:43.755Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="network">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/shispring/picgo/master/route-case.png">
+
+<link rel="canonical" href="https://shispring.github.io/2026/01/27/%E8%B7%AF%E7%94%B1Demo%E8%A7%A3%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>路由Demo解析 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/%E8%B7%AF%E7%94%B1Demo%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          路由Demo解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-27 15:34:10 / 修改时间：15:38:43" itemprop="dateCreated datePublished" datetime="2026-01-27T15:34:10+08:00">2026-01-27</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <hr>
+<h2 id="时序流程图（Mermaid）"><a href="#时序流程图（Mermaid）" class="headerlink" title="时序流程图（Mermaid）"></a>时序流程图（Mermaid）</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/route-case.png" alt="route-demo" title="route demo"></p>
+<hr>
+<h2 id="一、“总纲式结论”"><a href="#一、“总纲式结论”" class="headerlink" title="一、“总纲式结论”"></a>一、“总纲式结论”</h2><blockquote>
+<p><strong>跨三层通信的本质是：</strong></p>
+<ul>
+<li><strong>IP 地址：端到端不变（逻辑寻址）</strong></li>
+<li><strong>MAC 地址：逐跳改变（物理转发）</strong></li>
+<li><strong>ARP：只解决“下一跳是谁”，而不是“最终是谁”</strong></li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="二、拓扑与角色明确"><a href="#二、拓扑与角色明确" class="headerlink" title="二、拓扑与角色明确"></a>二、拓扑与角色明确</h2><p>拓扑如下（你给的）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Host1 — Router A — Router B — Router C — Host2</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Host1 的默认网关：Router A</li>
+<li>Host2 直连在 Router C 的 LAN 上</li>
+<li>路由器之间都是三层转发</li>
+<li>终端和路由器之间是二层通信</li>
+</ul>
+<hr>
+<h2 id="三、完整路由过程（按步骤拆解）"><a href="#三、完整路由过程（按步骤拆解）" class="headerlink" title="三、完整路由过程（按步骤拆解）"></a>三、完整路由过程（按步骤拆解）</h2><h3 id="阶段-1：Host1-决定“我该把包交给谁”"><a href="#阶段-1：Host1-决定“我该把包交给谁”" class="headerlink" title="阶段 1：Host1 决定“我该把包交给谁”"></a><strong>阶段 1：Host1 决定“我该把包交给谁”</strong></h3><h4 id="Step-1：Host1-判断目的-IP-是否本地"><a href="#Step-1：Host1-判断目的-IP-是否本地" class="headerlink" title="Step 1：Host1 判断目的 IP 是否本地"></a>Step 1：Host1 判断目的 IP 是否本地</h4><ul>
+<li><p>Host1 拿到 <strong>Host2 的 IP</strong></p>
+</li>
+<li><p>用自己的：</p>
+<ul>
+<li>IP</li>
+<li>子网掩码</li>
+</ul>
+</li>
+<li><p>计算后发现：<br><strong>Host2 不在本地子网</strong></p>
+</li>
+</ul>
+<p>👉 结论：<strong>必须交给默认网关（Router A）</strong></p>
+<hr>
+<h4 id="Step-2：Host1-通过-ARP-找默认网关的-MAC"><a href="#Step-2：Host1-通过-ARP-找默认网关的-MAC" class="headerlink" title="Step 2：Host1 通过 ARP 找默认网关的 MAC"></a>Step 2：Host1 通过 ARP 找默认网关的 MAC</h4><ul>
+<li><p>查看 ARP 表：</p>
+<ul>
+<li>有 Router A MAC → 直接用</li>
+<li>没有 → ARP Broadcast</li>
+</ul>
+</li>
+<li><p>得到：</p>
+<ul>
+<li>Router A（LAN 口）的 MAC</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="Step-3：Host1-封装第一个以太网帧"><a href="#Step-3：Host1-封装第一个以太网帧" class="headerlink" title="Step 3：Host1 封装第一个以太网帧"></a>Step 3：Host1 封装第一个以太网帧</h4><p>此时数据包状态是：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Host1 MAC</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Router A（LAN 口）MAC</td>
+</tr>
+</tbody></table>
+<p>👉 <strong>关键点</strong>：<br>Host1 <strong>不知道 Router B &#x2F; C &#x2F; Host2 的 MAC</strong>，也不需要知道。</p>
+<hr>
+<h3 id="阶段-2：Router-A-→-Router-B"><a href="#阶段-2：Router-A-→-Router-B" class="headerlink" title="阶段 2：Router A → Router B"></a><strong>阶段 2：Router A → Router B</strong></h3><h4 id="Step-4：Router-A-收到帧（L2-→-L3）"><a href="#Step-4：Router-A-收到帧（L2-→-L3）" class="headerlink" title="Step 4：Router A 收到帧（L2 → L3）"></a>Step 4：Router A 收到帧（L2 → L3）</h4><p>Router A 做三件事：</p>
+<ol>
+<li><p>看 <strong>目的 MAC</strong> → 是自己 → 收包</p>
+</li>
+<li><p>剥掉二层头，检查 <strong>目的 IP</strong></p>
+</li>
+<li><p>查路由表：</p>
+<ul>
+<li>Host2 不直连</li>
+<li>找到下一跳：<strong>Router B</strong></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4 id="Step-5：Router-A-通过-ARP-找-Router-B-的-MAC"><a href="#Step-5：Router-A-通过-ARP-找-Router-B-的-MAC" class="headerlink" title="Step 5：Router A 通过 ARP 找 Router B 的 MAC"></a>Step 5：Router A 通过 ARP 找 Router B 的 MAC</h4><ul>
+<li><p>ARP 查询：</p>
+<ul>
+<li>IP：Router B（A-B 链路上的 IP）</li>
+<li>得到 Router B 接口 MAC</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="Step-6：Router-A-重新封装帧并转发"><a href="#Step-6：Router-A-重新封装帧并转发" class="headerlink" title="Step 6：Router A 重新封装帧并转发"></a>Step 6：Router A 重新封装帧并转发</h4><p>新的帧：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Router A（发往 B 的接口 MAC）</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Router B（面向 A 的接口 MAC）</td>
+</tr>
+</tbody></table>
+<p>👉 <strong>IP 没变，MAC 换了</strong></p>
+<hr>
+<h3 id="阶段-3：Router-B-→-Router-C（同理）"><a href="#阶段-3：Router-B-→-Router-C（同理）" class="headerlink" title="阶段 3：Router B → Router C（同理）"></a><strong>阶段 3：Router B → Router C（同理）</strong></h3><p>Router B 做的事情和 Router A <strong>完全一样</strong>：</p>
+<ol>
+<li>收到帧（MAC 是自己）</li>
+<li>解封装</li>
+<li>查路由表</li>
+<li>下一跳是 Router C</li>
+<li>ARP 找 Router C MAC</li>
+<li>重新封装并转发</li>
+</ol>
+<p>新的帧：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Router B（面向 C 的接口 MAC）</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Router C（面向 B 的接口 MAC）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="阶段-4：Router-C-→-Host2（最后一跳）"><a href="#阶段-4：Router-C-→-Host2（最后一跳）" class="headerlink" title="阶段 4：Router C → Host2（最后一跳）"></a><strong>阶段 4：Router C → Host2（最后一跳）</strong></h3><h4 id="Step-7：Router-C-发现目的-IP-是本地直连"><a href="#Step-7：Router-C-发现目的-IP-是本地直连" class="headerlink" title="Step 7：Router C 发现目的 IP 是本地直连"></a>Step 7：Router C 发现目的 IP 是本地直连</h4><ul>
+<li><p>查路由表：</p>
+<ul>
+<li>Host2 IP 在本地 LAN</li>
+</ul>
+</li>
+<li><p>不再需要“下一跳路由器”</p>
+</li>
+</ul>
+<hr>
+<h4 id="Step-8：Router-C-ARP-查询-Host2-的-MAC"><a href="#Step-8：Router-C-ARP-查询-Host2-的-MAC" class="headerlink" title="Step 8：Router C ARP 查询 Host2 的 MAC"></a>Step 8：Router C ARP 查询 Host2 的 MAC</h4><ul>
+<li><p>ARP：</p>
+<ul>
+<li>IP：Host2</li>
+<li>得到 Host2 MAC</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="Step-9：Router-C-发送最终帧"><a href="#Step-9：Router-C-发送最终帧" class="headerlink" title="Step 9：Router C 发送最终帧"></a>Step 9：Router C 发送最终帧</h4><p>最终帧：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Router C（LAN 口 MAC）</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Host2 MAC</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="Step-10：交换机（二层）转发"><a href="#Step-10：交换机（二层）转发" class="headerlink" title="Step 10：交换机（二层）转发"></a>Step 10：交换机（二层）转发</h4><ul>
+<li>交换机只看 <strong>Destination MAC</strong></li>
+<li>查 MAC 表</li>
+<li>发给 Host2 所在端口</li>
+</ul>
+<p>👉 Host2 收到数据，<strong>去程完成</strong></p>
+<hr>
+<h2 id="四、一路上哪些东西「一直不变」，哪些「一直在变」"><a href="#四、一路上哪些东西「一直不变」，哪些「一直在变」" class="headerlink" title="四、一路上哪些东西「一直不变」，哪些「一直在变」"></a>四、一路上哪些东西「一直不变」，哪些「一直在变」</h2><h3 id="✅-一直不变的"><a href="#✅-一直不变的" class="headerlink" title="✅ 一直不变的"></a>✅ 一直不变的</h3><ul>
+<li>Source IP：Host1</li>
+<li>Destination IP：Host2</li>
+</ul>
+<h3 id="🔄-每一跳都会变的"><a href="#🔄-每一跳都会变的" class="headerlink" title="🔄 每一跳都会变的"></a>🔄 每一跳都会变的</h3><ul>
+<li>Source MAC</li>
+<li>Destination MAC</li>
+</ul>
+<h3 id="🧠-决策逻辑"><a href="#🧠-决策逻辑" class="headerlink" title="🧠 决策逻辑"></a>🧠 决策逻辑</h3><ul>
+<li><strong>IP 决定“去哪里”</strong></li>
+<li><strong>MAC 决定“下一跳交给谁”</strong></li>
+</ul>
+<hr>
+<h2 id="五、为什么不能“全网-ARP”（你原文最后的点睛）"><a href="#五、为什么不能“全网-ARP”（你原文最后的点睛）" class="headerlink" title="五、为什么不能“全网 ARP”（你原文最后的点睛）"></a>五、为什么不能“全网 ARP”（你原文最后的点睛）</h2><p>如果没有路由器：</p>
+<ul>
+<li>所有设备在一个广播域</li>
+<li>每一次通信都 ARP 全网</li>
+<li>广播风暴</li>
+<li>网络直接瘫痪</li>
+</ul>
+<p>👉 <strong>路由器的核心价值：</strong></p>
+<ul>
+<li>切割广播域</li>
+<li>限制 ARP 的作用范围</li>
+<li>让 Internet 成为可能</li>
+</ul>
+<hr>
+<h2 id="六、一句“工程师级总结”"><a href="#六、一句“工程师级总结”" class="headerlink" title="六、一句“工程师级总结”"></a>六、一句“工程师级总结”</h2><blockquote>
+<p><strong>三层决定方向，二层负责搬运。<br>路由器每一跳只关心：<br>“下一步我该把包交给谁？”</strong></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/network/" rel="tag"><i class="fa fa-tag"></i> network</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/" rel="prev" title="理解CNI及实践操作">
+      <i class="fa fa-chevron-left"></i> 理解CNI及实践操作
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E6%B5%81%E7%A8%8B%E5%9B%BE%EF%BC%88Mermaid%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">时序流程图（Mermaid）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E2%80%9C%E6%80%BB%E7%BA%B2%E5%BC%8F%E7%BB%93%E8%AE%BA%E2%80%9D"><span class="nav-number">2.</span> <span class="nav-text">一、“总纲式结论”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8B%93%E6%89%91%E4%B8%8E%E8%A7%92%E8%89%B2%E6%98%8E%E7%A1%AE"><span class="nav-number">3.</span> <span class="nav-text">二、拓扑与角色明确</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AE%8C%E6%95%B4%E8%B7%AF%E7%94%B1%E8%BF%87%E7%A8%8B%EF%BC%88%E6%8C%89%E6%AD%A5%E9%AA%A4%E6%8B%86%E8%A7%A3%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">三、完整路由过程（按步骤拆解）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5-1%EF%BC%9AHost1-%E5%86%B3%E5%AE%9A%E2%80%9C%E6%88%91%E8%AF%A5%E6%8A%8A%E5%8C%85%E4%BA%A4%E7%BB%99%E8%B0%81%E2%80%9D"><span class="nav-number">4.1.</span> <span class="nav-text">阶段 1：Host1 决定“我该把包交给谁”</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-1%EF%BC%9AHost1-%E5%88%A4%E6%96%AD%E7%9B%AE%E7%9A%84-IP-%E6%98%AF%E5%90%A6%E6%9C%AC%E5%9C%B0"><span class="nav-number">4.1.1.</span> <span class="nav-text">Step 1：Host1 判断目的 IP 是否本地</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-2%EF%BC%9AHost1-%E9%80%9A%E8%BF%87-ARP-%E6%89%BE%E9%BB%98%E8%AE%A4%E7%BD%91%E5%85%B3%E7%9A%84-MAC"><span class="nav-number">4.1.2.</span> <span class="nav-text">Step 2：Host1 通过 ARP 找默认网关的 MAC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-3%EF%BC%9AHost1-%E5%B0%81%E8%A3%85%E7%AC%AC%E4%B8%80%E4%B8%AA%E4%BB%A5%E5%A4%AA%E7%BD%91%E5%B8%A7"><span class="nav-number">4.1.3.</span> <span class="nav-text">Step 3：Host1 封装第一个以太网帧</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5-2%EF%BC%9ARouter-A-%E2%86%92-Router-B"><span class="nav-number">4.2.</span> <span class="nav-text">阶段 2：Router A → Router B</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4%EF%BC%9ARouter-A-%E6%94%B6%E5%88%B0%E5%B8%A7%EF%BC%88L2-%E2%86%92-L3%EF%BC%89"><span class="nav-number">4.2.1.</span> <span class="nav-text">Step 4：Router A 收到帧（L2 → L3）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-5%EF%BC%9ARouter-A-%E9%80%9A%E8%BF%87-ARP-%E6%89%BE-Router-B-%E7%9A%84-MAC"><span class="nav-number">4.2.2.</span> <span class="nav-text">Step 5：Router A 通过 ARP 找 Router B 的 MAC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-6%EF%BC%9ARouter-A-%E9%87%8D%E6%96%B0%E5%B0%81%E8%A3%85%E5%B8%A7%E5%B9%B6%E8%BD%AC%E5%8F%91"><span class="nav-number">4.2.3.</span> <span class="nav-text">Step 6：Router A 重新封装帧并转发</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5-3%EF%BC%9ARouter-B-%E2%86%92-Router-C%EF%BC%88%E5%90%8C%E7%90%86%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">阶段 3：Router B → Router C（同理）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5-4%EF%BC%9ARouter-C-%E2%86%92-Host2%EF%BC%88%E6%9C%80%E5%90%8E%E4%B8%80%E8%B7%B3%EF%BC%89"><span class="nav-number">4.4.</span> <span class="nav-text">阶段 4：Router C → Host2（最后一跳）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-7%EF%BC%9ARouter-C-%E5%8F%91%E7%8E%B0%E7%9B%AE%E7%9A%84-IP-%E6%98%AF%E6%9C%AC%E5%9C%B0%E7%9B%B4%E8%BF%9E"><span class="nav-number">4.4.1.</span> <span class="nav-text">Step 7：Router C 发现目的 IP 是本地直连</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-8%EF%BC%9ARouter-C-ARP-%E6%9F%A5%E8%AF%A2-Host2-%E7%9A%84-MAC"><span class="nav-number">4.4.2.</span> <span class="nav-text">Step 8：Router C ARP 查询 Host2 的 MAC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-9%EF%BC%9ARouter-C-%E5%8F%91%E9%80%81%E6%9C%80%E7%BB%88%E5%B8%A7"><span class="nav-number">4.4.3.</span> <span class="nav-text">Step 9：Router C 发送最终帧</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-10%EF%BC%9A%E4%BA%A4%E6%8D%A2%E6%9C%BA%EF%BC%88%E4%BA%8C%E5%B1%82%EF%BC%89%E8%BD%AC%E5%8F%91"><span class="nav-number">4.4.4.</span> <span class="nav-text">Step 10：交换机（二层）转发</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%B8%80%E8%B7%AF%E4%B8%8A%E5%93%AA%E4%BA%9B%E4%B8%9C%E8%A5%BF%E3%80%8C%E4%B8%80%E7%9B%B4%E4%B8%8D%E5%8F%98%E3%80%8D%EF%BC%8C%E5%93%AA%E4%BA%9B%E3%80%8C%E4%B8%80%E7%9B%B4%E5%9C%A8%E5%8F%98%E3%80%8D"><span class="nav-number">5.</span> <span class="nav-text">四、一路上哪些东西「一直不变」，哪些「一直在变」</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9C%85-%E4%B8%80%E7%9B%B4%E4%B8%8D%E5%8F%98%E7%9A%84"><span class="nav-number">5.1.</span> <span class="nav-text">✅ 一直不变的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%84-%E6%AF%8F%E4%B8%80%E8%B7%B3%E9%83%BD%E4%BC%9A%E5%8F%98%E7%9A%84"><span class="nav-number">5.2.</span> <span class="nav-text">🔄 每一跳都会变的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%A7%A0-%E5%86%B3%E7%AD%96%E9%80%BB%E8%BE%91"><span class="nav-number">5.3.</span> <span class="nav-text">🧠 决策逻辑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E2%80%9C%E5%85%A8%E7%BD%91-ARP%E2%80%9D%EF%BC%88%E4%BD%A0%E5%8E%9F%E6%96%87%E6%9C%80%E5%90%8E%E7%9A%84%E7%82%B9%E7%9D%9B%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">五、为什么不能“全网 ARP”（你原文最后的点睛）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%B8%80%E5%8F%A5%E2%80%9C%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%BA%A7%E6%80%BB%E7%BB%93%E2%80%9D"><span class="nav-number">7.</span> <span class="nav-text">六、一句“工程师级总结”</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">170</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

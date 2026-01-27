@@ -14382,4 +14382,256 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>k8s</tag>
       </tags>
   </entry>
+  <entry>
+    <title>路由Demo解析</title>
+    <url>/2026/01/27/%E8%B7%AF%E7%94%B1Demo%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<hr>
+<h2 id="时序流程图（Mermaid）"><a href="#时序流程图（Mermaid）" class="headerlink" title="时序流程图（Mermaid）"></a>时序流程图（Mermaid）</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/route-case.png" alt="route-demo" title="route demo"></p>
+<hr>
+<h2 id="一、“总纲式结论”"><a href="#一、“总纲式结论”" class="headerlink" title="一、“总纲式结论”"></a>一、“总纲式结论”</h2><blockquote>
+<p><strong>跨三层通信的本质是：</strong></p>
+<ul>
+<li><strong>IP 地址：端到端不变（逻辑寻址）</strong></li>
+<li><strong>MAC 地址：逐跳改变（物理转发）</strong></li>
+<li><strong>ARP：只解决“下一跳是谁”，而不是“最终是谁”</strong></li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="二、拓扑与角色明确"><a href="#二、拓扑与角色明确" class="headerlink" title="二、拓扑与角色明确"></a>二、拓扑与角色明确</h2><p>拓扑如下（你给的）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host1 — Router A — Router B — Router C — Host2</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Host1 的默认网关：Router A</li>
+<li>Host2 直连在 Router C 的 LAN 上</li>
+<li>路由器之间都是三层转发</li>
+<li>终端和路由器之间是二层通信</li>
+</ul>
+<hr>
+<h2 id="三、完整路由过程（按步骤拆解）"><a href="#三、完整路由过程（按步骤拆解）" class="headerlink" title="三、完整路由过程（按步骤拆解）"></a>三、完整路由过程（按步骤拆解）</h2><h3 id="阶段-1：Host1-决定“我该把包交给谁”"><a href="#阶段-1：Host1-决定“我该把包交给谁”" class="headerlink" title="阶段 1：Host1 决定“我该把包交给谁”"></a><strong>阶段 1：Host1 决定“我该把包交给谁”</strong></h3><h4 id="Step-1：Host1-判断目的-IP-是否本地"><a href="#Step-1：Host1-判断目的-IP-是否本地" class="headerlink" title="Step 1：Host1 判断目的 IP 是否本地"></a>Step 1：Host1 判断目的 IP 是否本地</h4><ul>
+<li><p>Host1 拿到 <strong>Host2 的 IP</strong></p>
+</li>
+<li><p>用自己的：</p>
+<ul>
+<li>IP</li>
+<li>子网掩码</li>
+</ul>
+</li>
+<li><p>计算后发现：<br><strong>Host2 不在本地子网</strong></p>
+</li>
+</ul>
+<p>👉 结论：<strong>必须交给默认网关（Router A）</strong></p>
+<hr>
+<h4 id="Step-2：Host1-通过-ARP-找默认网关的-MAC"><a href="#Step-2：Host1-通过-ARP-找默认网关的-MAC" class="headerlink" title="Step 2：Host1 通过 ARP 找默认网关的 MAC"></a>Step 2：Host1 通过 ARP 找默认网关的 MAC</h4><ul>
+<li><p>查看 ARP 表：</p>
+<ul>
+<li>有 Router A MAC → 直接用</li>
+<li>没有 → ARP Broadcast</li>
+</ul>
+</li>
+<li><p>得到：</p>
+<ul>
+<li>Router A（LAN 口）的 MAC</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="Step-3：Host1-封装第一个以太网帧"><a href="#Step-3：Host1-封装第一个以太网帧" class="headerlink" title="Step 3：Host1 封装第一个以太网帧"></a>Step 3：Host1 封装第一个以太网帧</h4><p>此时数据包状态是：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Host1 MAC</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Router A（LAN 口）MAC</td>
+</tr>
+</tbody></table>
+<p>👉 <strong>关键点</strong>：<br>Host1 <strong>不知道 Router B &#x2F; C &#x2F; Host2 的 MAC</strong>，也不需要知道。</p>
+<hr>
+<h3 id="阶段-2：Router-A-→-Router-B"><a href="#阶段-2：Router-A-→-Router-B" class="headerlink" title="阶段 2：Router A → Router B"></a><strong>阶段 2：Router A → Router B</strong></h3><h4 id="Step-4：Router-A-收到帧（L2-→-L3）"><a href="#Step-4：Router-A-收到帧（L2-→-L3）" class="headerlink" title="Step 4：Router A 收到帧（L2 → L3）"></a>Step 4：Router A 收到帧（L2 → L3）</h4><p>Router A 做三件事：</p>
+<ol>
+<li><p>看 <strong>目的 MAC</strong> → 是自己 → 收包</p>
+</li>
+<li><p>剥掉二层头，检查 <strong>目的 IP</strong></p>
+</li>
+<li><p>查路由表：</p>
+<ul>
+<li>Host2 不直连</li>
+<li>找到下一跳：<strong>Router B</strong></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4 id="Step-5：Router-A-通过-ARP-找-Router-B-的-MAC"><a href="#Step-5：Router-A-通过-ARP-找-Router-B-的-MAC" class="headerlink" title="Step 5：Router A 通过 ARP 找 Router B 的 MAC"></a>Step 5：Router A 通过 ARP 找 Router B 的 MAC</h4><ul>
+<li><p>ARP 查询：</p>
+<ul>
+<li>IP：Router B（A-B 链路上的 IP）</li>
+<li>得到 Router B 接口 MAC</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="Step-6：Router-A-重新封装帧并转发"><a href="#Step-6：Router-A-重新封装帧并转发" class="headerlink" title="Step 6：Router A 重新封装帧并转发"></a>Step 6：Router A 重新封装帧并转发</h4><p>新的帧：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Router A（发往 B 的接口 MAC）</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Router B（面向 A 的接口 MAC）</td>
+</tr>
+</tbody></table>
+<p>👉 <strong>IP 没变，MAC 换了</strong></p>
+<hr>
+<h3 id="阶段-3：Router-B-→-Router-C（同理）"><a href="#阶段-3：Router-B-→-Router-C（同理）" class="headerlink" title="阶段 3：Router B → Router C（同理）"></a><strong>阶段 3：Router B → Router C（同理）</strong></h3><p>Router B 做的事情和 Router A <strong>完全一样</strong>：</p>
+<ol>
+<li>收到帧（MAC 是自己）</li>
+<li>解封装</li>
+<li>查路由表</li>
+<li>下一跳是 Router C</li>
+<li>ARP 找 Router C MAC</li>
+<li>重新封装并转发</li>
+</ol>
+<p>新的帧：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Router B（面向 C 的接口 MAC）</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Router C（面向 B 的接口 MAC）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="阶段-4：Router-C-→-Host2（最后一跳）"><a href="#阶段-4：Router-C-→-Host2（最后一跳）" class="headerlink" title="阶段 4：Router C → Host2（最后一跳）"></a><strong>阶段 4：Router C → Host2（最后一跳）</strong></h3><h4 id="Step-7：Router-C-发现目的-IP-是本地直连"><a href="#Step-7：Router-C-发现目的-IP-是本地直连" class="headerlink" title="Step 7：Router C 发现目的 IP 是本地直连"></a>Step 7：Router C 发现目的 IP 是本地直连</h4><ul>
+<li><p>查路由表：</p>
+<ul>
+<li>Host2 IP 在本地 LAN</li>
+</ul>
+</li>
+<li><p>不再需要“下一跳路由器”</p>
+</li>
+</ul>
+<hr>
+<h4 id="Step-8：Router-C-ARP-查询-Host2-的-MAC"><a href="#Step-8：Router-C-ARP-查询-Host2-的-MAC" class="headerlink" title="Step 8：Router C ARP 查询 Host2 的 MAC"></a>Step 8：Router C ARP 查询 Host2 的 MAC</h4><ul>
+<li><p>ARP：</p>
+<ul>
+<li>IP：Host2</li>
+<li>得到 Host2 MAC</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="Step-9：Router-C-发送最终帧"><a href="#Step-9：Router-C-发送最终帧" class="headerlink" title="Step 9：Router C 发送最终帧"></a>Step 9：Router C 发送最终帧</h4><p>最终帧：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Source IP</td>
+<td>Host1 IP</td>
+</tr>
+<tr>
+<td>Dest IP</td>
+<td>Host2 IP</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>Router C（LAN 口 MAC）</td>
+</tr>
+<tr>
+<td>Dest MAC</td>
+<td>Host2 MAC</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="Step-10：交换机（二层）转发"><a href="#Step-10：交换机（二层）转发" class="headerlink" title="Step 10：交换机（二层）转发"></a>Step 10：交换机（二层）转发</h4><ul>
+<li>交换机只看 <strong>Destination MAC</strong></li>
+<li>查 MAC 表</li>
+<li>发给 Host2 所在端口</li>
+</ul>
+<p>👉 Host2 收到数据，<strong>去程完成</strong></p>
+<hr>
+<h2 id="四、一路上哪些东西「一直不变」，哪些「一直在变」"><a href="#四、一路上哪些东西「一直不变」，哪些「一直在变」" class="headerlink" title="四、一路上哪些东西「一直不变」，哪些「一直在变」"></a>四、一路上哪些东西「一直不变」，哪些「一直在变」</h2><h3 id="✅-一直不变的"><a href="#✅-一直不变的" class="headerlink" title="✅ 一直不变的"></a>✅ 一直不变的</h3><ul>
+<li>Source IP：Host1</li>
+<li>Destination IP：Host2</li>
+</ul>
+<h3 id="🔄-每一跳都会变的"><a href="#🔄-每一跳都会变的" class="headerlink" title="🔄 每一跳都会变的"></a>🔄 每一跳都会变的</h3><ul>
+<li>Source MAC</li>
+<li>Destination MAC</li>
+</ul>
+<h3 id="🧠-决策逻辑"><a href="#🧠-决策逻辑" class="headerlink" title="🧠 决策逻辑"></a>🧠 决策逻辑</h3><ul>
+<li><strong>IP 决定“去哪里”</strong></li>
+<li><strong>MAC 决定“下一跳交给谁”</strong></li>
+</ul>
+<hr>
+<h2 id="五、为什么不能“全网-ARP”（你原文最后的点睛）"><a href="#五、为什么不能“全网-ARP”（你原文最后的点睛）" class="headerlink" title="五、为什么不能“全网 ARP”（你原文最后的点睛）"></a>五、为什么不能“全网 ARP”（你原文最后的点睛）</h2><p>如果没有路由器：</p>
+<ul>
+<li>所有设备在一个广播域</li>
+<li>每一次通信都 ARP 全网</li>
+<li>广播风暴</li>
+<li>网络直接瘫痪</li>
+</ul>
+<p>👉 <strong>路由器的核心价值：</strong></p>
+<ul>
+<li>切割广播域</li>
+<li>限制 ARP 的作用范围</li>
+<li>让 Internet 成为可能</li>
+</ul>
+<hr>
+<h2 id="六、一句“工程师级总结”"><a href="#六、一句“工程师级总结”" class="headerlink" title="六、一句“工程师级总结”"></a>六、一句“工程师级总结”</h2><blockquote>
+<p><strong>三层决定方向，二层负责搬运。<br>路由器每一跳只关心：<br>“下一步我该把包交给谁？”</strong></p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
 </search>
