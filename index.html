@@ -184,6 +184,77 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/ip%E7%9A%84%E4%B8%80%E4%BA%9B%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/27/ip%E7%9A%84%E4%B8%80%E4%BA%9B%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4/" class="post-title-link" itemprop="url">Linux网络统计、性能工具/命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-27 15:53:50 / 修改时间：16:21:41" itemprop="dateCreated datePublished" datetime="2026-01-27T15:53:50+08:00">2026-01-27</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="网络统计"><a href="#网络统计" class="headerlink" title="网络统计"></a>网络统计</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">iproute2 用法</span><br><span class="line"># 列出所有 veth 设备</span><br><span class="line">ip -c link show type veth</span><br><span class="line"># 列出所有 tunnel 设备</span><br><span class="line">ip tunnel show</span><br></pre></td></tr></table></figure>
+<h2 id="网络统计工具"><a href="#网络统计工具" class="headerlink" title="网络统计工具"></a>网络统计工具</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">nstat 命令：网络统计工具</span><br><span class="line"># nstat</span><br><span class="line"></span><br><span class="line">ss 命令：用于调查套接字的实用程序</span><br><span class="line"># ss -s</span><br><span class="line"></span><br><span class="line">netstat 命令：显示套接字的经典实用工具</span><br><span class="line"># netstat -i</span><br><span class="line"></span><br><span class="line"># netstat -s</span><br><span class="line"></span><br><span class="line">ip/ifconfig 命令：配置或显示网络接口信息</span><br><span class="line"># ifconfig</span><br><span class="line"></span><br><span class="line"># ifconfig eth0</span><br><span class="line"></span><br><span class="line">要显示网络接口统计信息</span><br><span class="line"># ip -c -s link</span><br><span class="line"></span><br><span class="line">sar 命令：显示网络统计信息</span><br><span class="line"># sar -n DEV 1</span><br><span class="line"></span><br><span class="line">每秒1次，统计三次</span><br><span class="line"># sar -n DEV 1 3</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">使用 dropwatch（Kernel dropped packet monitor） 可以监测内核丢包信息 ，执行以下命令，然后输入 start</span><br><span class="line"># dropwatch -l kas</span><br><span class="line">Initalizing kallsyms db</span><br><span class="line">dropwatch&gt; start    </span><br><span class="line">xxx</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="网络性能测试"><a href="#网络性能测试" class="headerlink" title="网络性能测试"></a>网络性能测试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 使用 iperf3 进行性能测试</span><br><span class="line"># 启动服务端 -s 意思是服务端</span><br><span class="line">iperf3 -s </span><br><span class="line"># 后台进程方式启动服务端，-D 意思是 Daemon 进程启动</span><br><span class="line">iperf3 -s -D</span><br><span class="line"># 在客户端执行 TCP 测试， -c 指的是客户端，-b 目标带宽（一般与网卡带宽相匹配），-n 发送字节数</span><br><span class="line">iperf3 -c 10.10.140.95 -b 10000M -n 10G</span><br><span class="line"># 执行 UDP 测试，-u 使用 UDP 协议，-l 指定数据包大小，这里指定的是 TCP 或 UDP 数据部分的大小为 1400</span><br><span class="line"># 实际发送时的 MAC 帧长会是 1454 ，包括：</span><br><span class="line"># 26 个字节的 MAC 帧头：7 个字节的前导码，1 个字节的帧起始符，6 字节目的 MAC ，6 字节源 MAC ，2 字节帧长度，以及位于帧末尾的 4 字节 CRC 校验和</span><br><span class="line"># 20 字节的 IP 头部</span><br><span class="line"># 8 字节 UDP 头部</span><br><span class="line">iperf3 -u -c 10.10.140.95 -b 10000M -n 10G -l1400</span><br><span class="line"># 由于 iperf3 只显示带宽，可以借助 sar 查看包量</span><br><span class="line"># sar 工具包含在 sysstat 中</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="网络性能调优"><a href="#网络性能调优" class="headerlink" title="网络性能调优"></a>网络性能调优</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"># 1、网卡收发数据处理速度成为瓶颈时， 设置 CPU 亲和性（ irqbalance 的自动负载均衡很多时候不好用） 将中断处理分发到不同的 CPU 上，避免集中在一个 CPU 上</span><br><span class="line"># 找到底层设备</span><br><span class="line">readlink -e /sys/class/net/eth0/</span><br><span class="line">/sys/devices/pci0000:17/0000:17:00.0/0000:18:00.0/0000:19:03.0/0000:1a:00.0/net/eth0</span><br><span class="line"></span><br><span class="line">#2、当缓冲区大小成为瓶颈时，可调整内核参数进行优化</span><br><span class="line"># 该参数决定了，网络设备接收数据包的速率比内核处理这些包的速率快时，允许送到队列的数据包的最大数目。</span><br><span class="line">net.core.netdev_max_backlog = 400000</span><br><span class="line"># 该参数指定了每个套接字所允许的最大缓冲区的大小</span><br><span class="line">net.core.optmem_max = 10000000</span><br><span class="line"># 指定了接收套接字缓冲区大小的缺省值（以字节为单位）</span><br><span class="line">net.core.rmem_default = 16777216</span><br><span class="line"># 指定了接收套接字缓冲区大小的最大值（以字节为单位）</span><br><span class="line">net.core.rmem_max = 16777216</span><br><span class="line"># 表示socket监听的backlog(监听队列)上限</span><br><span class="line">net.core.somaxconn = 100000</span><br><span class="line"># 定义默认的发送窗口大小</span><br><span class="line">net.core.wmem_default = 16777216</span><br><span class="line"># 定义发送窗口的最大大小</span><br><span class="line">net.core.wmem_max = 16777216</span><br><span class="line"># 确定 TCP 栈应该如何反映内存使用；每个值的单位都是内存页（通常是 4KB）。</span><br><span class="line"># 第一个值是内存使用的下限。</span><br><span class="line"># 第二个值是内存压力模式开始对缓冲区使用应用压力的上限。</span><br><span class="line"># 第三个值是内存上限。在这个层次上可以将报文丢弃，从而减少对内存的使用。</span><br><span class="line">net.ipv4.tcp_mem=91650	122203	183300</span><br><span class="line"># 为自动调优定义每个 socket 使用的内存。</span><br><span class="line"># 第一个值是为 socket 的发送缓冲区分配的最少字节数。</span><br><span class="line"># 第二个值是默认值（该值会被 wmem_default 覆盖），缓冲区在系统负载不重的情况下可以增长到这个值。</span><br><span class="line"># 第三个值是发送缓冲区空间的最大字节数（该值会被 wmem_max 覆盖）。</span><br><span class="line">net.ipv4.tcp_wmem=4096 16384 16777216</span><br><span class="line">net.ipv4.tcp_rmem=4096 131072 16777216</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="网络栈的监控"><a href="#网络栈的监控" class="headerlink" title="网络栈的监控"></a>网络栈的监控</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://arthurchiao.art/blog/monitoring-network-stack/">https://arthurchiao.art/blog/monitoring-network-stack/</a></p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.xiayinchang.top/post/cf4d6f51.html">https://www.xiayinchang.top/post/cf4d6f51.html</a></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/%E8%B7%AF%E7%94%B1Demo%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1595,126 +1666,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/12/19/irqbalance%E8%A7%A3%E9%87%8A%E5%8F%8A%E7%BB%91%E6%A0%B8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/12/19/irqbalance%E8%A7%A3%E9%87%8A%E5%8F%8A%E7%BB%91%E6%A0%B8/" class="post-title-link" itemprop="url">irqbalance解释及绑核</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-12-19 15:30:29 / 修改时间：18:32:06" itemprop="dateCreated datePublished" datetime="2025-12-19T15:30:29+08:00">2025-12-19</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="IRQBALANCE-BANNED-CPUS-掩码含义详解"><a href="#IRQBALANCE-BANNED-CPUS-掩码含义详解" class="headerlink" title="IRQBALANCE_BANNED_CPUS 掩码含义详解"></a>IRQBALANCE_BANNED_CPUS 掩码含义详解</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p><code>IRQBALANCE_BANNED_CPUS</code> 是 IRQ Balance 服务的配置参数，用于指定<strong>禁止</strong>IRQ Balance 自动分配中断的 CPU 核心。</p>
-<h2 id="位值含义"><a href="#位值含义" class="headerlink" title="位值含义"></a>位值含义</h2><h3 id="关键理解："><a href="#关键理解：" class="headerlink" title="关键理解："></a>关键理解：</h3><ul>
-<li><strong>0 bit &#x3D; 允许使用</strong> - IRQ Balance 可以将中断分配到这个 CPU</li>
-<li><strong>1 bit &#x3D; 禁止使用</strong> - IRQ Balance 不会将中断分配到这个 CPU</li>
-</ul>
-<h3 id="示例说明"><a href="#示例说明" class="headerlink" title="示例说明"></a>示例说明</h3><p>假设一个 8 核系统 (CPU 0-7)：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CPU 编号:    7  6  5  4  3  2  1  0</span><br><span class="line">掩码位值:    0  1  0  0  1  1  0  0</span><br><span class="line">含义:       允 禁 允 允 禁 禁 允 允</span><br></pre></td></tr></table></figure>
-
-<p>转换为十六进制: <code>4c</code></p>
-<p><strong>这意味着：</strong></p>
-<ul>
-<li>CPU 0,1,4,5,7 - 允许 IRQ Balance 分配中断 (bit&#x3D;0)</li>
-<li>CPU 2,3,6 - 禁止 IRQ Balance 分配中断 (bit&#x3D;1)</li>
-</ul>
-<h2 id="实际应用场景"><a href="#实际应用场景" class="headerlink" title="实际应用场景"></a>实际应用场景</h2><h3 id="1-网卡中断优化"><a href="#1-网卡中断优化" class="headerlink" title="1. 网卡中断优化"></a>1. 网卡中断优化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 场景：将网卡中断绑定到特定CPU，其他CPU用于应用程序</span></span><br><span class="line"><span class="comment"># 假设要将 eth0 的中断只允许在 CPU 0,1 上处理</span></span><br><span class="line"></span><br><span class="line">CPU:     7  6  5  4  3  2  1  0</span><br><span class="line">期望:    禁 禁 禁 禁 禁 禁 允 允  </span><br><span class="line">掩码:    1  1  1  1  1  1  0  0</span><br><span class="line">结果: <span class="built_in">fc</span> (11111100)</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-NUMA-优化"><a href="#2-NUMA-优化" class="headerlink" title="2. NUMA 优化"></a>2. NUMA 优化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 场景：网卡在 NUMA node 0，只允许 node 0 的 CPU 处理网卡中断</span></span><br><span class="line"><span class="comment"># 假设 CPU 0-3 属于 node 0，CPU 4-7 属于 node 1</span></span><br><span class="line"></span><br><span class="line">CPU:     7  6  5  4  3  2  1  0</span><br><span class="line">NUMA:    1  1  1  1  0  0  0  0</span><br><span class="line">掩码:    1  1  1  1  0  0  0  0  (禁用 node 1 的 CPU)</span><br><span class="line">结果: f0 (11110000)</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-应用程序-CPU-隔离"><a href="#3-应用程序-CPU-隔离" class="headerlink" title="3. 应用程序 CPU 隔离"></a>3. 应用程序 CPU 隔离</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 场景：保留 CPU 4-7 专门给关键应用程序使用</span></span><br><span class="line"></span><br><span class="line">CPU:     7  6  5  4  3  2  1  0</span><br><span class="line">保留:    保 保 保 保 共 共 共 共</span><br><span class="line">掩码:    1  1  1  1  0  0  0  0  (禁用保留的 CPU)</span><br><span class="line">结果: f0 (11110000)</span><br></pre></td></tr></table></figure>
-
-<h2 id="我们脚本中的逻辑"><a href="#我们脚本中的逻辑" class="headerlink" title="我们脚本中的逻辑"></a>我们脚本中的逻辑</h2><p>在优化后的 <code>irqbalance.sh</code> 脚本中：</p>
-<h3 id="脚本目标"><a href="#脚本目标" class="headerlink" title="脚本目标"></a>脚本目标</h3><ul>
-<li>根据网卡所在的 NUMA 节点，选择一部分 CPU 核心专门处理网卡中断</li>
-<li>将其余 CPU 核心标记为”禁止”，让它们专注于应用程序处理</li>
-</ul>
-<h3 id="处理流程"><a href="#处理流程" class="headerlink" title="处理流程"></a>处理流程</h3><ol>
-<li><strong>获取允许的 CPU</strong> (ALLOWED_CPUS) - 网卡可以使用的 CPU</li>
-<li><strong>计算禁止的 CPU</strong> (BANNED_CPUS) - 其余所有 CPU</li>
-<li><strong>生成掩码</strong> - 将 BANNED_CPUS 对应的位设置为 1</li>
-</ol>
-<h3 id="实际效果"><a href="#实际效果" class="headerlink" title="实际效果"></a>实际效果</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设网卡在 NUMA node 0，该节点有 CPU 0-15</span></span><br><span class="line"><span class="comment"># 脚本选择了 20% 的核心 (CPU 0-3) 给网卡使用</span></span><br><span class="line"><span class="comment"># 其余核心 (CPU 4-15) 被禁用</span></span><br><span class="line"></span><br><span class="line">ALLOWED_CPUS: 0 1 2 3        <span class="comment"># bit = 0，允许中断分配</span></span><br><span class="line">BANNED_CPUS:  4 5 6 7 8 9 10 11 12 13 14 15  <span class="comment"># bit = 1，禁止中断分配</span></span><br><span class="line"></span><br><span class="line">最终掩码: 0000fff0 (假设 16 核系统)</span><br></pre></td></tr></table></figure>
-
-<h2 id="验证方法"><a href="#验证方法" class="headerlink" title="验证方法"></a>验证方法</h2><h3 id="1-查看当前配置"><a href="#1-查看当前配置" class="headerlink" title="1. 查看当前配置"></a>1. 查看当前配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/sysconfig/irqbalance</span><br><span class="line"><span class="comment"># 输出: IRQBALANCE_BANNED_CPUS=0000fff0</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-理解掩码含义"><a href="#2-理解掩码含义" class="headerlink" title="2. 理解掩码含义"></a>2. 理解掩码含义</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将十六进制转换为二进制查看</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;obase=2; ibase=16; 0000FFF0&quot;</span> | bc</span><br><span class="line"><span class="comment"># 输出: 1111111111110000</span></span><br><span class="line"><span class="comment"># 含义: CPU 0-3 允许(0)，CPU 4-15 禁止(1)</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-验证中断分布"><a href="#3-验证中断分布" class="headerlink" title="3. 验证中断分布"></a>3. 验证中断分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看网卡中断分布</span></span><br><span class="line"><span class="built_in">cat</span> /proc/interrupts | grep eth0</span><br><span class="line"><span class="comment"># 应该只在 CPU 0-3 上看到中断计数增长</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="常见误区"><a href="#常见误区" class="headerlink" title="常见误区"></a>常见误区</h2><h3 id="❌-错误理解"><a href="#❌-错误理解" class="headerlink" title="❌ 错误理解"></a>❌ 错误理解</h3><p>“1 表示允许使用，0 表示禁止使用”</p>
-<h3 id="✅-正确理解"><a href="#✅-正确理解" class="headerlink" title="✅ 正确理解"></a>✅ 正确理解</h3><p>“0 表示允许使用，1 表示禁止使用”</p>
-<h3 id="记忆技巧"><a href="#记忆技巧" class="headerlink" title="记忆技巧"></a>记忆技巧</h3><ul>
-<li><strong>BAN</strong>NED &#x3D; <strong>1</strong> (禁止)</li>
-<li><strong>ALLOW</strong>ED &#x3D; <strong>0</strong> (允许)</li>
-</ul>
-<h2 id="配置示例"><a href="#配置示例" class="headerlink" title="配置示例"></a>配置示例</h2><h3 id="小型系统-8-核"><a href="#小型系统-8-核" class="headerlink" title="小型系统 (8 核)"></a>小型系统 (8 核)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只允许 CPU 0,1 处理中断</span></span><br><span class="line">IRQBALANCE_BANNED_CPUS=<span class="built_in">fc</span>  <span class="comment"># 11111100</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 只允许 CPU 0-3 处理中断  </span></span><br><span class="line">IRQBALANCE_BANNED_CPUS=f0  <span class="comment"># 11110000</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="大型系统-64-核"><a href="#大型系统-64-核" class="headerlink" title="大型系统 (64 核)"></a>大型系统 (64 核)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只允许前 8 个 CPU (0-7) 处理中断</span></span><br><span class="line"><span class="comment"># 低32位: 只有前8位为0，其余为1 = ffffff00</span></span><br><span class="line"><span class="comment"># 高32位: 全部为1 = ffffffff</span></span><br><span class="line">IRQBALANCE_BANNED_CPUS=ffffffff,ffffff00</span><br></pre></td></tr></table></figure>
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li><code>IRQBALANCE_BANNED_CPUS</code> 是一个<strong>禁用掩码</strong></li>
-<li>每个 bit 对应一个 CPU：<strong>0&#x3D;允许，1&#x3D;禁止</strong></li>
-<li>目的是控制 IRQ Balance 的中断分配策略</li>
-<li>合理配置可以优化 NUMA 亲和性和 CPU 隔离</li>
-</ul>
-<hr>
-<h2 id="验证掩码"><a href="#验证掩码" class="headerlink" title="验证掩码"></a>验证掩码</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 验证 ffffffff,fcfffffc</span></span><br><span class="line">python3 -c <span class="string">&quot;</span></span><br><span class="line"><span class="string">mask = &#x27;ffffffff,fcfffffc&#x27;</span></span><br><span class="line"><span class="string">groups = mask.split(&#x27;,&#x27;)</span></span><br><span class="line"><span class="string">allowed = []</span></span><br><span class="line"><span class="string">for i, group in enumerate(reversed(groups)):</span></span><br><span class="line"><span class="string">    val = int(group, 16)</span></span><br><span class="line"><span class="string">    for bit in range(32):</span></span><br><span class="line"><span class="string">        cpu = i * 32 + bit</span></span><br><span class="line"><span class="string">        if not (val &amp; (1 &lt;&lt; bit)):  # bit为0表示允许</span></span><br><span class="line"><span class="string">            allowed.append(cpu)</span></span><br><span class="line"><span class="string">print(&#x27;允许的CPU:&#x27;, sorted(allowed))</span></span><br><span class="line"><span class="string">&quot;</span></span><br><span class="line"><span class="comment"># 输出: 允许的CPU: [0, 1, 24, 25]</span></span><br></pre></td></tr></table></figure>
-
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1782,7 +1737,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">170</span>
+          <span class="site-state-item-count">171</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
