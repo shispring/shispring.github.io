@@ -14854,8 +14854,9 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li>超出能力 → 直接拒绝（429）</li>
 </ul>
 <blockquote>
-<p><strong>Lua 在 Redis 中是：单线程、原子执行</strong></p>
+<p><strong>Lua 在 Redis 中是：单线程、原子执行</strong><br>✅ Redis Lua 脚本执行是 <strong>单线程、原子、阻塞</strong><br>所以不要在 Lua 中做“慢逻辑”。</p>
 </blockquote>
+<p>✅ Redis Lua 脚本不会自动持久化源代码<br>只能通过 <code>EVALSHA</code> 调用。</p>
 <h2 id="结合-docker-compose：完整加载流程"><a href="#结合-docker-compose：完整加载流程" class="headerlink" title="结合 docker-compose：完整加载流程"></a>结合 docker-compose：完整加载流程</h2><h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">rate-limit-demo/</span><br><span class="line">├── app.py</span><br><span class="line">├── token_bucket.lua</span><br><span class="line">├── Dockerfile</span><br><span class="line">└── docker-compose.yml</span><br></pre></td></tr></table></figure>
 <h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># cat token_bucket.lua</span><br><span class="line">-- token_bucket.lua</span><br><span class="line">local key = KEYS[1]</span><br><span class="line">local rate = tonumber(ARGV[1])</span><br><span class="line">local capacity = tonumber(ARGV[2])</span><br><span class="line">local now = tonumber(ARGV[3])</span><br><span class="line">local requested = tonumber(ARGV[4])</span><br><span class="line"></span><br><span class="line">local data = redis.call(&quot;HMGET&quot;, key, &quot;tokens&quot;, &quot;timestamp&quot;)</span><br><span class="line">local tokens = tonumber(data[1]) or capacity</span><br><span class="line">local last = tonumber(data[2]) or now</span><br><span class="line"></span><br><span class="line">-- 生成新令牌</span><br><span class="line">local delta = math.max(0, now - last)</span><br><span class="line">tokens = math.min(capacity, tokens + delta * rate)</span><br><span class="line"></span><br><span class="line">if tokens &lt; requested then</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 0</span><br><span class="line">else</span><br><span class="line">    tokens = tokens - requested</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 1</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"># cat app.py</span><br><span class="line">from fastapi import FastAPI, Request, HTTPException</span><br><span class="line">import redis</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">r = redis.Redis(host=&quot;redis&quot;, port=6379, decode_responses=True)</span><br><span class="line"></span><br><span class="line">with open(&quot;token_bucket.lua&quot;) as f:</span><br><span class="line">    LUA_SCRIPT = r.register_script(f.read())</span><br><span class="line"></span><br><span class="line">RATE = 5</span><br><span class="line">CAPACITY = 10</span><br><span class="line"></span><br><span class="line">@app.get(&quot;/api&quot;)</span><br><span class="line">def api(request: Request):</span><br><span class="line">    now = int(time.time())</span><br><span class="line">    allowed = LUA_SCRIPT(</span><br><span class="line">        keys=[&quot;token_bucket:api&quot;],</span><br><span class="line">        args=[RATE, CAPACITY, now, 1]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    if allowed == 0:</span><br><span class="line">        raise HTTPException(status_code=429, detail=&quot;Too Many Requests&quot;)</span><br><span class="line"></span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;ok&quot;&#125;</span><br><span class="line"></span><br><span class="line"># cat Dockerfile</span><br><span class="line">FROM docker.io/python:3.12.9</span><br><span class="line"></span><br><span class="line">WORKDIR /app</span><br><span class="line">COPY app.py token_bucket.lua ./</span><br><span class="line">RUN pip install fastapi uvicorn redis</span><br><span class="line"></span><br><span class="line">CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</span><br><span class="line"></span><br><span class="line"># cat docker-compose.yml</span><br><span class="line">services:</span><br><span class="line">  api:</span><br><span class="line">    build: .</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;8000:8000&quot;</span><br><span class="line">    depends_on:</span><br><span class="line">      - redis</span><br><span class="line"></span><br><span class="line">  redis:</span><br><span class="line">    image: docker.io/redis:7.4.7</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;6379:6379&quot;</span><br></pre></td></tr></table></figure>
 
@@ -14863,6 +14864,31 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <h3 id="启动顺序"><a href="#启动顺序" class="headerlink" title="启动顺序"></a>启动顺序</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker-compose up</span><br><span class="line">   ↓</span><br><span class="line">redis 容器启动</span><br><span class="line">   ↓</span><br><span class="line">api 容器启动</span><br><span class="line">   ↓</span><br><span class="line">Python import app.py</span><br><span class="line">   ↓</span><br><span class="line">读取 token_bucket.lua</span><br><span class="line">   ↓</span><br><span class="line">SCRIPT LOAD 到 Redis</span><br><span class="line">   ↓</span><br><span class="line">返回 SHA1</span><br><span class="line">   ↓</span><br><span class="line">后续请求 → EVALSHA</span><br></pre></td></tr></table></figure>
 <hr>
 <h3 id="启动及验证命令"><a href="#启动及验证命令" class="headerlink" title="启动及验证命令"></a>启动及验证命令</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#start</span><br><span class="line">docker compose up --build</span><br><span class="line"></span><br><span class="line">#观察token变化</span><br><span class="line">while true; do   curl http://localhost:8000/api;  sleep 0.1; done</span><br><span class="line"></span><br><span class="line">#在宿主机上观测</span><br><span class="line">#装客户端：yum install -y redis</span><br><span class="line">watch -n 0.1 &quot;redis-cli HGETALL token_bucket:api&quot;</span><br><span class="line"></span><br><span class="line">#替代ab的压测方案</span><br><span class="line">hey -n 100 -c 5 -q 5 http://localhost:8000/api</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="✅-初始状态的影响"><a href="#✅-初始状态的影响" class="headerlink" title="✅ 初始状态的影响"></a>✅ 初始状态的影响</h3><table>
+<thead>
+<tr>
+<th>初始状态</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>令牌桶满</td>
+<td>更友好突发体验</td>
+</tr>
+<tr>
+<td>令牌桶空</td>
+<td>更严格控制 steady 速率</td>
+</tr>
+<tr>
+<td>Warm-Up</td>
+<td>更稳定保护系统</td>
+</tr>
+<tr>
+<td>显式 Bootstrap</td>
+<td>服务重启时更可控</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>service</tag>
