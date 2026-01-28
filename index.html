@@ -184,6 +184,152 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/28/%E9%99%90%E6%B5%81%E5%AE%9E%E6%93%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/28/%E9%99%90%E6%B5%81%E5%AE%9E%E6%93%8D/" class="post-title-link" itemprop="url">限流实操</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-28 17:43:21 / 修改时间：17:56:05" itemprop="dateCreated datePublished" datetime="2026-01-28T17:43:21+08:00">2026-01-28</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="限流算法"><a href="#限流算法" class="headerlink" title="限流算法"></a>限流算法</h2><table>
+<thead>
+<tr>
+<th>算法名称</th>
+<th>原理一句话</th>
+<th>优点</th>
+<th>缺点</th>
+<th>典型案例 &#x2F; 场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>计数器（Counter）</strong></td>
+<td>累加请求数，超过阈值拒绝</td>
+<td>实现极简单</td>
+<td>无时间维度；洪峰瞬间失效</td>
+<td>Demo &#x2F; 教学</td>
+</tr>
+<tr>
+<td><strong>固定窗口（Fixed Window）</strong></td>
+<td>每个时间窗口内最多 N 次</td>
+<td>简单、易理解</td>
+<td>窗口边界突刺</td>
+<td>简单接口限流</td>
+</tr>
+<tr>
+<td><strong>滑动窗口（Sliding Window）</strong></td>
+<td>统计最近 T 时间内请求数</td>
+<td>平滑、精确</td>
+<td>实现复杂、存储成本高</td>
+<td>SDK &#x2F; API 网关</td>
+</tr>
+<tr>
+<td><strong>漏桶（Leaky Bucket）</strong></td>
+<td>请求进桶，固定速率漏出</td>
+<td>输出稳定、可整形</td>
+<td>不支持突发流量</td>
+<td>网络整形、QoS</td>
+</tr>
+<tr>
+<td>⭐ <strong>令牌桶（Token Bucket）</strong></td>
+<td>定速生成令牌，请求消耗</td>
+<td>支持突发、弹性好</td>
+<td>实现略复杂</td>
+<td><strong>生产主流方案</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>限流 ≠ 平滑<br>限流 &#x3D; 允许爆发，但要兜底</p>
+</blockquote>
+<h2 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h2><h3 id="核心参数"><a href="#核心参数" class="headerlink" title="核心参数"></a>核心参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>rate</td>
+<td>每秒生成多少令牌</td>
+</tr>
+<tr>
+<td>capacity</td>
+<td>桶最大容量</td>
+</tr>
+<tr>
+<td>tokens</td>
+<td>当前可用令牌</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>上次更新时间</td>
+</tr>
+</tbody></table>
+<h3 id="行为特性"><a href="#行为特性" class="headerlink" title="行为特性"></a>行为特性</h3><ul>
+<li>平时没流量 → 令牌累积</li>
+<li>突发流量 → 快速消耗</li>
+<li>超出能力 → 直接拒绝（429）</li>
+</ul>
+<blockquote>
+<p><strong>Lua 在 Redis 中是：单线程、原子执行</strong></p>
+</blockquote>
+<h2 id="结合-docker-compose：完整加载流程"><a href="#结合-docker-compose：完整加载流程" class="headerlink" title="结合 docker-compose：完整加载流程"></a>结合 docker-compose：完整加载流程</h2><h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rate-limit-demo/</span><br><span class="line">├── app.py</span><br><span class="line">├── token_bucket.lua</span><br><span class="line">├── Dockerfile</span><br><span class="line">└── docker-compose.yml</span><br></pre></td></tr></table></figure>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"># cat token_bucket.lua</span><br><span class="line">-- token_bucket.lua</span><br><span class="line">local key = KEYS[1]</span><br><span class="line">local rate = tonumber(ARGV[1])</span><br><span class="line">local capacity = tonumber(ARGV[2])</span><br><span class="line">local now = tonumber(ARGV[3])</span><br><span class="line">local requested = tonumber(ARGV[4])</span><br><span class="line"></span><br><span class="line">local data = redis.call(&quot;HMGET&quot;, key, &quot;tokens&quot;, &quot;timestamp&quot;)</span><br><span class="line">local tokens = tonumber(data[1]) or capacity</span><br><span class="line">local last = tonumber(data[2]) or now</span><br><span class="line"></span><br><span class="line">-- 生成新令牌</span><br><span class="line">local delta = math.max(0, now - last)</span><br><span class="line">tokens = math.min(capacity, tokens + delta * rate)</span><br><span class="line"></span><br><span class="line">if tokens &lt; requested then</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 0</span><br><span class="line">else</span><br><span class="line">    tokens = tokens - requested</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 1</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"># cat app.py</span><br><span class="line">from fastapi import FastAPI, Request, HTTPException</span><br><span class="line">import redis</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">r = redis.Redis(host=&quot;redis&quot;, port=6379, decode_responses=True)</span><br><span class="line"></span><br><span class="line">with open(&quot;token_bucket.lua&quot;) as f:</span><br><span class="line">    LUA_SCRIPT = r.register_script(f.read())</span><br><span class="line"></span><br><span class="line">RATE = 5</span><br><span class="line">CAPACITY = 10</span><br><span class="line"></span><br><span class="line">@app.get(&quot;/api&quot;)</span><br><span class="line">def api(request: Request):</span><br><span class="line">    now = int(time.time())</span><br><span class="line">    allowed = LUA_SCRIPT(</span><br><span class="line">        keys=[&quot;token_bucket:api&quot;],</span><br><span class="line">        args=[RATE, CAPACITY, now, 1]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    if allowed == 0:</span><br><span class="line">        raise HTTPException(status_code=429, detail=&quot;Too Many Requests&quot;)</span><br><span class="line"></span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;ok&quot;&#125;</span><br><span class="line"></span><br><span class="line"># cat Dockerfile</span><br><span class="line">FROM docker.io/python:3.12.9</span><br><span class="line"></span><br><span class="line">WORKDIR /app</span><br><span class="line">COPY app.py token_bucket.lua ./</span><br><span class="line">RUN pip install fastapi uvicorn redis</span><br><span class="line"></span><br><span class="line">CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</span><br><span class="line"></span><br><span class="line"># cat docker-compose.yml</span><br><span class="line">services:</span><br><span class="line">  api:</span><br><span class="line">    build: .</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;8000:8000&quot;</span><br><span class="line">    depends_on:</span><br><span class="line">      - redis</span><br><span class="line"></span><br><span class="line">  redis:</span><br><span class="line">    image: docker.io/redis:7.4.7</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;6379:6379&quot;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="启动顺序"><a href="#启动顺序" class="headerlink" title="启动顺序"></a>启动顺序</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up</span><br><span class="line">   ↓</span><br><span class="line">redis 容器启动</span><br><span class="line">   ↓</span><br><span class="line">api 容器启动</span><br><span class="line">   ↓</span><br><span class="line">Python import app.py</span><br><span class="line">   ↓</span><br><span class="line">读取 token_bucket.lua</span><br><span class="line">   ↓</span><br><span class="line">SCRIPT LOAD 到 Redis</span><br><span class="line">   ↓</span><br><span class="line">返回 SHA1</span><br><span class="line">   ↓</span><br><span class="line">后续请求 → EVALSHA</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="启动及验证命令"><a href="#启动及验证命令" class="headerlink" title="启动及验证命令"></a>启动及验证命令</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#start</span><br><span class="line">docker compose up --build</span><br><span class="line"></span><br><span class="line">#观察token变化</span><br><span class="line">while true; do   curl http://localhost:8000/api;  sleep 0.1; done</span><br><span class="line"></span><br><span class="line">#在宿主机上观测</span><br><span class="line">#装客户端：yum install -y redis</span><br><span class="line">watch -n 0.1 &quot;redis-cli HGETALL token_bucket:api&quot;</span><br><span class="line"></span><br><span class="line">#替代ab的压测方案</span><br><span class="line">hey -n 100 -c 5 -q 5 http://localhost:8000/api</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/linux%E5%86%85%E6%A0%B8%E5%8D%8F%E8%AE%AE%E6%A0%88/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1439,224 +1585,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/" class="post-title-link" itemprop="url">进程调度chrt</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-01-09 18:37:19 / 修改时间：18:40:53" itemprop="dateCreated datePublished" datetime="2026-01-09T18:37:19+08:00">2026-01-09</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="ps-eo-常用字段速查（最佳实践）"><a href="#ps-eo-常用字段速查（最佳实践）" class="headerlink" title="ps -eo 常用字段速查（最佳实践）"></a><code>ps -eo</code> 常用字段速查（最佳实践）</h1><h2 id="1️⃣-调度-性能诊断必备组合"><a href="#1️⃣-调度-性能诊断必备组合" class="headerlink" title="1️⃣ 调度&#x2F;性能诊断必备组合"></a>1️⃣ 调度&#x2F;性能诊断必备组合</h2><h3 id="🔹-看调度类-优先级"><a href="#🔹-看调度类-优先级" class="headerlink" title="🔹 看调度类 + 优先级"></a>🔹 看调度类 + 优先级</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio</span><br></pre></td></tr></table></figure>
-
-<p>用途：</p>
-<ul>
-<li>区分 CFS &#x2F; RT &#x2F; DL</li>
-<li>判断 RT 是否抢占系统</li>
-</ul>
-<hr>
-<h3 id="🔹-看-nice-值"><a href="#🔹-看-nice-值" class="headerlink" title="🔹 看 nice 值"></a>🔹 看 nice 值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,ni,pri</span><br></pre></td></tr></table></figure>
-
-<p>用途：</p>
-<ul>
-<li>分析 CFS 内部竞争</li>
-<li>判断是否需要 <code>renice</code></li>
-</ul>
-<hr>
-<h3 id="🔹-看-CPU-亲和性（配合-taskset）"><a href="#🔹-看-CPU-亲和性（配合-taskset）" class="headerlink" title="🔹 看 CPU 亲和性（配合 taskset）"></a>🔹 看 CPU 亲和性（配合 taskset）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,psr</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>psr</code></td>
-<td>当前运行 CPU</td>
-</tr>
-</tbody></table>
-<hr>
-<h3 id="🔹-看上下文切换压力"><a href="#🔹-看上下文切换压力" class="headerlink" title="🔹 看上下文切换压力"></a>🔹 看上下文切换压力</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cswch,nvcswch</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>cswch</code></td>
-<td>自愿上下文切换</td>
-</tr>
-<tr>
-<td><code>nvcswch</code></td>
-<td>被动抢占</td>
-</tr>
-</tbody></table>
-<hr>
-<h3 id="🔹-看调度延迟相关（高级）"><a href="#🔹-看调度延迟相关（高级）" class="headerlink" title="🔹 看调度延迟相关（高级）"></a>🔹 看调度延迟相关（高级）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,etime,<span class="built_in">stat</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>D</code> 状态频繁 → IO &#x2F; 调度阻塞</li>
-<li><code>R</code> 但运行慢 → 被抢占</li>
-</ul>
-<hr>
-<h2 id="2️⃣-一条「万能调度观察命令」"><a href="#2️⃣-一条「万能调度观察命令」" class="headerlink" title="2️⃣ 一条「万能调度观察命令」"></a>2️⃣ 一条「万能调度观察命令」</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio,ni,psr,<span class="built_in">stat</span> --<span class="built_in">sort</span>=-pri</span><br></pre></td></tr></table></figure>
-
-<p>📌 <strong>建议你直接 alias 掉</strong></p>
-<hr>
-<h1 id="chrt：调度策略的“手术刀”"><a href="#chrt：调度策略的“手术刀”" class="headerlink" title="chrt：调度策略的“手术刀”"></a><code>chrt</code>：调度策略的“手术刀”</h1><blockquote>
-<p><code>chrt</code> &#x3D; change &#x2F; show real-time scheduling attributes</p>
-</blockquote>
-<hr>
-<h2 id="1️⃣-查看进程调度策略"><a href="#1️⃣-查看进程调度策略" class="headerlink" title="1️⃣ 查看进程调度策略"></a>1️⃣ 查看进程调度策略</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
-
-<p>示例输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pid 13&#x27;s current scheduling policy: SCHED_OTHER</span><br><span class="line">pid 13&#x27;s current scheduling priority: 0</span><br></pre></td></tr></table></figure>
-
-<p>说明：</p>
-<ul>
-<li><code>SCHED_OTHER</code> &#x3D; CFS</li>
-<li>priority&#x3D;0 对 CFS 没意义（RT 才用）</li>
-</ul>
-<hr>
-<h2 id="2️⃣-修改为-RT（⚠️-慎用）"><a href="#2️⃣-修改为-RT（⚠️-慎用）" class="headerlink" title="2️⃣ 修改为 RT（⚠️ 慎用）"></a>2️⃣ 修改为 RT（⚠️ 慎用）</h2><h3 id="🔹-改为-FIFO（强实时）"><a href="#🔹-改为-FIFO（强实时）" class="headerlink" title="🔹 改为 FIFO（强实时）"></a>🔹 改为 FIFO（强实时）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -f -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>-f</code> &#x3D; SCHED_FIFO</li>
-<li><code>20</code> &#x3D; RT priority（1–99）</li>
-</ul>
-<p>⚠️ <strong>风险极高</strong>：</p>
-<ul>
-<li>不主动 <code>yield</code> 会霸占 CPU</li>
-<li>可直接卡死系统</li>
-</ul>
-<hr>
-<h3 id="🔹-改为-RR（可轮转）"><a href="#🔹-改为-RR（可轮转）" class="headerlink" title="🔹 改为 RR（可轮转）"></a>🔹 改为 RR（可轮转）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -r -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>更安全</li>
-<li>适合周期性内核线程（如网络）</li>
-</ul>
-<hr>
-<h2 id="3️⃣-只“稍微扶一把”：nice-而不是-RT"><a href="#3️⃣-只“稍微扶一把”：nice-而不是-RT" class="headerlink" title="3️⃣ 只“稍微扶一把”：nice 而不是 RT"></a>3️⃣ 只“稍微扶一把”：nice 而不是 RT</h2><h3 id="🔹-推荐方案（ksoftirqd-场景）"><a href="#🔹-推荐方案（ksoftirqd-场景）" class="headerlink" title="🔹 推荐方案（ksoftirqd 场景）"></a>🔹 推荐方案（ksoftirqd 场景）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">renice -n -5 -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
-
-<p>效果：</p>
-<ul>
-<li>仍是 CFS</li>
-<li>但 vruntime 增长更慢</li>
-<li><strong>显著降低被饿死概率</strong></li>
-</ul>
-<p>👉 <strong>这是生产环境首选</strong></p>
-<hr>
-<h2 id="4️⃣-一次性批量调整-ksoftirqd"><a href="#4️⃣-一次性批量调整-ksoftirqd" class="headerlink" title="4️⃣ 一次性批量调整 ksoftirqd"></a>4️⃣ 一次性批量调整 ksoftirqd</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> $(pgrep ksoftirqd); <span class="keyword">do</span></span><br><span class="line">  renice -n -5 -p <span class="variable">$p</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
-
-<p>📌 通常 <code>-5</code> 已足够<br>📌 不建议 &lt; -10</p>
-<hr>
-<h1 id="调度相关的其他关键观测工具"><a href="#调度相关的其他关键观测工具" class="headerlink" title="调度相关的其他关键观测工具"></a>调度相关的其他关键观测工具</h1><h2 id="1️⃣-proc-sched"><a href="#1️⃣-proc-sched" class="headerlink" title="1️⃣ /proc/&lt;pid&gt;/sched"></a>1️⃣ <code>/proc/&lt;pid&gt;/sched</code></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/13/sched</span><br></pre></td></tr></table></figure>
-
-<p>你能看到：</p>
-<ul>
-<li>vruntime</li>
-<li>nr_switches</li>
-<li>se.exec_start</li>
-</ul>
-<p>👉 <strong>这是理解“为什么被饿死”的核心文件</strong></p>
-<hr>
-<h2 id="2️⃣-schedstat（系统级）"><a href="#2️⃣-schedstat（系统级）" class="headerlink" title="2️⃣ schedstat（系统级）"></a>2️⃣ <code>schedstat</code>（系统级）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/schedstat</span><br></pre></td></tr></table></figure>
-
-<p>适合：</p>
-<ul>
-<li>NUMA &#x2F; 大核系统</li>
-<li>分析 runqueue 压力</li>
-</ul>
-<hr>
-<h2 id="3️⃣-perf-sched"><a href="#3️⃣-perf-sched" class="headerlink" title="3️⃣ perf sched"></a>3️⃣ <code>perf sched</code></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">perf <span class="built_in">sched</span> record</span><br><span class="line">perf <span class="built_in">sched</span> latency</span><br></pre></td></tr></table></figure>
-
-<p>用途：</p>
-<ul>
-<li>精确看到谁在抢 CPU</li>
-<li>定位调度延迟根因</li>
-</ul>
-<hr>
-<h2 id="4️⃣-eBPF（你已经在用的最高阶）"><a href="#4️⃣-eBPF（你已经在用的最高阶）" class="headerlink" title="4️⃣ eBPF（你已经在用的最高阶）"></a>4️⃣ eBPF（你已经在用的最高阶）</h2><ul>
-<li><code>sched:sched_switch</code></li>
-<li><code>irq:softirq_raise</code></li>
-<li><code>irq:softirq_entry</code></li>
-</ul>
-<p>👉 你现在做的事情，<strong>已经是调度问题的最深水区</strong></p>
-<hr>
-<h1 id="五、结合你当前问题的结论性建议"><a href="#五、结合你当前问题的结论性建议" class="headerlink" title="五、结合你当前问题的结论性建议"></a>五、结合你当前问题的结论性建议</h1><h3 id="✅-关于-ksoftirqd："><a href="#✅-关于-ksoftirqd：" class="headerlink" title="✅ 关于 ksoftirqd："></a>✅ 关于 <code>ksoftirqd</code>：</h3><ul>
-<li><p><strong>不是随机 CPU</strong></p>
-</li>
-<li><p>是 <strong>per-cpu 绑定线程</strong></p>
-</li>
-<li><p>被饿死 ≠ 优先级低，而是：</p>
-<ul>
-<li>CFS 公平性</li>
-<li>与业务进程同级竞争</li>
-</ul>
-</li>
-</ul>
-<h3 id="✅-推荐干预顺序（控制变量）："><a href="#✅-推荐干预顺序（控制变量）：" class="headerlink" title="✅ 推荐干预顺序（控制变量）："></a>✅ 推荐干预顺序（控制变量）：</h3><ol>
-<li>❌ 不启 RPS</li>
-<li>✅ <code>renice -5 ksoftirqd/*</code></li>
-<li>✅ IRQ 绑核（同 NUMA）</li>
-<li>⛔ 谨慎使用 <code>chrt</code></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1728,7 +1656,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">172</span>
+          <span class="site-state-item-count">173</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1741,7 +1669,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">23</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

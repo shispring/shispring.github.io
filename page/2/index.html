@@ -184,6 +184,224 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/" class="post-title-link" itemprop="url">进程调度chrt</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-09 18:37:19 / 修改时间：18:40:53" itemprop="dateCreated datePublished" datetime="2026-01-09T18:37:19+08:00">2026-01-09</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="ps-eo-常用字段速查（最佳实践）"><a href="#ps-eo-常用字段速查（最佳实践）" class="headerlink" title="ps -eo 常用字段速查（最佳实践）"></a><code>ps -eo</code> 常用字段速查（最佳实践）</h1><h2 id="1️⃣-调度-性能诊断必备组合"><a href="#1️⃣-调度-性能诊断必备组合" class="headerlink" title="1️⃣ 调度&#x2F;性能诊断必备组合"></a>1️⃣ 调度&#x2F;性能诊断必备组合</h2><h3 id="🔹-看调度类-优先级"><a href="#🔹-看调度类-优先级" class="headerlink" title="🔹 看调度类 + 优先级"></a>🔹 看调度类 + 优先级</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>区分 CFS &#x2F; RT &#x2F; DL</li>
+<li>判断 RT 是否抢占系统</li>
+</ul>
+<hr>
+<h3 id="🔹-看-nice-值"><a href="#🔹-看-nice-值" class="headerlink" title="🔹 看 nice 值"></a>🔹 看 nice 值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,ni,pri</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>分析 CFS 内部竞争</li>
+<li>判断是否需要 <code>renice</code></li>
+</ul>
+<hr>
+<h3 id="🔹-看-CPU-亲和性（配合-taskset）"><a href="#🔹-看-CPU-亲和性（配合-taskset）" class="headerlink" title="🔹 看 CPU 亲和性（配合 taskset）"></a>🔹 看 CPU 亲和性（配合 taskset）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,psr</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>psr</code></td>
+<td>当前运行 CPU</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔹-看上下文切换压力"><a href="#🔹-看上下文切换压力" class="headerlink" title="🔹 看上下文切换压力"></a>🔹 看上下文切换压力</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cswch,nvcswch</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cswch</code></td>
+<td>自愿上下文切换</td>
+</tr>
+<tr>
+<td><code>nvcswch</code></td>
+<td>被动抢占</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔹-看调度延迟相关（高级）"><a href="#🔹-看调度延迟相关（高级）" class="headerlink" title="🔹 看调度延迟相关（高级）"></a>🔹 看调度延迟相关（高级）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,etime,<span class="built_in">stat</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>D</code> 状态频繁 → IO &#x2F; 调度阻塞</li>
+<li><code>R</code> 但运行慢 → 被抢占</li>
+</ul>
+<hr>
+<h2 id="2️⃣-一条「万能调度观察命令」"><a href="#2️⃣-一条「万能调度观察命令」" class="headerlink" title="2️⃣ 一条「万能调度观察命令」"></a>2️⃣ 一条「万能调度观察命令」</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -eo pid,<span class="built_in">comm</span>,cls,pri,rtprio,ni,psr,<span class="built_in">stat</span> --<span class="built_in">sort</span>=-pri</span><br></pre></td></tr></table></figure>
+
+<p>📌 <strong>建议你直接 alias 掉</strong></p>
+<hr>
+<h1 id="chrt：调度策略的“手术刀”"><a href="#chrt：调度策略的“手术刀”" class="headerlink" title="chrt：调度策略的“手术刀”"></a><code>chrt</code>：调度策略的“手术刀”</h1><blockquote>
+<p><code>chrt</code> &#x3D; change &#x2F; show real-time scheduling attributes</p>
+</blockquote>
+<hr>
+<h2 id="1️⃣-查看进程调度策略"><a href="#1️⃣-查看进程调度策略" class="headerlink" title="1️⃣ 查看进程调度策略"></a>1️⃣ 查看进程调度策略</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<p>示例输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pid 13&#x27;s current scheduling policy: SCHED_OTHER</span><br><span class="line">pid 13&#x27;s current scheduling priority: 0</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li><code>SCHED_OTHER</code> &#x3D; CFS</li>
+<li>priority&#x3D;0 对 CFS 没意义（RT 才用）</li>
+</ul>
+<hr>
+<h2 id="2️⃣-修改为-RT（⚠️-慎用）"><a href="#2️⃣-修改为-RT（⚠️-慎用）" class="headerlink" title="2️⃣ 修改为 RT（⚠️ 慎用）"></a>2️⃣ 修改为 RT（⚠️ 慎用）</h2><h3 id="🔹-改为-FIFO（强实时）"><a href="#🔹-改为-FIFO（强实时）" class="headerlink" title="🔹 改为 FIFO（强实时）"></a>🔹 改为 FIFO（强实时）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -f -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-f</code> &#x3D; SCHED_FIFO</li>
+<li><code>20</code> &#x3D; RT priority（1–99）</li>
+</ul>
+<p>⚠️ <strong>风险极高</strong>：</p>
+<ul>
+<li>不主动 <code>yield</code> 会霸占 CPU</li>
+<li>可直接卡死系统</li>
+</ul>
+<hr>
+<h3 id="🔹-改为-RR（可轮转）"><a href="#🔹-改为-RR（可轮转）" class="headerlink" title="🔹 改为 RR（可轮转）"></a>🔹 改为 RR（可轮转）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrt -r -p 20 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>更安全</li>
+<li>适合周期性内核线程（如网络）</li>
+</ul>
+<hr>
+<h2 id="3️⃣-只“稍微扶一把”：nice-而不是-RT"><a href="#3️⃣-只“稍微扶一把”：nice-而不是-RT" class="headerlink" title="3️⃣ 只“稍微扶一把”：nice 而不是 RT"></a>3️⃣ 只“稍微扶一把”：nice 而不是 RT</h2><h3 id="🔹-推荐方案（ksoftirqd-场景）"><a href="#🔹-推荐方案（ksoftirqd-场景）" class="headerlink" title="🔹 推荐方案（ksoftirqd 场景）"></a>🔹 推荐方案（ksoftirqd 场景）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">renice -n -5 -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<ul>
+<li>仍是 CFS</li>
+<li>但 vruntime 增长更慢</li>
+<li><strong>显著降低被饿死概率</strong></li>
+</ul>
+<p>👉 <strong>这是生产环境首选</strong></p>
+<hr>
+<h2 id="4️⃣-一次性批量调整-ksoftirqd"><a href="#4️⃣-一次性批量调整-ksoftirqd" class="headerlink" title="4️⃣ 一次性批量调整 ksoftirqd"></a>4️⃣ 一次性批量调整 ksoftirqd</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> $(pgrep ksoftirqd); <span class="keyword">do</span></span><br><span class="line">  renice -n -5 -p <span class="variable">$p</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>📌 通常 <code>-5</code> 已足够<br>📌 不建议 &lt; -10</p>
+<hr>
+<h1 id="调度相关的其他关键观测工具"><a href="#调度相关的其他关键观测工具" class="headerlink" title="调度相关的其他关键观测工具"></a>调度相关的其他关键观测工具</h1><h2 id="1️⃣-proc-sched"><a href="#1️⃣-proc-sched" class="headerlink" title="1️⃣ /proc/&lt;pid&gt;/sched"></a>1️⃣ <code>/proc/&lt;pid&gt;/sched</code></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/13/sched</span><br></pre></td></tr></table></figure>
+
+<p>你能看到：</p>
+<ul>
+<li>vruntime</li>
+<li>nr_switches</li>
+<li>se.exec_start</li>
+</ul>
+<p>👉 <strong>这是理解“为什么被饿死”的核心文件</strong></p>
+<hr>
+<h2 id="2️⃣-schedstat（系统级）"><a href="#2️⃣-schedstat（系统级）" class="headerlink" title="2️⃣ schedstat（系统级）"></a>2️⃣ <code>schedstat</code>（系统级）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/schedstat</span><br></pre></td></tr></table></figure>
+
+<p>适合：</p>
+<ul>
+<li>NUMA &#x2F; 大核系统</li>
+<li>分析 runqueue 压力</li>
+</ul>
+<hr>
+<h2 id="3️⃣-perf-sched"><a href="#3️⃣-perf-sched" class="headerlink" title="3️⃣ perf sched"></a>3️⃣ <code>perf sched</code></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">perf <span class="built_in">sched</span> record</span><br><span class="line">perf <span class="built_in">sched</span> latency</span><br></pre></td></tr></table></figure>
+
+<p>用途：</p>
+<ul>
+<li>精确看到谁在抢 CPU</li>
+<li>定位调度延迟根因</li>
+</ul>
+<hr>
+<h2 id="4️⃣-eBPF（你已经在用的最高阶）"><a href="#4️⃣-eBPF（你已经在用的最高阶）" class="headerlink" title="4️⃣ eBPF（你已经在用的最高阶）"></a>4️⃣ eBPF（你已经在用的最高阶）</h2><ul>
+<li><code>sched:sched_switch</code></li>
+<li><code>irq:softirq_raise</code></li>
+<li><code>irq:softirq_entry</code></li>
+</ul>
+<p>👉 你现在做的事情，<strong>已经是调度问题的最深水区</strong></p>
+<hr>
+<h1 id="五、结合你当前问题的结论性建议"><a href="#五、结合你当前问题的结论性建议" class="headerlink" title="五、结合你当前问题的结论性建议"></a>五、结合你当前问题的结论性建议</h1><h3 id="✅-关于-ksoftirqd："><a href="#✅-关于-ksoftirqd：" class="headerlink" title="✅ 关于 ksoftirqd："></a>✅ 关于 <code>ksoftirqd</code>：</h3><ul>
+<li><p><strong>不是随机 CPU</strong></p>
+</li>
+<li><p>是 <strong>per-cpu 绑定线程</strong></p>
+</li>
+<li><p>被饿死 ≠ 优先级低，而是：</p>
+<ul>
+<li>CFS 公平性</li>
+<li>与业务进程同级竞争</li>
+</ul>
+</li>
+</ul>
+<h3 id="✅-推荐干预顺序（控制变量）："><a href="#✅-推荐干预顺序（控制变量）：" class="headerlink" title="✅ 推荐干预顺序（控制变量）："></a>✅ 推荐干预顺序（控制变量）：</h3><ol>
+<li>❌ 不启 RPS</li>
+<li>✅ <code>renice -5 ksoftirqd/*</code></li>
+<li>✅ IRQ 绑核（同 NUMA）</li>
+<li>⛔ 谨慎使用 <code>chrt</code></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/12/30/perf%E8%BF%9B%E9%98%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1871,311 +2089,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/07/dnsperf%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/07/dnsperf%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/" class="post-title-link" itemprop="url">dnsperf使用说明</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-11-07 17:19:42 / 修改时间：17:36:04" itemprop="dateCreated datePublished" datetime="2025-11-07T17:19:42+08:00">2025-11-07</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="🧭-dnsperf-实战与最佳实践速查指南"><a href="#🧭-dnsperf-实战与最佳实践速查指南" class="headerlink" title="🧭 dnsperf 实战与最佳实践速查指南"></a>🧭 dnsperf 实战与最佳实践速查指南</h1><h2 id="📖-1-工具简介"><a href="#📖-1-工具简介" class="headerlink" title="📖 1. 工具简介"></a>📖 1. 工具简介</h2><p><code>dnsperf</code> 是由 <strong>Nominum &#x2F; DNS-OARC</strong> 提供的 <strong>DNS 性能压测工具</strong>，用于模拟客户端大规模并发请求，测试 <strong>DNS 服务器（如 BIND、CoreDNS、PowerDNS）</strong> 的 QPS、响应延迟、丢包率等性能指标。<br>常用于：</p>
-<ul>
-<li>DNS 服务性能压测；</li>
-<li>网络栈优化与软中断验证；</li>
-<li>负载均衡策略评估；</li>
-<li>DNS 缓存与 TTL 策略测试。</li>
-</ul>
-<hr>
-<h2 id="⚙️-2-安装方式"><a href="#⚙️-2-安装方式" class="headerlink" title="⚙️ 2. 安装方式"></a>⚙️ 2. 安装方式</h2><h3 id="✅-通用（RHEL-Anolis-CentOS-8-）"><a href="#✅-通用（RHEL-Anolis-CentOS-8-）" class="headerlink" title="✅ 通用（RHEL&#x2F;Anolis&#x2F;CentOS 8+）"></a>✅ 通用（RHEL&#x2F;Anolis&#x2F;CentOS 8+）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y https://mirrors.aliyun.com/epel/epel-release-latest-8.noarch.rpm</span><br><span class="line">yum install -y dnsperf</span><br></pre></td></tr></table></figure>
-
-<h3 id="✅-验证安装"><a href="#✅-验证安装" class="headerlink" title="✅ 验证安装"></a>✅ 验证安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -h</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🧰-3-基本命令与参数说明"><a href="#🧰-3-基本命令与参数说明" class="headerlink" title="🧰 3. 基本命令与参数说明"></a>🧰 3. 基本命令与参数说明</h2><table>
-<thead>
-<tr>
-<th>参数</th>
-<th>含义</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>-s &lt;server&gt;</code></td>
-<td>指定被测 DNS 服务器 IP</td>
-<td>必填</td>
-</tr>
-<tr>
-<td><code>-p &lt;port&gt;</code></td>
-<td>DNS 端口（默认53）</td>
-<td>可用于测试 CoreDNS 或自定义端口</td>
-</tr>
-<tr>
-<td><code>-d &lt;datafile&gt;</code></td>
-<td>测试域名文件路径</td>
-<td>每行一个域名</td>
-</tr>
-<tr>
-<td><code>-l &lt;duration&gt;</code></td>
-<td>压测时长（秒）</td>
-<td>如 <code>-l 60</code> 表示持续压测 1 分钟</td>
-</tr>
-<tr>
-<td><code>-Q &lt;rate&gt;</code></td>
-<td>每秒查询速率（QPS 限制）</td>
-<td>如 <code>-Q 5000</code></td>
-</tr>
-<tr>
-<td><code>-c &lt;clients&gt;</code></td>
-<td>模拟并发客户端数量</td>
-<td>默认1，可设多线程</td>
-</tr>
-<tr>
-<td><code>-t &lt;threads&gt;</code></td>
-<td>线程数（默认1）</td>
-<td>与 CPU 核绑定测试软中断时建议多核</td>
-</tr>
-<tr>
-<td><code>-v</code></td>
-<td>输出详细日志</td>
-<td>包括 RTT 分布和请求统计</td>
-</tr>
-<tr>
-<td><code>-D</code></td>
-<td>打印每个查询结果</td>
-<td>用于验证响应内容</td>
-</tr>
-<tr>
-<td><code>-S</code></td>
-<td>使用 TCP 而非 UDP</td>
-<td>用于验证 TCP fallback</td>
-</tr>
-<tr>
-<td><code>-T</code></td>
-<td>设置每个线程的目标 QPS</td>
-<td>可用于核级软中断分配分析</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="📋-4-测试数据文件格式（queries-txt）"><a href="#📋-4-测试数据文件格式（queries-txt）" class="headerlink" title="📋 4. 测试数据文件格式（queries.txt）"></a>📋 4. 测试数据文件格式（<code>queries.txt</code>）</h2><p>示例：</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">www.baidu.com. A</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>⚠️ 注意：</p>
-<ul>
-<li>每行一个查询；</li>
-<li>以 <strong><code>.</code> 结尾</strong>；</li>
-<li>查询类型可为 <code>A</code>, <code>AAAA</code>, <code>MX</code>, <code>NS</code>, <code>TXT</code> 等。</li>
-</ul>
-</blockquote>
-<hr>
-<h2 id="🚀-5-常用命令模板与实战注释"><a href="#🚀-5-常用命令模板与实战注释" class="headerlink" title="🚀 5. 常用命令模板与实战注释"></a>🚀 5. 常用命令模板与实战注释</h2><h3 id="🧩-5-1-基础测试（单线程）"><a href="#🧩-5-1-基础测试（单线程）" class="headerlink" title="🧩 5.1 基础测试（单线程）"></a>🧩 5.1 基础测试（单线程）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>说明：</strong></p>
-<ul>
-<li>连续压测 30 秒</li>
-<li>默认 UDP + 单线程</li>
-<li>适用于功能验证阶段</li>
-</ul>
-</blockquote>
-<hr>
-<h3 id="⚡️-5-2-并发压测（多线程高并发）"><a href="#⚡️-5-2-并发压测（多线程高并发）" class="headerlink" title="⚡️ 5.2 并发压测（多线程高并发）"></a>⚡️ 5.2 并发压测（多线程高并发）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 60 -Q 50000 -t 8 -c 50</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>说明：</strong></p>
-<ul>
-<li>目标 QPS：50,000</li>
-<li>线程数：8（建议与 CPU 核数绑定）</li>
-<li>模拟 50 个客户端并发请求</li>
-<li>适合测试多核软中断均衡性能</li>
-</ul>
-</blockquote>
-<blockquote>
-<p>💡 <strong>监控建议：</strong><br>在被测 DNS 服务器执行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch -n1 <span class="string">&quot;cat /proc/softirqs | grep NET_RX&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>同时观察各 CPU 的软中断分布是否均衡。</p>
-</blockquote>
-<hr>
-<h3 id="🌐-5-3-TCP-模式验证（DNS-over-TCP）"><a href="#🌐-5-3-TCP-模式验证（DNS-over-TCP）" class="headerlink" title="🌐 5.3 TCP 模式验证（DNS over TCP）"></a>🌐 5.3 TCP 模式验证（DNS over TCP）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -p 53 -d queries.txt -S -l 30</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>说明：</strong></p>
-<ul>
-<li>使用 TCP 连接进行查询；</li>
-<li>适用于验证 <strong>TCP fallback</strong> 或防火墙规则。</li>
-</ul>
-</blockquote>
-<hr>
-<h3 id="🧪-5-4-指定每线程速率（核绑定验证）"><a href="#🧪-5-4-指定每线程速率（核绑定验证）" class="headerlink" title="🧪 5.4 指定每线程速率（核绑定验证）"></a>🧪 5.4 指定每线程速率（核绑定验证）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">taskset -c 0-7 dnsperf -s 10.16.13.14 -d queries.txt -t 8 -T 5000 -l 30</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>说明：</strong></p>
-<ul>
-<li>限定在 CPU 0-7 核运行；</li>
-<li>每线程 5,000 QPS；</li>
-<li>可结合 <code>irqbalance</code> 或 <code>ethtool -X</code> 调整中断亲和性；</li>
-<li>用于验证 <strong>软中断分布与性能关系</strong>。</li>
-</ul>
-</blockquote>
-<hr>
-<h3 id="📊-5-5-查看响应延迟分布"><a href="#📊-5-5-查看响应延迟分布" class="headerlink" title="📊 5.5 查看响应延迟分布"></a>📊 5.5 查看响应延迟分布</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 30 -Q 10000 -v</span><br><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -l 60 -t 8 -Q 400000 -v &gt; dnsperf_verbose.log 2&gt;&amp;1</span><br><span class="line"><span class="comment">#分析</span></span><br><span class="line">grep -E <span class="string">&quot;Latency Distribution|Queries per second|Average Latency|Latency StdDev&quot;</span> dnsperf_verbose.log -n</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>输出示例：</strong></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Statistics:</span><br><span class="line">  Queries sent:         300000</span><br><span class="line">  Queries completed:    299995 (100.00%)</span><br><span class="line">  Response codes:       NOERROR 299995</span><br><span class="line">  Average latency:      1.32 ms</span><br><span class="line">  Latency StdDev:       0.28 ms</span><br><span class="line">  Latency Distribution:</span><br><span class="line">    50%: 1.28 ms</span><br><span class="line">    90%: 1.47 ms</span><br><span class="line">    99%: 1.88 ms</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>用途：</strong> 观察性能抖动与延迟曲线，判断内核队列 &#x2F; IRQ 调整效果。</p>
-</blockquote>
-<hr>
-<h3 id="🔍-5-6-自定义端口测试（CoreDNS-ingress-nginx-场景）"><a href="#🔍-5-6-自定义端口测试（CoreDNS-ingress-nginx-场景）" class="headerlink" title="🔍 5.6 自定义端口测试（CoreDNS &#x2F; ingress-nginx 场景）"></a>🔍 5.6 自定义端口测试（CoreDNS &#x2F; ingress-nginx 场景）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 192.168.179.135 -p 1053 -d queries.txt -l 30</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>说明：</strong></p>
-<ul>
-<li>当你的 DNS 服务运行在自定义端口（如 CoreDNS、Nginx stream 模式）时使用。</li>
-</ul>
-</blockquote>
-<hr>
-<h2 id="📈-6-性能指标解读"><a href="#📈-6-性能指标解读" class="headerlink" title="📈 6. 性能指标解读"></a>📈 6. 性能指标解读</h2><table>
-<thead>
-<tr>
-<th>指标</th>
-<th>含义</th>
-<th>关键参考值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Queries per second</strong></td>
-<td>每秒查询数 (QPS)</td>
-<td>核心性能指标</td>
-</tr>
-<tr>
-<td><strong>Average latency</strong></td>
-<td>平均响应延迟</td>
-<td>&lt; 2ms 为优秀</td>
-</tr>
-<tr>
-<td><strong>Dropped packets</strong></td>
-<td>丢包率</td>
-<td>理论应为 0</td>
-</tr>
-<tr>
-<td><strong>RTT StdDev</strong></td>
-<td>响应抖动</td>
-<td>越小越稳定</td>
-</tr>
-<tr>
-<td><strong>CPU SoftIRQ Balance</strong></td>
-<td>各核软中断均衡度</td>
-<td>CPU0 不应长期100%</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="🧠-7-高级应用场景"><a href="#🧠-7-高级应用场景" class="headerlink" title="🧠 7. 高级应用场景"></a>🧠 7. 高级应用场景</h2><table>
-<thead>
-<tr>
-<th>场景</th>
-<th>目标</th>
-<th>推荐配置</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>软中断均衡验证</strong></td>
-<td>调整 <code>ethtool -X</code>, <code>irqbalance</code>, <code>taskset</code></td>
-<td><code>-t 8 -T 5000</code> 配合 <code>/proc/softirqs</code></td>
-</tr>
-<tr>
-<td><strong>CoreDNS 性能测试</strong></td>
-<td>验证集群内 DNS 服务稳定性</td>
-<td><code>dnsperf -s &lt;clusterDNS&gt;</code></td>
-</tr>
-<tr>
-<td><strong>边缘节点压力测试</strong></td>
-<td>验证边缘 CoreDNS 容量</td>
-<td>增加 <code>-c 100 -Q 80000</code></td>
-</tr>
-<tr>
-<td><strong>Ingress &#x2F; API 域名解析链路压测</strong></td>
-<td>验证上层流量入口延迟</td>
-<td>将 <code>dnsperf</code> 与 <code>wrk</code>、<code>iperf3</code> 结合使用</td>
-</tr>
-<tr>
-<td><strong>BIND &#x2F; PDNS 优化验证</strong></td>
-<td>调整线程数、缓存大小</td>
-<td>对比 QPS 与平均延迟变化</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="🧾-8-典型验证流程（软中断均衡实验）"><a href="#🧾-8-典型验证流程（软中断均衡实验）" class="headerlink" title="🧾 8. 典型验证流程（软中断均衡实验）"></a>🧾 8. 典型验证流程（软中断均衡实验）</h2><ol>
-<li><p><strong>准备域名数据：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt; queries.txt &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">www.baidu.com. A</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>绑定中断核（如只绑定 CPU0）：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> irq <span class="keyword">in</span> $(grep eth0 /proc/interrupts | awk <span class="string">&#x27;&#123;print $1&#125;&#x27;</span> | sed <span class="string">&#x27;s/://&#x27;</span>); <span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> 1 &gt; /proc/irq/<span class="variable">$irq</span>/smp_affinity</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>执行 dnsperf 压测：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsperf -s 10.16.13.14 -d queries.txt -t 8 -Q 10000 -l 30</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>观察软中断分布：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch -n1 <span class="string">&quot;grep NET_RX /proc/softirqs&quot;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>调整中断亲和性，重新压测对比。</strong></p>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2247,7 +2160,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">172</span>
+          <span class="site-state-item-count">173</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2260,7 +2173,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">23</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

@@ -184,6 +184,99 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/21/hpa-pod%E8%AE%A1%E7%AE%97/" class="post-title-link" itemprop="url">hpa pod计算</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-21 17:10:38 / 修改时间：17:12:39" itemprop="dateCreated datePublished" datetime="2024-10-21T17:10:38+08:00">2024-10-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Kubernetes 中配置基于 CPU 利用率的 Horizontal Pod Autoscaler (HPA) 策略时，扩展的 Pod 数量根据以下公式计算：</p>
+<h3 id="HPA-计算扩展-Pod-数量的公式："><a href="#HPA-计算扩展-Pod-数量的公式：" class="headerlink" title="HPA 计算扩展 Pod 数量的公式："></a>HPA 计算扩展 Pod 数量的公式：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desiredReplicas = ceil[currentReplicas * (currentMetricValue / targetMetricValue)]</span><br></pre></td></tr></table></figure>
+
+<p>具体来说：</p>
+<ol>
+<li><strong>currentReplicas</strong>：当前正在运行的 Pod 数量。</li>
+<li><strong>currentMetricValue</strong>：当前的 CPU 使用率，通常是所有 Pod 的 CPU 使用情况的平均值（例如 75%）。</li>
+<li><strong>targetMetricValue</strong>：你在 HPA 配置中指定的目标 CPU 利用率（例如 65%）。</li>
+</ol>
+<h3 id="例子："><a href="#例子：" class="headerlink" title="例子："></a>例子：</h3><p>假设：</p>
+<ul>
+<li>当前有 <strong>4 个 Pod</strong>。</li>
+<li>目标 CPU 利用率为 **65%**。</li>
+<li>当前的平均 CPU 利用率为 **80%**。</li>
+</ul>
+<p>计算公式为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desiredReplicas = ceil[4 * (80 / 65)] = ceil[4 * 1.23] = ceil[4.92] = 5</span><br></pre></td></tr></table></figure>
+<p>因此，HPA 将扩展至 <strong>5 个 Pod</strong>，以保证 CPU 利用率降到你设置的目标值附近。</p>
+<h3 id="扩展和缩容过程："><a href="#扩展和缩容过程：" class="headerlink" title="扩展和缩容过程："></a>扩展和缩容过程：</h3><ul>
+<li><strong>扩展</strong>：当当前的 CPU 使用率高于目标值时，HPA 会增加 Pod 数量。</li>
+<li><strong>缩容</strong>：如果当前的 CPU 使用率低于目标值，HPA 会减少 Pod 数量，但缩容通常有冷却时间，避免频繁调整。</li>
+</ul>
+<h3 id="配置示例："><a href="#配置示例：" class="headerlink" title="配置示例："></a>配置示例：</h3><p>在 HPA 配置文件中，设置 <code>targetCPUUtilizationPercentage</code>，例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">autoscaling/v2</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">HorizontalPodAutoscaler</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-hpa</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">scaleTargetRef:</span></span><br><span class="line">    <span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">my-deployment</span></span><br><span class="line">  <span class="attr">minReplicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">maxReplicas:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">metrics:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">Resource</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">cpu</span></span><br><span class="line">      <span class="attr">target:</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">Utilization</span></span><br><span class="line">        <span class="attr">averageUtilization:</span> <span class="number">65</span>  <span class="comment"># 目标 CPU 利用率</span></span><br></pre></td></tr></table></figure>
+<p>此配置将基于 CPU 利用率，动态调整 Pod 数量，使整体利用率保持在 65% 附近。</p>
+<p>这种机制确保集群资源得到充分利用，同时避免单个 Pod 过载或资源浪费。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/21/nmap%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1588,84 +1681,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/09/29/k8s-api-server%E6%8E%A5%E5%8F%A3%E4%BA%A4%E4%BA%92/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/09/29/k8s-api-server%E6%8E%A5%E5%8F%A3%E4%BA%A4%E4%BA%92/" class="post-title-link" itemprop="url">k8s api server接口交互</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-09-29 12:15:44" itemprop="dateCreated datePublished" datetime="2024-09-29T12:15:44+08:00">2024-09-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-01-15 18:52:03" itemprop="dateModified" datetime="2025-01-15T18:52:03+08:00">2025-01-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="apiserver"><a href="#apiserver" class="headerlink" title="apiserver"></a>apiserver</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://wghdr.top/?p=335</span><br></pre></td></tr></table></figure>
-
-<h3 id="查看api方法："><a href="#查看api方法：" class="headerlink" title="查看api方法："></a>查看api方法：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">kubectl get --raw /</span><br><span class="line">kubectl get --raw /apis/apps/v1 | jq .resources[].name</span><br><span class="line"></span><br><span class="line">或者开启apiserver</span><br><span class="line">kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line"><span class="comment">#默认资源</span></span><br><span class="line">curl 127.0.0.1:8000/apis/v1</span><br><span class="line">curl http://127.0.0.1:8080/apis/batch/v1</span><br><span class="line"></span><br><span class="line"><span class="comment">#扩展资源</span></span><br><span class="line">curl 127.0.0.1:8001/apis/apps/v1</span><br><span class="line"></span><br><span class="line"><span class="comment">#通过kubectl获取url请求</span></span><br><span class="line">kubectl get pod &#123;podName&#125; -v=9</span><br><span class="line"></span><br><span class="line"><span class="comment">#短连接</span></span><br><span class="line">- kubectl get xxx</span><br><span class="line"><span class="comment">#长连接</span></span><br><span class="line">- watch接口是对list接口的一种改进，在调用watch接口后，首先会一次性返回list的数据，同时会保持会话连接，后续的接口对象的curd，都会产生事件由apiserver将变更数据推送给调用端，调用端接收数据后，再</span><br><span class="line">更新初始接收到的list的全量数据以及其他操作</span><br><span class="line"><span class="comment">#client-go informer机制</span></span><br><span class="line">- watch依然比较麻烦，毕竟list获取的数据以及后续watch到的数据，需要调用端在内部处理和更新缓存。</span><br></pre></td></tr></table></figure>
-
-<h3 id="api结构及原理"><a href="#api结构及原理" class="headerlink" title="api结构及原理"></a>api结构及原理</h3><p><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/55.jpg?raw=true"><br><img src="https://github.com/shispring/shispring.github.io/blob/main/2024/08/28/Anolis-OS-8%E5%AE%89%E8%A3%85%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E9%9B%86/87.jpg?raw=true"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1737,7 +1752,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">172</span>
+          <span class="site-state-item-count">173</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1750,7 +1765,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">23</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

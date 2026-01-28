@@ -14772,4 +14772,100 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>限流实操</title>
+    <url>/2026/01/28/%E9%99%90%E6%B5%81%E5%AE%9E%E6%93%8D/</url>
+    <content><![CDATA[<h2 id="限流算法"><a href="#限流算法" class="headerlink" title="限流算法"></a>限流算法</h2><table>
+<thead>
+<tr>
+<th>算法名称</th>
+<th>原理一句话</th>
+<th>优点</th>
+<th>缺点</th>
+<th>典型案例 &#x2F; 场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>计数器（Counter）</strong></td>
+<td>累加请求数，超过阈值拒绝</td>
+<td>实现极简单</td>
+<td>无时间维度；洪峰瞬间失效</td>
+<td>Demo &#x2F; 教学</td>
+</tr>
+<tr>
+<td><strong>固定窗口（Fixed Window）</strong></td>
+<td>每个时间窗口内最多 N 次</td>
+<td>简单、易理解</td>
+<td>窗口边界突刺</td>
+<td>简单接口限流</td>
+</tr>
+<tr>
+<td><strong>滑动窗口（Sliding Window）</strong></td>
+<td>统计最近 T 时间内请求数</td>
+<td>平滑、精确</td>
+<td>实现复杂、存储成本高</td>
+<td>SDK &#x2F; API 网关</td>
+</tr>
+<tr>
+<td><strong>漏桶（Leaky Bucket）</strong></td>
+<td>请求进桶，固定速率漏出</td>
+<td>输出稳定、可整形</td>
+<td>不支持突发流量</td>
+<td>网络整形、QoS</td>
+</tr>
+<tr>
+<td>⭐ <strong>令牌桶（Token Bucket）</strong></td>
+<td>定速生成令牌，请求消耗</td>
+<td>支持突发、弹性好</td>
+<td>实现略复杂</td>
+<td><strong>生产主流方案</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>限流 ≠ 平滑<br>限流 &#x3D; 允许爆发，但要兜底</p>
+</blockquote>
+<h2 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h2><h3 id="核心参数"><a href="#核心参数" class="headerlink" title="核心参数"></a>核心参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>rate</td>
+<td>每秒生成多少令牌</td>
+</tr>
+<tr>
+<td>capacity</td>
+<td>桶最大容量</td>
+</tr>
+<tr>
+<td>tokens</td>
+<td>当前可用令牌</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>上次更新时间</td>
+</tr>
+</tbody></table>
+<h3 id="行为特性"><a href="#行为特性" class="headerlink" title="行为特性"></a>行为特性</h3><ul>
+<li>平时没流量 → 令牌累积</li>
+<li>突发流量 → 快速消耗</li>
+<li>超出能力 → 直接拒绝（429）</li>
+</ul>
+<blockquote>
+<p><strong>Lua 在 Redis 中是：单线程、原子执行</strong></p>
+</blockquote>
+<h2 id="结合-docker-compose：完整加载流程"><a href="#结合-docker-compose：完整加载流程" class="headerlink" title="结合 docker-compose：完整加载流程"></a>结合 docker-compose：完整加载流程</h2><h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">rate-limit-demo/</span><br><span class="line">├── app.py</span><br><span class="line">├── token_bucket.lua</span><br><span class="line">├── Dockerfile</span><br><span class="line">└── docker-compose.yml</span><br></pre></td></tr></table></figure>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># cat token_bucket.lua</span><br><span class="line">-- token_bucket.lua</span><br><span class="line">local key = KEYS[1]</span><br><span class="line">local rate = tonumber(ARGV[1])</span><br><span class="line">local capacity = tonumber(ARGV[2])</span><br><span class="line">local now = tonumber(ARGV[3])</span><br><span class="line">local requested = tonumber(ARGV[4])</span><br><span class="line"></span><br><span class="line">local data = redis.call(&quot;HMGET&quot;, key, &quot;tokens&quot;, &quot;timestamp&quot;)</span><br><span class="line">local tokens = tonumber(data[1]) or capacity</span><br><span class="line">local last = tonumber(data[2]) or now</span><br><span class="line"></span><br><span class="line">-- 生成新令牌</span><br><span class="line">local delta = math.max(0, now - last)</span><br><span class="line">tokens = math.min(capacity, tokens + delta * rate)</span><br><span class="line"></span><br><span class="line">if tokens &lt; requested then</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 0</span><br><span class="line">else</span><br><span class="line">    tokens = tokens - requested</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 1</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"># cat app.py</span><br><span class="line">from fastapi import FastAPI, Request, HTTPException</span><br><span class="line">import redis</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">r = redis.Redis(host=&quot;redis&quot;, port=6379, decode_responses=True)</span><br><span class="line"></span><br><span class="line">with open(&quot;token_bucket.lua&quot;) as f:</span><br><span class="line">    LUA_SCRIPT = r.register_script(f.read())</span><br><span class="line"></span><br><span class="line">RATE = 5</span><br><span class="line">CAPACITY = 10</span><br><span class="line"></span><br><span class="line">@app.get(&quot;/api&quot;)</span><br><span class="line">def api(request: Request):</span><br><span class="line">    now = int(time.time())</span><br><span class="line">    allowed = LUA_SCRIPT(</span><br><span class="line">        keys=[&quot;token_bucket:api&quot;],</span><br><span class="line">        args=[RATE, CAPACITY, now, 1]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    if allowed == 0:</span><br><span class="line">        raise HTTPException(status_code=429, detail=&quot;Too Many Requests&quot;)</span><br><span class="line"></span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;ok&quot;&#125;</span><br><span class="line"></span><br><span class="line"># cat Dockerfile</span><br><span class="line">FROM docker.io/python:3.12.9</span><br><span class="line"></span><br><span class="line">WORKDIR /app</span><br><span class="line">COPY app.py token_bucket.lua ./</span><br><span class="line">RUN pip install fastapi uvicorn redis</span><br><span class="line"></span><br><span class="line">CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</span><br><span class="line"></span><br><span class="line"># cat docker-compose.yml</span><br><span class="line">services:</span><br><span class="line">  api:</span><br><span class="line">    build: .</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;8000:8000&quot;</span><br><span class="line">    depends_on:</span><br><span class="line">      - redis</span><br><span class="line"></span><br><span class="line">  redis:</span><br><span class="line">    image: docker.io/redis:7.4.7</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;6379:6379&quot;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="启动顺序"><a href="#启动顺序" class="headerlink" title="启动顺序"></a>启动顺序</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker-compose up</span><br><span class="line">   ↓</span><br><span class="line">redis 容器启动</span><br><span class="line">   ↓</span><br><span class="line">api 容器启动</span><br><span class="line">   ↓</span><br><span class="line">Python import app.py</span><br><span class="line">   ↓</span><br><span class="line">读取 token_bucket.lua</span><br><span class="line">   ↓</span><br><span class="line">SCRIPT LOAD 到 Redis</span><br><span class="line">   ↓</span><br><span class="line">返回 SHA1</span><br><span class="line">   ↓</span><br><span class="line">后续请求 → EVALSHA</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="启动及验证命令"><a href="#启动及验证命令" class="headerlink" title="启动及验证命令"></a>启动及验证命令</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#start</span><br><span class="line">docker compose up --build</span><br><span class="line"></span><br><span class="line">#观察token变化</span><br><span class="line">while true; do   curl http://localhost:8000/api;  sleep 0.1; done</span><br><span class="line"></span><br><span class="line">#在宿主机上观测</span><br><span class="line">#装客户端：yum install -y redis</span><br><span class="line">watch -n 0.1 &quot;redis-cli HGETALL token_bucket:api&quot;</span><br><span class="line"></span><br><span class="line">#替代ab的压测方案</span><br><span class="line">hey -n 100 -c 5 -q 5 http://localhost:8000/api</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>service</tag>
+      </tags>
+  </entry>
 </search>
