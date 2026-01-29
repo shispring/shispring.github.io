@@ -2028,7 +2028,7 @@
 <hr>
 <h2 id="五、实战建议与技巧"><a href="#五、实战建议与技巧" class="headerlink" title="五、实战建议与技巧"></a>五、实战建议与技巧</h2><ul>
 <li><p>🔹 <strong>查看当前连接情况</strong></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">watch -n1 <span class="string">&#x27;ipvsadm -Ln --rate&#x27;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#查看当前 IPVS 模块是否生效</span></span><br><span class="line">lsmod | grep ip_vs</span><br><span class="line"></span><br><span class="line"><span class="comment"># LVS 层：</span></span><br><span class="line"><span class="comment">#查看速率（瞬时流量）</span></span><br><span class="line">ipvsadm -L -n --rate</span><br><span class="line"><span class="comment">#查看更详细信息（调度权重、状态）</span></span><br><span class="line">ipvsadm -L -n --stats --rate</span><br><span class="line"></span><br><span class="line"><span class="comment"># conntrack 层</span></span><br><span class="line">conntrack -L | <span class="built_in">wc</span> -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络层</span></span><br><span class="line">ss -tn state established</span><br><span class="line">	</span><br><span class="line">watch -n1 <span class="string">&#x27;ipvsadm -Ln --rate&#x27;</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>🔹 <strong>快速找出 VIP 所属 real servers</strong></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -Ln | grep -A3 <span class="string">&#x27;100.104.0.1:443&#x27;</span></span><br></pre></td></tr></table></figure>
@@ -2036,8 +2036,8 @@
 <li><p>🔹 <strong>配合 Kubernetes 调试</strong></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get svc -A</span><br><span class="line">ipvsadm -Ln | grep &lt;ClusterIP&gt;</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>🔹 <strong>清空所有 IPVS 规则</strong></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -C</span><br></pre></td></tr></table></figure></li>
+<li><p>🔹 ** IPVS 规则**</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#清空所有规则</span></span><br><span class="line">ipvsadm -C</span><br><span class="line"></span><br><span class="line"><span class="comment">#清空统计计数（不影响转发）   </span></span><br><span class="line">ipvsadm -Z</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看配置</span></span><br><span class="line">ipvsadm -S</span><br></pre></td></tr></table></figure></li>
 </ul>
 <hr>
 <h2 id="六、总结与思考"><a href="#六、总结与思考" class="headerlink" title="六、总结与思考"></a>六、总结与思考</h2><table>
