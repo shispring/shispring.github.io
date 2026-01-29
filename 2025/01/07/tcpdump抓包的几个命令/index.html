@@ -22,13 +22,13 @@
 
   <meta name="description" content="选项 -i any 监听所有的网卡接口，用来查看是否有网络流量 -i eth0 只监听eth0网卡接口 -D 显示可用的接口列表 -n 不要解析主机名 -nn 不要解析主机名或者端口名 -q 显示更少的输出(更加quiet) -t 输出可读的时间戳 -tttt 输出最大程度可读的时间戳 -X 以hex和ASCII两种形式显示包的内容 -XX 与**-X**类似，增加以太网header的显示 -v,">
 <meta property="og:type" content="article">
-<meta property="og:title" content="tcpdump抓包的几个命令">
+<meta property="og:title" content="tcpdump&#x2F;tshark抓包的几个命令">
 <meta property="og:url" content="https://shispring.github.io/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="选项 -i any 监听所有的网卡接口，用来查看是否有网络流量 -i eth0 只监听eth0网卡接口 -D 显示可用的接口列表 -n 不要解析主机名 -nn 不要解析主机名或者端口名 -q 显示更少的输出(更加quiet) -t 输出可读的时间戳 -tttt 输出最大程度可读的时间戳 -X 以hex和ASCII两种形式显示包的内容 -XX 与**-X**类似，增加以太网header的显示 -v,">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-01-07T08:41:59.000Z">
-<meta property="article:modified_time" content="2026-01-29T10:13:34.852Z">
+<meta property="article:modified_time" content="2026-01-29T10:48:32.858Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="network">
 <meta name="twitter:card" content="summary">
@@ -46,7 +46,7 @@
   };
 </script>
 
-  <title>tcpdump抓包的几个命令 | Hexo</title>
+  <title>tcpdump/tshark抓包的几个命令 | Hexo</title>
   
 
 
@@ -203,7 +203,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          tcpdump抓包的几个命令
+          tcpdump/tshark抓包的几个命令
         </h1>
 
         <div class="post-meta">
@@ -220,7 +220,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-01-29 18:13:34" itemprop="dateModified" datetime="2026-01-29T18:13:34+08:00">2026-01-29</time>
+                <time title="修改时间：2026-01-29 18:48:32" itemprop="dateModified" datetime="2026-01-29T18:48:32+08:00">2026-01-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -325,6 +325,86 @@
 </ul>
 <hr>
 <p><a target="_blank" rel="noopener" href="https://github.com/mylxsw/growing-up/blob/master/doc/tcpdump%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B.md">github参考</a></p>
+<hr>
+<h1 id="一、按「包序号（frame-number）」精确查看（最常用）"><a href="#一、按「包序号（frame-number）」精确查看（最常用）" class="headerlink" title="一、按「包序号（frame number）」精确查看（最常用）"></a>一、按「包序号（frame number）」精确查看（最常用）</h1><h2 id="1️⃣-只看第-N-个包"><a href="#1️⃣-只看第-N-个包" class="headerlink" title="1️⃣ 只看第 N 个包"></a>1️⃣ 只看第 N 个包</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>👉 等价于 Wireshark 里点第 123 行<br>👉 输出<strong>只会有这一帧</strong></p>
+<hr>
+<h2 id="2️⃣-看一个包区间（比如-120-130）"><a href="#2️⃣-看一个包区间（比如-120-130）" class="headerlink" title="2️⃣ 看一个包区间（比如 120 ~ 130）"></a>2️⃣ 看一个包区间（比如 120 ~ 130）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number &gt;= 120 &amp;&amp; frame.number &lt;= 130&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这是你现在<strong>最应该用的方式</strong>之一。</p>
+<hr>
+<h2 id="3️⃣-只-dump-某一帧的完整细节（替代-V-洪水）"><a href="#3️⃣-只-dump-某一帧的完整细节（替代-V-洪水）" class="headerlink" title="3️⃣ 只 dump 某一帧的完整细节（替代 -V 洪水）"></a>3️⃣ 只 dump 某一帧的完整细节（替代 -V 洪水）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span> -V</span><br></pre></td></tr></table></figure>
+
+<p>📌 正确姿势：</p>
+<blockquote>
+<p><strong>先用 -Y 定位，再用 -V 展开</strong></p>
+</blockquote>
+<hr>
+<h2 id="4️⃣-看某一帧的原始十六进制数据"><a href="#4️⃣-看某一帧的原始十六进制数据" class="headerlink" title="4️⃣ 看某一帧的原始十六进制数据"></a>4️⃣ 看某一帧的原始十六进制数据</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span> -x</span><br></pre></td></tr></table></figure>
+
+<p>如果你在看：</p>
+<ul>
+<li>header 是否被改</li>
+<li>payload 是否是预期内容<br>这个很有用。</li>
+</ul>
+<hr>
+<h1 id="二、按「时间」精确查看（定位问题窗口）"><a href="#二、按「时间」精确查看（定位问题窗口）" class="headerlink" title="二、按「时间」精确查看（定位问题窗口）"></a>二、按「时间」精确查看（定位问题窗口）</h1><h2 id="1️⃣-查看包的时间戳（先扫一眼）"><a href="#1️⃣-查看包的时间戳（先扫一眼）" class="headerlink" title="1️⃣ 查看包的时间戳（先扫一眼）"></a>1️⃣ 查看包的时间戳（先扫一眼）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e frame.number -e frame.time</span><br></pre></td></tr></table></figure>
+
+<p>常用来确定：</p>
+<blockquote>
+<p>问题发生在第几秒？</p>
+</blockquote>
+<hr>
+<h2 id="2️⃣-按时间范围过滤（重点）"><a href="#2️⃣-按时间范围过滤（重点）" class="headerlink" title="2️⃣ 按时间范围过滤（重点）"></a>2️⃣ 按时间范围过滤（<strong>重点</strong>）</h2><h3 id="示例：只看-10-01-30-～-10-01-32-之间的包"><a href="#示例：只看-10-01-30-～-10-01-32-之间的包" class="headerlink" title="示例：只看 10:01:30 ～ 10:01:32 之间的包"></a>示例：只看 10:01:30 ～ 10:01:32 之间的包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&#x27;frame.time &gt;= &quot;2026-01-28 10:01:30&quot; &amp;&amp; frame.time &lt;= &quot;2026-01-28 10:01:32&quot;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>📌 时间格式要和 <code>frame.time</code> 输出一致</p>
+<hr>
+<h2 id="3️⃣-用相对时间（更工程化）"><a href="#3️⃣-用相对时间（更工程化）" class="headerlink" title="3️⃣ 用相对时间（更工程化）"></a>3️⃣ 用相对时间（更工程化）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e frame.number -e frame.time_relative</span><br></pre></td></tr></table></figure>
+
+<p>然后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.time_relative &gt;= 12.5 &amp;&amp; frame.time_relative &lt;= 13.0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>👉 <strong>非常适合定位超时 &#x2F; 重传窗口</strong></p>
+<hr>
+<h1 id="三、按「连接-流」过滤（99-排障都该用）"><a href="#三、按「连接-流」过滤（99-排障都该用）" class="headerlink" title="三、按「连接 &#x2F; 流」过滤（99% 排障都该用）"></a>三、按「连接 &#x2F; 流」过滤（99% 排障都该用）</h1><h2 id="1️⃣-按-TCP-四元组过滤"><a href="#1️⃣-按-TCP-四元组过滤" class="headerlink" title="1️⃣ 按 TCP 四元组过滤"></a>1️⃣ 按 TCP 四元组过滤</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&quot;ip.src==10.0.0.1 &amp;&amp; ip.dst==10.0.0.2 &amp;&amp; tcp.port==443&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2️⃣-按-TCP-Stream（强烈推荐）"><a href="#2️⃣-按-TCP-Stream（强烈推荐）" class="headerlink" title="2️⃣ 按 TCP Stream（强烈推荐）"></a>2️⃣ 按 TCP Stream（<strong>强烈推荐</strong>）</h2><h3 id="先列出所有-TCP-stream"><a href="#先列出所有-TCP-stream" class="headerlink" title="先列出所有 TCP stream"></a>先列出所有 TCP stream</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e tcp.stream | <span class="built_in">sort</span> -n | <span class="built_in">uniq</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="假设你要看-stream-5："><a href="#假设你要看-stream-5：" class="headerlink" title="假设你要看 stream 5："></a>假设你要看 stream 5：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;tcp.stream == 5&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 Wireshark 里 “Follow TCP Stream”<br>👉 命令行就是这个</p>
+</blockquote>
+<hr>
+<h2 id="3️⃣-同时限制-stream-包序号"><a href="#3️⃣-同时限制-stream-包序号" class="headerlink" title="3️⃣ 同时限制 stream + 包序号"></a>3️⃣ 同时限制 stream + 包序号</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&quot;tcp.stream == 5 &amp;&amp; frame.number &gt;= 200 &amp;&amp; frame.number &lt;= 260&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>这是“工程级精确切片”</strong></p>
+<hr>
+<h1 id="四、只看你关心的字段（避免-V）"><a href="#四、只看你关心的字段（避免-V）" class="headerlink" title="四、只看你关心的字段（避免 -V）"></a>四、只看你关心的字段（避免 -V）</h1><h2 id="1️⃣-只看-TCP-关键字段"><a href="#1️⃣-只看-TCP-关键字段" class="headerlink" title="1️⃣ 只看 TCP 关键字段"></a>1️⃣ 只看 TCP 关键字段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -T fields \</span><br><span class="line">  -e frame.number \</span><br><span class="line">  -e frame.time_relative \</span><br><span class="line">  -e ip.src \</span><br><span class="line">  -e ip.dst \</span><br><span class="line">  -e tcp.seq \</span><br><span class="line">  -e tcp.ack \</span><br><span class="line">  -e tcp.flags</span><br></pre></td></tr></table></figure>
+
+<p>👉 非常适合：</p>
+<ul>
+<li>看重传</li>
+<li>看乱序</li>
+<li>看 RST &#x2F; FIN</li>
+</ul>
+<hr>
+<h2 id="2️⃣-只看-HTTP-状态码-Host"><a href="#2️⃣-只看-HTTP-状态码-Host" class="headerlink" title="2️⃣ 只看 HTTP 状态码 &#x2F; Host"></a>2️⃣ 只看 HTTP 状态码 &#x2F; Host</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y http.response \</span><br><span class="line">  -T fields \</span><br><span class="line">  -e frame.number \</span><br><span class="line">  -e http.response.code \</span><br><span class="line">  -e http.host \</span><br><span class="line">  -e http.request.uri</span><br></pre></td></tr></table></figure>
+
+<p>📌 用来分析：</p>
+<ul>
+<li>308 &#x2F; 502 &#x2F; 429</li>
+<li>回源问题</li>
+<li>ingress 行为</li>
+</ul>
+<hr>
+<h1 id="五、tcpdump-离线分析（配合用）"><a href="#五、tcpdump-离线分析（配合用）" class="headerlink" title="五、tcpdump 离线分析（配合用）"></a>五、tcpdump 离线分析（配合用）</h1><p>你也可以用 tcpdump <strong>先裁剪，再用 tshark 看</strong></p>
+<h2 id="1️⃣-裁剪某时间段"><a href="#1️⃣-裁剪某时间段" class="headerlink" title="1️⃣ 裁剪某时间段"></a>1️⃣ 裁剪某时间段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r file.pcap -w slice.pcap \</span><br><span class="line">  <span class="string">&#x27;tcp and (host 10.0.0.1)&#x27;</span> \</span><br><span class="line">  -G 2 -W 1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2️⃣-裁剪某个流（近似）"><a href="#2️⃣-裁剪某个流（近似）" class="headerlink" title="2️⃣ 裁剪某个流（近似）"></a>2️⃣ 裁剪某个流（近似）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r file.pcap -w flow.pcap \</span><br><span class="line">  <span class="string">&#x27;tcp and src host 10.0.0.1 and dst host 10.0.0.2&#x27;</span></span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -409,7 +489,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E9%A1%B9"><span class="nav-number">1.</span> <span class="nav-text">选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tcpdump-%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">tcpdump 一些命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%93%E5%8C%85ingress%E8%AF%B7%E6%B1%82case"><span class="nav-number">4.</span> <span class="nav-text">抓包ingress请求case</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%93%E5%8C%85%E8%84%9A%E6%9C%AC%E5%8F%8A%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">5.</span> <span class="nav-text">抓包脚本及注意事项</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E9%A1%B9"><span class="nav-number">1.</span> <span class="nav-text">选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tcpdump-%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">tcpdump 一些命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%93%E5%8C%85ingress%E8%AF%B7%E6%B1%82case"><span class="nav-number">4.</span> <span class="nav-text">抓包ingress请求case</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%93%E5%8C%85%E8%84%9A%E6%9C%AC%E5%8F%8A%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">5.</span> <span class="nav-text">抓包脚本及注意事项</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%8C%89%E3%80%8C%E5%8C%85%E5%BA%8F%E5%8F%B7%EF%BC%88frame-number%EF%BC%89%E3%80%8D%E7%B2%BE%E7%A1%AE%E6%9F%A5%E7%9C%8B%EF%BC%88%E6%9C%80%E5%B8%B8%E7%94%A8%EF%BC%89"><span class="nav-number"></span> <span class="nav-text">一、按「包序号（frame number）」精确查看（最常用）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E5%8F%AA%E7%9C%8B%E7%AC%AC-N-%E4%B8%AA%E5%8C%85"><span class="nav-number">1.</span> <span class="nav-text">1️⃣ 只看第 N 个包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E7%9C%8B%E4%B8%80%E4%B8%AA%E5%8C%85%E5%8C%BA%E9%97%B4%EF%BC%88%E6%AF%94%E5%A6%82-120-130%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">2️⃣ 看一个包区间（比如 120 ~ 130）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E5%8F%AA-dump-%E6%9F%90%E4%B8%80%E5%B8%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E7%BB%86%E8%8A%82%EF%BC%88%E6%9B%BF%E4%BB%A3-V-%E6%B4%AA%E6%B0%B4%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">3️⃣ 只 dump 某一帧的完整细节（替代 -V 洪水）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%EF%B8%8F%E2%83%A3-%E7%9C%8B%E6%9F%90%E4%B8%80%E5%B8%A7%E7%9A%84%E5%8E%9F%E5%A7%8B%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E6%95%B0%E6%8D%AE"><span class="nav-number">4.</span> <span class="nav-text">4️⃣ 看某一帧的原始十六进制数据</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8C%89%E3%80%8C%E6%97%B6%E9%97%B4%E3%80%8D%E7%B2%BE%E7%A1%AE%E6%9F%A5%E7%9C%8B%EF%BC%88%E5%AE%9A%E4%BD%8D%E9%97%AE%E9%A2%98%E7%AA%97%E5%8F%A3%EF%BC%89"><span class="nav-number"></span> <span class="nav-text">二、按「时间」精确查看（定位问题窗口）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E6%9F%A5%E7%9C%8B%E5%8C%85%E7%9A%84%E6%97%B6%E9%97%B4%E6%88%B3%EF%BC%88%E5%85%88%E6%89%AB%E4%B8%80%E7%9C%BC%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">1️⃣ 查看包的时间戳（先扫一眼）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E6%8C%89%E6%97%B6%E9%97%B4%E8%8C%83%E5%9B%B4%E8%BF%87%E6%BB%A4%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">2️⃣ 按时间范围过滤（重点）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E5%8F%AA%E7%9C%8B-10-01-30-%EF%BD%9E-10-01-32-%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%85"><span class="nav-number">2.1.</span> <span class="nav-text">示例：只看 10:01:30 ～ 10:01:32 之间的包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E7%94%A8%E7%9B%B8%E5%AF%B9%E6%97%B6%E9%97%B4%EF%BC%88%E6%9B%B4%E5%B7%A5%E7%A8%8B%E5%8C%96%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">3️⃣ 用相对时间（更工程化）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%8C%89%E3%80%8C%E8%BF%9E%E6%8E%A5-%E6%B5%81%E3%80%8D%E8%BF%87%E6%BB%A4%EF%BC%8899-%E6%8E%92%E9%9A%9C%E9%83%BD%E8%AF%A5%E7%94%A8%EF%BC%89"><span class="nav-number"></span> <span class="nav-text">三、按「连接 &#x2F; 流」过滤（99% 排障都该用）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E6%8C%89-TCP-%E5%9B%9B%E5%85%83%E7%BB%84%E8%BF%87%E6%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">1️⃣ 按 TCP 四元组过滤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E6%8C%89-TCP-Stream%EF%BC%88%E5%BC%BA%E7%83%88%E6%8E%A8%E8%8D%90%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">2️⃣ 按 TCP Stream（强烈推荐）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E5%88%97%E5%87%BA%E6%89%80%E6%9C%89-TCP-stream"><span class="nav-number">2.1.</span> <span class="nav-text">先列出所有 TCP stream</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%87%E8%AE%BE%E4%BD%A0%E8%A6%81%E7%9C%8B-stream-5%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">假设你要看 stream 5：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E5%90%8C%E6%97%B6%E9%99%90%E5%88%B6-stream-%E5%8C%85%E5%BA%8F%E5%8F%B7"><span class="nav-number">3.</span> <span class="nav-text">3️⃣ 同时限制 stream + 包序号</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8F%AA%E7%9C%8B%E4%BD%A0%E5%85%B3%E5%BF%83%E7%9A%84%E5%AD%97%E6%AE%B5%EF%BC%88%E9%81%BF%E5%85%8D-V%EF%BC%89"><span class="nav-number"></span> <span class="nav-text">四、只看你关心的字段（避免 -V）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E5%8F%AA%E7%9C%8B-TCP-%E5%85%B3%E9%94%AE%E5%AD%97%E6%AE%B5"><span class="nav-number">1.</span> <span class="nav-text">1️⃣ 只看 TCP 关键字段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E5%8F%AA%E7%9C%8B-HTTP-%E7%8A%B6%E6%80%81%E7%A0%81-Host"><span class="nav-number">2.</span> <span class="nav-text">2️⃣ 只看 HTTP 状态码 &#x2F; Host</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81tcpdump-%E7%A6%BB%E7%BA%BF%E5%88%86%E6%9E%90%EF%BC%88%E9%85%8D%E5%90%88%E7%94%A8%EF%BC%89"><span class="nav-number"></span> <span class="nav-text">五、tcpdump 离线分析（配合用）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E8%A3%81%E5%89%AA%E6%9F%90%E6%97%B6%E9%97%B4%E6%AE%B5"><span class="nav-number">1.</span> <span class="nav-text">1️⃣ 裁剪某时间段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-%E8%A3%81%E5%89%AA%E6%9F%90%E4%B8%AA%E6%B5%81%EF%BC%88%E8%BF%91%E4%BC%BC%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">2️⃣ 裁剪某个流（近似）</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
