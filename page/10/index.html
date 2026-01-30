@@ -1896,7 +1896,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-01-29 18:48:32" itemprop="dateModified" datetime="2026-01-29T18:48:32+08:00">2026-01-29</time>
+                <time title="修改时间：2026-01-30 12:07:03" itemprop="dateModified" datetime="2026-01-30T12:07:03+08:00">2026-01-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -2074,6 +2074,13 @@
 
 <hr>
 <h2 id="2️⃣-裁剪某个流（近似）"><a href="#2️⃣-裁剪某个流（近似）" class="headerlink" title="2️⃣ 裁剪某个流（近似）"></a>2️⃣ 裁剪某个流（近似）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r file.pcap -w flow.pcap \</span><br><span class="line">  <span class="string">&#x27;tcp and src host 10.0.0.1 and dst host 10.0.0.2&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="tcpdump-tshark-RTT"><a href="#tcpdump-tshark-RTT" class="headerlink" title="tcpdump &#x2F; tshark&#x2F; RTT"></a>tcpdump &#x2F; tshark&#x2F; RTT</h1><blockquote>
+<p>tcpdump 看到的是 “世界发生了什么”<br>tshark 看到的是 “我推断发生了什么”<br>RTT（Round Trip Time）&#x3D; 一个数据包从客户端发出 → 到服务端 → 服务端回应 → 客户端收到 的总耗时<br>RTT &#x3D; 网络 + 协议栈 + 应用处理 + 调度 + 回包</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">✅ tshark 可信的前提</span><br><span class="line">• 单接口抓包（如 -i eth0）</span><br><span class="line">• 或抓在真正的瓶颈点</span><br><span class="line">• client 侧</span><br><span class="line">• server 侧</span><br><span class="line">• 不混 lo / veth / bridge</span><br><span class="line"></span><br><span class="line">✅ tshark 非常适合：</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.retransmission&quot;</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.fast_retransmission&quot;</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.ack_rtt&quot;</span><br><span class="line"></span><br><span class="line">👉 前提：抓包点干净</span><br></pre></td></tr></table></figure>
+
 
       
     </div>
