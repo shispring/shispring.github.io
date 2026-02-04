@@ -184,6 +184,76 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/nginx-demo-service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/08/nginx-demo-service/" class="post-title-link" itemprop="url">nginx demo service</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-08 20:13:31 / 修改时间：20:15:11" itemprop="dateCreated datePublished" datetime="2024-11-08T20:13:31+08:00">2024-11-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx/" itemprop="url" rel="index"><span itemprop="name">nginx</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="配置nginx服务"><a href="#配置nginx服务" class="headerlink" title="配置nginx服务"></a>配置nginx服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOL &gt; /Users/xxx/share/nginx.conf</span><br><span class="line">events &#123;&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name localhost;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root /usr/share/nginx/html;</span><br><span class="line">            autoindex on; # 启用目录列表功能</span><br><span class="line">            autoindex_exact_size off; # 以KB或MB显示文件大小</span><br><span class="line">            autoindex_localtime on; # 以本地时间显示文件的修改时间</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOL</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动docker服务"><a href="#启动docker服务" class="headerlink" title="启动docker服务"></a>启动docker服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx</span><br><span class="line"></span><br><span class="line">docker run --name nginx-share -d \</span><br><span class="line">    -p 8080:80 \</span><br><span class="line">    -v /Users/xxx/share:/usr/share/nginx/html \</span><br><span class="line">    -v /Users/xxx/share/nginx.conf:/etc/nginx/nginx.conf:ro \</span><br><span class="line">    nginx</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/11/08/k8s%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E4%BA%8C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1225,147 +1295,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/10/29/k8s-patch-%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/29/k8s-patch-%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">k8s patch 用法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-10-29 13:59:10" itemprop="dateCreated datePublished" datetime="2024-10-29T13:59:10+08:00">2024-10-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-10-29 18:15:14" itemprop="dateModified" datetime="2025-10-29T18:15:14+08:00">2025-10-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="3-种-patch-类型"><a href="#3-种-patch-类型" class="headerlink" title="3 种 patch 类型"></a>3 种 patch 类型</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">参考：</span><br><span class="line"> https://xie.infoq.cn/article/8fbdf51461881b87333b904cf</span><br><span class="line"></span><br><span class="line">1 strategic patch（默认）：根据不同字段 patchStrategy 决定具体的合并 patch 策略。 Strategic merge patch 并非通用的 RFC 标准，而是 Kubernetes 特有的一种更新 Kubernetes 资源对象的方式。与 JSON merge patch 和 JSON patch 相比，strategic merge patch 更为强大。</span><br><span class="line"></span><br><span class="line">2 JSON merge patch：遵循 JSON Merge Patch, RFC 7386[1] 规范，根据 patch 中提供的期望更改的字段及其对应的值，更新到目标中。</span><br><span class="line"></span><br><span class="line">3 JSON patch：遵循 JSON Patch, RFC 6902[2] 规范，通过明确的指令表示具体的操作。</span><br><span class="line">`kubectl patch` 的 `--type=&#x27;json&#x27;` 方式是一种非常灵活的 JSON Patch 操作，可以实现 添加、删除、更新多个字段 的功能。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="使用-JSON-patch-更新资源"><a href="#使用-JSON-patch-更新资源" class="headerlink" title="使用 JSON patch 更新资源"></a>使用 JSON patch 更新资源</h2><p>JSON Patch 遵循 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6902">RFC 6902</a> 标准。常用操作有：  </p>
-<ul>
-<li><code>add</code>：向指定路径添加新字段。</li>
-<li><code>remove</code>：删除指定路径的字段。</li>
-<li><code>replace</code>：更新已有字段的值。</li>
-<li><code>copy</code>：复制一个字段到另一个位置。</li>
-<li><code>move</code>：移动字段。</li>
-<li><code>test</code>：用于断言字段是否存在，常用于保证安全更新。</li>
-</ul>
-<hr>
-<h3 id="1-更新已有字段的值（replace）"><a href="#1-更新已有字段的值（replace）" class="headerlink" title="1. 更新已有字段的值（replace）"></a>1. 更新已有字段的值（<code>replace</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[&#123;&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1.2 TLSv1.3&quot;&#125;]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;replace&quot;</code>：替换现有字段值。</li>
-<li><code>path: &quot;/data/ssl-protocols&quot;</code>：要更新的字段路径。</li>
-<li><code>value</code>：新的值。</li>
-</ul>
-<hr>
-<h3 id="2-添加多个新字段（add）"><a href="#2-添加多个新字段（add）" class="headerlink" title="2. 添加多个新字段（add）"></a>2. 添加多个新字段（<code>add</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1 TLSv1.1 TLSv1.2 TLSv1.3&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;, &quot;value&quot;: &quot;ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:@SECLEVEL=0&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;add&quot;</code>：为 ConfigMap 增加新的键值对。</li>
-<li>多个字段用数组表示，每个 JSON Patch 操作为一个对象。</li>
-</ul>
-<hr>
-<h3 id="3-删除多个字段（remove）"><a href="#3-删除多个字段（remove）" class="headerlink" title="3. 删除多个字段（remove）"></a>3. 删除多个字段（<code>remove</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/data/ssl-ciphers&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#检查主机port占用</span></span><br><span class="line">kubectl get deploy ingress-nginx-controller -n ingress-nginx -o jsonpath=<span class="string">&#x27;&#123;.spec.template.spec.containers[0].ports&#125;&#x27;</span> | jq</span><br><span class="line"></span><br><span class="line"><span class="comment">#删除主机port</span></span><br><span class="line">kubectl patch deploy ingress-nginx-controller -n ingress-nginx \</span><br><span class="line">--<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/spec/template/spec/containers/0/ports/0/hostPort&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/spec/template/spec/containers/0/ports/1/hostPort&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;remove&quot;, &quot;path&quot;: &quot;/spec/template/spec/containers/0/ports/2/hostPort&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;remove&quot;</code>：删除指定字段。</li>
-<li>如果字段不存在，会报错，可以先用 <code>kubectl get</code> 检查字段。</li>
-</ul>
-<hr>
-<h3 id="4-复制字段（copy）"><a href="#4-复制字段（copy）" class="headerlink" title="4. 复制字段（copy）"></a>4. 复制字段（<code>copy</code>）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[&#123;&quot;op&quot;: &quot;copy&quot;, &quot;from&quot;: &quot;/data/ssl-protocols&quot;, &quot;path&quot;: &quot;/data/backup-ssl-protocols&quot;&#125;]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;copy&quot;</code>：从 <code>/data/ssl-protocols</code> 复制值到 <code>/data/backup-ssl-protocols</code>。</li>
-</ul>
-<hr>
-<h3 id="5-条件测试字段（test）并更新"><a href="#5-条件测试字段（test）并更新" class="headerlink" title="5. 条件测试字段（test）并更新"></a>5. 条件测试字段（<code>test</code>）并更新</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch cm ingress-nginx-controller -n ingress-nginx --<span class="built_in">type</span>=<span class="string">&#x27;json&#x27;</span> \</span><br><span class="line">-p=<span class="string">&#x27;[</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;test&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1 TLSv1.2&quot;&#125;,</span></span><br><span class="line"><span class="string">  &#123;&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/data/ssl-protocols&quot;, &quot;value&quot;: &quot;TLSv1.2 TLSv1.3&quot;&#125;</span></span><br><span class="line"><span class="string">]&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>op: &quot;test&quot;</code>：检查 <code>ssl-protocols</code> 的值是否匹配。如果不匹配，则不会执行替换操作。</li>
-</ul>
-<hr>
-<h3 id="6-merge-json-用法"><a href="#6-merge-json-用法" class="headerlink" title="6. merge &amp; json 用法"></a>6. merge &amp; json 用法</h3><table>
-<thead>
-<tr>
-<th align="left">项目</th>
-<th align="left">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><code>merge</code></td>
-<td align="left">直接将指定字段合并到现有资源，不要求父节点已存在（最适合补充 annotations）</td>
-</tr>
-<tr>
-<td align="left"><code>json</code></td>
-<td align="left">纯 JSON Patch 语义，要求每一层路径存在，不存在就会 400 错误（适合复杂 patch）</td>
-</tr>
-</tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">#在 JSON patch 语义中，如果父节点 (annotations) 不存在，直接 patch 子字段（annotations.xxx）是非法的，会被服务器拒绝。</span><br><span class="line"></span><br><span class="line">kubectl patch ingress nginx-demo -n xxx \</span><br><span class="line">--type=&#x27;merge&#x27; \</span><br><span class="line">-p=&#x27;&#123;</span><br><span class="line">  &quot;metadata&quot;: &#123;</span><br><span class="line">    &quot;annotations&quot;: &#123;</span><br><span class="line">      &quot;nginx.ingress.kubernetes.io/proxy-connect-timeout&quot;: &quot;60&quot;,</span><br><span class="line">      &quot;nginx.ingress.kubernetes.io/proxy-send-timeout&quot;: &quot;600&quot;,</span><br><span class="line">      &quot;nginx.ingress.kubernetes.io/proxy-read-timeout&quot;: &quot;600&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;&#x27;</span><br><span class="line"></span><br><span class="line">#json使用</span><br><span class="line">kubectl patch ingress nginx-demo -n xxx \</span><br><span class="line">  --type=&#x27;json&#x27; \</span><br><span class="line">  -p=&#x27;[</span><br><span class="line">    &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/metadata/annotations/nginx.ingress.kubernetes.io~1proxy-connect-timeout&quot;,  &quot;value&quot;: &quot;60&quot;&#125;,</span><br><span class="line">    &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/metadata/annotations/nginx.ingress.kubernetes.io~1proxy-send-timeout&quot;,  &quot;value&quot;: &quot;600&quot;&#125;,</span><br><span class="line">    &#123;&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/metadata/annotations/nginx.ingress.kubernetes.io~1proxy-read-timeout&quot;,  &quot;value&quot;: &quot;600&quot;&#125;</span><br><span class="line">  ]&#x27;</span><br></pre></td></tr></table></figure>
-<hr>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>使用 <code>--type=&#39;json&#39;</code> 进行 PATCH 操作非常灵活，特别适合批量修改配置。  </p>
-<ul>
-<li><code>add</code>：新增字段。</li>
-<li><code>replace</code>：更新现有字段。</li>
-<li><code>remove</code>：删除不需要的字段。</li>
-<li><code>copy</code> 和 <code>move</code>：在 JSON 中重构结构。</li>
-<li><code>test</code>：用于确保一致性，避免不正确的更新。</li>
-</ul>
-<p>这些操作特别适合集群自动化运维和精细化的配置变更。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1437,7 +1366,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">174</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1450,7 +1379,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
