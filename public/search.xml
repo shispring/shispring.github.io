@@ -15082,6 +15082,9 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li>传统方式（有拷贝）<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果不使用零拷贝，数据传输需要经过 4次拷贝和2次上下文切换：</span><br><span class="line"></span><br><span class="line">磁盘 → 内核缓冲区 → 用户空间缓冲区 → Socket 缓冲区 → 网卡</span><br><span class="line">     (DMA拷贝)    (CPU拷贝)       (CPU拷贝)    (DMA拷贝)</span><br></pre></td></tr></table></figure></li>
 <li>零拷贝方式（sendfile）<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sendfile 实现了 数据直接在内核态传输 ，只需要 2次拷贝和2次上下文切换：</span><br><span class="line"></span><br><span class="line">磁盘 → 内核缓冲区 → Socket 缓冲区 → 网卡</span><br><span class="line">     (DMA拷贝)    (CPU拷贝)     (DMA拷贝)</span><br></pre></td></tr></table></figure></li>
 </ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a href="https://bigox.wiki/mq/">https://bigox.wiki/mq/</a></p>
+</blockquote>
 ]]></content>
       <tags>
         <tag>kafka</tag>
