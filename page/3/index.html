@@ -184,6 +184,248 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/" class="post-title-link" itemprop="url">terminationGracePeriodSeconds与deletionGracePeriodSeconds</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-11-17 17:58:16" itemprop="dateCreated datePublished" datetime="2025-11-17T17:58:16+08:00">2025-11-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-11-19 15:12:59" itemprop="dateModified" datetime="2025-11-19T15:12:59+08:00">2025-11-19</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在Kubernetes环境中，当Pod被删除时，kubelet会发送SIGTERM信号给容器进程，启动优雅停止过程。如果预设的grace期限内进程未结束，则发送SIGKILL强制终止。Pod的终止流程包括从service endpoint移除、执行preStopHook、发送SIGTERM、等待进程结束等步骤。为了实现优雅退出，应用需捕获并处理SIGTERM信号，可能需要配合设置preStopHook和terminationGracePeriodSeconds。</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）"><a href="#️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）" class="headerlink" title="#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）"></a>#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）</h1><h3 id="✔-所在位置"><a href="#✔-所在位置" class="headerlink" title="✔ 所在位置"></a>✔ 所在位置</h3><p>Pod Spec 字段：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="✔-意义"><a href="#✔-意义" class="headerlink" title="✔ 意义"></a>✔ 意义</h3><p><strong>“容器终止前允许它优雅退出的时间”</strong><br>即：K8s 要删除 Pod 时，不是立刻强制杀掉容器，而是：</p>
+<ol>
+<li>kubelet 先向容器发送 <strong>SIGTERM</strong></li>
+<li>等待 <code>terminationGracePeriodSeconds</code> 秒</li>
+<li>超时后如果容器仍未退出 → 再发送 <strong>SIGKILL</strong></li>
+</ol>
+<h3 id="✔-默认值"><a href="#✔-默认值" class="headerlink" title="✔ 默认值"></a>✔ 默认值</h3><p>30 秒。</p>
+<h3 id="✔-被哪些机制使用？"><a href="#✔-被哪些机制使用？" class="headerlink" title="✔ 被哪些机制使用？"></a>✔ 被哪些机制使用？</h3><ul>
+<li>Pod eviction（驱逐）</li>
+<li>Deployment 滚动升级</li>
+<li>手动删除 Pod</li>
+<li>节点失联时 controller manager 删除 orphaned pods</li>
+</ul>
+<p>这些都会触发 graceful termination。</p>
+<hr>
+<h1 id="️⃣-2-deletionGracePeriodSeconds-——-Kubernetes-API（运行时动态产生）"><a href="#️⃣-2-deletionGracePeriodSeconds-——-Kubernetes-API（运行时动态产生）" class="headerlink" title="#️⃣ 2. deletionGracePeriodSeconds —— Kubernetes API（运行时动态产生）"></a>#️⃣ 2. deletionGracePeriodSeconds —— Kubernetes API（运行时动态产生）</h1><h3 id="✔-所在位置-1"><a href="#✔-所在位置-1" class="headerlink" title="✔ 所在位置"></a>✔ 所在位置</h3><p><strong>不在 Pod Spec 内</strong>，属于 metadata 的运行时字段：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionTimestamp:</span> <span class="string">&quot;2024-11-14T01:02:03Z&quot;</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<p>➡ <strong>API Server 写入的字段，代表当前删除操作所使用的宽限期。</strong></p>
+<h3 id="✔-来自哪里？"><a href="#✔-来自哪里？" class="headerlink" title="✔ 来自哪里？"></a>✔ 来自哪里？</h3><p>来源于：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">terminationGracePeriodSeconds</span><br></pre></td></tr></table></figure>
+
+<p>或者用户通过：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod podA --grace-period=10</span><br></pre></td></tr></table></figure>
+
+<p>覆盖默认值。</p>
+<h3 id="✔-工作方式（Controller-Kubelet）"><a href="#✔-工作方式（Controller-Kubelet）" class="headerlink" title="✔ 工作方式（Controller &amp; Kubelet）"></a>✔ 工作方式（Controller &amp; Kubelet）</h3><p>当你删除 Pod：</p>
+<ol>
+<li><p>API Server 设置：</p>
+<ul>
+<li><code>deletionTimestamp</code> &#x3D; 当前时间</li>
+<li><code>deletionGracePeriodSeconds</code> &#x3D; 本次删除使用的宽限秒数</li>
+</ul>
+</li>
+<li><p>kubelet 根据这个值（而不是 Spec 里的 terminationGracePeriodSeconds）控制真正的 SIGTERM → SIGKILL 过程。</p>
+</li>
+</ol>
+<p>因此：</p>
+<blockquote>
+<p><strong>deletionGracePeriodSeconds 是“实际生效”的宽限期。</strong><br><strong>terminationGracePeriodSeconds 是“默认配置”。</strong></p>
+</blockquote>
+<hr>
+<h1 id="️⃣-3-二者关系总结"><a href="#️⃣-3-二者关系总结" class="headerlink" title="#️⃣ 3. 二者关系总结"></a>#️⃣ 3. 二者关系总结</h1><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>terminationGracePeriodSeconds</th>
+<th>deletionGracePeriodSeconds</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>类型</td>
+<td>Pod Spec 固定字段</td>
+<td>Pod metadata 运行时字段</td>
+</tr>
+<tr>
+<td>谁设置的？</td>
+<td>用户写在 YAML 中</td>
+<td>API Server 删除 Pod 时自动写入</td>
+</tr>
+<tr>
+<td>何时存在？</td>
+<td>Pod 一出生就有</td>
+<td>只有 Pod 被删除时才出现</td>
+</tr>
+<tr>
+<td>默认值</td>
+<td>30 秒</td>
+<td>等于 terminationGracePeriodSeconds</td>
+</tr>
+<tr>
+<td>可以覆盖？</td>
+<td>可以（spec 设置）</td>
+<td>可被 <code>kubectl delete --grace-period=X</code> 覆盖</td>
+</tr>
+<tr>
+<td>实际生效？</td>
+<td>❌（只是默认值）</td>
+<td>✅（真正决定 kubelet 等待时间）</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="️⃣-4-为什么-Kubernetes-需要两个字段？"><a href="#️⃣-4-为什么-Kubernetes-需要两个字段？" class="headerlink" title="#️⃣ 4. 为什么 Kubernetes 需要两个字段？"></a>#️⃣ 4. 为什么 Kubernetes 需要两个字段？</h1><p>原因如下：</p>
+<h2 id="✦-①-Pod-Spec-需要一个默认优雅退出时间"><a href="#✦-①-Pod-Spec-需要一个默认优雅退出时间" class="headerlink" title="✦ ① Pod Spec 需要一个默认优雅退出时间"></a>✦ ① Pod Spec 需要一个默认优雅退出时间</h2><p>应用有不同的退出需求，如：</p>
+<ul>
+<li>Web 服务器需要 10s 关闭连接</li>
+<li>数据库需要 60s flush 数据</li>
+<li>Stream 服务需要完成正在发送的数据包</li>
+</ul>
+<p>于是 <code>terminationGracePeriodSeconds</code> 用来为 Pod <strong>设定统一默认退出策略</strong>。</p>
+<hr>
+<h2 id="✦-②-删除操作可能需要临时修改退出宽限期"><a href="#✦-②-删除操作可能需要临时修改退出宽限期" class="headerlink" title="✦ ② 删除操作可能需要临时修改退出宽限期"></a>✦ ② 删除操作可能需要临时修改退出宽限期</h2><p>例如：</p>
+<h3 id="✔-强制删除"><a href="#✔-强制删除" class="headerlink" title="✔ 强制删除"></a>✔ 强制删除</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod A --grace-period=0 --force</span><br></pre></td></tr></table></figure>
+
+<p>这时：</p>
+<ul>
+<li><strong>不会修改 pod.spec.terminationGracePeriodSeconds</strong></li>
+<li>但 <strong>metadata.deletionGracePeriodSeconds &#x3D; 0</strong></li>
+</ul>
+<p>kubelet 看到 0 → 立即 SIGKILL。</p>
+<hr>
+<h2 id="✦-③-deletionGracePeriodSeconds-表示-Pod-正在-termination-状态"><a href="#✦-③-deletionGracePeriodSeconds-表示-Pod-正在-termination-状态" class="headerlink" title="✦ ③ deletionGracePeriodSeconds 表示 Pod 正在 termination 状态"></a>✦ ③ deletionGracePeriodSeconds 表示 Pod 正在 termination 状态</h2><p>带有：</p>
+<ul>
+<li>deletionTimestamp</li>
+<li>deletionGracePeriodSeconds</li>
+</ul>
+<p>API Server 认为 Pod 处于 “Terminating”，controller manager 和 kubelet由此处理清理流程。</p>
+<hr>
+<h1 id="️⃣-5-结合例子理解（最清晰）"><a href="#️⃣-5-结合例子理解（最清晰）" class="headerlink" title="#️⃣ 5. 结合例子理解（最清晰）"></a>#️⃣ 5. 结合例子理解（最清晰）</h1><h3 id="Pod-YAML（用户写的）："><a href="#Pod-YAML（用户写的）：" class="headerlink" title="Pod YAML（用户写的）："></a>Pod YAML（用户写的）：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="删除命令："><a href="#删除命令：" class="headerlink" title="删除命令："></a>删除命令：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod mypod</span><br></pre></td></tr></table></figure>
+
+<h3 id="Pod-在-API-Server-会变成："><a href="#Pod-在-API-Server-会变成：" class="headerlink" title="Pod 在 API Server 会变成："></a>Pod 在 API Server 会变成：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionTimestamp:</span> <span class="string">&quot;2025-11-17T08:00:00Z&quot;</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li>kubelet 会等待 30 秒后强杀</li>
+</ul>
+<hr>
+<h3 id="覆盖默认值："><a href="#覆盖默认值：" class="headerlink" title="覆盖默认值："></a>覆盖默认值：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod mypod --grace-period=5</span><br></pre></td></tr></table></figure>
+
+<p>API Server 变成：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<p>此时 kubelet 的实际宽限期是 5 秒，而不是 Spec 中的 30 秒。</p>
+<hr>
+<h1 id="️⃣-6-哪些场景必须关注这两个值？"><a href="#️⃣-6-哪些场景必须关注这两个值？" class="headerlink" title="#️⃣ 6. 哪些场景必须关注这两个值？"></a>#️⃣ 6. 哪些场景必须关注这两个值？</h1><h3 id="✔-滚动升级慢"><a href="#✔-滚动升级慢" class="headerlink" title="✔ 滚动升级慢"></a>✔ 滚动升级慢</h3><p>容器退出慢 → 需要增大 terminationGracePeriodSeconds。</p>
+<h3 id="✔-Pod-一直处于-Terminating"><a href="#✔-Pod-一直处于-Terminating" class="headerlink" title="✔ Pod 一直处于 Terminating"></a>✔ Pod 一直处于 Terminating</h3><p>检查 deletionGracePeriodSeconds 表示实际等待多久。</p>
+<h3 id="✔-强制删除-Pod-时需要明确-grace-period-0-的行为"><a href="#✔-强制删除-Pod-时需要明确-grace-period-0-的行为" class="headerlink" title="✔ 强制删除 Pod 时需要明确 --grace-period=0 的行为"></a>✔ 强制删除 Pod 时需要明确 <code>--grace-period=0</code> 的行为</h3><p>它不会改 spec，但会影响 metadata 的实际值。</p>
+<h3 id="✔-Stateful-workloads（DB，消息队列）需要更长的宽限期"><a href="#✔-Stateful-workloads（DB，消息队列）需要更长的宽限期" class="headerlink" title="✔ Stateful workloads（DB，消息队列）需要更长的宽限期"></a>✔ Stateful workloads（DB，消息队列）需要更长的宽限期</h3><p>否则容易数据损坏或主从 failover。</p>
+<hr>
+<h1 id="⭐-最后一段总结（可直接加入知识库）"><a href="#⭐-最后一段总结（可直接加入知识库）" class="headerlink" title="⭐ 最后一段总结（可直接加入知识库）"></a>⭐ 最后一段总结（可直接加入知识库）</h1><ul>
+<li><p><code>terminationGracePeriodSeconds</code> &#x3D; Pod 的 <strong>默认优雅退出时间</strong>，用户定义。</p>
+</li>
+<li><p><code>deletionGracePeriodSeconds</code> &#x3D; Pod <strong>被删除时真正采用的宽限期</strong>，由 API Server 设置，可被强制覆盖。</p>
+</li>
+<li><p>二者共同决定了 Pod 的生命周期：</p>
+<ul>
+<li>Pod 配置退出策略（spec）</li>
+<li>具体删除动作由 API server 在 metadata 记录（metadata）</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="⭐-terminationGracePeriodSeconds-设计核心原则（总结）"><a href="#⭐-terminationGracePeriodSeconds-设计核心原则（总结）" class="headerlink" title="⭐ terminationGracePeriodSeconds 设计核心原则（总结）"></a>⭐ terminationGracePeriodSeconds 设计核心原则（总结）</h1><table>
+<thead>
+<tr>
+<th>原则</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 与业务退出耗时相匹配</td>
+<td>不够会被 SIGKILL</td>
+</tr>
+<tr>
+<td>2. 大于 preStop 脚本执行时间</td>
+<td>防止脚本被中断</td>
+</tr>
+<tr>
+<td>3. 大于 LB 连接迁移耗时</td>
+<td>防止客户端访问异常</td>
+</tr>
+<tr>
+<td>4. 必须进行业务侧 graceful shutdown</td>
+<td>否则延长时间也没用</td>
+</tr>
+<tr>
+<td>5. 对长任务必须设计 checkpoint</td>
+<td>不然永远无法优雅终止</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1907,65 +2149,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/23/bash-profile%E9%85%8D%E7%BD%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/23/bash-profile%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">bash_profile配置</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-09-23 15:10:53 / 修改时间：15:17:38" itemprop="dateCreated datePublished" datetime="2025-09-23T15:10:53+08:00">2025-09-23</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="bash-profile配置"><a href="#bash-profile配置" class="headerlink" title=".bash_profile配置"></a>.bash_profile配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">############################</span><br><span class="line"># 基础工具增强</span><br><span class="line">############################</span><br><span class="line">alias grep=&#x27;grep --color=auto&#x27;</span><br><span class="line">alias fgrep=&#x27;fgrep --color=auto&#x27;</span><br><span class="line">alias egrep=&#x27;egrep --color=auto&#x27;</span><br><span class="line">alias lzd=&#x27;lazydocker&#x27;   # 轻量级 Docker 管理工具</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># Kubernetes 基础命令</span><br><span class="line">############################</span><br><span class="line">alias k=&#x27;kubecolor&#x27;                         # 彩色 kubectl 输出</span><br><span class="line">alias kn=&#x27;k get nodes&#x27;                      # 查看节点</span><br><span class="line">alias knw=&#x27;k get nodes -o wide&#x27;             # 查看节点详情</span><br><span class="line">alias kp=&#x27;k get pod -o wide&#x27;                # 当前命名空间 Pod</span><br><span class="line">alias kpa=&#x27;k get pod -A -o wide&#x27;            # 所有命名空间 Pod</span><br><span class="line">alias kgn=&#x27;k get ns&#x27;                        # 命名空间</span><br><span class="line">alias kgs=&#x27;k get secret&#x27;                    # Secret</span><br><span class="line">alias ki=&#x27;k get ing&#x27;                        # Ingress</span><br><span class="line">alias kio=&#x27;k get ing -o yaml&#x27;               # Ingress 详细</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># Kubernetes 配置管理</span><br><span class="line">############################</span><br><span class="line">alias kcg=&#x27;k config get-contexts&#x27;           # 查看所有 context</span><br><span class="line">alias kcc=&#x27;k config current-context&#x27;        # 当前 context</span><br><span class="line">alias kcu=&#x27;kubectl config use-context &#x27;     # 切换 context</span><br><span class="line">alias kv=&#x27;k config view&#x27;                    # 查看配置</span><br><span class="line">alias kcn=&#x27;k config view --minify --output &quot;jsonpath=&#123;..namespace&#125;&quot; &#x27;  # 当前 namespace</span><br><span class="line">alias kapi=&#x27;k api-resources --sort-by=name&#x27; # API 资源列表</span><br><span class="line"></span><br><span class="line"># 扩展：krew 插件、kubectl neat 等</span><br><span class="line">alias kk=&#x27;kubectl krew &#x27;                    # krew 插件管理</span><br><span class="line">alias kns=&#x27;kubectl config set-context --current --namespace &#x27;  # 切换 namespace</span><br><span class="line">alias knw=&#x27;k get nodes -o wide&#x27;</span><br><span class="line">alias kn=&#x27;k get nodes&#x27;</span><br><span class="line">alias knyaml=&#x27;k neat -o yaml&#x27;               # 输出格式化 yaml</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># Kubernetes 解释与调试</span><br><span class="line">############################</span><br><span class="line">alias ke=&#x27;kubectl explain &#x27;                 # 解释资源</span><br><span class="line">alias ker=&#x27;kubectl explain --recursive &#x27;    # 递归解释</span><br><span class="line">alias kdr=&#x27;kubectl --dry-run=client -o yaml&#x27; # 生成 yaml 草稿</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># 自定义封装</span><br><span class="line">############################</span><br><span class="line"># 添加 kubeconfig context，简化切换</span><br><span class="line">kcadd() &#123; kubectl kc add -cf /home/shijianpeng/.kube/$1.conf --context-name $1; &#125;</span><br><span class="line">pingt() &#123;</span><br><span class="line">    ping &quot;$@&quot; | ts &#x27;[%Y-%m-%d %H:%M:%S]&#x27;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 常用 kc 扩展</span><br><span class="line">alias kc=&#x27;kubectl kc&#x27;</span><br><span class="line">alias kcl=&#x27;kubectl kc list&#x27;</span><br><span class="line">alias kcs=&#x27;kubectl kc switch&#x27;</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># 集群信息</span><br><span class="line">############################</span><br><span class="line">alias kci=&#x27;k cluster-info&#x27;   # 集群信息</span><br><span class="line"># kubectl version</span><br><span class="line"># kubectl api-resources</span><br><span class="line"># kubectl api-versions</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2037,7 +2220,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">176</span>
+          <span class="site-state-item-count">177</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2050,7 +2233,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

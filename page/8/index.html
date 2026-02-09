@@ -184,6 +184,84 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/22/ffmpeg%E5%A4%84%E7%90%86%E8%A7%86%E9%A2%91tips/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/04/22/ffmpeg%E5%A4%84%E7%90%86%E8%A7%86%E9%A2%91tips/" class="post-title-link" itemprop="url">ffmpeg处理视频tips</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-22 10:29:45" itemprop="dateCreated datePublished" datetime="2025-04-22T10:29:45+08:00">2025-04-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-09-12 09:55:43" itemprop="dateModified" datetime="2025-09-12T09:55:43+08:00">2025-09-12</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="查看视频总帧数"><a href="#查看视频总帧数" class="headerlink" title="查看视频总帧数"></a>查看视频总帧数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 your_video.mp4</span><br></pre></td></tr></table></figure>
+
+<h3 id="导出视频的每一帧为图片"><a href="#导出视频的每一帧为图片" class="headerlink" title="导出视频的每一帧为图片"></a>导出视频的每一帧为图片</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i your_video.mp4 -q:v 1 output/frame_%05d.jpg</span><br><span class="line">参数含义</span><br><span class="line">-i your_video.mp4 : 输入文件</span><br><span class="line">-q:v 1 : 设置输出图像质量，1 是最高（1~31）</span><br><span class="line">output/frame_%05d.jpg : 输出路径和命名格式（5位数字序号）</span><br></pre></td></tr></table></figure>
+
+<h3 id="制作正向视频"><a href="#制作正向视频" class="headerlink" title="制作正向视频"></a>制作正向视频</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; frames.txt</span><br><span class="line">file &#x27;frame_00076.jpg&#x27;</span><br><span class="line">file &#x27;frame_00077.jpg&#x27;</span><br><span class="line">file &#x27;frame_00078.jpg&#x27;</span><br><span class="line">file &#x27;frame_00079.jpg&#x27;</span><br><span class="line">file &#x27;frame_00080.jpg&#x27;</span><br><span class="line">file &#x27;frame_00081.jpg&#x27;</span><br><span class="line">file &#x27;frame_00082.jpg&#x27;</span><br><span class="line">file &#x27;frame_00083.jpg&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -r 25 -i frames.txt -c:v libx264 -pix_fmt yuv420p forward.mp4</span><br><span class="line"></span><br><span class="line">解释：</span><br><span class="line">-framerate 25: 设置帧率为25（可按需调整）</span><br><span class="line">-i frame_%05d.jpg: 匹配 frame_00076.jpg 至 frame_00083.jpg（确保目录下这些帧是连续命名的）</span><br><span class="line">-vframes 8: 指定只使用8帧</span><br><span class="line">-c:v libx264: 使用 H.264 编码</span><br><span class="line">-pix_fmt yuv420p: 保证兼容性（尤其是网页或播放器）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="制作倒序视频"><a href="#制作倒序视频" class="headerlink" title="制作倒序视频"></a>制作倒序视频</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; reverse.txt</span><br><span class="line">file &#x27;frame_00082.jpg&#x27;</span><br><span class="line">file &#x27;frame_00081.jpg&#x27;</span><br><span class="line">file &#x27;frame_00080.jpg&#x27;</span><br><span class="line">file &#x27;frame_00079.jpg&#x27;</span><br><span class="line">file &#x27;frame_00078.jpg&#x27;</span><br><span class="line">file &#x27;frame_00077.jpg&#x27;</span><br><span class="line">file &#x27;frame_00076.jpg&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -r 25 -i reverse.txt -c:v libx264 -pix_fmt yuv420p reverse.mp4</span><br></pre></td></tr></table></figure>
+<h3 id="拼接正向-反向-视频"><a href="#拼接正向-反向-视频" class="headerlink" title="拼接正向 + 反向 视频"></a>拼接正向 + 反向 视频</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; concat.txt</span><br><span class="line">file &#x27;forward.mp4&#x27;</span><br><span class="line">file &#x27;reverse.mp4&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ffmpeg -f concat -safe 0 -i concat.txt -r 25 -c:v libx264 -pix_fmt yuv420p looped.mp4</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="剔除视频片段"><a href="#剔除视频片段" class="headerlink" title="剔除视频片段"></a>剔除视频片段</h2><ul>
+<li>1.确定要剔除的片段时间范围（比如从 00:01:30 到 00:02:10）</li>
+<li>2.用 ffmpeg 将视频切成两段，然后拼接起来（中间那段就被“剔除”）</li>
+</ul>
+<h3 id="无损裁剪-拼接（推荐）"><a href="#无损裁剪-拼接（推荐）" class="headerlink" title="无损裁剪 + 拼接（推荐）"></a>无损裁剪 + 拼接（推荐）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 切出前半段（从开头到 1:30）</span><br><span class="line">ffmpeg -i input.mp4 -ss 00:00:00 -to 00:01:30 -c copy part1.mp4</span><br><span class="line"></span><br><span class="line"># 切出后半段（从 2:10 到结尾）</span><br><span class="line">ffmpeg -i input.mp4 -ss 00:02:10 -c copy part2.mp4</span><br><span class="line"></span><br><span class="line"># 生成文件列表</span><br><span class="line">echo -e &quot;file &#x27;part1.mp4&#x27;\nfile &#x27;part2.mp4&#x27;&quot; &gt; files.txt</span><br><span class="line"></span><br><span class="line"># 拼接两段</span><br><span class="line">ffmpeg -f concat -safe 0 -i files.txt -c copy output.mp4</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/21/%E6%8B%86%E8%A7%A3%E5%A4%8D%E6%9D%82%E9%97%AE%E9%A2%98%E6%80%9D%E8%B7%AF%E4%B8%80/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1527,75 +1605,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/10/%E6%B7%B7%E5%90%88%E4%BA%91%E6%9E%B6%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/03/10/%E6%B7%B7%E5%90%88%E4%BA%91%E6%9E%B6%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE/" class="post-title-link" itemprop="url">混合云架构示意图</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-03-10 14:59:46 / 修改时间：15:29:27" itemprop="dateCreated datePublished" datetime="2025-03-10T14:59:46+08:00">2025-03-10</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="阿里混合云架构"><a href="#阿里混合云架构" class="headerlink" title="阿里混合云架构"></a>阿里混合云架构</h2><ul>
-<li>大陆架构1<br><img src="https://raw.githubusercontent.com/shispring/picgo/master/p56761.png" alt="大陆" title="大陆"></li>
-</ul>
-<hr>
-<ul>
-<li>大陆架构2<br><img src="https://raw.githubusercontent.com/shispring/picgo/master/p142282.png" alt="大陆2" title="大陆2"></li>
-</ul>
-<hr>
-<ul>
-<li>全球架构<br><img src="https://raw.githubusercontent.com/shispring/picgo/master/onwbejlswgnv4_20240422_7402cd3196f34eb58eceaf87a6e60e2a.png" alt="全球" title="全球"></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1667,7 +1676,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">176</span>
+          <span class="site-state-item-count">177</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1680,7 +1689,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
