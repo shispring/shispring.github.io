@@ -2150,7 +2150,7 @@
 <p> 数组索引从 0 开始。</p>
 </li>
 <li><p><strong>过滤数组元素</strong>：</p>
- <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.fieldName[] | select(.condition)&#x27;</span><br></pre></td></tr></table></figure>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">jq &#x27;.fieldName[] | select(.condition)&#x27;</span><br><span class="line"></span><br><span class="line">#筛选数组里指定元素</span><br><span class="line">jq &#x27;.status.poolItems[] | &#123;fixedIP, portID&#125;&#x27;</span><br><span class="line">jq -c &#x27;.status.poolItems[] | &#123;fixedIP, portID&#125;&#x27;</span><br></pre></td></tr></table></figure>
 <p> 替换 <code>condition</code> 为过滤条件，例如 <code>.name == &quot;desiredName&quot;</code>。</p>
 </li>
 <li><p><strong>获取嵌套字段</strong>：</p>
