@@ -15091,4 +15091,23 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>kafka</tag>
       </tags>
   </entry>
+  <entry>
+    <title>苏格拉底提问法【CRITIC】</title>
+    <url>/2026/02/09/%E8%8B%8F%E6%A0%BC%E6%8B%89%E5%BA%95%E6%8F%90%E9%97%AE%E6%B3%95%E3%80%90CRITIC%E3%80%91/</url>
+    <content><![CDATA[<h2 id="苏格拉底提问法的作用"><a href="#苏格拉底提问法的作用" class="headerlink" title="苏格拉底提问法的作用"></a>苏格拉底提问法的作用</h2><ul>
+<li>首先，苏格拉底提问法的一个主要特点是它的启发性。这种方法鼓励你提出开放性的问题，这些问题可以引导思考，而不是寻找特定的答案。</li>
+<li>其次，苏格拉底提问法也可以帮助我们挑战自己的假设。<br>最后，苏格拉底提问法也可以促进对话和理解。</li>
+</ul>
+<hr>
+<h2 id="苏格拉底提问法的六类问题"><a href="#苏格拉底提问法的六类问题" class="headerlink" title="苏格拉底提问法的六类问题"></a>苏格拉底提问法的六类问题</h2><ul>
+<li>Clarification：【澄清问题】</li>
+<li>Refute assumptions：【挑战假设】</li>
+<li>Identify evidence：【寻找证据】</li>
+<li>Think from different perspectives：【转换视角思考】</li>
+<li>Investigate potential consequences：【探究可能结果】</li>
+<li>Circle back to the original question：【回归原问题】</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、【C】澄清问题：澄清概念，界定清楚问题</span><br><span class="line">这个****的意思是什么？</span><br><span class="line">你为什么会问这个问题？</span><br><span class="line">你为什么会这么想/说？</span><br><span class="line">你说的****具体是指什么？</span><br><span class="line">可不可以举个例子，说明你想要表达的概念？</span><br><span class="line">是什么让你有这个问题（认知）？（问题产生的原因）</span><br><span class="line">这与我们的讨论有什么关系？</span><br><span class="line"></span><br><span class="line">2、【R】挑战假设：识别和破除隐性假设</span><br><span class="line">在这里的假设是什么？</span><br><span class="line">为什么会做这样的设想？</span><br><span class="line">你似乎正在假设****。</span><br><span class="line">你如何证明或推翻这个假设？</span><br><span class="line"></span><br><span class="line">3、【I】寻找证据：理性分析，进行逻辑推理</span><br><span class="line">你是如何得出这一结论的？</span><br><span class="line">你为什么相信这是真的？</span><br><span class="line">是什么让你相信的？</span><br><span class="line">能解释一下原因吗？</span><br><span class="line">可以举个例子吗？</span><br><span class="line">是否有理由怀疑这一结果?</span><br><span class="line">什么与这个比较类似？</span><br><span class="line">你认为****是由什么引起的？为什么？</span><br><span class="line"></span><br><span class="line">4、【T】转换视角：开阔思路，不同视角思考</span><br><span class="line">对这个问题其他人可能会怎么看</span><br><span class="line">相信****的人可能会有什么看法？</span><br><span class="line">不相信****的人可能会有什么看法？</span><br><span class="line">****和****的观点在哪些地方一致？哪些地方不一致？</span><br><span class="line">****和****的共同点或相似点是什么？</span><br><span class="line">别的不同的观点可能会是什么？</span><br><span class="line">可以用其他的方式或方法来看待这件事吗？</span><br><span class="line">还可以有其他的可能吗？</span><br><span class="line">有什么替代方案？</span><br><span class="line">为什么这是最好的？</span><br><span class="line">****的优点和缺点是什么？</span><br><span class="line">反驳观点可能是什么？为什么是必需的？</span><br><span class="line"></span><br><span class="line">5、【I】探究可能结果</span><br><span class="line">这个假设的结果是什么？</span><br><span class="line">你这么说隐含的意思是什么呢？你在暗示什么？</span><br><span class="line">这个会导致什么？</span><br><span class="line">这和我们原来学过的****有什么联系吗？</span><br><span class="line">那会有什么结果？</span><br><span class="line">那真的有可能发生吗？</span><br><span class="line">可供选择的办法是什么？</span><br><span class="line">如果那样的话，还有可能发生其他的什么事？</span><br><span class="line">你能得出什么结论？</span><br><span class="line"></span><br><span class="line">6、【C】回归原问题</span><br><span class="line">这个问题的意义是什么？</span><br><span class="line">你为什么认为我问这个问题？</span><br><span class="line">****是什么意思？</span><br><span class="line">****如何应用于日常生活？</span><br><span class="line">现在的真正的问题是什么？</span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
 </search>

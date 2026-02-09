@@ -184,6 +184,76 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/" class="post-title-link" itemprop="url">安装部署k3s</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-11-13 17:12:18 / 修改时间：23:00:10" itemprop="dateCreated datePublished" datetime="2025-11-13T17:12:18+08:00">2025-11-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://forums.rancher.cn/t/k3s/3314">https://forums.rancher.cn/t/k3s/3314</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | \</span><br><span class="line">  INSTALL_K3S_MIRROR=cn \</span><br><span class="line">  INSTALL_K3S_SKIP_SELINUX_RPM=true \</span><br><span class="line">  K3S_TOKEN=12345 sh -s - \</span><br><span class="line">  --system-default-registry=registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
+<p>📘 说明：<br>• INSTALL_K3S_SKIP_SELINUX_RPM&#x3D;true：告诉安装脚本跳过 k3s-selinux 安装；</p>
+<h3 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl status k3s</span><br><span class="line"></span><br><span class="line">k3s --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="🧠-K3s-的-kubeconfig-默认路径"><a href="#🧠-K3s-的-kubeconfig-默认路径" class="headerlink" title="🧠 K3s 的 kubeconfig 默认路径"></a>🧠 K3s 的 kubeconfig 默认路径</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#默认路径</span><br><span class="line">/etc/rancher/k3s/k3s.yaml</span><br><span class="line"></span><br><span class="line">#kubectl 使用时需要显式指定该配置文件，或者将其复制到 $HOME/.kube/config。</span><br><span class="line">kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get nodes</span><br><span class="line"></span><br><span class="line">#copy</span><br><span class="line">sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config</span><br></pre></td></tr></table></figure>
+
+<h3 id="部署helm"><a href="#部署helm" class="headerlink" title="部署helm"></a>部署helm</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#helm与k8s版本兼容匹配：https://helm.sh/zh/docs/topics/version_skew</span><br><span class="line">wget https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">tar zxvf helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">mv linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="部署cert-manager"><a href="#部署cert-manager" class="headerlink" title="部署cert-manager"></a>部署cert-manager</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#安装certcert-manager</span><br><span class="line">#安装CRD： https://github.com/cert-manager/cert-manager/releases</span><br><span class="line"></span><br><span class="line">kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/&lt;VERSION&gt;/cert-manager.crds.yaml</span><br><span class="line">eg:</span><br><span class="line">https://github.com/cert-manager/cert-manager/releases/download/v1.19.1/cert-manager.crds.yaml</span><br><span class="line"></span><br><span class="line">#使用helm安装</span><br><span class="line">helm repo add jetstack https://charts.jetstack.io</span><br><span class="line"></span><br><span class="line">helm repo update</span><br><span class="line">helm install cert-manager jetstack/cert-manager \</span><br><span class="line"> --namespace cert-manager \</span><br><span class="line"> --create-namespace</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/13/%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1896,141 +1966,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/" class="post-title-link" itemprop="url">容器文件系统挂载</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-09-19 12:36:25 / 修改时间：12:44:45" itemprop="dateCreated datePublished" datetime="2025-09-19T12:36:25+08:00">2025-09-19</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-查看挂载情况"><a href="#1-查看挂载情况" class="headerlink" title="1. 查看挂载情况"></a>1. 查看挂载情况</h2><ul>
-<li><p><strong>看挂载情况</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep /run/containerd/io.containerd.runtime.v2.task/k8s.io</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>看是否有进程占用</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y psmisc</span><br><span class="line">fuser -vm /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
-
-<p>或者：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof | grep 200ab1146de</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>看 containerd 里是否有残留 metadata</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io containers list | grep 200ab1146de</span><br><span class="line">ctr -n k8s.io tasks list | grep 200ab1146de</span><br></pre></td></tr></table></figure></li>
-</ul>
-<ol>
-<li><strong><code>ctr -n k8s.io tasks list | grep 200ab1146de</code> → 状态 STOPPED</strong></li>
-<li><strong><code>fuser -vm</code> 显示很多 <code>containerd-shim</code>、<code>qemu-system-x86</code>、<code>virtiofsd</code> 等进程引用这个目录</strong><ul>
-<li>说明这个目录（mountpoint）仍然被多个进程占用着。</li>
-<li>注意：这里的 “F.c..” &#x2F; “frc..” 表示打开了这个目录的 <strong>文件描述符</strong>，并且有读写&#x2F;控制引用。</li>
-</ul>
-</li>
-<li><strong>整体情况</strong><ul>
-<li>内核 <code>overlayfs</code> 挂载点还在，inode 没回收。</li>
-<li>容器已经 “STOPPED”（不可用），但是挂载点被其他 shim &#x2F; qemu &#x2F; virtiofsd 引用，所以无法自动卸载。</li>
-</ul>
-</li>
-</ol>
-<hr>
-<h2 id="2-mount-l-命令含义："><a href="#2-mount-l-命令含义：" class="headerlink" title="2. mount -l 命令含义："></a>2. mount -l 命令含义：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep <span class="string">&#x27;/run/containerd/io.containerd.runtime.v2.task/k8s.io&#x27;</span> | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | xargs -r <span class="built_in">sudo</span> umount -l</span><br></pre></td></tr></table></figure>
-
-<h3 id="这个命令会做什么？"><a href="#这个命令会做什么？" class="headerlink" title="这个命令会做什么？"></a>这个命令会做什么？</h3><ul>
-<li>找出所有挂载在 <code>/run/containerd/io.containerd.runtime.v2.task/k8s.io/*</code> 下的 mount point。</li>
-<li>对它们执行 <code>umount -l</code>（lazy umount）。</li>
-</ul>
-<p><strong>lazy umount 含义</strong>：</p>
-<ul>
-<li>马上把挂载点从 mount namespace 里“摘掉”，进程不再能通过路径访问它。</li>
-<li>如果有进程仍然持有 fd，会等它们关闭 fd 之后再真正释放资源（inode、dentry、slab）。</li>
-<li>这样避免了 <code>umount</code> 报错 “busy”，算是比较温和的方式。</li>
-</ul>
-<hr>
-<h2 id="3-对当前系统的影响"><a href="#3-对当前系统的影响" class="headerlink" title="3. 对当前系统的影响"></a>3. 对当前系统的影响</h2><ul>
-<li><p><strong>如果容器仍然活跃</strong>：对应 Pod 会立刻失效，因为 rootfs 被摘掉了，里面的文件系统消失。</p>
-</li>
-<li><p><strong>如果容器已经 STOPPED</strong>（像你这种）：</p>
-<ul>
-<li>大多数情况下影响有限，等价于清理垃圾挂载点。</li>
-<li>不过要小心：如果 containerd metadata 里还记录这个容器存在，containerd 在后续 GC 或者回收时可能会发现找不到挂载点，从而报错。</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h2 id="4-建议操作顺序"><a href="#4-建议操作顺序" class="headerlink" title="4. 建议操作顺序"></a>4. 建议操作顺序</h2><p>更温和的方案可以这样分级：</p>
-<ol>
-<li><p><strong>优先让 containerd 清理</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io tasks <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br><span class="line">ctr -n k8s.io containers <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
-
-<p>（如果卡住，说明 shim&#x2F;进程依赖还在）</p>
-</li>
-<li><p><strong>确认 mount</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep 200ab1146de</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>再 lazy umount</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> umount -l /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9/rootfs</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>最后清理目录</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>如果有大量残留</strong>，你那个 <code>awk | xargs umount -l</code> 可以作为批量清理手段，但最好在确认这些容器都已经 STOPPED 或已被 K8s 删除的前提下做。</p>
-</li>
-</ol>
-<hr>
-<p>✅ 结论：</p>
-<ul>
-<li>你的 <code>umount -l</code> 是温和可行的，不会直接 kill 进程，但会让容器 rootfs 消失。</li>
-<li><strong>如果只是清理 STOPPED 的残留容器</strong>，几乎没副作用，还能回收 inode&#x2F;slab。</li>
-<li>建议 <strong>先用 ctr rm</strong> 尝试让 containerd 自己清理，再手动 umount + rm 兜底。</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2102,7 +2037,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">175</span>
+          <span class="site-state-item-count">176</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

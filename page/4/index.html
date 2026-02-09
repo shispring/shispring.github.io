@@ -184,6 +184,141 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/" class="post-title-link" itemprop="url">容器文件系统挂载</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-19 12:36:25 / 修改时间：12:44:45" itemprop="dateCreated datePublished" datetime="2025-09-19T12:36:25+08:00">2025-09-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="1-查看挂载情况"><a href="#1-查看挂载情况" class="headerlink" title="1. 查看挂载情况"></a>1. 查看挂载情况</h2><ul>
+<li><p><strong>看挂载情况</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep /run/containerd/io.containerd.runtime.v2.task/k8s.io</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>看是否有进程占用</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y psmisc</span><br><span class="line">fuser -vm /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof | grep 200ab1146de</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>看 containerd 里是否有残留 metadata</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io containers list | grep 200ab1146de</span><br><span class="line">ctr -n k8s.io tasks list | grep 200ab1146de</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol>
+<li><strong><code>ctr -n k8s.io tasks list | grep 200ab1146de</code> → 状态 STOPPED</strong></li>
+<li><strong><code>fuser -vm</code> 显示很多 <code>containerd-shim</code>、<code>qemu-system-x86</code>、<code>virtiofsd</code> 等进程引用这个目录</strong><ul>
+<li>说明这个目录（mountpoint）仍然被多个进程占用着。</li>
+<li>注意：这里的 “F.c..” &#x2F; “frc..” 表示打开了这个目录的 <strong>文件描述符</strong>，并且有读写&#x2F;控制引用。</li>
+</ul>
+</li>
+<li><strong>整体情况</strong><ul>
+<li>内核 <code>overlayfs</code> 挂载点还在，inode 没回收。</li>
+<li>容器已经 “STOPPED”（不可用），但是挂载点被其他 shim &#x2F; qemu &#x2F; virtiofsd 引用，所以无法自动卸载。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="2-mount-l-命令含义："><a href="#2-mount-l-命令含义：" class="headerlink" title="2. mount -l 命令含义："></a>2. mount -l 命令含义：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep <span class="string">&#x27;/run/containerd/io.containerd.runtime.v2.task/k8s.io&#x27;</span> | awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | xargs -r <span class="built_in">sudo</span> umount -l</span><br></pre></td></tr></table></figure>
+
+<h3 id="这个命令会做什么？"><a href="#这个命令会做什么？" class="headerlink" title="这个命令会做什么？"></a>这个命令会做什么？</h3><ul>
+<li>找出所有挂载在 <code>/run/containerd/io.containerd.runtime.v2.task/k8s.io/*</code> 下的 mount point。</li>
+<li>对它们执行 <code>umount -l</code>（lazy umount）。</li>
+</ul>
+<p><strong>lazy umount 含义</strong>：</p>
+<ul>
+<li>马上把挂载点从 mount namespace 里“摘掉”，进程不再能通过路径访问它。</li>
+<li>如果有进程仍然持有 fd，会等它们关闭 fd 之后再真正释放资源（inode、dentry、slab）。</li>
+<li>这样避免了 <code>umount</code> 报错 “busy”，算是比较温和的方式。</li>
+</ul>
+<hr>
+<h2 id="3-对当前系统的影响"><a href="#3-对当前系统的影响" class="headerlink" title="3. 对当前系统的影响"></a>3. 对当前系统的影响</h2><ul>
+<li><p><strong>如果容器仍然活跃</strong>：对应 Pod 会立刻失效，因为 rootfs 被摘掉了，里面的文件系统消失。</p>
+</li>
+<li><p><strong>如果容器已经 STOPPED</strong>（像你这种）：</p>
+<ul>
+<li>大多数情况下影响有限，等价于清理垃圾挂载点。</li>
+<li>不过要小心：如果 containerd metadata 里还记录这个容器存在，containerd 在后续 GC 或者回收时可能会发现找不到挂载点，从而报错。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="4-建议操作顺序"><a href="#4-建议操作顺序" class="headerlink" title="4. 建议操作顺序"></a>4. 建议操作顺序</h2><p>更温和的方案可以这样分级：</p>
+<ol>
+<li><p><strong>优先让 containerd 清理</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctr -n k8s.io tasks <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br><span class="line">ctr -n k8s.io containers <span class="built_in">rm</span> 200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+
+<p>（如果卡住，说明 shim&#x2F;进程依赖还在）</p>
+</li>
+<li><p><strong>确认 mount</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount | grep 200ab1146de</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>再 lazy umount</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> umount -l /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9/rootfs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>最后清理目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /run/containerd/io.containerd.runtime.v2.task/k8s.io/200ab1146de738bcbe79e3e976eada34003b61de007a61d4b29f007eb5381bf9</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>如果有大量残留</strong>，你那个 <code>awk | xargs umount -l</code> 可以作为批量清理手段，但最好在确认这些容器都已经 STOPPED 或已被 K8s 删除的前提下做。</p>
+</li>
+</ol>
+<hr>
+<p>✅ 结论：</p>
+<ul>
+<li>你的 <code>umount -l</code> 是温和可行的，不会直接 kill 进程，但会让容器 rootfs 消失。</li>
+<li><strong>如果只是清理 STOPPED 的残留容器</strong>，几乎没副作用，还能回收 inode&#x2F;slab。</li>
+<li>建议 <strong>先用 ctr rm</strong> 尝试让 containerd 自己清理，再手动 umount + rm 兜底。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/MTU%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97%E5%92%8C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1387,237 +1522,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/13/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">网络故障模拟工具及常用命令</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-13 12:09:51 / 修改时间：12:17:56" itemprop="dateCreated datePublished" datetime="2025-08-13T12:09:51+08:00">2025-08-13</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="网络故障模拟工具与常用命令"><a href="#网络故障模拟工具与常用命令" class="headerlink" title="网络故障模拟工具与常用命令"></a>网络故障模拟工具与常用命令</h1><p>本文档提供了一系列网络故障模拟工具和常用命令，用于测试应用程序在各种网络条件下的行为，特别是长连接（如SSE、WebSocket）的稳定性测试。</p>
-<h2 id="1-常用网络故障模拟工具对比"><a href="#1-常用网络故障模拟工具对比" class="headerlink" title="1. 常用网络故障模拟工具对比"></a>1. 常用网络故障模拟工具对比</h2><table>
-<thead>
-<tr>
-<th>工具名称</th>
-<th>主要功能</th>
-<th>优势</th>
-<th>局限性</th>
-<th>适用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>tc&#x2F;netem</strong></td>
-<td>延迟、丢包、重排、复制、损坏</td>
-<td>内置Linux内核，精确控制</td>
-<td>配置较复杂</td>
-<td>全面的网络条件模拟</td>
-</tr>
-<tr>
-<td><strong>iptables</strong></td>
-<td>过滤、拦截、重定向</td>
-<td>灵活精确，低级别控制</td>
-<td>语法复杂</td>
-<td>精确控制特定连接</td>
-</tr>
-<tr>
-<td><strong>tcpkill</strong></td>
-<td>中断TCP连接</td>
-<td>简单直接</td>
-<td>功能单一</td>
-<td>模拟连接中断</td>
-</tr>
-<tr>
-<td><strong>Comcast</strong></td>
-<td>延迟、带宽限制、丢包等</td>
-<td>简单易用，GUI工具也有</td>
-<td>精度不如tc</td>
-<td>快速简易测试</td>
-</tr>
-<tr>
-<td><strong>toxiproxy</strong></td>
-<td>延迟、带宽限制、超时、中断等</td>
-<td>提供API，易于集成</td>
-<td>需要单独部署</td>
-<td>CI&#x2F;CD集成测试</td>
-</tr>
-<tr>
-<td><strong>Charles&#x2F;Fiddler</strong></td>
-<td>流量拦截、修改、限速</td>
-<td>图形界面，易于使用</td>
-<td>主要针对HTTP(S)</td>
-<td>应用层协议测试</td>
-</tr>
-<tr>
-<td><strong>WANem</strong></td>
-<td>全面网络模拟</td>
-<td>开箱即用，界面友好</td>
-<td>需要独立设备&#x2F;VM</td>
-<td>完整WAN环境模拟</td>
-</tr>
-</tbody></table>
-<h2 id="2-tc-Traffic-Control-详解"><a href="#2-tc-Traffic-Control-详解" class="headerlink" title="2. tc (Traffic Control) 详解"></a>2. tc (Traffic Control) 详解</h2><p><code>tc</code>是Linux内核的流量控制工具，通过<code>netem</code>模块可以模拟各种网络条件。这是最强大、最灵活的网络故障模拟工具。</p>
-<h3 id="基本使用模式"><a href="#基本使用模式" class="headerlink" title="基本使用模式"></a>基本使用模式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查找 dnf search iproute</span></span><br><span class="line"><span class="built_in">sudo</span> dnf install iproute-tc -y</span><br><span class="line">tc -V</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line">tc qdisc add dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换现有规则</span></span><br><span class="line">tc qdisc change dev INTERFACE root netem PARAMETER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除规则</span></span><br><span class="line">tc qdisc del dev INTERFACE root</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟常见网络问题的命令"><a href="#模拟常见网络问题的命令" class="headerlink" title="模拟常见网络问题的命令"></a>模拟常见网络问题的命令</h3><h4 id="1-延迟模拟"><a href="#1-延迟模拟" class="headerlink" title="1. 延迟模拟"></a>1. 延迟模拟</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加固定延迟(100ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟及抖动(100ms ±10ms)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加正态分布的延迟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 20ms distribution normal</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加相关性延迟(上一个包的延迟对当前包有25%影响)</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms 25%</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-丢包模拟"><a href="#2-丢包模拟" class="headerlink" title="2. 丢包模拟"></a>2. 丢包模拟</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机丢包(10%)</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基于状态的丢包模型(Gilbert-Elliott)</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss gemodel 10% 50% 70% 20%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢包与成功相关</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10% 25%</span><br></pre></td></tr></table></figure>
-
-<h4 id="3-数据包损坏"><a href="#3-数据包损坏" class="headerlink" title="3. 数据包损坏"></a>3. 数据包损坏</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机损坏5%的数据包</span></span><br><span class="line">tc qdisc add dev eth0 root netem corrupt 5%</span><br></pre></td></tr></table></figure>
-
-<h4 id="4-数据包重复"><a href="#4-数据包重复" class="headerlink" title="4. 数据包重复"></a>4. 数据包重复</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机重复1%的数据包</span></span><br><span class="line">tc qdisc add dev eth0 root netem duplicate 1%</span><br></pre></td></tr></table></figure>
-
-<h4 id="5-数据包乱序"><a href="#5-数据包乱序" class="headerlink" title="5. 数据包乱序"></a>5. 数据包乱序</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 25%的数据包将被延迟10ms以造成乱序</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 10ms reorder 25% 50%</span><br></pre></td></tr></table></figure>
-
-<h4 id="6-带宽限制"><a href="#6-带宽限制" class="headerlink" title="6. 带宽限制"></a>6. 带宽限制</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制带宽为1Mbit/s</span></span><br><span class="line">tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms</span><br></pre></td></tr></table></figure>
-
-<h4 id="7-组合多种故障"><a href="#7-组合多种故障" class="headerlink" title="7. 组合多种故障"></a>7. 组合多种故障</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 组合延迟、丢包和乱序</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms distribution normal loss 5% reorder 25%</span><br></pre></td></tr></table></figure>
-
-<h4 id="8-精确模拟TCP重传"><a href="#8-精确模拟TCP重传" class="headerlink" title="8. 精确模拟TCP重传"></a>8. 精确模拟TCP重传</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过组合延迟和随机丢包来触发重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 200ms loss random 15%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络拥塞</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 50ms loss 5% 25%</span><br></pre></td></tr></table></figure>
-
-<h3 id="针对特定流量的故障模拟"><a href="#针对特定流量的故障模拟" class="headerlink" title="针对特定流量的故障模拟"></a>针对特定流量的故障模拟</h3><p>使用tc与iptables结合，可以只对特定流量应用网络故障模拟：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建标记特定流量的iptables规则</span></span><br><span class="line">iptables -A FORWARD -t mangle -p tcp --dport 80 -j MARK --set-mark 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为标记的流量创建队列规则</span></span><br><span class="line">tc qdisc add dev eth0 root handle 1: prio</span><br><span class="line">tc qdisc add dev eth0 parent 1:3 handle 30: netem delay 100ms loss 10%</span><br><span class="line">tc filter add dev eth0 protocol ip parent 1:0 prio 3 handle 1 fw flowid 1:3</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-iptables-模拟网络故障"><a href="#3-iptables-模拟网络故障" class="headerlink" title="3. iptables 模拟网络故障"></a>3. iptables 模拟网络故障</h2><p>iptables可以用于模拟网络层面的多种故障，尤其擅长精确控制特定连接。</p>
-<h3 id="RST包和连接重置"><a href="#RST包和连接重置" class="headerlink" title="RST包和连接重置"></a>RST包和连接重置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 向特定连接发送RST包</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -j REJECT --reject-with tcp-reset</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只针对特定条件的连接发送RST</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -m statistic --mode random --probability 0.3 -j REJECT --reject-with tcp-reset</span><br></pre></td></tr></table></figure>
-
-<h3 id="丢弃数据包"><a href="#丢弃数据包" class="headerlink" title="丢弃数据包"></a>丢弃数据包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 丢弃所有发往特定主机端口的数据包</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 192.168.1.100 --dport 80 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢弃30%的数据包(随机)</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 192.168.1.100 -m statistic --mode random --probability 0.3 -j DROP</span><br></pre></td></tr></table></figure>
-
-<h3 id="限制连接数"><a href="#限制连接数" class="headerlink" title="限制连接数"></a>限制连接数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制同时连接数</span></span><br><span class="line">iptables -A FORWARD -p tcp --syn --dport 80 -m connlimit --connlimit-above 10 -j DROP</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟防火墙策略变更"><a href="#模拟防火墙策略变更" class="headerlink" title="模拟防火墙策略变更"></a>模拟防火墙策略变更</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 突然阻断所有连接</span></span><br><span class="line">iptables -I FORWARD 1 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 之后移除此规则恢复连接</span></span><br><span class="line">iptables -D FORWARD 1</span><br></pre></td></tr></table></figure>
-
-<h2 id="4-tcpkill-及相关工具详解"><a href="#4-tcpkill-及相关工具详解" class="headerlink" title="4. tcpkill 及相关工具详解"></a>4. tcpkill 及相关工具详解</h2><p>tcpkill属于dsniff工具集，主要用于中断TCP连接，但功能相对单一。同一工具集的其他工具可以模拟更多类型的网络攻击。</p>
-<h3 id="tcpkill-基本用法"><a href="#tcpkill-基本用法" class="headerlink" title="tcpkill 基本用法"></a>tcpkill 基本用法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 中断所有到达特定主机和端口的连接</span></span><br><span class="line">tcpkill -i eth0 host 192.168.1.100 and port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断指定协议的连接</span></span><br><span class="line">tcpkill -i eth0 port 443 and tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断特定源IP发起的连接</span></span><br><span class="line">tcpkill -i eth0 src 10.0.0.1 and dst port 22</span><br></pre></td></tr></table></figure>
-
-<h3 id="tcpkill-能模拟的其他攻击"><a href="#tcpkill-能模拟的其他攻击" class="headerlink" title="tcpkill 能模拟的其他攻击"></a>tcpkill 能模拟的其他攻击</h3><p>tcpkill本身功能有限，主要用于发送RST包中断连接。但dsniff工具集中的其他工具可以模拟更多攻击：</p>
-<ol>
-<li><p><strong>tcpnice</strong>: 通过操纵TCP窗口大小降低连接速度</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpnice -i eth0 host target.example.com</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>filesnarf</strong>: 捕获NFS文件传输</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">filesnarf -i eth0</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>mailsnarf</strong>: 捕获邮件内容</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mailsnarf -i eth0</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>msgsnarf</strong>: 捕获即时通讯消息</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msgsnarf -i eth0</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="tcpreplay-回放捕获的数据包"><a href="#tcpreplay-回放捕获的数据包" class="headerlink" title="tcpreplay: 回放捕获的数据包"></a>tcpreplay: 回放捕获的数据包</h3><p>tcpreplay可以重放之前捕获的数据包，用于模拟各种网络场景：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 回放之前捕获的数据包</span></span><br><span class="line">tcpreplay -i eth0 capture.pcap</span><br><span class="line"></span><br><span class="line"><span class="comment"># 调整回放速度</span></span><br><span class="line">tcpreplay -M 10.0 -i eth0 capture.pcap  <span class="comment"># 10倍速播放</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 循环播放</span></span><br><span class="line">tcpreplay -l 5 -i eth0 capture.pcap  <span class="comment"># 播放5次</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="5-其他高级网络模拟工具"><a href="#5-其他高级网络模拟工具" class="headerlink" title="5. 其他高级网络模拟工具"></a>5. 其他高级网络模拟工具</h2><h3 id="1-Toxiproxy"><a href="#1-Toxiproxy" class="headerlink" title="1. Toxiproxy"></a>1. Toxiproxy</h3><p>Toxiproxy是一个为测试设计的代理服务，可以模拟各种网络条件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动toxiproxy服务</span></span><br><span class="line">toxiproxy-server</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建代理</span></span><br><span class="line">toxiproxy-cli create myproxy --listen 0.0.0.0:8474 --upstream example.com:80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t latency -a latency=1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加随机延迟</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t latency -a jitter=500</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t bandwidth -a rate=100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟断开连接</span></span><br><span class="line">toxiproxy-cli toxic add myproxy -t <span class="built_in">timeout</span> -a <span class="built_in">timeout</span>=5000</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-Comcast"><a href="#2-Comcast" class="headerlink" title="2. Comcast"></a>2. Comcast</h3><p>一个简单易用的网络条件模拟工具：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">go get github.com/tylertreat/comcast</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟和丢包</span></span><br><span class="line">comcast --device=eth0 --latency=250 --packet-loss=10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止模拟</span></span><br><span class="line">comcast --stop</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-pumba-Docker环境"><a href="#3-pumba-Docker环境" class="headerlink" title="3. pumba (Docker环境)"></a>3. pumba (Docker环境)</h3><p>专门为Docker容器设计的网络混沌测试工具：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为指定容器添加延迟</span></span><br><span class="line">pumba netem --interface eth0 delay --time 3000 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络中断</span></span><br><span class="line">pumba netem --interface eth0 loss --percent 100 --correlation 100 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">pumba netem --interface eth0 rate --rate 1kbit my_container</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-Chaos-Mesh-Kubernetes环境"><a href="#4-Chaos-Mesh-Kubernetes环境" class="headerlink" title="4. Chaos Mesh (Kubernetes环境)"></a>4. Chaos Mesh (Kubernetes环境)</h3><p>为Kubernetes设计的混沌工程平台：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络延迟示例</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">chaos-mesh.org/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">NetworkChaos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">network-delay-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">action:</span> <span class="string">delay</span></span><br><span class="line">  <span class="attr">mode:</span> <span class="string">one</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">namespaces:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line">    <span class="attr">labelSelectors:</span></span><br><span class="line">      <span class="attr">&quot;app&quot;:</span> <span class="string">&quot;web-server&quot;</span></span><br><span class="line">  <span class="attr">delay:</span></span><br><span class="line">    <span class="attr">latency:</span> <span class="string">&quot;10ms&quot;</span></span><br><span class="line">    <span class="attr">correlation:</span> <span class="string">&quot;100&quot;</span></span><br><span class="line">    <span class="attr">jitter:</span> <span class="string">&quot;0ms&quot;</span></span><br><span class="line">  <span class="attr">duration:</span> <span class="string">&quot;30s&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="6-具体网络问题模拟方案"><a href="#6-具体网络问题模拟方案" class="headerlink" title="6. 具体网络问题模拟方案"></a>6. 具体网络问题模拟方案</h2><h3 id="模拟TCP重传"><a href="#模拟TCP重传" class="headerlink" title="模拟TCP重传"></a>模拟TCP重传</h3><p>TCP重传通常是由丢包、超时或网络拥塞引起的。要模拟TCP重传：</p>
-<h4 id="使用tc模拟"><a href="#使用tc模拟" class="headerlink" title="使用tc模拟:"></a>使用tc模拟:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 随机丢包引起的重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss random 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拥塞引起的重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 40ms distribution normal loss 5% 25%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 仅对特定流量引起重传</span></span><br><span class="line">tc qdisc add dev eth0 root handle 1: prio</span><br><span class="line">tc qdisc add dev eth0 parent 1:3 handle 30: netem loss 15%</span><br><span class="line">tc filter add dev eth0 parent 1: protocol ip prio 3 u32 match ip dport 80 0xffff flowid 1:3</span><br></pre></td></tr></table></figure>
-
-<h4 id="验证重传是否发生"><a href="#验证重传是否发生" class="headerlink" title="验证重传是否发生:"></a>验证重传是否发生:</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用tcpdump观察重传</span></span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-fin|tcp-rst|tcp-push) != 0 and port 80&quot;</span> -v</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找标记为&quot;retransmission&quot;的数据包</span></span><br><span class="line">tcpdump -i eth0 -v tcp | grep -i retransmission</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟网络分区"><a href="#模拟网络分区" class="headerlink" title="模拟网络分区"></a>模拟网络分区</h3><p>网络分区是指网络被分割成多个无法相互通信的部分：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用iptables模拟网络分区</span></span><br><span class="line">iptables -A FORWARD -s 192.168.1.0/24 -d 192.168.2.0/24 -j DROP</span><br><span class="line">iptables -A FORWARD -s 192.168.2.0/24 -d 192.168.1.0/24 -j DROP</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟慢启动和拥塞控制"><a href="#模拟慢启动和拥塞控制" class="headerlink" title="模拟慢启动和拥塞控制"></a>模拟慢启动和拥塞控制</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 限制初始拥塞窗口大小</span></span><br><span class="line">ip route change default via 192.168.1.1 dev eth0 initcwnd 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 恢复默认设置</span></span><br><span class="line">ip route change default via 192.168.1.1 dev eth0 initcwnd 10</span><br></pre></td></tr></table></figure>
-
-<h3 id="模拟网络风暴"><a href="#模拟网络风暴" class="headerlink" title="模拟网络风暴"></a>模拟网络风暴</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用hping3模拟SYN泛洪</span></span><br><span class="line">hping3 -S --flood -p 80 target.example.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用iperf3模拟高流量</span></span><br><span class="line">iperf3 -c target.example.com -b 1G -t 60</span><br></pre></td></tr></table></figure>
-
-<h2 id="7-常用命令总结"><a href="#7-常用命令总结" class="headerlink" title="7. 常用命令总结"></a>7. 常用命令总结</h2><h3 id="基本网络故障模拟命令"><a href="#基本网络故障模拟命令" class="headerlink" title="基本网络故障模拟命令"></a>基本网络故障模拟命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 添加延迟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 10ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 丢包率</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 限制带宽</span></span><br><span class="line">tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 数据包损坏</span></span><br><span class="line">tc qdisc add dev eth0 root netem corrupt 5%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 模拟RST包</span></span><br><span class="line">iptables -A OUTPUT -p tcp -d 192.168.1.100 --dport 80 -j REJECT --reject-with tcp-reset</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 中断特定连接</span></span><br><span class="line">tcpkill -i eth0 host 192.168.1.100 and port 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 7. 模拟TCP重传</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss random 15% delay 200ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 8. 重置所有网络模拟</span></span><br><span class="line">tc qdisc del dev eth0 root</span><br><span class="line">iptables -F</span><br></pre></td></tr></table></figure>
-
-<h3 id="监控网络问题命令"><a href="#监控网络问题命令" class="headerlink" title="监控网络问题命令"></a>监控网络问题命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看TCP重传和其他统计信息</span></span><br><span class="line">netstat -s | grep -i retrans</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络接口统计</span></span><br><span class="line">netstat -i</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时监控特定主机的网络连接</span></span><br><span class="line">watch -n 1 <span class="string">&quot;netstat -tunapl | grep 192.168.1.100&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用tcpdump查看重传</span></span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-fin|tcp-rst|tcp-push) != 0&quot;</span> -v | grep -i retransmission</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查丢包情况</span></span><br><span class="line">ping -c 100 192.168.1.100 | grep <span class="string">&quot;packet loss&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络路由</span></span><br><span class="line">traceroute -T 192.168.1.100</span><br></pre></td></tr></table></figure>
-
-<h3 id="常用组合场景命令"><a href="#常用组合场景命令" class="headerlink" title="常用组合场景命令"></a>常用组合场景命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 场景1: 不稳定的网络连接</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 100ms 50ms distribution normal loss 5% 25% duplicate 1% corrupt 2%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景2: 移动网络环境模拟</span></span><br><span class="line">tc qdisc add dev eth0 root netem delay 200ms 100ms loss 3% reorder 5% rate 1mbit</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景3: 高丢包率环境下的TCP重传测试</span></span><br><span class="line">tc qdisc add dev eth0 root netem loss 20% delay 100ms 30ms &amp;&amp; \</span><br><span class="line">tcpdump -i eth0 -nn <span class="string">&quot;host 192.168.1.100&quot;</span> -v | grep -i retransmission</span><br><span class="line"></span><br><span class="line"><span class="comment"># 场景4: 周期性网络抖动(脚本示例)</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span>; <span class="keyword">do</span></span><br><span class="line">  <span class="comment"># 网络正常</span></span><br><span class="line">  tc qdisc del dev eth0 root</span><br><span class="line">  <span class="built_in">sleep</span> 30</span><br><span class="line">  <span class="comment"># 网络抖动</span></span><br><span class="line">  tc qdisc add dev eth0 root netem delay 500ms 200ms loss 10%</span><br><span class="line">  <span class="built_in">sleep</span> 10</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="8-总结与最佳实践"><a href="#8-总结与最佳实践" class="headerlink" title="8. 总结与最佳实践"></a>8. 总结与最佳实践</h2><p>在测试SSE或WebSocket等长连接时，应考虑以下方面：</p>
-<ol>
-<li><p><strong>模拟不同类型的网络中断</strong>：</p>
-<ul>
-<li>使用FIN包的优雅关闭 (应用层主动关闭)</li>
-<li>使用RST包的强制中断 (网络异常导致)</li>
-<li>临时网络不可达 (数据包丢失)</li>
-</ul>
-</li>
-<li><p><strong>测试客户端重连机制</strong>：</p>
-<ul>
-<li>指数退避重连</li>
-<li>区分不同类型的连接错误</li>
-<li>维持会话状态</li>
-</ul>
-</li>
-<li><p><strong>测试服务端优雅降级</strong>：</p>
-<ul>
-<li>连接突然断开时的资源清理</li>
-<li>部分网络可达时的服务降级</li>
-<li>高负载下的连接管理</li>
-</ul>
-</li>
-<li><p><strong>常见问题及解决方案</strong>：</p>
-<ul>
-<li>僵尸连接：设置合理的keepalive和超时</li>
-<li>资源泄漏：确保连接正确关闭</li>
-<li>重连风暴：客户端实现退避机制</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1689,7 +1593,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">175</span>
+          <span class="site-state-item-count">176</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

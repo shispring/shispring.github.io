@@ -184,6 +184,141 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/06/linux%E6%9F%A5%E7%9C%8B%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/06/linux%E6%9F%A5%E7%9C%8B%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/" class="post-title-link" itemprop="url">linux查看内核模块</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-06 14:56:33" itemprop="dateCreated datePublished" datetime="2025-02-06T14:56:33+08:00">2025-02-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-09-23 10:24:30" itemprop="dateModified" datetime="2025-09-23T10:24:30+08:00">2025-09-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="linux源码包"><a href="#linux源码包" class="headerlink" title="linux源码包"></a>linux源码包</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://mirrors.edge.kernel.org/pub/linux/kernel/</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="查看linux是否开启虚拟化"><a href="#查看linux是否开启虚拟化" class="headerlink" title="查看linux是否开启虚拟化"></a>查看linux是否开启虚拟化</h2><ul>
+<li>cat &#x2F;proc&#x2F;cpuinfo | grep -E “vmx|svm”<br>其中，vmx 表示Intel的虛拟化技术（InteIVT），svm 表示AMD的虚拟化技术（AMD-V）。</li>
+<li>lscpu</li>
+<li>lsmod | grep kvm</li>
+</ul>
+<h3 id="lsmod-命令的作用"><a href="#lsmod-命令的作用" class="headerlink" title="lsmod 命令的作用"></a><strong><code>lsmod</code> 命令的作用</strong></h3><p><code>lsmod</code> 是 Linux 系统中的一个命令，用于显示当前已加载的 <strong>内核模块（Kernel Modules）</strong>。它可以帮助用户检查哪些模块正在运行，并用于诊断系统硬件和驱动相关问题。</p>
+<h3 id="lsmod-的基本输出格式"><a href="#lsmod-的基本输出格式" class="headerlink" title="lsmod 的基本输出格式"></a><strong><code>lsmod</code> 的基本输出格式</strong></h3><p>执行 <code>lsmod</code> 命令时，会得到如下格式的输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
+<p>示例输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Module                  Size  Used by</span><br><span class="line">ip_tables              28672  2</span><br><span class="line">x_tables               40960  1 ip_tables</span><br><span class="line">i915                 2330624  12</span><br><span class="line">drm_kms_helper        217088  1 i915</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>Module</strong>：模块名称（例如 <code>i915</code>，为 Intel 显卡驱动模块）。</li>
+<li><strong>Size</strong>：模块占用的字节数（以 KB 计算）。</li>
+<li><strong>Used by</strong>：当前使用该模块的进程数或依赖该模块的其他内核模块。</li>
+</ul>
+<hr>
+<h3 id="lsmod-的常见操作"><a href="#lsmod-的常见操作" class="headerlink" title="lsmod 的常见操作"></a><strong><code>lsmod</code> 的常见操作</strong></h3><h4 id="1-查看已加载的所有内核模块"><a href="#1-查看已加载的所有内核模块" class="headerlink" title="1. 查看已加载的所有内核模块"></a><strong>1. 查看已加载的所有内核模块</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod</span><br></pre></td></tr></table></figure>
+<p>显示所有当前正在运行的内核模块。</p>
+<h4 id="2-过滤特定模块"><a href="#2-过滤特定模块" class="headerlink" title="2. 过滤特定模块"></a><strong>2. 过滤特定模块</strong></h4><p>如果想要查找某个特定模块（如 <code>i915</code> 显卡驱动）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep i915</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-查看模块的详细信息"><a href="#3-查看模块的详细信息" class="headerlink" title="3. 查看模块的详细信息"></a><strong>3. 查看模块的详细信息</strong></h4><p><code>lsmod</code> 本身不提供详细信息，但可以使用 <code>modinfo</code> 获取：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">modinfo i915</span><br></pre></td></tr></table></figure>
+<p>返回结果可能包含：</p>
+<ul>
+<li>模块名称</li>
+<li>描述信息</li>
+<li>版本</li>
+<li>依赖关系</li>
+<li>加载参数等</li>
+</ul>
+<h4 id="4-手动加载模块"><a href="#4-手动加载模块" class="headerlink" title="4. 手动加载模块"></a><strong>4. 手动加载模块</strong></h4><p>如果某个模块没有被自动加载，可以使用 <code>modprobe</code> 加载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe module_name</span><br></pre></td></tr></table></figure>
+<p>例如加载 <code>i915</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe i915</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-卸载内核模块"><a href="#5-卸载内核模块" class="headerlink" title="5. 卸载内核模块"></a><strong>5. 卸载内核模块</strong></h4><p>如果一个模块没有被任何进程使用，可以使用 <code>rmmod</code> 卸载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> rmmod module_name</span><br></pre></td></tr></table></figure>
+<p>例如卸载 <code>ip_tables</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> rmmod ip_tables</span><br></pre></td></tr></table></figure>
+<p>但如果模块正在使用，可能会报错，可以使用 <code>modprobe -r</code> 尝试卸载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> modprobe -r ip_tables</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-列出模块的依赖关系"><a href="#6-列出模块的依赖关系" class="headerlink" title="6. 列出模块的依赖关系"></a><strong>6. 列出模块的依赖关系</strong></h4><p>使用 <code>lsmod</code> 看到的 <code>Used by</code> 列并不详细，可以使用 <code>modinfo</code> 或 <code>lsmod | grep</code> 结合 <code>lsmod</code> 查看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep drm_kms_helper</span><br><span class="line">modinfo drm_kms_helper</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a><strong>应用场景</strong></h3><ul>
+<li><strong>诊断硬件驱动</strong>：例如，检查显卡、网卡、USB 设备是否正确加载了驱动模块。</li>
+<li><strong>调试系统问题</strong>：如果某些功能无法使用，可以检查相关模块是否被正确加载。</li>
+<li><strong>手动管理模块</strong>：在某些情况下，用户可能需要手动加载或卸载某些模块，以优化性能或排除问题。</li>
+</ul>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><ul>
+<li><code>lsmod</code> 用于列出当前已加载的内核模块。</li>
+<li>结合 <code>grep</code> 可以快速查找特定模块。</li>
+<li><code>modinfo</code> 获取模块详细信息。</li>
+<li><code>modprobe</code> 加载模块，<code>rmmod</code> 或 <code>modprobe -r</code> 卸载模块。</li>
+<li>常用于硬件驱动诊断和系统调试。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/24/time-After%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%A2%E6%B5%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2028,241 +2163,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">tcpdump/tshark抓包的几个命令</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-01-07 16:41:59" itemprop="dateCreated datePublished" datetime="2025-01-07T16:41:59+08:00">2025-01-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-01-30 12:07:03" itemprop="dateModified" datetime="2026-01-30T12:07:03+08:00">2026-01-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/network/" itemprop="url" rel="index"><span itemprop="name">network</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h2><ul>
-<li>-i any 监听所有的网卡接口，用来查看是否有网络流量</li>
-<li>-i eth0 只监听eth0网卡接口</li>
-<li>-D 显示可用的接口列表</li>
-<li>-n 不要解析主机名</li>
-<li>-nn 不要解析主机名或者端口名</li>
-<li>-q 显示更少的输出(更加quiet)</li>
-<li>-t 输出可读的时间戳</li>
-<li>-tttt 输出最大程度可读的时间戳</li>
-<li>-X 以hex和ASCII两种形式显示包的内容</li>
-<li>-XX 与**-X**类似，增加以太网header的显示</li>
-<li>-v, -vv, -vvv 显示更加多的包信息</li>
-<li>-c 只读取x个包，然后停止</li>
-<li>-s 指定每一个包捕获的长度，单位是byte，使用 -s 0 可以捕获整个包的内容</li>
-<li>-S 输出绝对的序列号</li>
-<li>-e 获取以太网header</li>
-<li>-E 使用提供的秘钥解密IPSEC流量</li>
-</ul>
-<hr>
-<h2 id="tcpdump-一些命令"><a href="#tcpdump-一些命令" class="headerlink" title="tcpdump 一些命令"></a>tcpdump 一些命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">查看网络接口列表:</span><br><span class="line">tcpdump -D</span><br><span class="line"></span><br><span class="line">简单抓包：</span><br><span class="line">抓取某接口的所有流量：</span><br><span class="line">tcpdump -i eth0</span><br><span class="line"></span><br><span class="line">保存抓包文件:</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定IP地址的数据包:</span><br><span class="line">只抓取源地址或目标地址为 `192.168.3.110` 的流量</span><br><span class="line">sudo tcpdump -i eth0 host 192.168.3.110</span><br><span class="line"></span><br><span class="line">抓取HTTP流量（端口8080）：</span><br><span class="line">sudo tcpdump -i eth0 port 8080</span><br><span class="line"></span><br><span class="line">抓取多个端口：</span><br><span class="line">sudo tcpdump -i eth0 portrange 8000-9000</span><br><span class="line"></span><br><span class="line">抓取TCP流量</span><br><span class="line">sudo tcpdump -i eth0 tcp</span><br><span class="line">抓取UDP流量</span><br><span class="line">sudo tcpdump -i eth0 udp</span><br><span class="line"></span><br><span class="line">抓取ICMP流量（如ping）：</span><br><span class="line">sudo tcpdump -i eth0 icmp</span><br><span class="line"></span><br><span class="line">抓取指定源地址和目标端口的数据包：</span><br><span class="line">sudo tcpdump -i eth0 src 192.168.3.110 and port 22</span><br><span class="line">逻辑运算符： and：与 or ：或  not：非</span><br><span class="line"></span><br><span class="line">显示数据包的详细信息:</span><br><span class="line">sudo tcpdump -i eth0 -v</span><br><span class="line"></span><br><span class="line">如果流量异常密集，可以通过 `-c` 限制抓包数量</span><br><span class="line">sudo tcpdump -i eth0 port 22 -c 100</span><br><span class="line"></span><br><span class="line">抓包文件过大,每10MB保存一个文件</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap -C 10</span><br><span class="line"></span><br><span class="line">读取包内容</span><br><span class="line">sudo tcpdump -r capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定时间范围的包，抓包10秒后自动停止</span><br><span class="line">timeout 10s tcpdump -i eth0</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h2><table>
-<thead>
-<tr>
-<th><strong>需求</strong></th>
-<th><strong>命令</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>捕获指定接口流量</td>
-<td><code>sudo tcpdump -i eth0</code></td>
-</tr>
-<tr>
-<td>捕获指定端口流量</td>
-<td><code>sudo tcpdump -i eth0 port 80</code></td>
-</tr>
-<tr>
-<td>保存抓包到文件</td>
-<td><code>sudo tcpdump -i eth0 -w capture.pcap</code></td>
-</tr>
-<tr>
-<td>限制抓包数量</td>
-<td><code>sudo tcpdump -i eth0 -c 100</code></td>
-</tr>
-<tr>
-<td>过滤特定源 IP 或目标 IP</td>
-<td><code>sudo tcpdump -i eth0 src host 192.168.1.10</code></td>
-</tr>
-<tr>
-<td>过滤特定协议</td>
-<td><code>sudo tcpdump -i eth0 tcp</code></td>
-</tr>
-<tr>
-<td>输出包详细内容</td>
-<td><code>sudo tcpdump -i eth0 -X</code></td>
-</tr>
-<tr>
-<td>限制包的大小</td>
-<td><code>sudo tcpdump -i eth0 -s 128</code></td>
-</tr>
-<tr>
-<td>捕获 DNS 流量</td>
-<td><code>sudo tcpdump -i eth0 port 53 -vvv</code></td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="抓包ingress请求case"><a href="#抓包ingress请求case" class="headerlink" title="抓包ingress请求case"></a>抓包ingress请求case</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#抓包请求</span><br><span class="line">curl -H &quot;host:test.xxx.com&quot; http://10.221.100.200/api/v1/xxx</span><br><span class="line">#查看日志输出</span><br><span class="line">crictl logs  -f &lt;container-id&gt; 2&gt;&amp;1 | grep &quot;/api/v1/xxx&quot;</span><br><span class="line">#抓包过滤</span><br><span class="line">tcpdump -i eth0  -ttt -nnn -v dst host 10.221.100.200 and port 80 and src host 10.100.100.100</span><br></pre></td></tr></table></figure>
-
-<h2 id="抓包脚本及注意事项"><a href="#抓包脚本及注意事项" class="headerlink" title="抓包脚本及注意事项"></a>抓包脚本及注意事项</h2><ul>
-<li>使用ifconfig查看要抓的源ip的网卡(要知道请求ip地址所在网卡)</li>
-<li>或者使用bmon 或者 iptraf-ng 查看网卡的流量</li>
-<li>或者设定要抓取的网卡（也可以指定为：any）<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># 输出以时间戳命名的 pcap 文件，便于后续 Wireshark 分析</span><br><span class="line"></span><br><span class="line">VIP=&quot;10.xxx.xxx.xxx&quot;</span><br><span class="line">PORT=&quot;443&quot;</span><br><span class="line">DURATION=60  # 抓包时长，单位为秒，可根据需要修改</span><br><span class="line">OUT_FILE=&quot;./tcpdump_k8s_$(date +%Y%m%d_%H%M%S).pcap&quot;</span><br><span class="line"></span><br><span class="line">echo &quot;[*] Starting tcpdump for $DURATION seconds on host $VIP:$PORT...&quot;</span><br><span class="line">sudo timeout $DURATION tcpdump -i any host $VIP and port $PORT -ttt -nn -vv -s 0 -w $OUT_FILE</span><br><span class="line"></span><br><span class="line">echo &quot;[+] Capture complete: $OUT_FILE&quot;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<hr>
-<p><a target="_blank" rel="noopener" href="https://github.com/mylxsw/growing-up/blob/master/doc/tcpdump%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B.md">github参考</a></p>
-<hr>
-<h1 id="一、按「包序号（frame-number）」精确查看（最常用）"><a href="#一、按「包序号（frame-number）」精确查看（最常用）" class="headerlink" title="一、按「包序号（frame number）」精确查看（最常用）"></a>一、按「包序号（frame number）」精确查看（最常用）</h1><h2 id="1️⃣-只看第-N-个包"><a href="#1️⃣-只看第-N-个包" class="headerlink" title="1️⃣ 只看第 N 个包"></a>1️⃣ 只看第 N 个包</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>👉 等价于 Wireshark 里点第 123 行<br>👉 输出<strong>只会有这一帧</strong></p>
-<hr>
-<h2 id="2️⃣-看一个包区间（比如-120-130）"><a href="#2️⃣-看一个包区间（比如-120-130）" class="headerlink" title="2️⃣ 看一个包区间（比如 120 ~ 130）"></a>2️⃣ 看一个包区间（比如 120 ~ 130）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number &gt;= 120 &amp;&amp; frame.number &lt;= 130&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>这是你现在<strong>最应该用的方式</strong>之一。</p>
-<hr>
-<h2 id="3️⃣-只-dump-某一帧的完整细节（替代-V-洪水）"><a href="#3️⃣-只-dump-某一帧的完整细节（替代-V-洪水）" class="headerlink" title="3️⃣ 只 dump 某一帧的完整细节（替代 -V 洪水）"></a>3️⃣ 只 dump 某一帧的完整细节（替代 -V 洪水）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span> -V</span><br></pre></td></tr></table></figure>
-
-<p>📌 正确姿势：</p>
-<blockquote>
-<p><strong>先用 -Y 定位，再用 -V 展开</strong></p>
-</blockquote>
-<hr>
-<h2 id="4️⃣-看某一帧的原始十六进制数据"><a href="#4️⃣-看某一帧的原始十六进制数据" class="headerlink" title="4️⃣ 看某一帧的原始十六进制数据"></a>4️⃣ 看某一帧的原始十六进制数据</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span> -x</span><br></pre></td></tr></table></figure>
-
-<p>如果你在看：</p>
-<ul>
-<li>header 是否被改</li>
-<li>payload 是否是预期内容<br>这个很有用。</li>
-</ul>
-<hr>
-<h1 id="二、按「时间」精确查看（定位问题窗口）"><a href="#二、按「时间」精确查看（定位问题窗口）" class="headerlink" title="二、按「时间」精确查看（定位问题窗口）"></a>二、按「时间」精确查看（定位问题窗口）</h1><h2 id="1️⃣-查看包的时间戳（先扫一眼）"><a href="#1️⃣-查看包的时间戳（先扫一眼）" class="headerlink" title="1️⃣ 查看包的时间戳（先扫一眼）"></a>1️⃣ 查看包的时间戳（先扫一眼）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e frame.number -e frame.time</span><br></pre></td></tr></table></figure>
-
-<p>常用来确定：</p>
-<blockquote>
-<p>问题发生在第几秒？</p>
-</blockquote>
-<hr>
-<h2 id="2️⃣-按时间范围过滤（重点）"><a href="#2️⃣-按时间范围过滤（重点）" class="headerlink" title="2️⃣ 按时间范围过滤（重点）"></a>2️⃣ 按时间范围过滤（<strong>重点</strong>）</h2><h3 id="示例：只看-10-01-30-～-10-01-32-之间的包"><a href="#示例：只看-10-01-30-～-10-01-32-之间的包" class="headerlink" title="示例：只看 10:01:30 ～ 10:01:32 之间的包"></a>示例：只看 10:01:30 ～ 10:01:32 之间的包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&#x27;frame.time &gt;= &quot;2026-01-28 10:01:30&quot; &amp;&amp; frame.time &lt;= &quot;2026-01-28 10:01:32&quot;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>📌 时间格式要和 <code>frame.time</code> 输出一致</p>
-<hr>
-<h2 id="3️⃣-用相对时间（更工程化）"><a href="#3️⃣-用相对时间（更工程化）" class="headerlink" title="3️⃣ 用相对时间（更工程化）"></a>3️⃣ 用相对时间（更工程化）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e frame.number -e frame.time_relative</span><br></pre></td></tr></table></figure>
-
-<p>然后：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.time_relative &gt;= 12.5 &amp;&amp; frame.time_relative &lt;= 13.0&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>👉 <strong>非常适合定位超时 &#x2F; 重传窗口</strong></p>
-<hr>
-<h1 id="三、按「连接-流」过滤（99-排障都该用）"><a href="#三、按「连接-流」过滤（99-排障都该用）" class="headerlink" title="三、按「连接 &#x2F; 流」过滤（99% 排障都该用）"></a>三、按「连接 &#x2F; 流」过滤（99% 排障都该用）</h1><h2 id="1️⃣-按-TCP-四元组过滤"><a href="#1️⃣-按-TCP-四元组过滤" class="headerlink" title="1️⃣ 按 TCP 四元组过滤"></a>1️⃣ 按 TCP 四元组过滤</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&quot;ip.src==10.0.0.1 &amp;&amp; ip.dst==10.0.0.2 &amp;&amp; tcp.port==443&quot;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="2️⃣-按-TCP-Stream（强烈推荐）"><a href="#2️⃣-按-TCP-Stream（强烈推荐）" class="headerlink" title="2️⃣ 按 TCP Stream（强烈推荐）"></a>2️⃣ 按 TCP Stream（<strong>强烈推荐</strong>）</h2><h3 id="先列出所有-TCP-stream"><a href="#先列出所有-TCP-stream" class="headerlink" title="先列出所有 TCP stream"></a>先列出所有 TCP stream</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e tcp.stream | <span class="built_in">sort</span> -n | <span class="built_in">uniq</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="假设你要看-stream-5："><a href="#假设你要看-stream-5：" class="headerlink" title="假设你要看 stream 5："></a>假设你要看 stream 5：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;tcp.stream == 5&quot;</span></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>💡 Wireshark 里 “Follow TCP Stream”<br>👉 命令行就是这个</p>
-</blockquote>
-<hr>
-<h2 id="3️⃣-同时限制-stream-包序号"><a href="#3️⃣-同时限制-stream-包序号" class="headerlink" title="3️⃣ 同时限制 stream + 包序号"></a>3️⃣ 同时限制 stream + 包序号</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&quot;tcp.stream == 5 &amp;&amp; frame.number &gt;= 200 &amp;&amp; frame.number &lt;= 260&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>这是“工程级精确切片”</strong></p>
-<hr>
-<h1 id="四、只看你关心的字段（避免-V）"><a href="#四、只看你关心的字段（避免-V）" class="headerlink" title="四、只看你关心的字段（避免 -V）"></a>四、只看你关心的字段（避免 -V）</h1><h2 id="1️⃣-只看-TCP-关键字段"><a href="#1️⃣-只看-TCP-关键字段" class="headerlink" title="1️⃣ 只看 TCP 关键字段"></a>1️⃣ 只看 TCP 关键字段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -T fields \</span><br><span class="line">  -e frame.number \</span><br><span class="line">  -e frame.time_relative \</span><br><span class="line">  -e ip.src \</span><br><span class="line">  -e ip.dst \</span><br><span class="line">  -e tcp.seq \</span><br><span class="line">  -e tcp.ack \</span><br><span class="line">  -e tcp.flags</span><br></pre></td></tr></table></figure>
-
-<p>👉 非常适合：</p>
-<ul>
-<li>看重传</li>
-<li>看乱序</li>
-<li>看 RST &#x2F; FIN</li>
-</ul>
-<hr>
-<h2 id="2️⃣-只看-HTTP-状态码-Host"><a href="#2️⃣-只看-HTTP-状态码-Host" class="headerlink" title="2️⃣ 只看 HTTP 状态码 &#x2F; Host"></a>2️⃣ 只看 HTTP 状态码 &#x2F; Host</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y http.response \</span><br><span class="line">  -T fields \</span><br><span class="line">  -e frame.number \</span><br><span class="line">  -e http.response.code \</span><br><span class="line">  -e http.host \</span><br><span class="line">  -e http.request.uri</span><br></pre></td></tr></table></figure>
-
-<p>📌 用来分析：</p>
-<ul>
-<li>308 &#x2F; 502 &#x2F; 429</li>
-<li>回源问题</li>
-<li>ingress 行为</li>
-</ul>
-<hr>
-<h1 id="五、tcpdump-离线分析（配合用）"><a href="#五、tcpdump-离线分析（配合用）" class="headerlink" title="五、tcpdump 离线分析（配合用）"></a>五、tcpdump 离线分析（配合用）</h1><p>你也可以用 tcpdump <strong>先裁剪，再用 tshark 看</strong></p>
-<h2 id="1️⃣-裁剪某时间段"><a href="#1️⃣-裁剪某时间段" class="headerlink" title="1️⃣ 裁剪某时间段"></a>1️⃣ 裁剪某时间段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r file.pcap -w slice.pcap \</span><br><span class="line">  <span class="string">&#x27;tcp and (host 10.0.0.1)&#x27;</span> \</span><br><span class="line">  -G 2 -W 1</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="2️⃣-裁剪某个流（近似）"><a href="#2️⃣-裁剪某个流（近似）" class="headerlink" title="2️⃣ 裁剪某个流（近似）"></a>2️⃣ 裁剪某个流（近似）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r file.pcap -w flow.pcap \</span><br><span class="line">  <span class="string">&#x27;tcp and src host 10.0.0.1 and dst host 10.0.0.2&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h1 id="tcpdump-tshark-RTT"><a href="#tcpdump-tshark-RTT" class="headerlink" title="tcpdump &#x2F; tshark&#x2F; RTT"></a>tcpdump &#x2F; tshark&#x2F; RTT</h1><blockquote>
-<p>tcpdump 看到的是 “世界发生了什么”<br>tshark 看到的是 “我推断发生了什么”<br>RTT（Round Trip Time）&#x3D; 一个数据包从客户端发出 → 到服务端 → 服务端回应 → 客户端收到 的总耗时<br>RTT &#x3D; 网络 + 协议栈 + 应用处理 + 调度 + 回包</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">✅ tshark 可信的前提</span><br><span class="line">• 单接口抓包（如 -i eth0）</span><br><span class="line">• 或抓在真正的瓶颈点</span><br><span class="line">• client 侧</span><br><span class="line">• server 侧</span><br><span class="line">• 不混 lo / veth / bridge</span><br><span class="line"></span><br><span class="line">✅ tshark 非常适合：</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.retransmission&quot;</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.fast_retransmission&quot;</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.ack_rtt&quot;</span><br><span class="line"></span><br><span class="line">👉 前提：抓包点干净</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2334,7 +2234,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">175</span>
+          <span class="site-state-item-count">176</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

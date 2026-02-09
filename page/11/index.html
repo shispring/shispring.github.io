@@ -184,6 +184,241 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/01/07/tcpdump%E6%8A%93%E5%8C%85%E7%9A%84%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">tcpdump/tshark抓包的几个命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-07 16:41:59" itemprop="dateCreated datePublished" datetime="2025-01-07T16:41:59+08:00">2025-01-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-01-30 12:07:03" itemprop="dateModified" datetime="2026-01-30T12:07:03+08:00">2026-01-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/network/" itemprop="url" rel="index"><span itemprop="name">network</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h2><ul>
+<li>-i any 监听所有的网卡接口，用来查看是否有网络流量</li>
+<li>-i eth0 只监听eth0网卡接口</li>
+<li>-D 显示可用的接口列表</li>
+<li>-n 不要解析主机名</li>
+<li>-nn 不要解析主机名或者端口名</li>
+<li>-q 显示更少的输出(更加quiet)</li>
+<li>-t 输出可读的时间戳</li>
+<li>-tttt 输出最大程度可读的时间戳</li>
+<li>-X 以hex和ASCII两种形式显示包的内容</li>
+<li>-XX 与**-X**类似，增加以太网header的显示</li>
+<li>-v, -vv, -vvv 显示更加多的包信息</li>
+<li>-c 只读取x个包，然后停止</li>
+<li>-s 指定每一个包捕获的长度，单位是byte，使用 -s 0 可以捕获整个包的内容</li>
+<li>-S 输出绝对的序列号</li>
+<li>-e 获取以太网header</li>
+<li>-E 使用提供的秘钥解密IPSEC流量</li>
+</ul>
+<hr>
+<h2 id="tcpdump-一些命令"><a href="#tcpdump-一些命令" class="headerlink" title="tcpdump 一些命令"></a>tcpdump 一些命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">查看网络接口列表:</span><br><span class="line">tcpdump -D</span><br><span class="line"></span><br><span class="line">简单抓包：</span><br><span class="line">抓取某接口的所有流量：</span><br><span class="line">tcpdump -i eth0</span><br><span class="line"></span><br><span class="line">保存抓包文件:</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定IP地址的数据包:</span><br><span class="line">只抓取源地址或目标地址为 `192.168.3.110` 的流量</span><br><span class="line">sudo tcpdump -i eth0 host 192.168.3.110</span><br><span class="line"></span><br><span class="line">抓取HTTP流量（端口8080）：</span><br><span class="line">sudo tcpdump -i eth0 port 8080</span><br><span class="line"></span><br><span class="line">抓取多个端口：</span><br><span class="line">sudo tcpdump -i eth0 portrange 8000-9000</span><br><span class="line"></span><br><span class="line">抓取TCP流量</span><br><span class="line">sudo tcpdump -i eth0 tcp</span><br><span class="line">抓取UDP流量</span><br><span class="line">sudo tcpdump -i eth0 udp</span><br><span class="line"></span><br><span class="line">抓取ICMP流量（如ping）：</span><br><span class="line">sudo tcpdump -i eth0 icmp</span><br><span class="line"></span><br><span class="line">抓取指定源地址和目标端口的数据包：</span><br><span class="line">sudo tcpdump -i eth0 src 192.168.3.110 and port 22</span><br><span class="line">逻辑运算符： and：与 or ：或  not：非</span><br><span class="line"></span><br><span class="line">显示数据包的详细信息:</span><br><span class="line">sudo tcpdump -i eth0 -v</span><br><span class="line"></span><br><span class="line">如果流量异常密集，可以通过 `-c` 限制抓包数量</span><br><span class="line">sudo tcpdump -i eth0 port 22 -c 100</span><br><span class="line"></span><br><span class="line">抓包文件过大,每10MB保存一个文件</span><br><span class="line">sudo tcpdump -i eth0 -w capture.pcap -C 10</span><br><span class="line"></span><br><span class="line">读取包内容</span><br><span class="line">sudo tcpdump -r capture.pcap</span><br><span class="line"></span><br><span class="line">抓取指定时间范围的包，抓包10秒后自动停止</span><br><span class="line">timeout 10s tcpdump -i eth0</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h2><table>
+<thead>
+<tr>
+<th><strong>需求</strong></th>
+<th><strong>命令</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>捕获指定接口流量</td>
+<td><code>sudo tcpdump -i eth0</code></td>
+</tr>
+<tr>
+<td>捕获指定端口流量</td>
+<td><code>sudo tcpdump -i eth0 port 80</code></td>
+</tr>
+<tr>
+<td>保存抓包到文件</td>
+<td><code>sudo tcpdump -i eth0 -w capture.pcap</code></td>
+</tr>
+<tr>
+<td>限制抓包数量</td>
+<td><code>sudo tcpdump -i eth0 -c 100</code></td>
+</tr>
+<tr>
+<td>过滤特定源 IP 或目标 IP</td>
+<td><code>sudo tcpdump -i eth0 src host 192.168.1.10</code></td>
+</tr>
+<tr>
+<td>过滤特定协议</td>
+<td><code>sudo tcpdump -i eth0 tcp</code></td>
+</tr>
+<tr>
+<td>输出包详细内容</td>
+<td><code>sudo tcpdump -i eth0 -X</code></td>
+</tr>
+<tr>
+<td>限制包的大小</td>
+<td><code>sudo tcpdump -i eth0 -s 128</code></td>
+</tr>
+<tr>
+<td>捕获 DNS 流量</td>
+<td><code>sudo tcpdump -i eth0 port 53 -vvv</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="抓包ingress请求case"><a href="#抓包ingress请求case" class="headerlink" title="抓包ingress请求case"></a>抓包ingress请求case</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#抓包请求</span><br><span class="line">curl -H &quot;host:test.xxx.com&quot; http://10.221.100.200/api/v1/xxx</span><br><span class="line">#查看日志输出</span><br><span class="line">crictl logs  -f &lt;container-id&gt; 2&gt;&amp;1 | grep &quot;/api/v1/xxx&quot;</span><br><span class="line">#抓包过滤</span><br><span class="line">tcpdump -i eth0  -ttt -nnn -v dst host 10.221.100.200 and port 80 and src host 10.100.100.100</span><br></pre></td></tr></table></figure>
+
+<h2 id="抓包脚本及注意事项"><a href="#抓包脚本及注意事项" class="headerlink" title="抓包脚本及注意事项"></a>抓包脚本及注意事项</h2><ul>
+<li>使用ifconfig查看要抓的源ip的网卡(要知道请求ip地址所在网卡)</li>
+<li>或者使用bmon 或者 iptraf-ng 查看网卡的流量</li>
+<li>或者设定要抓取的网卡（也可以指定为：any）<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># 输出以时间戳命名的 pcap 文件，便于后续 Wireshark 分析</span><br><span class="line"></span><br><span class="line">VIP=&quot;10.xxx.xxx.xxx&quot;</span><br><span class="line">PORT=&quot;443&quot;</span><br><span class="line">DURATION=60  # 抓包时长，单位为秒，可根据需要修改</span><br><span class="line">OUT_FILE=&quot;./tcpdump_k8s_$(date +%Y%m%d_%H%M%S).pcap&quot;</span><br><span class="line"></span><br><span class="line">echo &quot;[*] Starting tcpdump for $DURATION seconds on host $VIP:$PORT...&quot;</span><br><span class="line">sudo timeout $DURATION tcpdump -i any host $VIP and port $PORT -ttt -nn -vv -s 0 -w $OUT_FILE</span><br><span class="line"></span><br><span class="line">echo &quot;[+] Capture complete: $OUT_FILE&quot;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<p><a target="_blank" rel="noopener" href="https://github.com/mylxsw/growing-up/blob/master/doc/tcpdump%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B.md">github参考</a></p>
+<hr>
+<h1 id="一、按「包序号（frame-number）」精确查看（最常用）"><a href="#一、按「包序号（frame-number）」精确查看（最常用）" class="headerlink" title="一、按「包序号（frame number）」精确查看（最常用）"></a>一、按「包序号（frame number）」精确查看（最常用）</h1><h2 id="1️⃣-只看第-N-个包"><a href="#1️⃣-只看第-N-个包" class="headerlink" title="1️⃣ 只看第 N 个包"></a>1️⃣ 只看第 N 个包</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>👉 等价于 Wireshark 里点第 123 行<br>👉 输出<strong>只会有这一帧</strong></p>
+<hr>
+<h2 id="2️⃣-看一个包区间（比如-120-130）"><a href="#2️⃣-看一个包区间（比如-120-130）" class="headerlink" title="2️⃣ 看一个包区间（比如 120 ~ 130）"></a>2️⃣ 看一个包区间（比如 120 ~ 130）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number &gt;= 120 &amp;&amp; frame.number &lt;= 130&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这是你现在<strong>最应该用的方式</strong>之一。</p>
+<hr>
+<h2 id="3️⃣-只-dump-某一帧的完整细节（替代-V-洪水）"><a href="#3️⃣-只-dump-某一帧的完整细节（替代-V-洪水）" class="headerlink" title="3️⃣ 只 dump 某一帧的完整细节（替代 -V 洪水）"></a>3️⃣ 只 dump 某一帧的完整细节（替代 -V 洪水）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span> -V</span><br></pre></td></tr></table></figure>
+
+<p>📌 正确姿势：</p>
+<blockquote>
+<p><strong>先用 -Y 定位，再用 -V 展开</strong></p>
+</blockquote>
+<hr>
+<h2 id="4️⃣-看某一帧的原始十六进制数据"><a href="#4️⃣-看某一帧的原始十六进制数据" class="headerlink" title="4️⃣ 看某一帧的原始十六进制数据"></a>4️⃣ 看某一帧的原始十六进制数据</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.number == 123&quot;</span> -x</span><br></pre></td></tr></table></figure>
+
+<p>如果你在看：</p>
+<ul>
+<li>header 是否被改</li>
+<li>payload 是否是预期内容<br>这个很有用。</li>
+</ul>
+<hr>
+<h1 id="二、按「时间」精确查看（定位问题窗口）"><a href="#二、按「时间」精确查看（定位问题窗口）" class="headerlink" title="二、按「时间」精确查看（定位问题窗口）"></a>二、按「时间」精确查看（定位问题窗口）</h1><h2 id="1️⃣-查看包的时间戳（先扫一眼）"><a href="#1️⃣-查看包的时间戳（先扫一眼）" class="headerlink" title="1️⃣ 查看包的时间戳（先扫一眼）"></a>1️⃣ 查看包的时间戳（先扫一眼）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e frame.number -e frame.time</span><br></pre></td></tr></table></figure>
+
+<p>常用来确定：</p>
+<blockquote>
+<p>问题发生在第几秒？</p>
+</blockquote>
+<hr>
+<h2 id="2️⃣-按时间范围过滤（重点）"><a href="#2️⃣-按时间范围过滤（重点）" class="headerlink" title="2️⃣ 按时间范围过滤（重点）"></a>2️⃣ 按时间范围过滤（<strong>重点</strong>）</h2><h3 id="示例：只看-10-01-30-～-10-01-32-之间的包"><a href="#示例：只看-10-01-30-～-10-01-32-之间的包" class="headerlink" title="示例：只看 10:01:30 ～ 10:01:32 之间的包"></a>示例：只看 10:01:30 ～ 10:01:32 之间的包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&#x27;frame.time &gt;= &quot;2026-01-28 10:01:30&quot; &amp;&amp; frame.time &lt;= &quot;2026-01-28 10:01:32&quot;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>📌 时间格式要和 <code>frame.time</code> 输出一致</p>
+<hr>
+<h2 id="3️⃣-用相对时间（更工程化）"><a href="#3️⃣-用相对时间（更工程化）" class="headerlink" title="3️⃣ 用相对时间（更工程化）"></a>3️⃣ 用相对时间（更工程化）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e frame.number -e frame.time_relative</span><br></pre></td></tr></table></figure>
+
+<p>然后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;frame.time_relative &gt;= 12.5 &amp;&amp; frame.time_relative &lt;= 13.0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>👉 <strong>非常适合定位超时 &#x2F; 重传窗口</strong></p>
+<hr>
+<h1 id="三、按「连接-流」过滤（99-排障都该用）"><a href="#三、按「连接-流」过滤（99-排障都该用）" class="headerlink" title="三、按「连接 &#x2F; 流」过滤（99% 排障都该用）"></a>三、按「连接 &#x2F; 流」过滤（99% 排障都该用）</h1><h2 id="1️⃣-按-TCP-四元组过滤"><a href="#1️⃣-按-TCP-四元组过滤" class="headerlink" title="1️⃣ 按 TCP 四元组过滤"></a>1️⃣ 按 TCP 四元组过滤</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&quot;ip.src==10.0.0.1 &amp;&amp; ip.dst==10.0.0.2 &amp;&amp; tcp.port==443&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2️⃣-按-TCP-Stream（强烈推荐）"><a href="#2️⃣-按-TCP-Stream（强烈推荐）" class="headerlink" title="2️⃣ 按 TCP Stream（强烈推荐）"></a>2️⃣ 按 TCP Stream（<strong>强烈推荐</strong>）</h2><h3 id="先列出所有-TCP-stream"><a href="#先列出所有-TCP-stream" class="headerlink" title="先列出所有 TCP stream"></a>先列出所有 TCP stream</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -T fields -e tcp.stream | <span class="built_in">sort</span> -n | <span class="built_in">uniq</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="假设你要看-stream-5："><a href="#假设你要看-stream-5：" class="headerlink" title="假设你要看 stream 5："></a>假设你要看 stream 5：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap -Y <span class="string">&quot;tcp.stream == 5&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 Wireshark 里 “Follow TCP Stream”<br>👉 命令行就是这个</p>
+</blockquote>
+<hr>
+<h2 id="3️⃣-同时限制-stream-包序号"><a href="#3️⃣-同时限制-stream-包序号" class="headerlink" title="3️⃣ 同时限制 stream + 包序号"></a>3️⃣ 同时限制 stream + 包序号</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y <span class="string">&quot;tcp.stream == 5 &amp;&amp; frame.number &gt;= 200 &amp;&amp; frame.number &lt;= 260&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>这是“工程级精确切片”</strong></p>
+<hr>
+<h1 id="四、只看你关心的字段（避免-V）"><a href="#四、只看你关心的字段（避免-V）" class="headerlink" title="四、只看你关心的字段（避免 -V）"></a>四、只看你关心的字段（避免 -V）</h1><h2 id="1️⃣-只看-TCP-关键字段"><a href="#1️⃣-只看-TCP-关键字段" class="headerlink" title="1️⃣ 只看 TCP 关键字段"></a>1️⃣ 只看 TCP 关键字段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -T fields \</span><br><span class="line">  -e frame.number \</span><br><span class="line">  -e frame.time_relative \</span><br><span class="line">  -e ip.src \</span><br><span class="line">  -e ip.dst \</span><br><span class="line">  -e tcp.seq \</span><br><span class="line">  -e tcp.ack \</span><br><span class="line">  -e tcp.flags</span><br></pre></td></tr></table></figure>
+
+<p>👉 非常适合：</p>
+<ul>
+<li>看重传</li>
+<li>看乱序</li>
+<li>看 RST &#x2F; FIN</li>
+</ul>
+<hr>
+<h2 id="2️⃣-只看-HTTP-状态码-Host"><a href="#2️⃣-只看-HTTP-状态码-Host" class="headerlink" title="2️⃣ 只看 HTTP 状态码 &#x2F; Host"></a>2️⃣ 只看 HTTP 状态码 &#x2F; Host</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tshark -r file.pcap \</span><br><span class="line">  -Y http.response \</span><br><span class="line">  -T fields \</span><br><span class="line">  -e frame.number \</span><br><span class="line">  -e http.response.code \</span><br><span class="line">  -e http.host \</span><br><span class="line">  -e http.request.uri</span><br></pre></td></tr></table></figure>
+
+<p>📌 用来分析：</p>
+<ul>
+<li>308 &#x2F; 502 &#x2F; 429</li>
+<li>回源问题</li>
+<li>ingress 行为</li>
+</ul>
+<hr>
+<h1 id="五、tcpdump-离线分析（配合用）"><a href="#五、tcpdump-离线分析（配合用）" class="headerlink" title="五、tcpdump 离线分析（配合用）"></a>五、tcpdump 离线分析（配合用）</h1><p>你也可以用 tcpdump <strong>先裁剪，再用 tshark 看</strong></p>
+<h2 id="1️⃣-裁剪某时间段"><a href="#1️⃣-裁剪某时间段" class="headerlink" title="1️⃣ 裁剪某时间段"></a>1️⃣ 裁剪某时间段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r file.pcap -w slice.pcap \</span><br><span class="line">  <span class="string">&#x27;tcp and (host 10.0.0.1)&#x27;</span> \</span><br><span class="line">  -G 2 -W 1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2️⃣-裁剪某个流（近似）"><a href="#2️⃣-裁剪某个流（近似）" class="headerlink" title="2️⃣ 裁剪某个流（近似）"></a>2️⃣ 裁剪某个流（近似）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -r file.pcap -w flow.pcap \</span><br><span class="line">  <span class="string">&#x27;tcp and src host 10.0.0.1 and dst host 10.0.0.2&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="tcpdump-tshark-RTT"><a href="#tcpdump-tshark-RTT" class="headerlink" title="tcpdump &#x2F; tshark&#x2F; RTT"></a>tcpdump &#x2F; tshark&#x2F; RTT</h1><blockquote>
+<p>tcpdump 看到的是 “世界发生了什么”<br>tshark 看到的是 “我推断发生了什么”<br>RTT（Round Trip Time）&#x3D; 一个数据包从客户端发出 → 到服务端 → 服务端回应 → 客户端收到 的总耗时<br>RTT &#x3D; 网络 + 协议栈 + 应用处理 + 调度 + 回包</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">✅ tshark 可信的前提</span><br><span class="line">• 单接口抓包（如 -i eth0）</span><br><span class="line">• 或抓在真正的瓶颈点</span><br><span class="line">• client 侧</span><br><span class="line">• server 侧</span><br><span class="line">• 不混 lo / veth / bridge</span><br><span class="line"></span><br><span class="line">✅ tshark 非常适合：</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.retransmission&quot;</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.fast_retransmission&quot;</span><br><span class="line">tshark -r xxx.pcap -Y &quot;tcp.analysis.ack_rtt&quot;</span><br><span class="line"></span><br><span class="line">👉 前提：抓包点干净</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/07/%E9%9B%86%E7%BE%A4%E6%B5%8B%E8%AF%95%E7%9B%B8%E5%85%B3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1482,183 +1717,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/23/terminating%E7%9A%84pod%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/23/terminating%E7%9A%84pod%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF/" class="post-title-link" itemprop="url">terminating的pod排查思路</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-12-23 17:54:28 / 修改时间：17:55:13" itemprop="dateCreated datePublished" datetime="2024-12-23T17:54:28+08:00">2024-12-23</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/pod/" itemprop="url" rel="index"><span itemprop="name">pod</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="Pod-处于-Terminating-状态的原因"><a href="#Pod-处于-Terminating-状态的原因" class="headerlink" title="Pod 处于 Terminating 状态的原因"></a><strong>Pod 处于 <code>Terminating</code> 状态的原因</strong></h3><p>Pod 长时间处于 <code>Terminating</code> 状态，通常是因为 Kubernetes 在删除 Pod 时未能正常完成某些清理操作。以下是可能的原因：</p>
-<ol>
-<li><strong>挂载的存储未能正常卸载</strong>：<ul>
-<li>Pod 使用了持久卷（PV），但存储卸载失败，导致 Pod 资源无法释放。</li>
-</ul>
-</li>
-<li><strong>容器未能正常终止</strong>：<ul>
-<li>Pod 中的容器未能按预期响应 <code>SIGTERM</code> 信号。</li>
-<li>容器运行时（如 containerd、CRI-O）可能出现问题，导致容器未能被删除。</li>
-</ul>
-</li>
-<li><strong>Finalizer 阻塞</strong>：<ul>
-<li>Pod 定义中包含了 <code>finalizer</code>，但未能按预期完成清理操作。</li>
-</ul>
-</li>
-<li><strong>网络或 API Server 问题</strong>：<ul>
-<li>Kubernetes API Server 无法与节点通信，导致删除指令未能执行。</li>
-</ul>
-</li>
-<li><strong>节点异常</strong>：<ul>
-<li>Pod 所在的节点已不可用，但 Kubernetes 仍尝试与该节点交互。</li>
-</ul>
-</li>
-</ol>
-<hr>
-<h3 id="Kubernetes-垃圾回收机制"><a href="#Kubernetes-垃圾回收机制" class="headerlink" title="Kubernetes 垃圾回收机制"></a><strong>Kubernetes 垃圾回收机制</strong></h3><ol>
-<li><strong>默认行为</strong>：<ul>
-<li>Kubernetes 的垃圾回收机制会尝试清理处于 <code>Terminating</code> 状态的 Pod，但这依赖于集群的健康状态和 Pod 的配置。</li>
-</ul>
-</li>
-<li><strong>Finalizer 的影响</strong>：<ul>
-<li>如果 Pod 含有未完成的 <code>finalizer</code>，垃圾回收机制不会自动删除 Pod。</li>
-</ul>
-</li>
-<li><strong>节点不可用的情况</strong>：<ul>
-<li>如果节点长时间不可用，Kubernetes 会将节点标记为 <code>NotReady</code>，并最终删除相关 Pod，但需要依赖 <code>node-ttl</code> 等配置。</li>
-</ul>
-</li>
-</ol>
-<p>因此，如果 Pod 长时间处于 <code>Terminating</code> 状态且无人干预，它可能会一直保留在集群中，特别是当某些资源清理失败时。</p>
-<hr>
-<h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a><strong>排查思路</strong></h3><ol>
-<li><p><strong>查看 Pod 的详细信息</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;pod-name&gt; -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>检查 Events</strong>：<ul>
-<li>查看是否有与存储、容器终止或 Finalizer 相关的错误。</li>
-</ul>
-</li>
-<li><strong>检查 Finalizer</strong>：<ul>
-<li>Pod 的 <code>metadata.finalizers</code> 是否未被清理。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p><strong>检查 Pod 的容器状态</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod &lt;pod-name&gt; -n &lt;namespace&gt; -o jsonpath=<span class="string">&#x27;&#123;.status.containerStatuses[*].state&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>确认容器是否已经终止。</li>
-<li>如果容器未能正常终止，可能需要进一步排查容器运行时。</li>
-</ul>
-</li>
-<li><p><strong>检查节点状态</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
-<ul>
-<li>Pod 所在节点是否处于 <code>Ready</code> 状态。</li>
-<li>如果节点不可用，Pod 的删除可能被阻塞。</li>
-</ul>
-</li>
-<li><p><strong>检查存储状态</strong>：</p>
-<ul>
-<li>如果 Pod 使用了存储卷，检查卷是否被成功卸载：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pvc -n &lt;namespace&gt;</span><br></pre></td></tr></table></figure></li>
-<li>查看相关 PV 和存储系统的状态。</li>
-</ul>
-</li>
-<li><p><strong>检查网络和 API Server</strong>：</p>
-<ul>
-<li>查看 API Server 和 kubelet 的日志，确认是否存在通信问题：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u kubelet</span><br></pre></td></tr></table></figure></li>
-</ul>
-</li>
-<li><p><strong>强制删除 Pod</strong>：<br>如果问题无法解决，可以强制删除 Pod，但要谨慎：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod &lt;pod-name&gt; -n &lt;namespace&gt; --force --grace-period=0</span><br></pre></td></tr></table></figure>
-<ul>
-<li>此操作会跳过 Finalizer 和清理过程。</li>
-</ul>
-</li>
-</ol>
-<hr>
-<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a><strong>最佳实践</strong></h3><ol>
-<li><strong>设置合理的终止行为</strong>：<ul>
-<li>在 Pod 的 <code>spec</code> 中设置 <code>terminationGracePeriodSeconds</code>，确保容器有足够时间完成清理。</li>
-</ul>
-</li>
-<li><strong>监控和告警</strong>：<ul>
-<li>配置监控工具（如 Prometheus 和 Grafana）以检测长时间处于 <code>Terminating</code> 状态的 Pod。</li>
-</ul>
-</li>
-<li><strong>避免 Finalizer 阻塞</strong>：<ul>
-<li>确保使用的 Finalizer 能正常完成清理任务。</li>
-</ul>
-</li>
-<li><strong>定期检查节点状态</strong>：<ul>
-<li>确保节点健康，及时清理不可用的节点。</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1730,7 +1788,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">175</span>
+          <span class="site-state-item-count">176</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
