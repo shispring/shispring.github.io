@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="锁机制详解：自旋锁、互斥锁、读写锁目录 锁机制概述 自旋锁 (Spin Lock) 互斥锁 (Mutex) 读写锁 (RWMutex) 锁机制对比 选择指南   锁机制概述什么是锁？锁是一种同步机制，用于控制多个线程或 goroutine 对共享资源的访问。当一个线程获取了锁，其他线程就必须等待，直到锁被释放。 为什么需要锁？ 数据一致性：防止多个线程同时修改共享数据导致数据不一致 竞态条件：避免">
+<meta property="og:type" content="article">
+<meta property="og:title" content="锁机制详解：自旋锁、互斥锁、读写锁">
+<meta property="og:url" content="https://shispring.github.io/2026/02/10/%E9%94%81%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%EF%BC%9A%E8%87%AA%E6%97%8B%E9%94%81%E3%80%81%E4%BA%92%E6%96%A5%E9%94%81%E3%80%81%E8%AF%BB%E5%86%99%E9%94%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="锁机制详解：自旋锁、互斥锁、读写锁目录 锁机制概述 自旋锁 (Spin Lock) 互斥锁 (Mutex) 读写锁 (RWMutex) 锁机制对比 选择指南   锁机制概述什么是锁？锁是一种同步机制，用于控制多个线程或 goroutine 对共享资源的访问。当一个线程获取了锁，其他线程就必须等待，直到锁被释放。 为什么需要锁？ 数据一致性：防止多个线程同时修改共享数据导致数据不一致 竞态条件：避免">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-02-10T03:13:58.000Z">
+<meta property="article:modified_time" content="2026-02-10T03:14:30.838Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="lock">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2026/02/10/%E9%94%81%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%EF%BC%9A%E8%87%AA%E6%97%8B%E9%94%81%E3%80%81%E4%BA%92%E6%96%A5%E9%94%81%E3%80%81%E8%AF%BB%E5%86%99%E9%94%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>锁机制详解：自旋锁、互斥锁、读写锁 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/02/10/%E9%94%81%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%EF%BC%9A%E8%87%AA%E6%97%8B%E9%94%81%E3%80%81%E4%BA%92%E6%96%A5%E9%94%81%E3%80%81%E8%AF%BB%E5%86%99%E9%94%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          锁机制详解：自旋锁、互斥锁、读写锁
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-02-10 11:13:58 / 修改时间：11:14:30" itemprop="dateCreated datePublished" datetime="2026-02-10T11:13:58+08:00">2026-02-10</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="锁机制详解：自旋锁、互斥锁、读写锁"><a href="#锁机制详解：自旋锁、互斥锁、读写锁" class="headerlink" title="锁机制详解：自旋锁、互斥锁、读写锁"></a>锁机制详解：自旋锁、互斥锁、读写锁</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li><a href="#%E9%94%81%E6%9C%BA%E5%88%B6%E6%A6%82%E8%BF%B0">锁机制概述</a></li>
+<li><a href="#%E8%87%AA%E6%97%8B%E9%94%81-spin-lock">自旋锁 (Spin Lock)</a></li>
+<li><a href="#%E4%BA%92%E6%96%A5%E9%94%81-mutex">互斥锁 (Mutex)</a></li>
+<li><a href="#%E8%AF%BB%E5%86%99%E9%94%81-rwmutex">读写锁 (RWMutex)</a></li>
+<li><a href="#%E9%94%81%E6%9C%BA%E5%88%B6%E5%AF%B9%E6%AF%94">锁机制对比</a></li>
+<li><a href="#%E9%80%89%E6%8B%A9%E6%8C%87%E5%8D%97">选择指南</a></li>
+</ol>
+<hr>
+<h2 id="锁机制概述"><a href="#锁机制概述" class="headerlink" title="锁机制概述"></a>锁机制概述</h2><h3 id="什么是锁？"><a href="#什么是锁？" class="headerlink" title="什么是锁？"></a>什么是锁？</h3><p>锁是一种同步机制，用于控制多个线程或 goroutine 对共享资源的访问。当一个线程获取了锁，其他线程就必须等待，直到锁被释放。</p>
+<h3 id="为什么需要锁？"><a href="#为什么需要锁？" class="headerlink" title="为什么需要锁？"></a>为什么需要锁？</h3><ol>
+<li><strong>数据一致性</strong>：防止多个线程同时修改共享数据导致数据不一致</li>
+<li><strong>竞态条件</strong>：避免因执行顺序不确定导致的错误结果</li>
+<li><strong>资源保护</strong>：确保关键资源在同一时间只能被一个线程访问</li>
+</ol>
+<h3 id="锁的基本原理"><a href="#锁的基本原理" class="headerlink" title="锁的基本原理"></a>锁的基本原理</h3><p>锁通过原子操作实现，确保在多线程环境下的正确性。当一个线程尝试获取已被占用的锁时，会有不同的处理方式：</p>
+<ul>
+<li><strong>阻塞等待</strong>：线程进入睡眠状态，等待锁释放</li>
+<li><strong>忙等待</strong>：线程持续检查锁状态，不进入睡眠</li>
+</ul>
+<hr>
+<h2 id="自旋锁-Spin-Lock"><a href="#自旋锁-Spin-Lock" class="headerlink" title="自旋锁 (Spin Lock)"></a>自旋锁 (Spin Lock)</h2><h3 id="核心理念"><a href="#核心理念" class="headerlink" title="核心理念"></a>核心理念</h3><p>自旋锁是一种忙等待的锁机制。当线程尝试获取锁失败时，不会进入睡眠状态，而是持续检查锁的状态，直到锁被释放。</p>
+<h3 id="产生背景"><a href="#产生背景" class="headerlink" title="产生背景"></a>产生背景</h3><p>自旋锁最初是为了在多处理器系统中减少上下文切换的开销而设计的。在单处理器系统中，自旋锁没有意义，因为持有锁的线程不释放 CPU，其他线程就无法运行。</p>
+<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">尝试获取锁</span><br><span class="line">  ↓</span><br><span class="line">是否成功?</span><br><span class="line">  ↓ 是</span><br><span class="line">执行临界区代码</span><br><span class="line">  ↓</span><br><span class="line">释放锁</span><br><span class="line"></span><br><span class="line">  ↓ 否</span><br><span class="line">循环检查锁状态 ←</span><br><span class="line">  ↓</span><br><span class="line">获取锁成功 → 执行临界区代码</span><br></pre></td></tr></table></figure>
+
+<h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ol>
+<li><strong>无上下文切换开销</strong>：避免了线程睡眠和唤醒的开销</li>
+<li><strong>响应速度快</strong>：一旦锁被释放，等待线程可以立即获取</li>
+<li><strong>适用于短临界区</strong>：当临界区执行时间很短时，自旋等待比睡眠唤醒更高效</li>
+</ol>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ol>
+<li><strong>CPU 资源浪费</strong>：在等待期间持续占用 CPU</li>
+<li><strong>不适合长临界区</strong>：如果临界区执行时间长，会浪费大量 CPU 资源</li>
+<li><strong>可能导致优先级反转</strong>：低优先级线程持有锁时，高优先级线程会持续自旋</li>
+</ol>
+<h3 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h3><ol>
+<li><strong>临界区非常短</strong>：执行时间远小于线程切换开销</li>
+<li><strong>多处理器系统</strong>：有足够 CPU 资源供其他线程运行</li>
+<li><strong>锁竞争不激烈</strong>：大部分时间锁都是可用的</li>
+</ol>
+<h3 id="Go-语言中的自旋锁"><a href="#Go-语言中的自旋锁" class="headerlink" title="Go 语言中的自旋锁"></a>Go 语言中的自旋锁</h3><p>Go 标准库没有直接提供自旋锁，但可以通过 <code>sync/atomic</code> 包实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;runtime&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">    <span class="string">&quot;sync/atomic&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 自旋锁实现</span></span><br><span class="line"><span class="keyword">type</span> SpinLock <span class="keyword">struct</span> &#123;</span><br><span class="line">    state <span class="type">int32</span> <span class="comment">// 0: unlocked, 1: locked</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *SpinLock)</span></span> Lock() &#123;</span><br><span class="line">    <span class="keyword">for</span> !atomic.CompareAndSwapInt32(&amp;sl.state, <span class="number">0</span>, <span class="number">1</span>) &#123;</span><br><span class="line">        runtime.Gosched() <span class="comment">// 让出 CPU 时间片，避免过度占用</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *SpinLock)</span></span> Unlock() &#123;</span><br><span class="line">    atomic.StoreInt32(&amp;sl.state, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> lock SpinLock</span><br><span class="line">    <span class="keyword">var</span> counter <span class="type">int64</span></span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    </span><br><span class="line">    start := time.Now()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启动多个 goroutine 竞争锁</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(id <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">1000</span>; j++ &#123;</span><br><span class="line">                lock.Lock()</span><br><span class="line">                counter++</span><br><span class="line">                <span class="comment">// 模拟非常短的临界区操作</span></span><br><span class="line">                _ = counter * <span class="number">2</span></span><br><span class="line">                lock.Unlock()</span><br><span class="line">            &#125;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;Goroutine %d finished\n&quot;</span>, id)</span><br><span class="line">        &#125;(i)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    wg.Wait()</span><br><span class="line">    elapsed := time.Since(start)</span><br><span class="line">    </span><br><span class="line">    fmt.Printf(<span class="string">&quot;Counter: %d\n&quot;</span>, counter)</span><br><span class="line">    fmt.Printf(<span class="string">&quot;Time elapsed: %v\n&quot;</span>, elapsed)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="互斥锁-Mutex"><a href="#互斥锁-Mutex" class="headerlink" title="互斥锁 (Mutex)"></a>互斥锁 (Mutex)</h2><h3 id="核心理念-1"><a href="#核心理念-1" class="headerlink" title="核心理念"></a>核心理念</h3><p>互斥锁是一种阻塞等待的锁机制。当线程尝试获取锁失败时，会进入睡眠状态，直到锁被释放时被唤醒。</p>
+<h3 id="产生背景-1"><a href="#产生背景-1" class="headerlink" title="产生背景"></a>产生背景</h3><p>互斥锁是为了在各种场景下提供通用的同步机制而设计的。它平衡了 CPU 使用效率和响应时间，是最常用的锁类型。</p>
+<h3 id="工作原理-1"><a href="#工作原理-1" class="headerlink" title="工作原理"></a>工作原理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">尝试获取锁</span><br><span class="line">  ↓</span><br><span class="line">是否成功?</span><br><span class="line">  ↓ 是</span><br><span class="line">执行临界区代码</span><br><span class="line">  ↓</span><br><span class="line">释放锁</span><br><span class="line"></span><br><span class="line">  ↓ 否</span><br><span class="line">进入睡眠状态</span><br><span class="line">  ↓</span><br><span class="line">被唤醒 → 获取锁 → 执行临界区代码</span><br></pre></td></tr></table></figure>
+
+<h3 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h3><ol>
+<li><strong>CPU 使用效率高</strong>：等待时不占用 CPU</li>
+<li><strong>适用场景广泛</strong>：适合各种长度的临界区</li>
+<li><strong>公平性好</strong>：通常按等待顺序唤醒线程</li>
+</ol>
+<h3 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h3><ol>
+<li><strong>上下文切换开销</strong>：睡眠和唤醒需要系统调用</li>
+<li><strong>响应时间不确定</strong>：受调度器影响</li>
+<li><strong>可能导致死锁</strong>：如果使用不当</li>
+</ol>
+<h3 id="适用场景-1"><a href="#适用场景-1" class="headerlink" title="适用场景"></a>适用场景</h3><ol>
+<li><strong>临界区执行时间不确定</strong>：可能很短也可能很长</li>
+<li><strong>锁竞争激烈</strong>：多个线程频繁竞争锁</li>
+<li><strong>通用场景</strong>：大多数需要同步的场景</li>
+</ol>
+<h3 id="Go-语言中的互斥锁"><a href="#Go-语言中的互斥锁" class="headerlink" title="Go 语言中的互斥锁"></a>Go 语言中的互斥锁</h3><p>Go 通过 <code>sync.Mutex</code> 提供互斥锁：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> mutex sync.Mutex</span><br><span class="line">    <span class="keyword">var</span> counter <span class="type">int</span></span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    </span><br><span class="line">    start := time.Now()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启动多个 goroutine 竞争锁</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(id <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">1000</span>; j++ &#123;</span><br><span class="line">                mutex.Lock()</span><br><span class="line">                counter++</span><br><span class="line">                <span class="comment">// 模拟较长的临界区操作</span></span><br><span class="line">                time.Sleep(time.Microsecond) <span class="comment">// 模拟一些处理时间</span></span><br><span class="line">                mutex.Unlock()</span><br><span class="line">            &#125;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;Goroutine %d finished\n&quot;</span>, id)</span><br><span class="line">        &#125;(i)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    wg.Wait()</span><br><span class="line">    elapsed := time.Since(start)</span><br><span class="line">    </span><br><span class="line">    fmt.Printf(<span class="string">&quot;Counter: %d\n&quot;</span>, counter)</span><br><span class="line">    fmt.Printf(<span class="string">&quot;Time elapsed: %v\n&quot;</span>, elapsed)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="读写锁-RWMutex"><a href="#读写锁-RWMutex" class="headerlink" title="读写锁 (RWMutex)"></a>读写锁 (RWMutex)</h2><h3 id="核心理念-2"><a href="#核心理念-2" class="headerlink" title="核心理念"></a>核心理念</h3><p>读写锁是一种特殊的锁，允许多个读操作同时进行，但写操作是独占的。它区分了读锁和写锁，提供了更高的并发性。</p>
+<h3 id="产生背景-2"><a href="#产生背景-2" class="headerlink" title="产生背景"></a>产生背景</h3><p>读写锁是为了解决”读多写少”场景下的并发性能问题。在很多应用中，读操作远多于写操作，使用普通互斥锁会限制读操作的并发性。</p>
+<h3 id="工作原理-2"><a href="#工作原理-2" class="headerlink" title="工作原理"></a>工作原理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">读锁获取:</span><br><span class="line">- 如果没有写锁，可以获取读锁</span><br><span class="line">- 可以有多个读锁同时存在</span><br><span class="line"></span><br><span class="line">写锁获取:</span><br><span class="line">- 必须没有其他读锁和写锁</span><br><span class="line">- 写锁是独占的</span><br><span class="line"></span><br><span class="line">读锁释放:</span><br><span class="line">- 减少读锁计数</span><br><span class="line"></span><br><span class="line">写锁释放:</span><br><span class="line">- 释放独占锁</span><br></pre></td></tr></table></figure>
+
+<h3 id="优点-2"><a href="#优点-2" class="headerlink" title="优点"></a>优点</h3><ol>
+<li><strong>高读并发性</strong>：多个读操作可以同时进行</li>
+<li><strong>适合读多写少场景</strong>：显著提高读操作性能</li>
+<li><strong>灵活性好</strong>：区分读写操作，提供不同级别的保护</li>
+</ol>
+<h3 id="缺点-2"><a href="#缺点-2" class="headerlink" title="缺点"></a>缺点</h3><ol>
+<li><strong>实现复杂</strong>：比普通互斥锁复杂</li>
+<li><strong>写饥饿问题</strong>：在读操作频繁时，写操作可能长时间等待</li>
+<li><strong>开销较大</strong>：维护读锁计数等额外状态</li>
+</ol>
+<h3 id="适用场景-2"><a href="#适用场景-2" class="headerlink" title="适用场景"></a>适用场景</h3><ol>
+<li><strong>读多写少</strong>：读操作远多于写操作</li>
+<li><strong>数据结构相对稳定</strong>：不频繁修改的数据结构</li>
+<li><strong>需要高读并发性</strong>：希望最大化读操作的并发性能</li>
+</ol>
+<h3 id="Go-语言中的读写锁"><a href="#Go-语言中的读写锁" class="headerlink" title="Go 语言中的读写锁"></a>Go 语言中的读写锁</h3><p>Go 通过 <code>sync.RWMutex</code> 提供读写锁：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Data <span class="keyword">struct</span> &#123;</span><br><span class="line">    value <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> rwMutex sync.RWMutex</span><br><span class="line">    data := &amp;Data&#123;value: <span class="number">0</span>&#125;</span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    </span><br><span class="line">    start := time.Now()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启动多个读 goroutine</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(id <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">1000</span>; j++ &#123;</span><br><span class="line">                rwMutex.RLock()</span><br><span class="line">                <span class="comment">// 模拟读操作</span></span><br><span class="line">                _ = data.value</span><br><span class="line">                time.Sleep(time.Microsecond) <span class="comment">// 模拟读取处理时间</span></span><br><span class="line">                rwMutex.RUnlock()</span><br><span class="line">            &#125;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;Reader %d finished\n&quot;</span>, id)</span><br><span class="line">        &#125;(i)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启动写 goroutine</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(id <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">100</span>; j++ &#123;</span><br><span class="line">                rwMutex.Lock()</span><br><span class="line">                <span class="comment">// 模拟写操作</span></span><br><span class="line">                data.value++</span><br><span class="line">                time.Sleep(time.Microsecond * <span class="number">2</span>) <span class="comment">// 模拟写入处理时间</span></span><br><span class="line">                rwMutex.Unlock()</span><br><span class="line">            &#125;</span><br><span class="line">            fmt.Printf(<span class="string">&quot;Writer %d finished\n&quot;</span>, id)</span><br><span class="line">        &#125;(i)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    wg.Wait()</span><br><span class="line">    elapsed := time.Since(start)</span><br><span class="line">    </span><br><span class="line">    fmt.Printf(<span class="string">&quot;Final value: %d\n&quot;</span>, data.value)</span><br><span class="line">    fmt.Printf(<span class="string">&quot;Time elapsed: %v\n&quot;</span>, elapsed)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="锁机制对比"><a href="#锁机制对比" class="headerlink" title="锁机制对比"></a>锁机制对比</h2><table>
+<thead>
+<tr>
+<th>锁类型</th>
+<th>优点</th>
+<th>缺点</th>
+<th>适用场景</th>
+<th>核心含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>自旋锁</strong></td>
+<td>无上下文切换开销，响应速度快</td>
+<td>CPU 资源浪费，不适合长临界区</td>
+<td>临界区非常短，多处理器系统</td>
+<td>忙等待，持续检查锁状态</td>
+</tr>
+<tr>
+<td><strong>互斥锁</strong></td>
+<td>CPU 使用效率高，适用场景广泛</td>
+<td>上下文切换开销，响应时间不确定</td>
+<td>通用场景，临界区时间不确定</td>
+<td>阻塞等待，睡眠唤醒机制</td>
+</tr>
+<tr>
+<td><strong>读写锁</strong></td>
+<td>高读并发性，适合读多写少</td>
+<td>实现复杂，可能写饥饿</td>
+<td>读多写少，需要高读并发性</td>
+<td>区分读写操作的锁机制</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="选择指南"><a href="#选择指南" class="headerlink" title="选择指南"></a>选择指南</h2><h3 id="根据临界区长度选择"><a href="#根据临界区长度选择" class="headerlink" title="根据临界区长度选择"></a>根据临界区长度选择</h3><table>
+<thead>
+<tr>
+<th>临界区长度</th>
+<th>推荐锁类型</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>非常短 (&lt; 10 微秒)</td>
+<td>自旋锁</td>
+<td>避免上下文切换开销</td>
+</tr>
+<tr>
+<td>中等 (10 微秒 - 1 毫秒)</td>
+<td>互斥锁</td>
+<td>平衡性能和资源使用</td>
+</tr>
+<tr>
+<td>较长 (&gt; 1 毫秒)</td>
+<td>互斥锁</td>
+<td>避免浪费 CPU 资源</td>
+</tr>
+</tbody></table>
+<h3 id="根据读写比例选择"><a href="#根据读写比例选择" class="headerlink" title="根据读写比例选择"></a>根据读写比例选择</h3><table>
+<thead>
+<tr>
+<th>读写比例</th>
+<th>推荐锁类型</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>读操作远多于写操作 (&gt; 90%)</td>
+<td>读写锁</td>
+<td>最大化读操作并发性</td>
+</tr>
+<tr>
+<td>读写操作均衡</td>
+<td>互斥锁</td>
+<td>简单可靠</td>
+</tr>
+<tr>
+<td>写操作较多</td>
+<td>互斥锁</td>
+<td>避免写饥饿问题</td>
+</tr>
+</tbody></table>
+<h3 id="根据系统环境选择"><a href="#根据系统环境选择" class="headerlink" title="根据系统环境选择"></a>根据系统环境选择</h3><table>
+<thead>
+<tr>
+<th>系统环境</th>
+<th>推荐锁类型</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单处理器</td>
+<td>互斥锁</td>
+<td>自旋锁无意义</td>
+</tr>
+<tr>
+<td>多处理器</td>
+<td>自旋锁或互斥锁</td>
+<td>根据临界区长度决定</td>
+</tr>
+<tr>
+<td>资源受限</td>
+<td>互斥锁</td>
+<td>节省 CPU 资源</td>
+</tr>
+</tbody></table>
+<h3 id="性能测试建议"><a href="#性能测试建议" class="headerlink" title="性能测试建议"></a>性能测试建议</h3><p>在实际应用中，建议通过性能测试来选择最适合的锁类型：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 性能测试示例</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkSpinLock</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> lock SpinLock</span><br><span class="line">    <span class="keyword">var</span> counter <span class="type">int64</span></span><br><span class="line">    </span><br><span class="line">    b.RunParallel(<span class="function"><span class="keyword">func</span><span class="params">(pb *testing.PB)</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> pb.Next() &#123;</span><br><span class="line">            lock.Lock()</span><br><span class="line">            counter++</span><br><span class="line">            lock.Unlock()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkMutex</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> mutex sync.Mutex</span><br><span class="line">    <span class="keyword">var</span> counter <span class="type">int64</span></span><br><span class="line">    </span><br><span class="line">    b.RunParallel(<span class="function"><span class="keyword">func</span><span class="params">(pb *testing.PB)</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> pb.Next() &#123;</span><br><span class="line">            mutex.Lock()</span><br><span class="line">            counter++</span><br><span class="line">            mutex.Unlock()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><h3 id="1-锁的粒度"><a href="#1-锁的粒度" class="headerlink" title="1. 锁的粒度"></a>1. 锁的粒度</h3><ul>
+<li><strong>细粒度锁</strong>：保护更小的数据结构，提高并发性</li>
+<li><strong>粗粒度锁</strong>：保护更大的数据结构，简化同步逻辑</li>
+</ul>
+<h3 id="2-锁的顺序"><a href="#2-锁的顺序" class="headerlink" title="2. 锁的顺序"></a>2. 锁的顺序</h3><ul>
+<li>在多个锁的情况下，始终以相同顺序获取锁，避免死锁</li>
+</ul>
+<h3 id="3-锁的范围"><a href="#3-锁的范围" class="headerlink" title="3. 锁的范围"></a>3. 锁的范围</h3><ul>
+<li>尽量缩短持有锁的时间</li>
+<li>避免在临界区内进行耗时操作</li>
+</ul>
+<h3 id="4-错误处理"><a href="#4-错误处理" class="headerlink" title="4. 错误处理"></a>4. 错误处理</h3><ul>
+<li>确保在异常情况下也能正确释放锁</li>
+<li>使用 defer 语句保证锁的释放</li>
+</ul>
+<h3 id="5-性能监控"><a href="#5-性能监控" class="headerlink" title="5. 性能监控"></a>5. 性能监控</h3><ul>
+<li>监控锁的竞争情况</li>
+<li>分析锁等待时间，优化锁的使用</li>
+</ul>
+<p>通过理解这些锁机制的特点和适用场景，您可以根据具体需求选择最合适的同步机制，从而构建高性能、可靠的并发程序。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/lock/" rel="tag"><i class="fa fa-tag"></i> lock</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%BF%AB%E9%80%9F%E5%AF%B9%E6%AF%94%E6%8C%87%E5%8D%97/" rel="prev" title="设计模式快速对比指南">
+      <i class="fa fa-chevron-left"></i> 设计模式快速对比指南
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%94%81%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%EF%BC%9A%E8%87%AA%E6%97%8B%E9%94%81%E3%80%81%E4%BA%92%E6%96%A5%E9%94%81%E3%80%81%E8%AF%BB%E5%86%99%E9%94%81"><span class="nav-number">1.</span> <span class="nav-text">锁机制详解：自旋锁、互斥锁、读写锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95"><span class="nav-number">1.1.</span> <span class="nav-text">目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E6%9C%BA%E5%88%B6%E6%A6%82%E8%BF%B0"><span class="nav-number">1.2.</span> <span class="nav-text">锁机制概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%94%81%EF%BC%9F"><span class="nav-number">1.2.1.</span> <span class="nav-text">什么是锁？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E9%94%81%EF%BC%9F"><span class="nav-number">1.2.2.</span> <span class="nav-text">为什么需要锁？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.3.</span> <span class="nav-text">锁的基本原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81-Spin-Lock"><span class="nav-number">1.3.</span> <span class="nav-text">自旋锁 (Spin Lock)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5"><span class="nav-number">1.3.1.</span> <span class="nav-text">核心理念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A7%E7%94%9F%E8%83%8C%E6%99%AF"><span class="nav-number">1.3.2.</span> <span class="nav-text">产生背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.3.3.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">1.3.4.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">1.3.5.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.3.6.</span> <span class="nav-text">适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Go-%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84%E8%87%AA%E6%97%8B%E9%94%81"><span class="nav-number">1.3.7.</span> <span class="nav-text">Go 语言中的自旋锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%92%E6%96%A5%E9%94%81-Mutex"><span class="nav-number">1.4.</span> <span class="nav-text">互斥锁 (Mutex)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5-1"><span class="nav-number">1.4.1.</span> <span class="nav-text">核心理念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A7%E7%94%9F%E8%83%8C%E6%99%AF-1"><span class="nav-number">1.4.2.</span> <span class="nav-text">产生背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-1"><span class="nav-number">1.4.3.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E7%82%B9-1"><span class="nav-number">1.4.4.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9-1"><span class="nav-number">1.4.5.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="nav-number">1.4.6.</span> <span class="nav-text">适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Go-%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84%E4%BA%92%E6%96%A5%E9%94%81"><span class="nav-number">1.4.7.</span> <span class="nav-text">Go 语言中的互斥锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E9%94%81-RWMutex"><span class="nav-number">1.5.</span> <span class="nav-text">读写锁 (RWMutex)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5-2"><span class="nav-number">1.5.1.</span> <span class="nav-text">核心理念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A7%E7%94%9F%E8%83%8C%E6%99%AF-2"><span class="nav-number">1.5.2.</span> <span class="nav-text">产生背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-2"><span class="nav-number">1.5.3.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E7%82%B9-2"><span class="nav-number">1.5.4.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9-2"><span class="nav-number">1.5.5.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-2"><span class="nav-number">1.5.6.</span> <span class="nav-text">适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Go-%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84%E8%AF%BB%E5%86%99%E9%94%81"><span class="nav-number">1.5.7.</span> <span class="nav-text">Go 语言中的读写锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E6%9C%BA%E5%88%B6%E5%AF%B9%E6%AF%94"><span class="nav-number">1.6.</span> <span class="nav-text">锁机制对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E6%8C%87%E5%8D%97"><span class="nav-number">1.7.</span> <span class="nav-text">选择指南</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E4%B8%B4%E7%95%8C%E5%8C%BA%E9%95%BF%E5%BA%A6%E9%80%89%E6%8B%A9"><span class="nav-number">1.7.1.</span> <span class="nav-text">根据临界区长度选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E8%AF%BB%E5%86%99%E6%AF%94%E4%BE%8B%E9%80%89%E6%8B%A9"><span class="nav-number">1.7.2.</span> <span class="nav-text">根据读写比例选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83%E9%80%89%E6%8B%A9"><span class="nav-number">1.7.3.</span> <span class="nav-text">根据系统环境选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.7.4.</span> <span class="nav-text">性能测试建议</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.8.</span> <span class="nav-text">最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%94%81%E7%9A%84%E7%B2%92%E5%BA%A6"><span class="nav-number">1.8.1.</span> <span class="nav-text">1. 锁的粒度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%94%81%E7%9A%84%E9%A1%BA%E5%BA%8F"><span class="nav-number">1.8.2.</span> <span class="nav-text">2. 锁的顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%94%81%E7%9A%84%E8%8C%83%E5%9B%B4"><span class="nav-number">1.8.3.</span> <span class="nav-text">3. 锁的范围</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="nav-number">1.8.4.</span> <span class="nav-text">4. 错误处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7"><span class="nav-number">1.8.5.</span> <span class="nav-text">5. 性能监控</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">178</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

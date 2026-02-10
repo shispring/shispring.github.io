@@ -184,6 +184,132 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/10/16/%E6%B8%85%E7%90%86docker%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/10/16/%E6%B8%85%E7%90%86docker%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE/" class="post-title-link" itemprop="url">清理docker缓存数据</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-10-16 10:51:19 / 修改时间：10:57:37" itemprop="dateCreated datePublished" datetime="2025-10-16T10:51:19+08:00">2025-10-16</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="现象：构建镜像设备无空间"><a href="#现象：构建镜像设备无空间" class="headerlink" title="现象：构建镜像设备无空间"></a>现象：构建镜像设备无空间</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#docker build xxx</span><br><span class="line">...</span><br><span class="line">mkdir /tmp/go-build1189934179/b521/: no space left on device</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">#查看设备存储</span><br><span class="line">#df -lh</span><br><span class="line">/dev/sda1        99G   54G   41G  57% /</span><br><span class="line">/dev/sdb        100G  100G  945M 100% /data</span><br><span class="line"></span><br><span class="line">#查看docker资源占用情况</span><br><span class="line">#docker system df</span><br><span class="line">TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE</span><br><span class="line">Images          69        15        13.21GB   10.8GB (81%)</span><br><span class="line">Containers      25        0         24.54MB   24.54MB (100%)</span><br><span class="line">Local Volumes   43        1         2.966GB   2.958GB (99%)</span><br><span class="line">Build Cache     376       0         85.73GB   85.73GB</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="🧭-一、总体分析"><a href="#🧭-一、总体分析" class="headerlink" title="🧭 一、总体分析"></a>🧭 一、总体分析</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>占用</th>
+<th>可回收</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Images</strong></td>
+<td>13.21 GB</td>
+<td>10.8 GB (81%)</td>
+<td>很多旧镜像未使用</td>
+</tr>
+<tr>
+<td><strong>Containers</strong></td>
+<td>24 MB</td>
+<td>100% 可回收</td>
+<td>停止容器未清理</td>
+</tr>
+<tr>
+<td><strong>Local Volumes</strong></td>
+<td>2.96 GB</td>
+<td>99% 可回收</td>
+<td>旧卷未使用</td>
+</tr>
+<tr>
+<td><strong>Build Cache</strong></td>
+<td><strong>85.73 GB</strong></td>
+<td><strong>85.73 GB (巨量)</strong></td>
+<td>Docker build 中产生的大量中间层缓存</td>
+</tr>
+</tbody></table>
+<h2 id="🧹-二、分级清理策略"><a href="#🧹-二、分级清理策略" class="headerlink" title="🧹 二、分级清理策略"></a>🧹 二、分级清理策略</h2><blockquote>
+<p>✅ 建议分三步执行，从“安全”到“彻底”。</p>
+</blockquote>
+<h3 id="1️⃣-安全清理（释放最多空间，低风险）"><a href="#1️⃣-安全清理（释放最多空间，低风险）" class="headerlink" title="1️⃣ 安全清理（释放最多空间，低风险）"></a>1️⃣ 安全清理（释放最多空间，低风险）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除无用 build cache（推荐第一步）</span></span><br><span class="line">docker builder prune</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>交互时输入 <code>y</code> 确认即可，通常能释放 80GB 以上空间。<br>不影响现有镜像或运行中的容器。</p>
+</blockquote>
+<hr>
+<h3 id="2️⃣-深度清理（删除所有未使用的镜像、容器、卷）"><a href="#2️⃣-深度清理（删除所有未使用的镜像、容器、卷）" class="headerlink" title="2️⃣ 深度清理（删除所有未使用的镜像、容器、卷）"></a>2️⃣ 深度清理（删除所有未使用的镜像、容器、卷）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system prune -a --volumes</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<ul>
+<li><code>-a</code>：删除所有未被容器使用的镜像（包括悬空镜像 <code>&lt;none&gt;</code>）。</li>
+<li><code>--volumes</code>：删除未被挂载的卷。</li>
+<li><code>system prune</code>：同时清理 network &#x2F; container &#x2F; build cache。</li>
+</ul>
+<p>💡 <strong>慎用</strong><br>此命令会删掉所有旧镜像，下次构建会重新拉取（时间成本较高，但可彻底释放空间）。</p>
+<hr>
+<h3 id="3️⃣-针对性清理（更精细控制）"><a href="#3️⃣-针对性清理（更精细控制）" class="headerlink" title="3️⃣ 针对性清理（更精细控制）"></a>3️⃣ 针对性清理（更精细控制）</h3><h4 id="清理无用镜像"><a href="#清理无用镜像" class="headerlink" title="清理无用镜像"></a>清理无用镜像</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -a</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理停止容器"><a href="#清理停止容器" class="headerlink" title="清理停止容器"></a>清理停止容器</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container prune</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理未使用的卷"><a href="#清理未使用的卷" class="headerlink" title="清理未使用的卷"></a>清理未使用的卷</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+
+<h4 id="清理构建缓存（所有构建器实例）"><a href="#清理构建缓存（所有构建器实例）" class="headerlink" title="清理构建缓存（所有构建器实例）"></a>清理构建缓存（所有构建器实例）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker builder prune --all</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🔍-三、查看清理效果"><a href="#🔍-三、查看清理效果" class="headerlink" title="🔍 三、查看清理效果"></a>🔍 三、查看清理效果</h2><p>执行完后再检查空间：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker system df</span></span><br><span class="line">TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE</span><br><span class="line">Images          69        15        13.21GB   10.8GB (81%)</span><br><span class="line">Containers      25        0         24.54MB   24.54MB (100%)</span><br><span class="line">Local Volumes   43        1         2.966GB   2.958GB (99%)</span><br><span class="line">Build Cache     63        0         0B        0B</span><br></pre></td></tr></table></figure>
+
+<p>通常 Build Cache 会从 85 GB 降到 &lt;5 GB，磁盘释放非常明显。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/23/bash-profile%E9%85%8D%E7%BD%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1220,116 +1346,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/14/%E5%B8%B8%E8%A7%81%E6%B5%81%E7%A8%8B%E5%9B%BE%E7%B1%BB%E5%9E%8B%E5%8F%8A%E7%94%A8%E9%80%94/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/14/%E5%B8%B8%E8%A7%81%E6%B5%81%E7%A8%8B%E5%9B%BE%E7%B1%BB%E5%9E%8B%E5%8F%8A%E7%94%A8%E9%80%94/" class="post-title-link" itemprop="url">常见流程图类型及用途</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-14 18:22:52 / 修改时间：18:23:55" itemprop="dateCreated datePublished" datetime="2025-08-14T18:22:52+08:00">2025-08-14</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="流程图类型及用途"><a href="#流程图类型及用途" class="headerlink" title="流程图类型及用途"></a>流程图类型及用途</h2><table>
-<thead>
-<tr>
-<th>图类型</th>
-<th>适用场景</th>
-<th>是否常用</th>
-<th>特点</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>时序图（Sequence Diagram）</strong></td>
-<td>展示系统组件之间随时间推移的交互</td>
-<td>✅ 非常常用</td>
-<td>强调<strong>时间顺序</strong>和消息流</td>
-</tr>
-<tr>
-<td><strong>流程图（Flowchart）</strong></td>
-<td>展示操作&#x2F;决策的逻辑流程</td>
-<td>✅ 最常见</td>
-<td>适合描述<strong>决策逻辑</strong></td>
-</tr>
-<tr>
-<td><strong>活动图（Activity Diagram）</strong></td>
-<td>类似流程图，更关注流程中的并发与分支</td>
-<td>✅ 常用</td>
-<td>更偏向于<strong>行为建模</strong></td>
-</tr>
-<tr>
-<td><strong>状态图（State Machine Diagram）</strong></td>
-<td>展示对象状态随事件变化</td>
-<td>⚠️ 特定场景</td>
-<td>适用于<strong>有限状态机</strong>描述</td>
-</tr>
-<tr>
-<td><strong>组件图（Component Diagram）</strong></td>
-<td>展示系统结构及组件依赖</td>
-<td>✅ 架构设计常用</td>
-<td>显示模块、接口和依赖</td>
-</tr>
-<tr>
-<td><strong>部署图（Deployment Diagram）</strong></td>
-<td>展示物理部署架构</td>
-<td>✅ DevOps 场景常见</td>
-<td>描述服务器、容器部署</td>
-</tr>
-<tr>
-<td><strong>时序交互图（Interaction Overview Diagram）</strong></td>
-<td>结合流程图和时序图</td>
-<td>⚠️ 较少用</td>
-<td>适合大系统多子流程交互</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1401,7 +1417,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">178</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1414,7 +1430,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
