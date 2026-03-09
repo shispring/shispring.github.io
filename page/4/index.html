@@ -184,6 +184,121 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/04/%E7%B3%BB%E7%BB%9F%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/11/04/%E7%B3%BB%E7%BB%9F%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">系统分析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-11-04 15:05:10" itemprop="dateCreated datePublished" datetime="2025-11-04T15:05:10+08:00">2025-11-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-12-08 19:13:50" itemprop="dateModified" datetime="2025-12-08T19:13:50+08:00">2025-12-08</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="系统分析"><a href="#系统分析" class="headerlink" title="系统分析"></a>系统分析</h2><blockquote>
+<p>覆盖了网卡、NUMA、中断、CPU绑定、CPU软中断分布、I&#x2F;O负载(pidstat&#x2F;iostat)、队列与中断绑定分析</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"># ------------------------------------------------------------</span><br><span class="line"># 网络 + NUMA + CPU + 中断 综合排查脚本</span><br><span class="line"># ------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">NIC=$&#123;1:-eth2&#125;   # 默认网卡 eth2，可通过参数指定</span><br><span class="line">echo -e &quot;\n\033[1;36m&gt;&gt;&gt; 开始分析网卡: $NIC\033[0m&quot;</span><br><span class="line">echo &quot;------------------------------------------------------------&quot;</span><br><span class="line"></span><br><span class="line"># ========== 1. 基础硬件与NUMA结构 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[1] NUMA与CPU拓扑信息\033[0m&quot;</span><br><span class="line">lscpu | egrep &quot;Model name|Socket|Core|Thread|NUMA&quot;</span><br><span class="line">echo</span><br><span class="line">numactl --hardware | grep -E &quot;available:|node [0-9]+ cpus:&quot;</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">if [ -f &quot;/sys/class/net/$NIC/device/numa_node&quot; ]; then</span><br><span class="line">    NUMA_NODE=$(cat /sys/class/net/$NIC/device/numa_node)</span><br><span class="line">    echo &quot;🧩 网卡 $NIC 属于 NUMA 节点: $NUMA_NODE&quot;</span><br><span class="line">    NODE_CPUS=$(cat /sys/devices/system/node/node$&#123;NUMA_NODE&#125;/cpulist)</span><br><span class="line">    echo &quot;🧠 对应 NUMA 节点CPU列表: $NODE_CPUS&quot;</span><br><span class="line">else</span><br><span class="line">    echo &quot;⚠️ 未找到 $NIC 的 NUMA 节点信息&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># ========== 2. 网卡硬件与队列信息 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[2] 网卡硬件参数与队列情况\033[0m&quot;</span><br><span class="line">ethtool -i $NIC | grep -E &quot;driver|version|firmware&quot;</span><br><span class="line">ethtool -l $NIC | grep -A1 &quot;Combined&quot;</span><br><span class="line">echo</span><br><span class="line">echo &quot;队列列表:&quot;</span><br><span class="line">ls /sys/class/net/$NIC/queues/ 2&gt;/dev/null || echo &quot;无队列目录&quot;</span><br><span class="line">echo</span><br><span class="line">ethtool -x $NIC 2&gt;/dev/null | head -20 || echo &quot;该网卡不支持RSS映射查看&quot;</span><br><span class="line"></span><br><span class="line"># ========== 3. 中断分布与绑定 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[3] 中断与CPU绑定关系\033[0m&quot;</span><br><span class="line">echo &quot;👉 $NIC 的中断号分布：&quot;</span><br><span class="line">grep $NIC /proc/interrupts | awk &#x27;&#123;print $1 &quot;\t&quot; $NF&#125;&#x27; | tr -d &#x27;:&#x27; | column -t</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n👉 每个中断号绑定CPU信息:&quot;</span><br><span class="line">grep $NIC /proc/interrupts | cut -d: -f1 | while read irq; do</span><br><span class="line">    [ -n &quot;$irq&quot; ] &amp;&amp; printf &quot;IRQ %-4s -&gt; CPU(s): %s\n&quot; &quot;$irq&quot; &quot;$(cat /proc/irq/$irq/smp_affinity_list 2&gt;/dev/null)&quot;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line"># ========== 4. 网卡接收性能参数 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[4] 网卡接收性能参数\033[0m&quot;</span><br><span class="line">sysctl -a 2&gt;/dev/null | grep &quot;net.core.netdev_max_backlog&quot;</span><br><span class="line">ethtool -S $NIC 2&gt;/dev/null | egrep &quot;rx_|tx_&quot; | head -20</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line"># ========== 5. CPU中断与软中断负载 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[5] CPU中断与软中断统计\033[0m&quot;</span><br><span class="line">echo -e &quot;\n🧮 查看单核CPU的软中断(top前几项)：&quot;</span><br><span class="line">mpstat -P ALL 1 1 | grep -v &quot;Average&quot; | grep -v &quot;^$&quot; | head -15</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n🧩 /proc/softirqs 前20行：&quot;</span><br><span class="line">head -20 /proc/softirqs</span><br><span class="line"></span><br><span class="line"># ========== 6. 机器整体性能快照 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[6] 系统整体性能快照\033[0m&quot;</span><br><span class="line">echo -e &quot;\n📊 CPU使用率：&quot;</span><br><span class="line">mpstat 1 1 | tail -10</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n💾 磁盘I/O负载：&quot;</span><br><span class="line">iostat -x -d 1 1 | grep -v &quot;^$&quot;</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n📈 网络流量速率：&quot;</span><br><span class="line">sar -n DEV 1 1 | grep $NIC</span><br><span class="line">echo</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n👀 进程级CPU/IO统计（前5名）：&quot;</span><br><span class="line">pidstat -dru 1 1 | head -20</span><br><span class="line"></span><br><span class="line"># ========== 7. 附加建议 ==========</span><br><span class="line">echo -e &quot;\n\033[1;33m[7] 附加建议命令（可选手动执行）\033[0m&quot;</span><br><span class="line">cat &lt;&lt;EOF</span><br><span class="line"># 查看中断平衡服务状态（IRQBalance）</span><br><span class="line">systemctl status irqbalance</span><br><span class="line"></span><br><span class="line"># 查看RSS配置与中断CPU亲和性调整建议</span><br><span class="line">grep . /sys/class/net/$NIC/queues/*/rps_cpus</span><br><span class="line">grep . /sys/class/net/$NIC/queues/*/xps_cpus</span><br><span class="line"></span><br><span class="line"># 查看当前活跃连接数</span><br><span class="line">ss -s</span><br><span class="line"></span><br><span class="line"># 实时监控单核CPU中断变化（示例）</span><br><span class="line">watch -n1 &#x27;cat /proc/softirqs | head -20&#x27;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n\033[1;32m✅ 完成，以上为网卡与NUMA性能诊断信息。\033[0m&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>🧩 输出逻辑概览（排查顺序）</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>主要目的</th>
+<th>核心命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1️⃣ NUMA与CPU拓扑</td>
+<td>了解CPU与内存结构</td>
+<td><code>lscpu</code>, <code>numactl</code></td>
+</tr>
+<tr>
+<td>2️⃣ 网卡硬件与队列</td>
+<td>确认网卡队列、RSS能力</td>
+<td><code>ethtool -l</code>, <code>ethtool -x</code></td>
+</tr>
+<tr>
+<td>3️⃣ 中断绑定关系</td>
+<td>分析IRQ与CPU的分布</td>
+<td><code>/proc/interrupts</code>, <code>/proc/irq/</code></td>
+</tr>
+<tr>
+<td>4️⃣ 网络性能参数</td>
+<td>核心队列与缓冲</td>
+<td><code>ethtool -S</code>, <code>sysctl net.core</code></td>
+</tr>
+<tr>
+<td>5️⃣ CPU软中断分析</td>
+<td>检查软中断瓶颈</td>
+<td><code>mpstat</code>, <code>/proc/softirqs</code></td>
+</tr>
+<tr>
+<td>6️⃣ 系统性能快照</td>
+<td>看系统整体健康度</td>
+<td><code>pidstat</code>, <code>iostat</code>, <code>sar</code></td>
+</tr>
+<tr>
+<td>7️⃣ 附加优化</td>
+<td>手动调整指引</td>
+<td>RSS&#x2F;XPS, irqbalance</td>
+</tr>
+</tbody></table>
+<h2 id="irqtop-与-lsirq"><a href="#irqtop-与-lsirq" class="headerlink" title="irqtop 与 lsirq"></a>irqtop 与 lsirq</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">#cat /proc/interrupts 格式不够良好</span><br><span class="line">#默认util-linux-2.38才集成了irqtop与lsirq，升级util-linux有一定风险，仅编译安装两个工具</span><br><span class="line">#rpm -q util-linux</span><br><span class="line">util-linux-2.32.1-22.0.1.an8.x86_64</span><br><span class="line"></span><br><span class="line">#Anolis OS 8.2 编译安装</span><br><span class="line"># 安装必要的静态库</span><br><span class="line">yum install -y glibc-static</span><br><span class="line"></span><br><span class="line">git clone https://github.com/util-linux/util-linux.git</span><br><span class="line">cd util-linux/</span><br><span class="line">./autogen.sh</span><br><span class="line"></span><br><span class="line">#两个工具依赖libsmartcols</span><br><span class="line"># 重新配置并编译</span><br><span class="line">make distclean</span><br><span class="line">./configure --enable-libsmartcols --disable-all-programs \</span><br><span class="line">  --enable-lsirq --enable-irqtop \</span><br><span class="line">  --enable-static --disable-shared \</span><br><span class="line">  LDFLAGS=&quot;-static&quot;</span><br><span class="line"></span><br><span class="line">make</span><br><span class="line"></span><br><span class="line">#拷贝（可选）</span><br><span class="line">cp lsirq /usr/local/bin/</span><br><span class="line">cp irqtop /usr/local/bin/</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/10/31/numactl%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1583,114 +1698,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/05/%E5%86%85%E5%AD%98%E5%9B%9E%E5%86%99-%E8%84%8F%E9%A1%B5-%E5%9B%9E%E6%94%B6-OOM/" class="post-title-link" itemprop="url">内存回写/脏页/回收/OOM</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-09-05 10:47:51 / 修改时间：10:48:07" itemprop="dateCreated datePublished" datetime="2025-09-05T10:47:51+08:00">2025-09-05</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="内存回写-脏页-回收-OOM-—-全流程说明与排查指南"><a href="#内存回写-脏页-回收-OOM-—-全流程说明与排查指南" class="headerlink" title="内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南"></a>内存回写 &#x2F; 脏页 &#x2F; 回收 &#x2F; OOM — 全流程说明与排查指南</h1><h2 id="概览（一句话）"><a href="#概览（一句话）" class="headerlink" title="概览（一句话）"></a>概览（一句话）</h2><p>用户进程写数据 → 数据先写入页缓存（page cache）成为 <em>dirty pages</em> → 内核异步回写（writeback）到磁盘 → 若磁盘&#x2F;后端慢或写入速率低于生成速率，dirty 将积累 → 内存回收（kswapd）尝试回收或触发写回并阻塞写者 → 若回收失败并耗尽内存，OOM killer 根据策略选择并杀死进程 &#x2F; cgroup。</p>
-<hr>
-<h2 id="一、关键概念（快速回顾）"><a href="#一、关键概念（快速回顾）" class="headerlink" title="一、关键概念（快速回顾）"></a>一、关键概念（快速回顾）</h2><ul>
-<li>**页缓存 (page cache)**：文件&#x2F;块 IO 的缓存层，存储在内存中 <code>struct page</code>。</li>
-<li><strong>Dirty pages</strong>：已修改但尚未写回到磁盘的页（占用内存，可写回）。</li>
-<li><strong>Writeback</strong>：内核将 dirty page 写回存储（由 writeback kthreads &#x2F; flush workers 执行）。</li>
-<li><strong>kswapd &#x2F; page reclaim</strong>：当内存紧张时回收可回收页（包括触发 writeback）。</li>
-<li><strong>OOM killer</strong>：当内核无法满足分配且无法回收，选择进程作为牺牲者（基于 <code>oom_score</code>、<code>oom_score_adj</code>、cgroup）并终止之。</li>
-<li><strong>cgroup v1&#x2F;v2</strong>：容器资源限制机制，内存超限会触发 cgroup OOM 行为。</li>
-</ul>
-<hr>
-<h2 id="二、典型触发路径（更详细）"><a href="#二、典型触发路径（更详细）" class="headerlink" title="二、典型触发路径（更详细）"></a>二、典型触发路径（更详细）</h2><ol>
-<li><p><strong>用户进程 write()</strong>  </p>
-<ul>
-<li>内核在 page cache 分配&#x2F;获取 page，复制数据到 page，然后标记为 <code>dirty</code>。</li>
-<li>write 返回快（写入内存），不等磁盘写完 -&gt; 写入吞吐高但延迟低。</li>
-</ul>
-</li>
-<li><p><strong>后台 writeback</strong>  </p>
-<ul>
-<li>内核周期性&#x2F;阈值触发 writeback（<code>vm.dirty_background_ratio</code> &#x2F; <code>vm.dirty_ratio</code> 或绝对量 <code>vm.dirty_bytes</code>）。</li>
-<li>writeback 由内核 kthreads 执行，异步把页写到块设备或通过 NFS&#x2F;CIFS&#x2F;CSI 等上游。</li>
-</ul>
-</li>
-<li><p><strong>当 writeback 跟不上</strong>  </p>
-<ul>
-<li>若产生 dirty 的速度 &gt; 写回速度（例如磁盘慢&#x2F;IO 卡住），dirty 会累积。</li>
-<li>一旦达到 <code>vm.dirty_ratio</code>，写者可能被强制阻塞（同步地 flush），导致大量进程阻塞在 D (uninterruptible sleep) 状态。</li>
-<li>IO 长时间阻塞会使系统响应变差（ssh 卡、syscalls 卡）。</li>
-</ul>
-</li>
-<li><p><strong>内存回收与 OOM</strong>  </p>
-<ul>
-<li>kswapd&#x2F;直接分配者触发回收，回收优先回收可回收的缓存页或回写脏页。</li>
-<li>如果回收仍然不能满足内存请求，内核触发 OOM killer，选择最合适的 victim（参考 oom_score, oom_score_adj, oom_badness 以及 cgroup 权重），并杀掉进程。</li>
-<li>在 cgroup v2 下，若 cgroup 达到 <code>memory.max</code>，可能只杀该 cgroup 内的进程（cgroup OOM）。</li>
-</ul>
-</li>
-</ol>
-<hr>
-<h2 id="三、和-buff-cache-MemAvailable-的常见误解"><a href="#三、和-buff-cache-MemAvailable-的常见误解" class="headerlink" title="三、和 buff/cache &#x2F; MemAvailable 的常见误解"></a>三、和 <code>buff/cache</code> &#x2F; <code>MemAvailable</code> 的常见误解</h2><ul>
-<li><code>buff/cache</code> 高 <strong>不等于</strong> 可用性低；<code>buff/cache</code> 是可回收的（通常）。  </li>
-<li>但当脏页非常多或 slab（内核对象）泄漏时，内存是“不可回收”的 → 即便 <code>MemAvailable</code> 暂时显示不是 0，也可能回收失败导致假死。  </li>
-<li>区分点：看 <code>Dirty</code>&#x2F;<code>Writeback</code> 与 <code>SReclaimable</code> &#x2F; <code>SUnreclaim</code>（<code>/proc/meminfo</code> 与 <code>slabtop</code>）。</li>
-</ul>
-<hr>
-<h2 id="四、实操排查清单（从轻到重）"><a href="#四、实操排查清单（从轻到重）" class="headerlink" title="四、实操排查清单（从轻到重）"></a>四、实操排查清单（从轻到重）</h2><h3 id="1-快速查看内存-脏页-回写"><a href="#1-快速查看内存-脏页-回写" class="headerlink" title="1) 快速查看内存&#x2F;脏页&#x2F;回写"></a>1) 快速查看内存&#x2F;脏页&#x2F;回写</h3><pre><code class="bash">free -h
-cat /proc/meminfo | egrep &#39;Dirty|Writeback|MemAvailable|Cached|Buffers|SUnreclaim|Slab|Swap&#39;
-cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writeback&#39;
-</code></pre>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1762,7 +1769,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">180</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
