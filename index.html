@@ -184,6 +184,82 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/03/09/buildx%E5%A4%9A%E6%9E%B6%E6%9E%84%E7%BC%96%E8%AF%91%E9%95%9C%E5%83%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/03/09/buildx%E5%A4%9A%E6%9E%B6%E6%9E%84%E7%BC%96%E8%AF%91%E9%95%9C%E5%83%8F/" class="post-title-link" itemprop="url">buildx多架构编译镜像</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-03-09 11:09:31 / 修改时间：11:15:40" itemprop="dateCreated datePublished" datetime="2026-03-09T11:09:31+08:00">2026-03-09</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>使用amd架构主机构建arm架构镜像</p>
+<h2 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h2><ul>
+<li><p>初始支持架构</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># docker buildx ls</span><br><span class="line">NAME/NODE     DRIVER/ENDPOINT   STATUS    BUILDKIT   PLATFORMS</span><br><span class="line">default*      docker</span><br><span class="line"> \_ default    \_ default       running   v0.13.2    linux/amd64, linux/amd64/v2, linux/386</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>部署</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#1、确认 Docker 版本: 推荐 docker ≥ 20.10 ，buildx ≥ v0.10</span><br><span class="line">docker version</span><br><span class="line">docker buildx version</span><br><span class="line"></span><br><span class="line">#2、安装 QEMU（跨架构的“翻译官”）: 最省事</span><br><span class="line">docker run --privileged --rm tonistiigi/binfmt --install all</span><br><span class="line"></span><br><span class="line">#验证 QEMU 是否就绪，查看目录是否有： qemu-aarch64,qemu-arm</span><br><span class="line">ls /proc/sys/fs/binfmt_misc/</span><br><span class="line"></span><br><span class="line">#查看是否有enabled？如果有enabled，说明 QEMU 已生效</span><br><span class="line">cat /proc/sys/fs/binfmt_misc/qemu-aarch64</span><br><span class="line"></span><br><span class="line">#3、创建真正的 multi-arch builder</span><br><span class="line">docker buildx create \</span><br><span class="line">  --name multiarch-builder \</span><br><span class="line">  --driver docker-container \</span><br><span class="line">  --use</span><br><span class="line"></span><br><span class="line">#解释含义</span><br><span class="line">#docker-container → 独立 buildkit</span><br><span class="line">#--use → 立刻切换</span><br><span class="line"></span><br><span class="line">#4、启动并初始化 builder ，如果能看到 linux/arm64 说明成功</span><br><span class="line">docker buildx inspect --bootstrap</span><br><span class="line"></span><br><span class="line">#注意：</span><br><span class="line">#如果失败，需要解决错误，执行清理： docker buildx rm multiarch-builder</span><br><span class="line">#再执行：docker buildx create --name multiarch-builder --driver docker-container --use</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>再次确认 buildx 状态</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker buildx ls</span><br><span class="line">NAME/NODE                DRIVER/ENDPOINT                   STATUS    BUILDKIT   PLATFORMS</span><br><span class="line">multiarch-builder*       docker-container</span><br><span class="line"> \_ multiarch-builder0    \_ unix:///var/run/docker.sock   running   v0.27.1    linux/amd64, linux/amd64/v2, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/mips64le, linux/mips64, linux/loong64, linux/arm/v7, linux/arm/v6</span><br><span class="line">default                  docker</span><br><span class="line"> \_ default               \_ default                       running   v0.13.2    linux/amd64, linux/amd64/v2, linux/386, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/mips64le, linux/mips64, linux/loong64, linux/arm/v7, linux/arm/v6</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ul>
+<li><p><strong>开始构建 ARM 镜像</strong></p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#1、确认基础镜像要支持多架构</span><br><span class="line">docker manifest inspect golang:1.20 | jq .manifests</span><br><span class="line"></span><br><span class="line">#2、简单验证：只适合单架构，会 load 到本地 docker images</span><br><span class="line">docker buildx build \</span><br><span class="line">  --platform linux/arm64 \</span><br><span class="line">  -t nginx:a8abf22 \</span><br><span class="line">  --load \</span><br><span class="line">  .</span><br><span class="line"></span><br><span class="line">#验证镜像架构</span><br><span class="line">docker inspect nginx:a8abf22 | grep -i arch</span><br><span class="line"></span><br><span class="line">#容器部署验证</span><br><span class="line">docker run --rm --platform linux/arm64 nginx:a8abf22 --help</span><br><span class="line"></span><br><span class="line">#构建并 push方式（暂未尝试）</span><br><span class="line">docker buildx build \</span><br><span class="line">  --platform linux/amd64,linux/arm64 \</span><br><span class="line">  -t harbor.xxx.net/cloud/nginx:a8abf22 \</span><br><span class="line">  --push .</span><br><span class="line"></span><br><span class="line">#推送镜像</span><br><span class="line">echo xxx | docker login &quot;harbor.xxx.net&quot; -u &quot;admin&quot; --password-stdin</span><br><span class="line">docker tag nginx:a8abf22 harbor.xxx.net/cloud/nginx:a8abf22-arm64</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>多架构：multi-arch manifest（amd64 + arm64）</strong></p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#使用 docker manifest 相关指令对两个版本的镜像进行处理</span><br><span class="line">#创建 manifest</span><br><span class="line">docker manifest create \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22 \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22 \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22-arm64</span><br><span class="line"></span><br><span class="line">说明：</span><br><span class="line">•第一个 a8abf22：manifest 的名字</span><br><span class="line">•第二个 a8abf22：已有的 amd64 镜像</span><br><span class="line">•第三个 a8abf22-arm64：新 push 的 arm64 镜像</span><br><span class="line"></span><br><span class="line">#push manifest list</span><br><span class="line">docker manifest push   harbor.xxx.net/cloud/nginx:a8abf22</span><br><span class="line"></span><br><span class="line">#查看manifest，注意： docker manifest inspect 默认是“去 registry 查”的</span><br><span class="line">docker manifest inspect harbor.xxx.net/cloud/nginx:a8abf22</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/02/10/%E9%94%81%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%EF%BC%9A%E8%87%AA%E6%97%8B%E9%94%81%E3%80%81%E4%BA%92%E6%96%A5%E9%94%81%E3%80%81%E8%AF%BB%E5%86%99%E9%94%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1780,220 +1856,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/" class="post-title-link" itemprop="url">理解CNI及实践操作</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-01-21 22:15:13" itemprop="dateCreated datePublished" datetime="2026-01-21T22:15:13+08:00">2026-01-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-01-27 15:53:05" itemprop="dateModified" datetime="2026-01-27T15:53:05+08:00">2026-01-27</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://cloudpods.csdn.net/6578109cb8e5f01e1e4496fd.html">https://cloudpods.csdn.net/6578109cb8e5f01e1e4496fd.html</a></p>
-</blockquote>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png" alt="cni" title="cni"></p>
-<hr>
-<h1 id="一、分析图片的-3-个步骤"><a href="#一、分析图片的-3-个步骤" class="headerlink" title="一、分析图片的 3 个步骤"></a>一、分析图片的 3 个步骤</h1><h2 id="Step-1：给-Pod-插上“网线”（veth）"><a href="#Step-1：给-Pod-插上“网线”（veth）" class="headerlink" title="Step 1：给 Pod 插上“网线”（veth）"></a>Step 1：给 Pod 插上“网线”（veth）</h2><blockquote>
-<p>创建 veth pair，一端进 Pod，一端留在 Node</p>
-</blockquote>
-<h3 id="👍-这是-CNI-的核心职责之一"><a href="#👍-这是-CNI-的核心职责之一" class="headerlink" title="👍 这是 CNI 的核心职责之一"></a>👍 这是 CNI 的<strong>核心职责之一</strong></h3><p><strong>底层原理</strong>：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ Pod netns ] eth0  &lt;==== veth pair ====  vethXXXX [ Node ]</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>veth 是 Linux 提供的“虚拟网线”</li>
-<li>Pod 里看到的是 <code>eth0</code></li>
-<li>Node 上看到的是 <code>vethxxxx</code><br>👉 <strong>CNI 插件最基础的职责：</strong><blockquote>
-<p>把 Pod 的 network namespace 接入宿主机网络</p>
-</blockquote>
-</li>
-</ul>
-<hr>
-<h2 id="Step-2：给-Pod-分配-IP（IPAM）"><a href="#Step-2：给-Pod-分配-IP（IPAM）" class="headerlink" title="Step 2：给 Pod 分配 IP（IPAM）"></a>Step 2：给 Pod 分配 IP（IPAM）</h2><blockquote>
-<p>每个 Pod 一个唯一 IP，通常 Node 拿一个子网</p>
-</blockquote>
-<h3 id="👍-这也是-CNI-的标准设计"><a href="#👍-这也是-CNI-的标准设计" class="headerlink" title="👍 这也是 CNI 的标准设计"></a>👍 这也是 CNI 的标准设计</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">  Pod1: 172.16.0.1</span><br><span class="line">  Pod2: 172.16.0.2</span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
-<h2 id="这是：-Node-级子网划分-Pod-从-Node-子网里分-IP👉-这是非常典型的-Node-scoped-IPAM-模型Flannel-Calico-Cilium-都支持这个模型"><a href="#这是：-Node-级子网划分-Pod-从-Node-子网里分-IP👉-这是非常典型的-Node-scoped-IPAM-模型Flannel-Calico-Cilium-都支持这个模型" class="headerlink" title="这是：* Node 级子网划分* Pod 从 Node 子网里分 IP👉 这是非常典型的 Node-scoped IPAM 模型Flannel &#x2F; Calico &#x2F; Cilium 都支持这个模型"></a>这是：<br>* <strong>Node 级子网划分</strong><br>* Pod 从 Node 子网里分 IP<br>👉 这是非常典型的 <strong>Node-scoped IPAM 模型</strong><br><strong>Flannel &#x2F; Calico &#x2F; Cilium 都支持这个模型</strong></h2><h2 id="Step-3：配置-IP-路由（L3-通）"><a href="#Step-3：配置-IP-路由（L3-通）" class="headerlink" title="Step 3：配置 IP + 路由（L3 通）"></a>Step 3：配置 IP + 路由（L3 通）</h2><blockquote>
-<p>Pod 能出网，Node 知道怎么把包送回 Pod</p>
-</blockquote>
-<h3 id="👍-这是最容易被低估，但最重要的一步"><a href="#👍-这是最容易被低估，但最重要的一步" class="headerlink" title="👍 这是最容易被低估，但最重要的一步"></a>👍 这是最容易被低估，但最重要的一步</h3><h2 id="图里提到三件事：1-给-Pod-eth0-配-IP2-给-Pod-配默认路由3-给-Node-配到-Pod-IP-的路由这是-“Pod-能通信”成立的最小条件。"><a href="#图里提到三件事：1-给-Pod-eth0-配-IP2-给-Pod-配默认路由3-给-Node-配到-Pod-IP-的路由这是-“Pod-能通信”成立的最小条件。" class="headerlink" title="图里提到三件事：1. 给 Pod eth0 配 IP2. 给 Pod 配默认路由3. 给 Node 配到 Pod IP 的路由这是 “Pod 能通信”成立的最小条件。"></a>图里提到三件事：<br>1. 给 Pod eth0 配 IP<br>2. 给 Pod 配默认路由<br>3. 给 Node 配到 Pod IP 的路由<br>这是 <strong>“Pod 能通信”成立的最小条件</strong>。</h2><h1 id="二、如果你手动“完整体验一遍-CNI”，应该怎么做？"><a href="#二、如果你手动“完整体验一遍-CNI”，应该怎么做？" class="headerlink" title="二、如果你手动“完整体验一遍 CNI”，应该怎么做？"></a>二、如果你手动“完整体验一遍 CNI”，应该怎么做？</h1><h2 id="下面是一套完全可手动复现的-CNI-行为"><a href="#下面是一套完全可手动复现的-CNI-行为" class="headerlink" title="下面是一套完全可手动复现的 CNI 行为"></a>下面是一套<strong>完全可手动复现的 CNI 行为</strong></h2><h2 id="🔧-实验前准备"><a href="#🔧-实验前准备" class="headerlink" title="🔧 实验前准备"></a>🔧 实验前准备</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个模拟 Pod 的 netns</span></span><br><span class="line">ip netns add pod1</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="Step-1：创建-veth-pair"><a href="#Step-1：创建-veth-pair" class="headerlink" title="Step 1：创建 veth pair"></a>Step 1：创建 veth pair</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> add veth-pod1 <span class="built_in">type</span> veth peer name veth-host1</span><br></pre></td></tr></table></figure>
-<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="Step-2：把一端放进-Pod-netns"><a href="#Step-2：把一端放进-Pod-netns" class="headerlink" title="Step 2：把一端放进 Pod netns"></a>Step 2：把一端放进 Pod netns</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> veth-pod1 netns pod1</span><br></pre></td></tr></table></figure>
-<h3 id="验证-1"><a href="#验证-1" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span></span><br></pre></td></tr></table></figure>
-<h2 id="你会看到-veth-pod1"><a href="#你会看到-veth-pod1" class="headerlink" title="你会看到 veth-pod1"></a>你会看到 <code>veth-pod1</code></h2><h2 id="Step-3：给-Pod-网卡改名为-eth0-配-IP"><a href="#Step-3：给-Pod-网卡改名为-eth0-配-IP" class="headerlink" title="Step 3：给 Pod 网卡改名为 eth0 + 配 IP"></a>Step 3：给 Pod 网卡改名为 eth0 + 配 IP</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span> <span class="built_in">set</span> veth-pod1 name eth0</span><br><span class="line">ip netns <span class="built_in">exec</span> pod1 ip addr add 172.16.0.2/24 dev eth0</span><br><span class="line">ip netns <span class="built_in">exec</span> pod1 ip <span class="built_in">link</span> <span class="built_in">set</span> eth0 up</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="Step-4：配置-Pod-默认路由"><a href="#Step-4：配置-Pod-默认路由" class="headerlink" title="Step 4：配置 Pod 默认路由"></a>Step 4：配置 Pod 默认路由</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ip route add default via 172.16.0.1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>这个 <code>172.16.0.1</code> 通常就是 Node 侧 veth 的 IP</p>
-</blockquote>
-<hr>
-<h2 id="Step-5：配置-Node-侧-veth"><a href="#Step-5：配置-Node-侧-veth" class="headerlink" title="Step 5：配置 Node 侧 veth"></a>Step 5：配置 Node 侧 veth</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip addr add 172.16.0.1/24 dev veth-host1</span><br><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> veth-host1 up</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="Step-6：Node-→-Pod-路由（如果需要）"><a href="#Step-6：Node-→-Pod-路由（如果需要）" class="headerlink" title="Step 6：Node → Pod 路由（如果需要）"></a>Step 6：Node → Pod 路由（如果需要）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route add 172.16.0.2 dev veth-host1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>实际 CNI 中，这步通常由内核自动完成或由更上层组件（BGP &#x2F; overlay）负责</p>
-</blockquote>
-<hr>
-<h2 id="Step-7：验证通信"><a href="#Step-7：验证通信" class="headerlink" title="Step 7：验证通信"></a>Step 7：验证通信</h2><h3 id="Pod-→-Node"><a href="#Pod-→-Node" class="headerlink" title="Pod → Node"></a>Pod → Node</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> pod1 ping 172.16.0.1</span><br></pre></td></tr></table></figure>
-<h3 id="Node-→-Pod"><a href="#Node-→-Pod" class="headerlink" title="Node → Pod"></a>Node → Pod</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping 172.16.0.2</span><br></pre></td></tr></table></figure>
-<h2 id="✅-通了，说明你已经手搓了一个最小-CNI"><a href="#✅-通了，说明你已经手搓了一个最小-CNI" class="headerlink" title="✅ 通了，说明你已经手搓了一个最小 CNI"></a>✅ 通了，说明你已经<strong>手搓了一个最小 CNI</strong></h2><h1 id="三、和“真实-CNI-插件”的差距在哪？"><a href="#三、和“真实-CNI-插件”的差距在哪？" class="headerlink" title="三、和“真实 CNI 插件”的差距在哪？"></a>三、和“真实 CNI 插件”的差距在哪？</h1><table>
-<thead>
-<tr>
-<th>能力</th>
-<th>图中是否涉及</th>
-<th>生产 CNI</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>veth 管理</td>
-<td>✅</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>IPAM</td>
-<td>✅</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Node 间互通</td>
-<td>❌</td>
-<td>必须</td>
-</tr>
-<tr>
-<td>Overlay &#x2F; BGP</td>
-<td>❌</td>
-<td>必须</td>
-</tr>
-<tr>
-<td>NetworkPolicy</td>
-<td>❌</td>
-<td>必须</td>
-</tr>
-<tr>
-<td>生命周期回收</td>
-<td>❌</td>
-<td>必须</td>
-</tr>
-<tr>
-<td>高性能</td>
-<td>❌</td>
-<td>eBPF &#x2F; XDP</td>
-</tr>
-</tbody></table>
-<hr>
-<h1 id="四、“手动-CNI”的真实网络拓扑"><a href="#四、“手动-CNI”的真实网络拓扑" class="headerlink" title="四、“手动 CNI”的真实网络拓扑"></a>四、“手动 CNI”的真实网络拓扑</h1><h2 id="1️⃣-逻辑网络拓扑（强烈推荐先看这个）"><a href="#1️⃣-逻辑网络拓扑（强烈推荐先看这个）" class="headerlink" title="1️⃣ 逻辑网络拓扑（强烈推荐先看这个）"></a>1️⃣ 逻辑网络拓扑（强烈推荐先看这个）</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">+----------------------------------------------------+</span><br><span class="line">|                     Node (Host)                    |</span><br><span class="line">|                                                    |</span><br><span class="line">|   veth-host1                                       |</span><br><span class="line">|   IP: 172.16.0.1/24                                |</span><br><span class="line">|        |                                           |</span><br><span class="line">|        |  (veth pair)                              |</span><br><span class="line">|        |                                           |</span><br><span class="line">|   +----+-----------------------------+             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   |        Pod Network Namespace     |             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   |   eth0                           |             |</span><br><span class="line">|   |   IP: 172.16.0.2/24              |             |</span><br><span class="line">|   |   Default GW: 172.16.0.1         |             |</span><br><span class="line">|   |                                  |             |</span><br><span class="line">|   +----------------------------------+             |</span><br><span class="line">|                                                    |</span><br><span class="line">+----------------------------------------------------+</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="2️⃣-数据包流向（ping-时发生了什么）"><a href="#2️⃣-数据包流向（ping-时发生了什么）" class="headerlink" title="2️⃣ 数据包流向（ping 时发生了什么）"></a>2️⃣ 数据包流向（ping 时发生了什么）</h2><h3 id="Pod-→-Node-1"><a href="#Pod-→-Node-1" class="headerlink" title="Pod → Node"></a>Pod → Node</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Pod eth0 (172.16.0.2)</span><br><span class="line">  |</span><br><span class="line">  |  ICMP Echo Request</span><br><span class="line">  |</span><br><span class="line">veth-pod1  ====== veth-host1</span><br><span class="line">                          |</span><br><span class="line">                          |</span><br><span class="line">                    Node 网络协议栈</span><br></pre></td></tr></table></figure>
-<h3 id="Node-→-Pod-1"><a href="#Node-→-Pod-1" class="headerlink" title="Node → Pod"></a>Node → Pod</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Node IP stack</span><br><span class="line">  |</span><br><span class="line">  |  查路由：172.16.0.2 dev veth-host1</span><br><span class="line">  |</span><br><span class="line">veth-host1 ====== veth-pod1</span><br><span class="line">                          |</span><br><span class="line">                          |</span><br><span class="line">                      Pod eth0</span><br></pre></td></tr></table></figure>
-<h2 id="👉-关键点-veth-≈-一根虚拟网线-不需要-NAT-不需要-iptables-这是纯-L3-路由模型"><a href="#👉-关键点-veth-≈-一根虚拟网线-不需要-NAT-不需要-iptables-这是纯-L3-路由模型" class="headerlink" title="👉 关键点* veth ≈ 一根虚拟网线* 不需要 NAT* 不需要 iptables* 这是纯 L3 路由模型"></a>👉 <strong>关键点</strong><br>* veth ≈ 一根虚拟网线<br>* 不需要 NAT<br>* 不需要 iptables<br>* 这是纯 L3 路由模型</h2><h2 id="3️⃣-用一句话总结你现在的结构"><a href="#3️⃣-用一句话总结你现在的结构" class="headerlink" title="3️⃣ 用一句话总结你现在的结构"></a>3️⃣ 用一句话总结你现在的结构</h2><blockquote>
-<p><strong>Pod 是 Node 网络的一部分，只是通过 veth 被“延长”到了另一个 namespace</strong><br>这正是 <strong>Kubernetes CNI 的核心哲学</strong>。</p>
-</blockquote>
-<hr>
-<h1 id="五、完整的「清理步骤（DEL）」"><a href="#五、完整的「清理步骤（DEL）」" class="headerlink" title="五、完整的「清理步骤（DEL）」"></a>五、完整的「清理步骤（DEL）」</h1><h2 id="你现在做的是-ADD，但生产-CNI-最容易出-bug-的是-DEL。下面是完全对称、且安全的清理顺序。"><a href="#你现在做的是-ADD，但生产-CNI-最容易出-bug-的是-DEL。下面是完全对称、且安全的清理顺序。" class="headerlink" title="你现在做的是 ADD，但生产 CNI 最容易出 bug 的是 DEL。下面是完全对称、且安全的清理顺序。"></a>你现在做的是 <code>ADD</code>，但<strong>生产 CNI 最容易出 bug 的是 <code>DEL</code><strong>。<br>下面是</strong>完全对称、且安全的清理顺序</strong>。</h2><h2 id="Step-1：删除-Pod-netns（最彻底）"><a href="#Step-1：删除-Pod-netns（最彻底）" class="headerlink" title="Step 1：删除 Pod netns（最彻底）"></a>Step 1：删除 Pod netns（最彻底）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns del pod1</span><br></pre></td></tr></table></figure>
-<h3 id="验证-2"><a href="#验证-2" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns list</span><br></pre></td></tr></table></figure>
-<h2 id="✅-pod1-不存在-⚠️-注意：-如果你删的是-netns，netns-内的-veth-会被自动回收"><a href="#✅-pod1-不存在-⚠️-注意：-如果你删的是-netns，netns-内的-veth-会被自动回收" class="headerlink" title="✅ pod1 不存在&gt; ⚠️ 注意：&gt; 如果你删的是 netns，netns 内的 veth 会被自动回收"></a>✅ pod1 不存在<br>&gt; ⚠️ 注意：<br>&gt; 如果你删的是 netns，<strong>netns 内的 veth 会被自动回收</strong></h2><h2 id="Step-2：确认-Node-侧-veth-是否还存在"><a href="#Step-2：确认-Node-侧-veth-是否还存在" class="headerlink" title="Step 2：确认 Node 侧 veth 是否还存在"></a>Step 2：确认 Node 侧 veth 是否还存在</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth-host1</span><br></pre></td></tr></table></figure>
-<ul>
-<li>如果 <strong>还存在</strong>（少见，但可能）：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> del veth-host1</span><br></pre></td></tr></table></figure></li>
-</ul>
-<hr>
-<h2 id="Step-3：清理路由（如果你是手动加的）"><a href="#Step-3：清理路由（如果你是手动加的）" class="headerlink" title="Step 3：清理路由（如果你是手动加的）"></a>Step 3：清理路由（如果你是手动加的）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route del 172.16.0.2 dev veth-host1</span><br></pre></td></tr></table></figure>
-<h3 id="验证-3"><a href="#验证-3" class="headerlink" title="验证"></a>验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route | grep 172.16.0.2</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="Step-4：清理-IP（一般随-veth-一起消失）"><a href="#Step-4：清理-IP（一般随-veth-一起消失）" class="headerlink" title="Step 4：清理 IP（一般随 veth 一起消失）"></a>Step 4：清理 IP（一般随 veth 一起消失）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr del 172.16.0.1/24 dev veth-host1</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="Step-5：最终验证"><a href="#Step-5：最终验证" class="headerlink" title="Step 5：最终验证"></a>Step 5：最终验证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> | grep veth</span><br><span class="line">ip route | grep 172.16</span><br></pre></td></tr></table></figure>
-<h2 id="✅-干净，环境恢复"><a href="#✅-干净，环境恢复" class="headerlink" title="✅ 干净，环境恢复"></a>✅ 干净，环境恢复</h2><h1 id="六、在“真实-CNI-IPAM”中，这些步骤是如何被管理的？"><a href="#六、在“真实-CNI-IPAM”中，这些步骤是如何被管理的？" class="headerlink" title="六、在“真实 CNI &#x2F; IPAM”中，这些步骤是如何被管理的？"></a>六、在“真实 CNI &#x2F; IPAM”中，这些步骤是如何被管理的？</h1><h2 id="你刚才是“人肉-IPAM”，现在我们系统化一下。"><a href="#你刚才是“人肉-IPAM”，现在我们系统化一下。" class="headerlink" title="你刚才是“人肉 IPAM”，现在我们系统化一下。"></a>你刚才是<strong>“人肉 IPAM”</strong>，现在我们系统化一下。</h2><h2 id="1️⃣-IPAM-的职责边界（非常重要）"><a href="#1️⃣-IPAM-的职责边界（非常重要）" class="headerlink" title="1️⃣ IPAM 的职责边界（非常重要）"></a>1️⃣ IPAM 的职责边界（非常重要）</h2><h2 id="IPAM-只做三件事：1-分配-IP2-回收-IP3-持久化-IP-使用状态它不：-创建-veth-配路由-管网络策略"><a href="#IPAM-只做三件事：1-分配-IP2-回收-IP3-持久化-IP-使用状态它不：-创建-veth-配路由-管网络策略" class="headerlink" title="IPAM 只做三件事：1. 分配 IP2. 回收 IP3. 持久化 IP 使用状态它不：* 创建 veth* 配路由* 管网络策略"></a><strong>IPAM 只做三件事：</strong><br>1. 分配 IP<br>2. 回收 IP<br>3. 持久化 IP 使用状态<br><strong>它不：</strong><br>* 创建 veth<br>* 配路由<br>* 管网络策略</h2><h2 id="2️⃣-常见-IPAM-模型-命令抽象"><a href="#2️⃣-常见-IPAM-模型-命令抽象" class="headerlink" title="2️⃣ 常见 IPAM 模型 &amp; 命令抽象"></a>2️⃣ 常见 IPAM 模型 &amp; 命令抽象</h2><h3 id="🔹-模型一：Node-子网（你现在用的）"><a href="#🔹-模型一：Node-子网（你现在用的）" class="headerlink" title="🔹 模型一：Node 子网（你现在用的）"></a>🔹 模型一：Node 子网（你现在用的）</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
-<h2 id="IPAM-内部逻辑（抽象）："><a href="#IPAM-内部逻辑（抽象）：" class="headerlink" title="IPAM 内部逻辑（抽象）："></a><strong>IPAM 内部逻辑（抽象）</strong>：<br><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ALLOCATE:</span><br><span class="line">  找一个 free IP</span><br><span class="line">  标记为 used</span><br><span class="line">  返回 IP + mask + gateway</span><br><span class="line">RELEASE:</span><br><span class="line">  标记 IP 为 free</span><br></pre></td></tr></table></figure></h2><h3 id="🔹-手动模拟-IPAM-的常见命令"><a href="#🔹-手动模拟-IPAM-的常见命令" class="headerlink" title="🔹 手动模拟 IPAM 的常见命令"></a>🔹 手动模拟 IPAM 的常见命令</h3><h4 id="查看当前-Node-上的-Pod-IP（模拟）"><a href="#查看当前-Node-上的-Pod-IP（模拟）" class="headerlink" title="查看当前 Node 上的 Pod IP（模拟）"></a>查看当前 Node 上的 Pod IP（模拟）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr | grep 172.16</span><br></pre></td></tr></table></figure>
-<h4 id="查看“已占用-IP”（粗暴版）"><a href="#查看“已占用-IP”（粗暴版）" class="headerlink" title="查看“已占用 IP”（粗暴版）"></a>查看“已占用 IP”（粗暴版）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip route | grep veth</span><br></pre></td></tr></table></figure>
-<h4 id="回收-IP（本质）"><a href="#回收-IP（本质）" class="headerlink" title="回收 IP（本质）"></a>回收 IP（本质）</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">删除 netns + 删除 veth + 删除路由</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="3️⃣-常见真实-IPAM-实现"><a href="#3️⃣-常见真实-IPAM-实现" class="headerlink" title="3️⃣ 常见真实 IPAM 实现"></a>3️⃣ 常见真实 IPAM 实现</h2><table>
-<thead>
-<tr>
-<th>IPAM</th>
-<th>底层</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>host-local</td>
-<td>文件 <code>/var/lib/cni/networks/</code></td>
-</tr>
-<tr>
-<td>calico-ipam</td>
-<td>etcd &#x2F; CRD</td>
-</tr>
-<tr>
-<td>cilium IPAM</td>
-<td>KVStore &#x2F; Kubernetes</td>
-</tr>
-<tr>
-<td>whereabouts</td>
-<td>分布式锁</td>
-</tr>
-</tbody></table>
-<h3 id="以-host-local-IPAM-为例"><a href="#以-host-local-IPAM-为例" class="headerlink" title="以 host-local IPAM 为例"></a>以 <strong>host-local IPAM</strong> 为例</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /var/lib/cni/networks/&lt;network-name&gt;/</span><br></pre></td></tr></table></figure>
-<p>你会看到：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">172.16.0.2</span><br><span class="line">172.16.0.3</span><br><span class="line">last_reserved_ip</span><br></pre></td></tr></table></figure>
-<p>这就是 <strong>最原始的 IPAM 状态存储</strong></p>
-<h2 id="故障诊断命令"><a href="#故障诊断命令" class="headerlink" title="故障诊断命令"></a>故障诊断命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"># 网络虚拟化环境诊断脚本</span><br><span class="line"></span><br><span class="line">echo &quot;=== 网络命名空间检查 ===&quot;</span><br><span class="line">ip netns list</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n=== 网桥信息 ===&quot;</span><br><span class="line">bridge link show 2&gt;/dev/null || ip link show type bridge</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n=== veth设备检查 ===&quot;</span><br><span class="line">ip link show type veth</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n=== 路由表检查 ===&quot;</span><br><span class="line">for ns in $(ip netns list | awk &#x27;&#123;print $1&#125;&#x27;); do</span><br><span class="line">    echo &quot;--- 命名空间 $ns 路由表 ---&quot;</span><br><span class="line">    ip netns exec $ns ip route show</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n=== ARP表检查 ===&quot;</span><br><span class="line">for ns in $(ip netns list | awk &#x27;&#123;print $1&#125;&#x27;); do</span><br><span class="line">    echo &quot;--- 命名空间 $ns ARP表 ---&quot;</span><br><span class="line">    ip netns exec $ns ip neighbor show</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n=== 连通性测试 ===&quot;</span><br><span class="line"># 测试网桥内部通信</span><br><span class="line">if ip netns list | grep -q ns0; then</span><br><span class="line">    ip netns exec ns0 ping -c 2 172.17.0.1 &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \</span><br><span class="line">        echo &quot;网桥内部通信: 正常&quot; || echo &quot;网桥内部通信: 失败&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">echo -e &quot;\n=== iptables规则检查 ===&quot;</span><br><span class="line">iptables -t nat -L -n -v</span><br><span class="line">iptables -L FORWARD -n -v</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2065,7 +1927,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">178</span>
+          <span class="site-state-item-count">179</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

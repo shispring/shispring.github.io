@@ -184,6 +184,195 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/08/PromQL%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/01/08/PromQL%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">PromQL一些用法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-01-08 11:49:44 / 修改时间：11:50:23" itemprop="dateCreated datePublished" datetime="2025-01-08T11:49:44+08:00">2025-01-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/promql/" itemprop="url" rel="index"><span itemprop="name">promql</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="常用-PromQL-查询示例"><a href="#常用-PromQL-查询示例" class="headerlink" title="常用 PromQL 查询示例"></a><strong>常用 PromQL 查询示例</strong></h3><p>以下是一些常见场景和 PromQL 查询用法：</p>
+<h4 id="1-查询特定指标的当前值"><a href="#1-查询特定指标的当前值" class="headerlink" title="1. 查询特定指标的当前值"></a><strong>1. 查询特定指标的当前值</strong></h4>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node_cpu_seconds_total</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-查询特定实例的-CPU-使用率"><a href="#2-查询特定实例的-CPU-使用率" class="headerlink" title="2. 查询特定实例的 CPU 使用率"></a><strong>2. 查询特定实例的 CPU 使用率</strong></h4>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rate(node_cpu_seconds_total&#123;mode=&quot;user&quot;, instance=&quot;server1&quot;&#125;[5m])</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-查询所有实例的-CPU-使用率"><a href="#3-查询所有实例的-CPU-使用率" class="headerlink" title="3. 查询所有实例的 CPU 使用率"></a><strong>3. 查询所有实例的 CPU 使用率</strong></h4>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rate(node_cpu_seconds_total&#123;mode=&quot;user&quot;&#125;[5m])</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-查询内存使用率"><a href="#4-查询内存使用率" class="headerlink" title="4. 查询内存使用率"></a><strong>4. 查询内存使用率</strong></h4>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-查询磁盘-I-O-读取速率"><a href="#5-查询磁盘-I-O-读取速率" class="headerlink" title="5. 查询磁盘 I&#x2F;O 读取速率"></a><strong>5. 查询磁盘 I&#x2F;O 读取速率</strong></h4>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rate(node_disk_read_bytes_total[5m])</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-查询-HTTP-请求状态码分布"><a href="#6-查询-HTTP-请求状态码分布" class="headerlink" title="6. 查询 HTTP 请求状态码分布"></a><strong>6. 查询 HTTP 请求状态码分布</strong></h4>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum(rate(http_requests_total[5m])) by (status)</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-查询包含特定标签的指标"><a href="#7-查询包含特定标签的指标" class="headerlink" title="7. 查询包含特定标签的指标"></a><strong>7. 查询包含特定标签的指标</strong></h4><ul>
+<li>匹配 <code>job</code> 标签包含 “app” 的所有指标：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;job=~&quot;.*app.*&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="8-查询指定时间段内的指标值"><a href="#8-查询指定时间段内的指标值" class="headerlink" title="8. 查询指定时间段内的指标值"></a><strong>8. 查询指定时间段内的指标值</strong></h4><ul>
+<li>查询过去 1 小时的 <code>node_cpu_seconds_total</code>：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node_cpu_seconds_total[1h]</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="9-计算某一时间段的平均值"><a href="#9-计算某一时间段的平均值" class="headerlink" title="9. 计算某一时间段的平均值"></a><strong>9. 计算某一时间段的平均值</strong></h4><ul>
+<li>计算过去 5 分钟内的平均 CPU 使用率：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">avg(rate(node_cpu_seconds_total[5m]))</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="10-查询最大值或最小值"><a href="#10-查询最大值或最小值" class="headerlink" title="10. 查询最大值或最小值"></a><strong>10. 查询最大值或最小值</strong></h4><ul>
+<li>查询所有实例的最大 CPU 使用率：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max(rate(node_cpu_seconds_total[5m])) by (instance)</span><br></pre></td></tr></table></figure></li>
+<li>查询最小值：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">min(rate(node_cpu_seconds_total[5m])) by (instance)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3 id="PromQL-模糊查找的常用方法"><a href="#PromQL-模糊查找的常用方法" class="headerlink" title="PromQL 模糊查找的常用方法"></a><strong>PromQL 模糊查找的常用方法</strong></h3><ol>
+<li><p><strong>匹配标签值（正则表达式匹配）</strong><br>使用 <code>=~</code> 运算符可以对标签值进行正则表达式匹配。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">metric_name&#123;label_name=~&quot;regex_pattern&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>示例：</p>
+<ul>
+<li>匹配 <code>job</code> 标签中包含 “node” 的所有时间序列：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">up&#123;job=~&quot;.*node.*&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>排除特定标签值</strong><br>使用 <code>!~</code> 运算符排除符合正则表达式的标签值。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">metric_name&#123;label_name!~&quot;regex_pattern&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>示例：</p>
+<ul>
+<li>排除 <code>job</code> 标签中包含 “node” 的时间序列：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">up&#123;job!~&quot;.*node.*&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>指定多个标签值</strong><br>使用 <code>|</code> 组合多个值进行匹配。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">metric_name&#123;label_name=~&quot;value1|value2&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>示例：</p>
+<ul>
+<li>匹配 <code>instance</code> 标签为 “server1” 或 “server2” 的时间序列：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpu_usage&#123;instance=~&quot;server1|server2&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>匹配标签存在或不存在</strong></p>
+<ul>
+<li>匹配时间序列中存在某个标签：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">metric_name&#123;label_name=~&quot;.+&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+<li>匹配时间序列中不存在某个标签：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">metric_name&#123;label_name=&quot;&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="PromQL-常用操作符"><a href="#PromQL-常用操作符" class="headerlink" title="PromQL 常用操作符"></a><strong>PromQL 常用操作符</strong></h3><table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>=</code></td>
+<td>精确匹配标签值</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>排除匹配的标签值</td>
+</tr>
+<tr>
+<td><code>=~</code></td>
+<td>使用正则表达式匹配标签值</td>
+</tr>
+<tr>
+<td><code>!~</code></td>
+<td>排除匹配正则表达式的标签值</td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>加法运算</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>减法运算</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>乘法运算</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>除法运算</td>
+</tr>
+<tr>
+<td><code>&gt;</code></td>
+<td>大于比较</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>小于比较</td>
+</tr>
+<tr>
+<td><code>and</code></td>
+<td>返回两个时间序列中都有的标签</td>
+</tr>
+<tr>
+<td><code>or</code></td>
+<td>返回两个时间序列中任意一个时间序列的值</td>
+</tr>
+<tr>
+<td><code>unless</code></td>
+<td>从左侧时间序列中排除右侧时间序列</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="推荐工具和文档"><a href="#推荐工具和文档" class="headerlink" title="推荐工具和文档"></a><strong>推荐工具和文档</strong></h3><ul>
+<li><strong>Prometheus 官方文档</strong>: <a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/querying/basics/">PromQL 查询语言</a></li>
+<li><strong>PromLens</strong>: 可视化 PromQL 查询工具，帮助调试复杂查询。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/01/08/linux%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2018,95 +2207,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2024/12/26/create-pod-and-state/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/12/26/create-pod-and-state/" class="post-title-link" itemprop="url">create pod and state</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-12-26 21:28:15 / 修改时间：21:33:48" itemprop="dateCreated datePublished" datetime="2024-12-26T21:28:15+08:00">2024-12-26</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="pod状态"><a href="#pod状态" class="headerlink" title="pod状态"></a>pod状态</h2><ul>
-<li>CrashLoopBackOff : 容器退出，kubelet正在将它重启</li>
-<li>InvalidImageName : 无法解析镜像名称</li>
-<li>ImageInspectError : 无法校验镜像</li>
-<li>ErrImageNeverPull : 策略禁止拉取镜像</li>
-<li>ImagePullBackOff : 正在重试拉取</li>
-<li>RegistryUnavailable : 连接不到镜像中心</li>
-<li>ErrImagePull : 通用的拉取镜像出错</li>
-<li>CreateContainerConfigError : 不能创建kubelet使用的容器配置</li>
-<li>CreateContainerError : 创建容器失败</li>
-<li>m.internalLifecycle.PreStartContainer : 执行hook报错</li>
-<li>RunContainerError : 启动容器失败</li>
-<li>PostStartHookError : 执行hook报错</li>
-<li>ContainersNotInitialized : 容器没有初始化完毕</li>
-<li>ContainersNotRead : 容器没有准备完毕</li>
-<li>ContainerCreating : 容器创建中</li>
-<li>PodInitializing : pod : 初始化中</li>
-<li>DockerDaemonNotReady : docker还没有完全启动</li>
-<li>NetworkPluginNotReady : 网络插件还没有完全启动</li>
-<li>Evicted : Pod被驱逐</li>
-</ul>
-<h2 id="创建流程"><a href="#创建流程" class="headerlink" title="创建流程"></a>创建流程</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/pod-create.png" alt="create pod"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2178,7 +2278,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">178</span>
+          <span class="site-state-item-count">179</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
