@@ -272,7 +272,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-03-09 11:09:31 / 修改时间：11:15:40" itemprop="dateCreated datePublished" datetime="2026-03-09T11:09:31+08:00">2026-03-09</time>
+              <time title="创建时间：2026-03-09 11:09:31 / 修改时间：11:23:04" itemprop="dateCreated datePublished" datetime="2026-03-09T11:09:31+08:00">2026-03-09</time>
             </span>
 
           
@@ -304,6 +304,9 @@
 <li><p><strong>多架构：multi-arch manifest（amd64 + arm64）</strong></p>
   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#使用 docker manifest 相关指令对两个版本的镜像进行处理</span><br><span class="line">#创建 manifest</span><br><span class="line">docker manifest create \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22 \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22 \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22-arm64</span><br><span class="line"></span><br><span class="line">说明：</span><br><span class="line">•第一个 a8abf22：manifest 的名字</span><br><span class="line">•第二个 a8abf22：已有的 amd64 镜像</span><br><span class="line">•第三个 a8abf22-arm64：新 push 的 arm64 镜像</span><br><span class="line"></span><br><span class="line">#push manifest list</span><br><span class="line">docker manifest push   harbor.xxx.net/cloud/nginx:a8abf22</span><br><span class="line"></span><br><span class="line">#查看manifest，注意： docker manifest inspect 默认是“去 registry 查”的</span><br><span class="line">docker manifest inspect harbor.xxx.net/cloud/nginx:a8abf22</span><br></pre></td></tr></table></figure></li>
 </ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/_-ygQwd2MUTN3mII3Pbnjw">https://mp.weixin.qq.com/s/_-ygQwd2MUTN3mII3Pbnjw</a></p>
+</blockquote>
 
       
     </div>

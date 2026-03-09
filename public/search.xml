@@ -15687,6 +15687,9 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li><p><strong>多架构：multi-arch manifest（amd64 + arm64）</strong></p>
   <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#使用 docker manifest 相关指令对两个版本的镜像进行处理</span><br><span class="line">#创建 manifest</span><br><span class="line">docker manifest create \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22 \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22 \</span><br><span class="line">  harbor.xxx.net/cloud/nginx:a8abf22-arm64</span><br><span class="line"></span><br><span class="line">说明：</span><br><span class="line">•第一个 a8abf22：manifest 的名字</span><br><span class="line">•第二个 a8abf22：已有的 amd64 镜像</span><br><span class="line">•第三个 a8abf22-arm64：新 push 的 arm64 镜像</span><br><span class="line"></span><br><span class="line">#push manifest list</span><br><span class="line">docker manifest push   harbor.xxx.net/cloud/nginx:a8abf22</span><br><span class="line"></span><br><span class="line">#查看manifest，注意： docker manifest inspect 默认是“去 registry 查”的</span><br><span class="line">docker manifest inspect harbor.xxx.net/cloud/nginx:a8abf22</span><br></pre></td></tr></table></figure></li>
 </ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a href="https://mp.weixin.qq.com/s/_-ygQwd2MUTN3mII3Pbnjw">https://mp.weixin.qq.com/s/_-ygQwd2MUTN3mII3Pbnjw</a></p>
+</blockquote>
 ]]></content>
       <tags>
         <tag>docker</tag>
