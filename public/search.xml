@@ -15926,4 +15926,106 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>健康</tag>
       </tags>
   </entry>
+  <entry>
+    <title>网络隔离手段</title>
+    <url>/2026/03/17/%E7%BD%91%E7%BB%9C%E9%9A%94%E7%A6%BB%E6%89%8B%E6%AE%B5/</url>
+    <content><![CDATA[<h2 id="📊-网络隔离手段概览"><a href="#📊-网络隔离手段概览" class="headerlink" title="**📊 网络隔离手段概览 **"></a>**📊 网络隔离手段概览 **</h2><table>
+<thead>
+<tr>
+<th align="left">手段名称</th>
+<th align="left">作用层级</th>
+<th align="left">通俗比喻</th>
+<th align="left">状态特性</th>
+<th align="left">作用范围</th>
+<th align="left">底层核心实现</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>安全组</strong></td>
+<td align="left">L3&#x2F;L4（实例网卡）</td>
+<td align="left">虚拟机的”贴身保镖”</td>
+<td align="left"><strong>有状态</strong></td>
+<td align="left">云服务器实例（VM&#x2F;网卡）</td>
+<td align="left">OVS 流表 &#x2F; Netfilter + conntrack</td>
+<td align="left">出站默认放行，入站默认拒绝</td>
+</tr>
+<tr>
+<td align="left"><strong>网络 ACL</strong></td>
+<td align="left">L3&#x2F;L4（子网）</td>
+<td align="left">小区的”无情门卫”</td>
+<td align="left"><strong>无状态</strong></td>
+<td align="left">整个云子网（Subnet）</td>
+<td align="left">SDN 网关硬件表项 &#x2F; OVS 流表</td>
+<td align="left">需手动配置双向规则</td>
+</tr>
+<tr>
+<td align="left"><strong>iptables</strong></td>
+<td align="left">L3&#x2F;L4（OS 内核）</td>
+<td align="left">系统的”安检通道”</td>
+<td align="left"><strong>有&#x2F;无状态均可</strong></td>
+<td align="left">所在操作系统全局</td>
+<td align="left">Linux 内核 Netfilter 钩子</td>
+<td align="left"><code>-m conntrack</code> 可启用状态跟踪</td>
+</tr>
+<tr>
+<td align="left"><strong>BGP 路由策略</strong></td>
+<td align="left">L3（路由层）</td>
+<td align="left">城市的”导航路牌”</td>
+<td align="left"><strong>无状态</strong>（基于路径属性）</td>
+<td align="left">VPC 互联 &#x2F; 混合云边界</td>
+<td align="left">BGP Route-Map &#x2F; Prefix-List 过滤</td>
+<td align="left">通过控制路由可达性间接限流，不检查数据包内容</td>
+</tr>
+<tr>
+<td align="left"><strong>eBPF（如 Cilium）</strong></td>
+<td align="left">L2~L7（内核态）</td>
+<td align="left">底层的”超高速拦截网”</td>
+<td align="left"><strong>有&#x2F;无状态均可</strong></td>
+<td align="left">宿主机 &#x2F; 容器 Pod</td>
+<td align="left">内核态沙盒字节码程序</td>
+<td align="left">可绕开 iptables，性能更优</td>
+</tr>
+<tr>
+<td align="left"><strong>K8s NetworkPolicy</strong></td>
+<td align="left">L3&#x2F;L4（Pod 级）</td>
+<td align="left">容器间的”微隔离”</td>
+<td align="left"><strong>取决于 CNI 实现</strong></td>
+<td align="left">Kubernetes 集群内部</td>
+<td align="left">CNI 插件转换为 iptables 或 eBPF</td>
+<td align="left">策略本身无状态，执行层有状态与否由 CNI 决定</td>
+</tr>
+<tr>
+<td align="left"><strong>mTLS &#x2F; Service Mesh</strong></td>
+<td align="left">L7（应用&#x2F;传输层）</td>
+<td align="left">校验身份的”通行证”</td>
+<td align="left"><strong>有状态</strong></td>
+<td align="left">微服务之间</td>
+<td align="left">证书体系 + Envoy 等代理拦截</td>
+<td align="left">同时解决认证 + 加密 + 授权</td>
+</tr>
+<tr>
+<td align="left"><strong>WAF &#x2F; API 网关</strong></td>
+<td align="left">L7（应用层）</td>
+<td align="left">拆包检查的”X 光机”</td>
+<td align="left"><strong>有状态</strong></td>
+<td align="left">公网→内部业务入口</td>
+<td align="left">Nginx &#x2F; 反向代理应用层解析</td>
+<td align="left">可检测 SQL 注入、XSS 等语义攻击</td>
+</tr>
+<tr>
+<td align="left"><strong>VPC Overlay（隔离）</strong></td>
+<td align="left">L2&#x2F;L3（虚拟网络）</td>
+<td align="left">独立的”专属高架桥”</td>
+<td align="left"><strong>无状态</strong>（基于隧道封装）</td>
+<td align="left">整个 VPC 网络空间</td>
+<td align="left">VXLAN &#x2F; GENEVE + VNI 隔离</td>
+<td align="left">提供网络边界隔离，需配合 SG&#x2F;ACL 限制连接</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
 </search>

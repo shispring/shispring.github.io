@@ -184,6 +184,146 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/linux%E5%86%85%E6%A0%B8%E5%8D%8F%E8%AE%AE%E6%A0%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/27/linux%E5%86%85%E6%A0%B8%E5%8D%8F%E8%AE%AE%E6%A0%88/" class="post-title-link" itemprop="url">linux内核协议栈</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-27 17:34:36 / 修改时间：17:48:59" itemprop="dateCreated datePublished" datetime="2026-01-27T17:34:36+08:00">2026-01-27</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="协议栈"><a href="#协议栈" class="headerlink" title="协议栈"></a>协议栈</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/Network-API-and-data-flow-within-Linux-kernel-1.png" alt="linux-kernel-network" title="linux kernel network"></p>
+<hr>
+<h2 id="🧠-主线口诀"><a href="#🧠-主线口诀" class="headerlink" title="🧠 主线口诀"></a>🧠 主线口诀</h2><h3 id="①-第一条主线：数据方向（最重要）"><a href="#①-第一条主线：数据方向（最重要）" class="headerlink" title="① 第一条主线：数据方向（最重要）"></a>① 第一条主线：数据方向（最重要）</h3><p>只保留 90% 正常流量会经过的路径,忽略异常、重传、边角状态机</p>
+<p>TX：用户 → TCP → IP → 设备 → 网卡<br>RX：网卡 → IP → TCP → Socket → 用户</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">用户态</span><br><span class="line"> ↓</span><br><span class="line">系统调用</span><br><span class="line"> ↓</span><br><span class="line">协议栈（L4 → L3 → L2）</span><br><span class="line"> ↓</span><br><span class="line">驱动</span><br><span class="line"> ↓</span><br><span class="line">网卡</span><br></pre></td></tr></table></figure>
+
+<h4 id="发送路径（左半边为主）"><a href="#发送路径（左半边为主）" class="headerlink" title="发送路径（左半边为主）"></a><strong>发送路径（左半边为主）</strong></h4><ul>
+<li>write &#x2F; send &#x2F; sendmsg</li>
+<li>tcp_sendmsg</li>
+<li>tcp_push_one</li>
+<li>ip_output</li>
+<li>dev_queue_xmit</li>
+<li>driver → NIC</li>
+</ul>
+<h4 id="接收路径（右半边为主）"><a href="#接收路径（右半边为主）" class="headerlink" title="接收路径（右半边为主）"></a><strong>接收路径（右半边为主）</strong></h4><ul>
+<li>NIC 中断</li>
+<li>NAPI poll</li>
+<li>netif_receive_skb</li>
+<li>ip_rcv</li>
+<li>tcp_v4_rcv</li>
+<li>sock_recvmsg &#x2F; read</li>
+</ul>
+<h3 id="第二条主线：控制面-vs-数据面"><a href="#第二条主线：控制面-vs-数据面" class="headerlink" title="第二条主线：控制面 vs 数据面"></a>第二条主线：控制面 vs 数据面</h3><p>图中混杂了两类东西，你要强行把它们分开：</p>
+<h4 id="🟨-数据面（你-80-关注的）"><a href="#🟨-数据面（你-80-关注的）" class="headerlink" title="🟨 数据面（你 80% 关注的）"></a>🟨 数据面（你 80% 关注的）</h4><ul>
+<li>skb（sk_buff）</li>
+<li>队列（queue）</li>
+<li>copy &#x2F; zero-copy</li>
+<li>push &#x2F; pull</li>
+</ul>
+<p>关键词：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">skb</span><br><span class="line">queue</span><br><span class="line">xmit</span><br><span class="line">rcv</span><br><span class="line">copy</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="🟥-控制面（暂时只识别，不深挖）"><a href="#🟥-控制面（暂时只识别，不深挖）" class="headerlink" title="🟥 控制面（暂时只识别，不深挖）"></a>🟥 控制面（暂时只识别，不深挖）</h4><ul>
+<li>socket 状态机</li>
+<li>TCP 状态（ESTABLISHED &#x2F; TIME_WAIT）</li>
+<li>ACK &#x2F; 重传 &#x2F; 定时器</li>
+</ul>
+<p>关键词：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">state</span><br><span class="line">timer</span><br><span class="line">ack</span><br><span class="line">retrans</span><br></pre></td></tr></table></figure>
+
+<p>二、工程上该关心什么</p>
+<p>① User &#x2F; Syscall 层</p>
+<p>你关心什么：<br>  • 应用是否阻塞？<br>  • write&#x2F;send 是不是慢？<br>  • 是否频繁系统调用？</p>
+<p>常见问题：<br>  • 小包 write（syscall 过多）<br>  • 未开启 sendfile &#x2F; splice</p>
+<p>⸻</p>
+<p>② TCP 层（tcp_sendmsg &#x2F; tcp_v4_rcv）</p>
+<p>你关心什么：<br>  • 队列是否满？<br>  • 是否在重传？<br>  • 延迟是否在 TCP 内部？</p>
+<p>指标 &#x2F; 工具：</p>
+<p>ss -ti<br>netstat -s</p>
+<p>⸻</p>
+<p>③ IP 层（ip_output &#x2F; ip_rcv）</p>
+<p>你关心什么：<br>  • 路由是否正确？<br>  • 是否被 netfilter &#x2F; iptables 拖慢？<br>  • MTU &#x2F; 分片问题？</p>
+<p>典型场景：<br>  • kube-proxy iptables 模式<br>  • 大量规则导致 ip_rcv 慢</p>
+<p>⸻</p>
+<p>④ Qdisc &#x2F; dev_queue_xmit（性能高发区）</p>
+<p>这是工程事故高发区</p>
+<p>你关心：<br>  • 队列是否堆积？<br>  • qdisc 是否成为瓶颈？<br>  • 网卡 TX 是否 backpressure？</p>
+<p>工具：</p>
+<p>tc -s qdisc</p>
+<p>⸻</p>
+<p>⑤ NAPI &#x2F; softirq（RX 性能关键）</p>
+<p>这是 RX 侧最重要的地方</p>
+<p>你关心：<br>  • softirq 是否打满 CPU？<br>  • backlog 是否丢包？<br>  • 是否进入 ksoftirqd？</p>
+<p>工具：</p>
+<p>cat &#x2F;proc&#x2F;net&#x2F;softnet_stat<br>top<br>perf top</p>
+<p>三、工程级「怎么用这张图」</p>
+<p>场景 1：QPS 上不去，但 CPU 很高</p>
+<p>直接套路径：</p>
+<p>RX → NAPI → netif_receive_skb → tcp_v4_rcv</p>
+<p>优先看：<br>  • softirq<br>  • backlog<br>  • TCP 接收队列</p>
+<p>⸻</p>
+<p>场景 2：延迟高，但没有丢包</p>
+<p>优先怀疑：</p>
+<p>TCP → 队列 → 调度</p>
+<p>排查：<br>  • TCP send&#x2F;recv queue<br>  • Nagle &#x2F; delayed ACK<br>  • cgroup CPU 限制</p>
+<p>⸻</p>
+<p>场景 3：Ingress &#x2F; Service 性能异常</p>
+<p>路径映射：</p>
+<p>NIC<br>→ Linux RX<br>→ iptables &#x2F; conntrack<br>→ Pod veth<br>→ 容器 TCP</p>
+<p>重点：<br>  • netfilter<br>  • conntrack<br>  • veth + qdisc</p>
+<p>⸻</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/ip%E7%9A%84%E4%B8%80%E4%BA%9B%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1517,155 +1657,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/12/30/perf%E8%BF%9B%E9%98%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/12/30/perf%E8%BF%9B%E9%98%B6/" class="post-title-link" itemprop="url">perf进阶</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-12-30 11:01:15 / 修改时间：11:01:33" itemprop="dateCreated datePublished" datetime="2025-12-30T11:01:15+08:00">2025-12-30</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Perf-进阶路线图：从入门到专家级"><a href="#Perf-进阶路线图：从入门到专家级" class="headerlink" title="Perf 进阶路线图：从入门到专家级"></a>Perf 进阶路线图：从入门到专家级</h1><h2 id="📚-学习路线概览"><a href="#📚-学习路线概览" class="headerlink" title="📚 学习路线概览"></a>📚 学习路线概览</h2><h3 id="Level-1-入门级-基础概念和常用命令"><a href="#Level-1-入门级-基础概念和常用命令" class="headerlink" title="Level 1: 入门级 (基础概念和常用命令)"></a>Level 1: 入门级 (基础概念和常用命令)</h3><h3 id="Level-2-进阶级-性能分析和优化"><a href="#Level-2-进阶级-性能分析和优化" class="headerlink" title="Level 2: 进阶级 (性能分析和优化)"></a>Level 2: 进阶级 (性能分析和优化)</h3><h3 id="Level-3-高级级-深入系统分析"><a href="#Level-3-高级级-深入系统分析" class="headerlink" title="Level 3: 高级级 (深入系统分析)"></a>Level 3: 高级级 (深入系统分析)</h3><h3 id="Level-4-专家级-内核级分析和定制"><a href="#Level-4-专家级-内核级分析和定制" class="headerlink" title="Level 4: 专家级 (内核级分析和定制)"></a>Level 4: 专家级 (内核级分析和定制)</h3><hr>
-<h2 id="🚀-Level-1-入门级"><a href="#🚀-Level-1-入门级" class="headerlink" title="🚀 Level 1: 入门级"></a>🚀 Level 1: 入门级</h2><h3 id="基础概念理解"><a href="#基础概念理解" class="headerlink" title="基础概念理解"></a>基础概念理解</h3><ul>
-<li>硬件计数器 (Hardware Counters)</li>
-<li>采样 vs 计数</li>
-<li>事件类型：硬件事件、软件事件、跟踪点</li>
-</ul>
-<h3 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 系统整体性能概览</span></span><br><span class="line">perf top                          <span class="comment"># 实时查看系统热点</span></span><br><span class="line">perf top -p &lt;PID&gt;                 <span class="comment"># 查看特定进程热点</span></span><br><span class="line">perf <span class="built_in">stat</span> &lt;<span class="built_in">command</span>&gt;               <span class="comment"># 统计命令执行期间的性能计数器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础性能统计</span></span><br><span class="line">perf <span class="built_in">stat</span> -e cycles,instructions,cache-references,cache-misses &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf <span class="built_in">stat</span> -d &lt;<span class="built_in">command</span>&gt;            <span class="comment"># 详细统计信息</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li><strong>系统负载监控</strong>: 快速定位CPU使用率高的进程</li>
-<li><strong>应用性能评估</strong>: 评估程序的基本性能指标</li>
-<li><strong>初步问题定位</strong>: 发现明显的性能瓶颈</li>
-</ul>
-<hr>
-<h2 id="⚡-Level-2-进阶级"><a href="#⚡-Level-2-进阶级" class="headerlink" title="⚡ Level 2: 进阶级"></a>⚡ Level 2: 进阶级</h2><h3 id="性能数据记录和分析"><a href="#性能数据记录和分析" class="headerlink" title="性能数据记录和分析"></a>性能数据记录和分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录性能数据</span></span><br><span class="line">perf record -g &lt;<span class="built_in">command</span>&gt;          <span class="comment"># 记录调用图</span></span><br><span class="line">perf record -F 99 -g &lt;<span class="built_in">command</span>&gt;    <span class="comment"># 指定采样频率</span></span><br><span class="line">perf record -e cpu-clock -g &lt;<span class="built_in">command</span>&gt;  <span class="comment"># 记录CPU时钟事件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析记录的数据</span></span><br><span class="line">perf report                       <span class="comment"># 查看性能报告</span></span><br><span class="line">perf report --stdio               <span class="comment"># 文本格式报告</span></span><br><span class="line">perf report -g graph              <span class="comment"># 调用图格式</span></span><br><span class="line">perf report --<span class="built_in">sort</span>=<span class="built_in">comm</span>,symbol    <span class="comment"># 按进程和符号排序</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="进程和线程分析"><a href="#进程和线程分析" class="headerlink" title="进程和线程分析"></a>进程和线程分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 特定进程分析</span></span><br><span class="line">perf record -p &lt;PID&gt; -g          <span class="comment"># 记录特定进程</span></span><br><span class="line">perf record -t &lt;TID&gt; -g          <span class="comment"># 记录特定线程</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 多进程分析</span></span><br><span class="line">perf record -a -g                <span class="comment"># 记录整个系统</span></span><br><span class="line">perf record --call-graph dwarf   <span class="comment"># 使用DWARF调用图</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="CPU-热点分析"><a href="#CPU-热点分析" class="headerlink" title="CPU 热点分析"></a>CPU 热点分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 函数级热点分析</span></span><br><span class="line">perf record -e cycles -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf report -g <span class="string">&#x27;graph,0.5,caller&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 源码级分析</span></span><br><span class="line">perf record --call-graph dwarf &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf annotate                     <span class="comment"># 查看汇编级别的热点</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="使用场景-1"><a href="#使用场景-1" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li><strong>应用性能优化</strong>: 识别程序中的热点函数</li>
-<li><strong>CPU 使用分析</strong>: 分析CPU时间分布</li>
-<li><strong>调用关系分析</strong>: 理解程序的执行路径</li>
-</ul>
-<hr>
-<h2 id="🔧-Level-3-高级级"><a href="#🔧-Level-3-高级级" class="headerlink" title="🔧 Level 3: 高级级"></a>🔧 Level 3: 高级级</h2><h3 id="内存性能分析"><a href="#内存性能分析" class="headerlink" title="内存性能分析"></a>内存性能分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 缓存性能分析</span></span><br><span class="line">perf record -e cache-misses,cache-references -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf <span class="built_in">stat</span> -e L1-dcache-load-misses,L1-dcache-loads &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf <span class="built_in">stat</span> -e LLC-load-misses,LLC-loads &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内存带宽分析</span></span><br><span class="line">perf record -e cpu/mem-loads,ldlat=30/ -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf record -e cpu/mem-stores/ -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内存访问模式分析</span></span><br><span class="line">perf mem record -a                <span class="comment"># 记录内存访问</span></span><br><span class="line">perf mem report --<span class="built_in">sort</span>=mem        <span class="comment"># 按内存访问模式排序</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="网络性能分析"><a href="#网络性能分析" class="headerlink" title="网络性能分析"></a>网络性能分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络中断分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a -g</span><br><span class="line">perf record -e irq:softirq_entry -a -g</span><br><span class="line">perf record -e napi:napi_poll -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络栈分析</span></span><br><span class="line">perf record -e net:netif_receive_skb -a -g</span><br><span class="line">perf record -e net:net_dev_queue -a -g</span><br><span class="line">perf record -e tcp:tcp_probe -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络延迟分析</span></span><br><span class="line">perf trace -e <span class="string">&#x27;net:*&#x27;</span> &lt;network_command&gt;</span><br><span class="line">perf record -e syscalls:sys_enter_sendto,syscalls:sys_exit_sendto -a</span><br></pre></td></tr></table></figure>
-
-<h3 id="调度器分析"><a href="#调度器分析" class="headerlink" title="调度器分析"></a>调度器分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进程调度分析</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_switch -a -g</span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_wakeup -a -g</span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_migrate_task -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU 使用率分析</span></span><br><span class="line">perf <span class="built_in">sched</span> record -- <span class="built_in">sleep</span> 10     <span class="comment"># 记录调度活动</span></span><br><span class="line">perf <span class="built_in">sched</span> latency                 <span class="comment"># 调度延迟分析</span></span><br><span class="line">perf <span class="built_in">sched</span> map                     <span class="comment"># 调度映射图</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 负载均衡分析</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_stick_numa -a</span><br><span class="line">perf record -e migrate:mm_migrate_pages -a</span><br></pre></td></tr></table></figure>
-
-<h3 id="中断处理分析"><a href="#中断处理分析" class="headerlink" title="中断处理分析"></a>中断处理分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 硬中断分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf script | grep irq_handler_entry</span><br><span class="line"></span><br><span class="line"><span class="comment"># 软中断分析</span></span><br><span class="line">perf record -e irq:softirq_entry -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf record -e irq:softirq_exit -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 特定中断源分析</span></span><br><span class="line">perf record -e irq:* -a -g        <span class="comment"># 所有中断事件</span></span><br><span class="line">perf script -f time,cpu,<span class="built_in">comm</span>,event,trace</span><br></pre></td></tr></table></figure>
-
-<h3 id="使用场景-2"><a href="#使用场景-2" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li><strong>内存优化</strong>: 识别缓存未命中热点，优化内存访问模式</li>
-<li><strong>网络性能调优</strong>: 分析网络栈瓶颈，优化中断处理</li>
-<li><strong>多核扩展性</strong>: 分析调度器行为，优化进程亲和性</li>
-</ul>
-<hr>
-<h2 id="🎯-Level-4-专家级"><a href="#🎯-Level-4-专家级" class="headerlink" title="🎯 Level 4: 专家级"></a>🎯 Level 4: 专家级</h2><h3 id="定制化事件分析"><a href="#定制化事件分析" class="headerlink" title="定制化事件分析"></a>定制化事件分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义硬件事件</span></span><br><span class="line">perf list                         <span class="comment"># 查看所有可用事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e r81d0 &lt;<span class="built_in">command</span>&gt;      <span class="comment"># 使用原始硬件事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e cpu/event=0xd0,<span class="built_in">umask</span>=0x81/ &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># PMU 特定事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e uncore_imc/cas_count_read/ &lt;<span class="built_in">command</span>&gt;  <span class="comment"># 内存控制器事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e intel_cqm/llc_occupancy/ &lt;<span class="built_in">command</span>&gt;    <span class="comment"># LLC占用率</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="内核级性能分析"><a href="#内核级性能分析" class="headerlink" title="内核级性能分析"></a>内核级性能分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 内核函数分析</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;tcp_sendmsg&#x27;</span>    <span class="comment"># 添加内核探测点</span></span><br><span class="line">perf record -e probe:tcp_sendmsg -a -g</span><br><span class="line">perf probe --del=<span class="string">&#x27;*&#x27;</span>              <span class="comment"># 删除所有探测点</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核调用栈分析</span></span><br><span class="line">perf record --call-graph dwarf -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf script --header -F +pid,+tid,+cpu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核锁竞争分析</span></span><br><span class="line">perf record -e lock:* -a -g</span><br><span class="line">perf lock record -- &lt;<span class="built_in">command</span>&gt;     <span class="comment"># 记录锁事件</span></span><br><span class="line">perf lock report                   <span class="comment"># 锁竞争报告</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="系统级综合分析"><a href="#系统级综合分析" class="headerlink" title="系统级综合分析"></a>系统级综合分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全系统性能快照</span></span><br><span class="line">perf record -a -g --call-graph dwarf -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf archive                       <span class="comment"># 打包分析数据</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 多维度性能分析</span></span><br><span class="line">perf record -e cycles,cache-misses,branch-misses,page-faults -a -g</span><br><span class="line">perf diff perf1.data perf2.data    <span class="comment"># 对比两个性能数据文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 火焰图生成</span></span><br><span class="line">perf record -F 99 -a -g -- <span class="built_in">sleep</span> 60</span><br><span class="line">perf script | stackcollapse-perf.pl | flamegraph.pl &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="NUMA-和拓扑分析"><a href="#NUMA-和拓扑分析" class="headerlink" title="NUMA 和拓扑分析"></a>NUMA 和拓扑分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># NUMA 性能分析</span></span><br><span class="line">perf c2c record &lt;<span class="built_in">command</span>&gt;          <span class="comment"># Cache-to-Cache 分析</span></span><br><span class="line">perf c2c report                    <span class="comment"># NUMA 访问热点</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU 拓扑感知分析</span></span><br><span class="line">perf <span class="built_in">stat</span> -a -A -e cycles,instructions  <span class="comment"># 按CPU分别统计</span></span><br><span class="line">perf record -a -g -C 0-3           <span class="comment"># 仅监控特定CPU核心</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="高级脚本化分析"><a href="#高级脚本化分析" class="headerlink" title="高级脚本化分析"></a>高级脚本化分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自动化性能分析脚本</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 综合性能分析脚本示例</span></span><br><span class="line">perf record -a -g -e cycles,cache-misses,branch-misses -- <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">perf report --<span class="built_in">sort</span>=<span class="built_in">comm</span>,dso,symbol --stdio &gt; perf_report.txt</span><br><span class="line">perf script | stackcollapse-perf.pl | flamegraph.pl &gt; flamegraph.svg</span><br><span class="line"></span><br><span class="line"><span class="comment"># 性能回归测试</span></span><br><span class="line"><span class="function"><span class="title">perf_compare</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> baseline=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> current=<span class="variable">$2</span></span><br><span class="line">    perf diff <span class="string">&quot;<span class="variable">$baseline</span>&quot;</span> <span class="string">&quot;<span class="variable">$current</span>&quot;</span> --formula=<span class="string">&quot;(new-baseline)/baseline*100&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🎨-分类专题分析"><a href="#🎨-分类专题分析" class="headerlink" title="🎨 分类专题分析"></a>🎨 分类专题分析</h2><h3 id="网络性能专题"><a href="#网络性能专题" class="headerlink" title="网络性能专题"></a>网络性能专题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络包处理路径分析</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;__netif_receive_skb_core&#x27;</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;ip_rcv&#x27;</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;tcp_v4_rcv&#x27;</span></span><br><span class="line">perf record -e probe:* -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络中断亲和性分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a --call-graph dwarf</span><br><span class="line">perf script | grep -E <span class="string">&quot;(eth|ens)&quot;</span> | <span class="built_in">head</span> -20</span><br><span class="line"></span><br><span class="line"><span class="comment"># RPS/XPS 效果分析</span></span><br><span class="line">perf record -e net:netif_receive_skb -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf script -f cpu,<span class="built_in">comm</span>,event | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
-
-<h3 id="CPU-调度专题"><a href="#CPU-调度专题" class="headerlink" title="CPU 调度专题"></a>CPU 调度专题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 调度延迟热点分析</span></span><br><span class="line">perf <span class="built_in">sched</span> record -a -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf <span class="built_in">sched</span> latency --<span class="built_in">sort</span>=max     <span class="comment"># 按最大延迟排序</span></span><br><span class="line">perf <span class="built_in">sched</span> timehist              <span class="comment"># 调度时间历史</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU 亲和性效果分析</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_migrate_task -a -g</span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_switch -a -g</span><br><span class="line">perf script -f time,cpu,pid,<span class="built_in">comm</span>,event</span><br></pre></td></tr></table></figure>
-
-<h3 id="中断处理专题"><a href="#中断处理专题" class="headerlink" title="中断处理专题"></a>中断处理专题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 中断负载均衡分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a --call-graph dwarf -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf script -f cpu,<span class="built_in">comm</span>,event | awk <span class="string">&#x27;&#123;print $1&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断延迟分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry,irq:irq_handler_exit -a</span><br><span class="line">perf script | awk <span class="string">&#x27;BEGIN&#123;OFS=&quot;\t&quot;&#125; &#123;print $1, $2, $3, $4, $5&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="💡-实战应用场景"><a href="#💡-实战应用场景" class="headerlink" title="💡 实战应用场景"></a>💡 实战应用场景</h2><h3 id="场景1-Web服务器性能优化"><a href="#场景1-Web服务器性能优化" class="headerlink" title="场景1: Web服务器性能优化"></a>场景1: Web服务器性能优化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 整体热点分析</span></span><br><span class="line">perf record -a -g -F 99 -- <span class="built_in">sleep</span> 60</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 网络处理分析</span></span><br><span class="line">perf record -e net:netif_receive_skb,syscalls:sys_enter_sendto -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 内存使用分析</span></span><br><span class="line">perf record -e cache-misses,page-faults -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 生成火焰图</span></span><br><span class="line">perf script | stackcollapse-perf.pl | flamegraph.pl &gt; web_flamegraph.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="场景2-数据库性能调优"><a href="#场景2-数据库性能调优" class="headerlink" title="场景2: 数据库性能调优"></a>场景2: 数据库性能调优</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. I/O 性能分析</span></span><br><span class="line">perf record -e syscalls:sys_enter_read,syscalls:sys_enter_write -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 锁竞争分析</span></span><br><span class="line">perf lock record -a -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf lock report --<span class="built_in">sort</span>=acquired</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 缓存性能分析</span></span><br><span class="line">perf <span class="built_in">stat</span> -e LLC-loads,LLC-load-misses,L1-dcache-loads,L1-dcache-load-misses</span><br></pre></td></tr></table></figure>
-
-<h3 id="场景3-高频交易系统优化"><a href="#场景3-高频交易系统优化" class="headerlink" title="场景3: 高频交易系统优化"></a>场景3: 高频交易系统优化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 延迟分析</span></span><br><span class="line">perf record -e cycles:pp -a -g --call-graph dwarf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 中断影响分析</span></span><br><span class="line">perf record -e irq:* -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. NUMA 优化分析</span></span><br><span class="line">perf c2c record &lt;trading_app&gt;</span><br><span class="line">perf c2c report</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🛠-专家级工具组合"><a href="#🛠-专家级工具组合" class="headerlink" title="🛠 专家级工具组合"></a>🛠 专家级工具组合</h2><h3 id="性能分析工具链"><a href="#性能分析工具链" class="headerlink" title="性能分析工具链"></a>性能分析工具链</h3><ol>
-<li><strong>perf + FlameGraph</strong>: 可视化性能热点</li>
-<li><strong>perf + Intel VTune</strong>: 硬件级深度分析</li>
-<li><strong>perf + BPF&#x2F;eBPF</strong>: 定制化内核跟踪</li>
-<li><strong>perf + SystemTap</strong>: 动态内核插桩</li>
-</ol>
-<h3 id="自动化分析脚本"><a href="#自动化分析脚本" class="headerlink" title="自动化分析脚本"></a>自动化分析脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 专家级性能自动化分析脚本</span></span><br><span class="line"><span class="function"><span class="title">analyze_performance</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> app=<span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">    <span class="built_in">local</span> duration=<span class="string">&quot;<span class="variable">$&#123;2:-30&#125;</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;开始综合性能分析...&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># CPU 热点分析</span></span><br><span class="line">    perf record -o cpu_hotspot.data -a -g -F 99 -- <span class="string">&quot;<span class="variable">$app</span>&quot;</span> &amp;</span><br><span class="line">    <span class="built_in">local</span> perf_pid=$!</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 网络性能分析</span></span><br><span class="line">    perf record -o network.data -e net:*,irq:* -a -g -- <span class="built_in">sleep</span> <span class="string">&quot;<span class="variable">$duration</span>&quot;</span> &amp;</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 调度分析</span></span><br><span class="line">    perf <span class="built_in">sched</span> record -o sched.data -a -- <span class="built_in">sleep</span> <span class="string">&quot;<span class="variable">$duration</span>&quot;</span> &amp;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">wait</span> <span class="string">&quot;<span class="variable">$perf_pid</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 生成报告</span></span><br><span class="line">    generate_comprehensive_report</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="📊-进阶学习建议"><a href="#📊-进阶学习建议" class="headerlink" title="📊 进阶学习建议"></a>📊 进阶学习建议</h2><h3 id="阶段性目标"><a href="#阶段性目标" class="headerlink" title="阶段性目标"></a>阶段性目标</h3><ol>
-<li><strong>入门阶段</strong>: 熟练使用基础命令，理解性能指标</li>
-<li><strong>进阶阶段</strong>: 掌握调用图分析，能独立进行性能优化</li>
-<li><strong>高级阶段</strong>: 深入理解系统原理，能分析复杂性能问题</li>
-<li><strong>专家阶段</strong>: 定制化分析工具，解决内核级性能问题</li>
-</ol>
-<h3 id="实践项目建议"><a href="#实践项目建议" class="headerlink" title="实践项目建议"></a>实践项目建议</h3><ul>
-<li><strong>Web服务优化</strong>: 优化Nginx&#x2F;Apache性能</li>
-<li><strong>数据库调优</strong>: 优化MySQL&#x2F;PostgreSQL</li>
-<li><strong>高性能计算</strong>: 优化科学计算应用</li>
-<li><strong>实时系统</strong>: 优化延迟敏感应用</li>
-</ul>
-<h3 id="延伸学习资源"><a href="#延伸学习资源" class="headerlink" title="延伸学习资源"></a>延伸学习资源</h3><ul>
-<li>Intel 软件优化手册</li>
-<li>Brendan Gregg 的性能工具书籍</li>
-<li>Linux 内核源码分析</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1737,7 +1728,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">181</span>
+          <span class="site-state-item-count">182</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
