@@ -3772,6 +3772,8 @@
     <title>linux负载较高排查步骤</title>
     <url>/2025/01/09/linux%E8%B4%9F%E8%BD%BD%E8%BE%83%E9%AB%98%E6%8E%92%E6%9F%A5%E6%AD%A5%E9%AA%A4/</url>
     <content><![CDATA[<h3 id="系统负载较高的排查步骤与命令汇总"><a href="#系统负载较高的排查步骤与命令汇总" class="headerlink" title="系统负载较高的排查步骤与命令汇总"></a><strong>系统负载较高的排查步骤与命令汇总</strong></h3><p>以下从 <strong>CPU、内存、磁盘 I&#x2F;O、网络、系统整体</strong> 五个方面总结排查步骤和常用命令，结合具体指标进行分析，帮助快速定位问题。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">负载高 → 先 uptime/top 看整体</span><br><span class="line">  ↓</span><br><span class="line">load average &gt;&gt; CPU核心数</span><br><span class="line">  ↓</span><br><span class="line">CPU高 → 定位进程 → pidstat/perf 找热点函数</span><br><span class="line">  ↓</span><br><span class="line">iowait高 → iostat/iotop 找元凶进程</span><br><span class="line">  ↓</span><br><span class="line">内存不足 → free/vmstat → 判断是泄漏还是正常</span><br><span class="line">  ↓</span><br><span class="line">网络高 → sar -n DEV → 定位流量来源</span><br></pre></td></tr></table></figure>
+
 <hr>
 <h4 id="1-CPU-负载排查"><a href="#1-CPU-负载排查" class="headerlink" title="1. CPU 负载排查"></a><strong>1. CPU 负载排查</strong></h4><table>
 <thead>
