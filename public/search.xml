@@ -5690,13 +5690,13 @@ validate</p>
 
 <p>这会将 <code>perf.data</code> 文件解析成 <code>out.perf</code>，便于生成火焰图。</p>
 <h3 id="4-生成火焰图"><a href="#4-生成火焰图" class="headerlink" title="4. 生成火焰图"></a>4. 生成火焰图</h3><p>在 <code>FlameGraph</code> 目录下运行以下命令：</p>
-<h3 id="折叠堆栈信息"><a href="#折叠堆栈信息" class="headerlink" title="折叠堆栈信息"></a>折叠堆栈信息</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br></pre></td></tr></table></figure>
+<h3 id="折叠堆栈信息"><a href="#折叠堆栈信息" class="headerlink" title="折叠堆栈信息"></a>折叠堆栈信息</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./FlameGraph/stackcollapse-perf.pl out.perf &gt; out.folded</span><br></pre></td></tr></table></figure>
 
-<h3 id="生成火焰图"><a href="#生成火焰图" class="headerlink" title="生成火焰图"></a>生成火焰图</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+<h3 id="生成火焰图"><a href="#生成火焰图" class="headerlink" title="生成火焰图"></a>生成火焰图</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./FlameGraph/flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
 
 <p>生成的 <code>flamegraph.svg</code> 文件是一个交互式火焰图，可以通过浏览器打开查看。</p>
 <h3 id="5-分析火焰图"><a href="#5-分析火焰图" class="headerlink" title="5. 分析火焰图"></a>5. 分析火焰图</h3><p>火焰图中各个块的宽度表示 CPU 使用时间，占用时间越多，宽度越大。图层深度表示调用堆栈的深度。可以查看性能热点并根据需要进行优化。</p>
-<h3 id="总结的命令流程"><a href="#总结的命令流程" class="headerlink" title="总结的命令流程"></a>总结的命令流程</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> perf record -F 99 -p 1234 -g -- <span class="built_in">sleep</span> 30</span><br><span class="line"><span class="built_in">sudo</span> perf script &gt; out.perf</span><br><span class="line">./stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">./flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
+<h3 id="总结的命令流程"><a href="#总结的命令流程" class="headerlink" title="总结的命令流程"></a>总结的命令流程</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#root账户执行</span></span><br><span class="line"></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">dnf install -y perl</span><br><span class="line">dnf install -y glibc-langpack-zh glibc-langpack-en</span><br><span class="line"></span><br><span class="line">PID=1234</span><br><span class="line">perf record -F 99 -p <span class="variable">$PID</span> -g -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf script &gt; out.perf</span><br><span class="line">./FlameGraph/stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">./FlameGraph/flamegraph.pl out.folded &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
 
 <p>通过上述步骤，你可以生成并查看程序的 CPU 性能火焰图，为性能瓶颈定位和优化提供参考。</p>
 ]]></content>
