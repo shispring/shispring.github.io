@@ -16034,4 +16034,203 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>pprof实践</title>
+    <url>/2026/03/31/pprof%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<h2 id="pprof常用操作"><a href="#pprof常用操作" class="headerlink" title="pprof常用操作"></a>pprof常用操作</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 安装graphviz</span><br><span class="line">yum install -y graphviz</span><br><span class="line"></span><br><span class="line"># 抓堆快照</span><br><span class="line">## 交互式</span><br><span class="line">go tool pprof http://11.52.2.19:6060/debug/pprof/heap</span><br><span class="line"># 在 pprof 交互模式中，可以使用一些调试命令：</span><br><span class="line">#    top 20        — 查看内存占用前20的函数</span><br><span class="line">#    top 20 -cum   — 按累积分配量排序</span><br><span class="line">#    web           — 生成可视化 SVG 图（1、需安装 graphviz，2、有浏览器）</span><br><span class="line">#    list funcName — 查看某函数的逐行分配</span><br><span class="line"></span><br><span class="line">## http请求</span><br><span class="line">curl -s http://11.52.2.19:6060/debug/pprof/heap?debug=1 | head -30</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看 goroutine 是否泄漏</span><br><span class="line">curl http://11.52.2.19:6060/debug/pprof/goroutine?debug=1 | head -50</span><br><span class="line"># 或</span><br><span class="line">go tool pprof http://11.52.2.19:6060/debug/pprof/goroutine</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#离线导出查看堆内存</span><br><span class="line">curl -s -o heap.pb.gz http://11.52.2.19:6060/debug/pprof/heap</span><br><span class="line">#浏览器查看</span><br><span class="line">go tool pprof -http=0.0.0.0:8080 ./heap.pb.gz</span><br><span class="line"></span><br><span class="line">#或者导出 SVG，然后 scp 到本地打开</span><br><span class="line">go tool pprof -svg ./heap.pb.gz &gt; heap.svg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#对比差异</span><br><span class="line">## 第一次</span><br><span class="line">curl -o heap1.pb.gz http://11.52.2.19:6060/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">## 等 10-30 分钟</span><br><span class="line">curl -o heap2.pb.gz http://11.52.2.19:6060/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">## 对比差异（找增长最快的函数）</span><br><span class="line">go tool pprof -base heap1.pb.gz heap2.pb.gz</span><br><span class="line">## 进入后 top 20 查看增量</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="pprof-交互模式最佳实践（命令速查表）"><a href="#pprof-交互模式最佳实践（命令速查表）" class="headerlink" title="pprof 交互模式最佳实践（命令速查表）"></a>pprof 交互模式最佳实践（命令速查表）</h2><h3 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>top 20</code></td>
+<td>按 flat 值展示前 20 个函数</td>
+<td>快速定位占内存&#x2F;CPU 最多的函数</td>
+</tr>
+<tr>
+<td><code>top 20 -cum</code></td>
+<td>按 cum（累积）值排序</td>
+<td>定位调用链上层的”源头”函数</td>
+</tr>
+<tr>
+<td><code>list &lt;函数名&gt;</code></td>
+<td>展示函数逐行的分配&#x2F;CPU 占用</td>
+<td>精确到哪一行代码造成的分配（**需要编译时保留符号，不能用 <code>-s -w</code>**）</td>
+</tr>
+<tr>
+<td><code>web</code></td>
+<td>生成调用图并打开浏览器</td>
+<td>需要 Graphviz + 浏览器，服务器上一般不可用</td>
+</tr>
+<tr>
+<td><code>svg</code></td>
+<td>生成 SVG 输出到 stdout</td>
+<td><code>go tool pprof -svg file.pb.gz &gt; out.svg</code></td>
+</tr>
+<tr>
+<td><code>png</code></td>
+<td>生成 PNG 图片</td>
+<td>同上，输出重定向到 .png</td>
+</tr>
+<tr>
+<td><code>pdf</code></td>
+<td>生成 PDF 文档</td>
+<td>适合存档分析报告</td>
+</tr>
+</tbody></table>
+<h3 id="过滤与聚焦"><a href="#过滤与聚焦" class="headerlink" title="过滤与聚焦"></a>过滤与聚焦</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>focus=&lt;正则&gt;</code></td>
+<td>只展示匹配的函数</td>
+<td>例如 <code>top 20 -focus=informer</code></td>
+</tr>
+<tr>
+<td><code>ignore=&lt;正则&gt;</code></td>
+<td>排除匹配的函数</td>
+<td>例如 <code>top 20 -ignore=runtime</code></td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>展示 profile 中的标签信息</td>
+<td>查看 label 维度</td>
+</tr>
+<tr>
+<td><code>tree</code></td>
+<td>以树形展示调用关系</td>
+<td>理解调用链层级</td>
+</tr>
+<tr>
+<td><code>traces</code></td>
+<td>展示所有采样的完整栈</td>
+<td>深入分析某类分配的完整调用路径</td>
+</tr>
+</tbody></table>
+<h3 id="切换分析类型（核心技巧）"><a href="#切换分析类型（核心技巧）" class="headerlink" title="切换分析类型（核心技巧）"></a>切换分析类型（核心技巧）</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sample_index=inuse_space</code></td>
+<td>当前堆上驻留的内存量</td>
+<td><strong>默认值</strong>，排查”现在哪些对象在占内存”</td>
+</tr>
+<tr>
+<td><code>sample_index=inuse_objects</code></td>
+<td>当前堆上驻留的对象数量</td>
+<td>排查大量小对象（如 string、slice header）</td>
+</tr>
+<tr>
+<td><code>sample_index=alloc_space</code></td>
+<td>从启动到现在累计分配的内存量</td>
+<td><strong>排查高频分配热点</strong>（即使对象已释放也能看到）</td>
+</tr>
+<tr>
+<td><code>sample_index=alloc_objects</code></td>
+<td>从启动到现在累计分配的对象数量</td>
+<td>排查 GC 压力来源</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>在交互模式中输入 <code>o</code> 可查看当前选项，<code>sample_index=alloc_space</code> 然后 <code>top 20</code> 即可切换。</p>
+</blockquote>
+<h3 id="对比分析（检测泄漏最有效）"><a href="#对比分析（检测泄漏最有效）" class="headerlink" title="对比分析（检测泄漏最有效）"></a>对比分析（检测泄漏最有效）</h3><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 抓第一次快照</td>
+<td><code>curl -o heap1.pb.gz http://IP:6060/debug/pprof/heap</code></td>
+<td>基线</td>
+</tr>
+<tr>
+<td>2. 等 10-30 分钟</td>
+<td>—</td>
+<td>等待内存增长</td>
+</tr>
+<tr>
+<td>3. 抓第二次快照</td>
+<td><code>curl -o heap2.pb.gz http://IP:6060/debug/pprof/heap</code></td>
+<td>对比点</td>
+</tr>
+<tr>
+<td>4. 差异分析</td>
+<td><code>go tool pprof -base heap1.pb.gz heap2.pb.gz</code></td>
+<td>只展示增量，找泄漏点</td>
+</tr>
+<tr>
+<td>5. 查看增量 top</td>
+<td><code>top 20</code></td>
+<td>增量最大的函数就是嫌疑对象</td>
+</tr>
+</tbody></table>
+<h3 id="其他-profile-类型"><a href="#其他-profile-类型" class="headerlink" title="其他 profile 类型"></a>其他 profile 类型</h3><table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>URL</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>heap</td>
+<td><code>/debug/pprof/heap</code></td>
+<td>内存分配（最常用）</td>
+</tr>
+<tr>
+<td>goroutine</td>
+<td><code>/debug/pprof/goroutine</code></td>
+<td>goroutine 泄漏检查</td>
+</tr>
+<tr>
+<td>profile</td>
+<td><code>/debug/pprof/profile?seconds=30</code></td>
+<td>CPU 热点（采 30 秒）</td>
+</tr>
+<tr>
+<td>allocs</td>
+<td><code>/debug/pprof/allocs</code></td>
+<td>累积分配（类似 heap 的 alloc_space）</td>
+</tr>
+<tr>
+<td>block</td>
+<td><code>/debug/pprof/block</code></td>
+<td>阻塞分析</td>
+</tr>
+<tr>
+<td>mutex</td>
+<td><code>/debug/pprof/mutex</code></td>
+<td>锁竞争分析</td>
+</tr>
+<tr>
+<td>trace</td>
+<td><code>/debug/pprof/trace?seconds=5</code></td>
+<td>运行时 trace（用 <code>go tool trace</code> 打开）</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>go</tag>
+      </tags>
+  </entry>
 </search>
