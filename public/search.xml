@@ -16228,6 +16228,33 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <td>运行时 trace（用 <code>go tool trace</code> 打开）</td>
 </tr>
 </tbody></table>
+<hr>
+<h2 id="1-生产环境什么情况下才会用-dlv？（适用场景）"><a href="#1-生产环境什么情况下才会用-dlv？（适用场景）" class="headerlink" title="1. 生产环境什么情况下才会用 dlv？（适用场景）"></a>1. 生产环境什么情况下才会用 <code>dlv</code>？（适用场景）</h2><p>只有当以下<strong>所有条件同时满足</strong>时，才会考虑在线上用 <code>dlv</code>：</p>
+<ol>
+<li><strong>日志、Metrics、pprof 甚至 Trace 都无法定位问题</strong>：比如变量内部状态异常、复杂的并发时序 Bug（Race Condition），或者某些请求走到特定分支后悄无声息地卡住（非死锁、无报错）。</li>
+<li><strong>问题无法在测试&#x2F;预发环境复现</strong>：只在生产的特定数据、特定流量规模或特定时序下才发生（所谓“海森堡 Bug”）。</li>
+<li><strong>不能重启进程</strong>：一重启现场就没了，而且问题很久才复现一次。</li>
+<li><strong>服务可以容忍短暂停顿</strong>：<code>dlv</code> 命中断点时，整个进程（或某些 Goroutine）会暂停。如果你的 Controller 卡住，可能导致心跳超时、Leader 切换甚至全量 Reconcile 重启，影响控制面稳定性。</li>
+</ol>
+<p><strong>常见的“必须用 dlv”的线上绝境：</strong></p>
+<ul>
+<li>进程死锁&#x2F;协程挂起，但 <code>pprof/goroutine</code> 导出的栈信息不足以看出具体是哪个结构体内部的锁。</li>
+<li>内存泄漏，<code>pprof/heap</code> 看出分配点，但不知道是哪个具体业务对象的切片在无限膨胀（需要看内存变量的实际值）。</li>
+<li>复杂的逻辑流转，需要在崩溃前夕（Panic 之前）打印局部变量的状态。</li>
+</ul>
+<h2 id="2-使用-dlv-交互式排查主要内容"><a href="#2-使用-dlv-交互式排查主要内容" class="headerlink" title="2. 使用 dlv 交互式排查主要内容"></a>2. 使用 <code>dlv</code> 交互式排查主要内容</h2><p>进入 dlv 交互模式后：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">(dlv) goroutines             # 查看所有协程状态</span><br><span class="line">(dlv) gr 123                 # 切换到挂起或异常的 123 号协程</span><br><span class="line">(dlv) bt                     # 查看当前协程的堆栈 (Backtrace)</span><br><span class="line">(dlv) frame 3                # 跳转到堆栈的某一层</span><br><span class="line">(dlv) locals                 # 打印当前函数的所有局部变量</span><br><span class="line">(dlv) print myStruct.Field   # 打印特定变量的值</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>高危警告：</strong><br>尽量<strong>避免在线上使用 <code>break</code> (断点) 和 <code>continue</code><strong>，因为断点命中时会冻结进程，这通常会导致 K8s Liveness Probe 失败进而重启 Pod，彻底破坏案发现场。线上 <code>dlv attach</code> 的主要目的是</strong>检查当前时刻的变量状态和所有协程堆栈</strong>，看完了立刻 <code>detach</code> 或 <code>exit</code>。</p>
+</blockquote>
+<h2 id="3-为什么生产很少用"><a href="#3-为什么生产很少用" class="headerlink" title="3. 为什么生产很少用"></a>3. 为什么生产很少用</h2><p>在<strong>本地开发</strong>（特别是 IDE 环境如 VSCode&#x2F;Goland）或<strong>本地 Kind 集群</strong>中，<code>dlv</code> 是极其常用的（本地代码热更新&#x2F;单步调试）。<br>但在生产环境，<strong>成熟的团队会通过前置的可观测性建设来替代 99% 的 <code>dlv</code> 需求</strong>：</p>
+<ol>
+<li>**完善的日志 (Zap&#x2F;Klog)**：记录关键分支的上下文。</li>
+<li>**丰富的 Metrics (Prometheus)**：监控 QPS、耗时、队列深度。</li>
+<li><strong>常态化的 pprof 接口</strong>：随时抓取 CPU&#x2F;Heap&#x2F;Goroutine。</li>
+<li>**分布式追踪 (Tracing)**：如果是微服务架构，记录链路。</li>
+</ol>
 ]]></content>
       <tags>
         <tag>go</tag>
