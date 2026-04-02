@@ -16258,9 +16258,128 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li><strong>常态化的 pprof 接口</strong>：随时抓取 CPU&#x2F;Heap&#x2F;Goroutine。</li>
 <li>**分布式追踪 (Tracing)**：如果是微服务架构，记录链路。</li>
 </ol>
+<h2 id="4-pprof-最常用的功能是哪些？"><a href="#4-pprof-最常用的功能是哪些？" class="headerlink" title="4. pprof 最常用的功能是哪些？"></a>4. pprof 最常用的功能是哪些？</h2><p>按使用频率和实用性排序：</p>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>profile</th>
+<th>路径</th>
+<th>使用频率</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>goroutine</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/goroutine</code></a></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>最常用。排查 goroutine 泄漏、卡住、堆积。<code>?debug=2</code> 直接看全部堆栈</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>heap</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/heap</code></a></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>排查内存问题首选。看当前堆上对象分布</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>profile (CPU)</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/profile</code></a></td>
+<td>⭐⭐⭐⭐</td>
+<td>CPU 热点分析，需要采样一段时间（默认 30 秒）</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>allocs</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/allocs</code></a></td>
+<td>⭐⭐⭐</td>
+<td>排查频繁分配 &#x2F; GC 压力大时使用</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>trace</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/trace</code></a></td>
+<td>⭐⭐</td>
+<td>更深入的运行时分析，数据量大，偶尔用</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Index 首页</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/</code></a></td>
+<td>⭐⭐</td>
+<td>入口页，看概览信息</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>block &#x2F; mutex</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/block</code></a></td>
+<td>⭐</td>
+<td>需要额外开启采样率才有数据，偶尔用</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>cmdline &#x2F; symbol &#x2F; threadcreate</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/cmdline</code></a></td>
+<td>⭐</td>
+<td>辅助性质，直接用得少</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>go</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>沟通模型</title>
+    <url>/2026/04/02/%E6%B2%9F%E9%80%9A%E6%A8%A1%E5%9E%8B/</url>
+    <content><![CDATA[<h2 id="🎙️-沟通导航模型：3-Level-Filter-3L-F"><a href="#🎙️-沟通导航模型：3-Level-Filter-3L-F" class="headerlink" title="🎙️ 沟通导航模型：3-Level Filter (3L-F)"></a>🎙️ 沟通导航模型：3-Level Filter (3L-F)</h2><p>无论你面对谁，统一用这个“漏斗”过滤你的话术：</p>
+<h3 id="第一层：过滤身份-Who-am-I-talking-to"><a href="#第一层：过滤身份-Who-am-I-talking-to" class="headerlink" title="第一层：过滤身份 (Who am I talking to?)"></a>第一层：过滤身份 (Who am I talking to?)</h3><ul>
+<li>**工程师 (Peer)**：他们关心“正确性”和“实现细节”。</li>
+<li>**业务&#x2F;产品 (Business)**：他们关心“功能性”和“用户体验”。</li>
+<li>**老板 (Decision Maker)**：他们关心“投入产出比 (ROI)”和“风险”。</li>
+</ul>
+<h3 id="第二层：应用滤镜-Which-filter"><a href="#第二层：应用滤镜-Which-filter" class="headerlink" title="第二层：应用滤镜 (Which filter?)"></a>第二层：应用滤镜 (Which filter?)</h3><table>
+<thead>
+<tr>
+<th align="left">听众角色</th>
+<th align="left">核心关注点 (Filter)</th>
+<th align="left">沟通话术策略 (The Formula)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>工程师</strong></td>
+<td align="left"><strong>实现机制 (How)</strong></td>
+<td align="left">“这个技术难点我通过 A 方法解决了，利用的是…机制，坑主要在于…”</td>
+</tr>
+<tr>
+<td align="left"><strong>业务方</strong></td>
+<td align="left"><strong>交付价值 (What)</strong></td>
+<td align="left">“这个方案能让用户在 X 秒内完成操作，并且以后不会出现…的报错。”</td>
+</tr>
+<tr>
+<td align="left"><strong>老板</strong></td>
+<td align="left"><strong>商业损益 (Value)</strong></td>
+<td align="left">“这件事做完，能规避 X 风险，节省 Y 成本，支撑未来 Z 业务的发展。”</td>
+</tr>
+</tbody></table>
+<h3 id="第三层：结论先行-Bottom-Line-Up-Front-BLUF"><a href="#第三层：结论先行-Bottom-Line-Up-Front-BLUF" class="headerlink" title="第三层：结论先行 (Bottom Line Up Front - BLUF)"></a>第三层：结论先行 (Bottom Line Up Front - BLUF)</h3><ul>
+<li><strong>无论面对谁，第一句话永远是结论。</strong> 别铺垫背景，别从底层逻辑讲起。</li>
+</ul>
+<hr>
+<h2 id="💡-如何用模型“套用”你的日常沟通？"><a href="#💡-如何用模型“套用”你的日常沟通？" class="headerlink" title="💡 如何用模型“套用”你的日常沟通？"></a>💡 如何用模型“套用”你的日常沟通？</h2><p>当你准备开口时，执行以下这套<strong>“三步走逻辑链”</strong>：</p>
+<ol>
+<li>**定调 (Target)**：先在脑子里想，“他是哪类人？”（例如：老板）。</li>
+<li><strong>筛选 (Impact)<strong>：如果他是老板，我刚才脑子里的那些“Informer 机制”、“Slab 内存排查”全部</strong>设为不可见</strong>，只保留“避免系统崩”、“节省机器成本”。</li>
+<li>**输出 (BLUF)**：用一句话输出结论，再根据对方追问决定是否展开。</li>
+</ol>
+<hr>
+<h2 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h2><p>不管什么沟通，在脑子里过一下：</p>
+<ol>
+<li><strong>Who?</strong> (我是对谁讲)</li>
+<li><strong>So what?</strong> (他听完这事儿对他有什么好处&#x2F;坏处)</li>
+</ol>
+]]></content>
   </entry>
 </search>
