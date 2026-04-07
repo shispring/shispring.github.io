@@ -16336,9 +16336,9 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
     <url>/2026/04/02/%E6%B2%9F%E9%80%9A%E6%A8%A1%E5%9E%8B/</url>
     <content><![CDATA[<h2 id="🎙️-沟通导航模型：3-Level-Filter-3L-F"><a href="#🎙️-沟通导航模型：3-Level-Filter-3L-F" class="headerlink" title="🎙️ 沟通导航模型：3-Level Filter (3L-F)"></a>🎙️ 沟通导航模型：3-Level Filter (3L-F)</h2><p>无论你面对谁，统一用这个“漏斗”过滤你的话术：</p>
 <h3 id="第一层：过滤身份-Who-am-I-talking-to"><a href="#第一层：过滤身份-Who-am-I-talking-to" class="headerlink" title="第一层：过滤身份 (Who am I talking to?)"></a>第一层：过滤身份 (Who am I talking to?)</h3><ul>
-<li>**工程师 (Peer)**：他们关心“正确性”和“实现细节”。</li>
-<li>**业务&#x2F;产品 (Business)**：他们关心“功能性”和“用户体验”。</li>
-<li>**老板 (Decision Maker)**：他们关心“投入产出比 (ROI)”和“风险”。</li>
+<li><strong>工程师 (Peer)</strong> ：他们关心“正确性”和“实现细节”。</li>
+<li><strong>业务&#x2F;产品 (Business)</strong> ：他们关心“功能性”和“用户体验”。</li>
+<li><strong>老板 (Decision Maker)</strong> ：他们关心“投入产出比 (ROI)”和“风险”。</li>
 </ul>
 <h3 id="第二层：应用滤镜-Which-filter"><a href="#第二层：应用滤镜-Which-filter" class="headerlink" title="第二层：应用滤镜 (Which filter?)"></a>第二层：应用滤镜 (Which filter?)</h3><table>
 <thead>
