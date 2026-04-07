@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-04-07 15:46:23 / 修改时间：16:07:12" itemprop="dateCreated datePublished" datetime="2026-04-07T15:46:23+08:00">2026-04-07</time>
+              <time title="创建时间：2026-04-07 15:46:23 / 修改时间：17:04:07" itemprop="dateCreated datePublished" datetime="2026-04-07T15:46:23+08:00">2026-04-07</time>
             </span>
 
           <br>
@@ -218,7 +218,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>737</span>
+              <span>725</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -273,7 +273,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看内核已知的真实记录</span></span><br><span class="line">arp -n | grep 11.132.74.143</span><br></pre></td></tr></table></figure>
 <p>只要这里有记录，不管是 <code>C</code> (Completed) 还是 <code>M</code> (Modified)，说明该机器就在这，活得好好的。</p>
 <p><strong>方法 B：发起“正常询问” (不带 -D)</strong><br>普通的 <code>arping</code> 是询问：“你是谁？”</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 去掉 -D，用普通探测</span></span><br><span class="line">arping -c 1 -I eth0 11.132.74.143</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arping -c 1 -I eth0 11.132.74.143</span><br></pre></td></tr></table></figure>
 
       
     </div>

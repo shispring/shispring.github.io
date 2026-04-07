@@ -16467,7 +16467,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看内核已知的真实记录</span></span><br><span class="line">arp -n | grep 11.132.74.143</span><br></pre></td></tr></table></figure>
 <p>只要这里有记录，不管是 <code>C</code> (Completed) 还是 <code>M</code> (Modified)，说明该机器就在这，活得好好的。</p>
 <p><strong>方法 B：发起“正常询问” (不带 -D)</strong><br>普通的 <code>arping</code> 是询问：“你是谁？”</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 去掉 -D，用普通探测</span></span><br><span class="line">arping -c 1 -I eth0 11.132.74.143</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">arping -c 1 -I eth0 11.132.74.143</span><br></pre></td></tr></table></figure>
 ]]></content>
   </entry>
 </search>
