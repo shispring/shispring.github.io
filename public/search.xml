@@ -14370,10 +14370,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   <entry>
     <title>理解CNI及实践操作</title>
     <url>/2026/01/21/%E7%90%86%E8%A7%A3CNI%E5%8F%8A%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C/</url>
-    <content><![CDATA[<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><blockquote>
-<p><a href="https://cloudpods.csdn.net/6578109cb8e5f01e1e4496fd.html">https://cloudpods.csdn.net/6578109cb8e5f01e1e4496fd.html</a></p>
-</blockquote>
-<p><img src="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png" alt="cni" title="cni"></p>
+    <content><![CDATA[<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/c54b0cea8c10edba2f581d573f58ee01.png" alt="cni" title="cni"></p>
 <hr>
 <h1 id="一、分析图片的-3-个步骤"><a href="#一、分析图片的-3-个步骤" class="headerlink" title="一、分析图片的 3 个步骤"></a>一、分析图片的 3 个步骤</h1><h2 id="Step-1：给-Pod-插上“网线”（veth）"><a href="#Step-1：给-Pod-插上“网线”（veth）" class="headerlink" title="Step 1：给 Pod 插上“网线”（veth）"></a>Step 1：给 Pod 插上“网线”（veth）</h2><blockquote>
 <p>创建 veth pair，一端进 Pod，一端留在 Node</p>
