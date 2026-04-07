@@ -16428,4 +16428,46 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </ol>
 ]]></content>
   </entry>
+  <entry>
+    <title>路由相关基础</title>
+    <url>/2026/04/07/%E8%B7%AF%E7%94%B1%E7%9B%B8%E5%85%B3%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<h2 id="nsenter一些命令"><a href="#nsenter一些命令" class="headerlink" title="nsenter一些命令"></a>nsenter一些命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nsenter -t 173104 -n ip route get 169.254.20.10</span><br><span class="line">nsenter -t 173104 -n ip addr</span><br><span class="line">#加路由</span><br><span class="line">nsenter -t 173104 -n ip route add 169.254.20.10/32 dev eth0</span><br><span class="line"></span><br><span class="line">#验证</span><br><span class="line">nsenter -t 173104 -n nc -zv 169.254.20.10 53</span><br><span class="line">nsenter -t 173104 -n dig baidu.com @169.254.20.10</span><br><span class="line">nsenter -t 173104 -n nslookup baidu.com 169.254.20.10</span><br><span class="line">nsenter -t 173104 -n ping -c 1 169.254.20.10</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="arping-vs-arp-的核心差异"><a href="#arping-vs-arp-的核心差异" class="headerlink" title="arping vs arp 的核心差异"></a><code>arping</code> vs <code>arp</code> 的核心差异</h3><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left"><code>arp</code> (显示&#x2F;操作 ARP 缓存表)</th>
+<th align="left"><code>arping</code> (发送 ARP 请求)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>定位</strong></td>
+<td align="left"><strong>“查看”</strong>（被动查看缓存表）</td>
+<td align="left"><strong>“探测”</strong>（主动发起请求）</td>
+</tr>
+<tr>
+<td align="left"><strong>目的</strong></td>
+<td align="left">告诉你：“操作系统现在认为 IP 对应的 MAC 是什么”。</td>
+<td align="left">告诉你：“该 IP 是否真的在局域网内有响应”。</td>
+</tr>
+<tr>
+<td align="left"><strong>网络层</strong></td>
+<td align="left">查看 ARP 缓存表内容 (数据来自 <code>/proc/net/arp</code>)</td>
+<td align="left">在数据链路层（L2）发送广播包</td>
+</tr>
+<tr>
+<td align="left"><strong>场景</strong></td>
+<td align="left">排查缓存污染、查看邻居表。</td>
+<td align="left">排查 IP 冲突、测试二层连通性、验证 IP 存活。</td>
+</tr>
+</tbody></table>
+<p>准确探测一个 IP 是否被占用？</p>
+<h4 id="正确的实践方式："><a href="#正确的实践方式：" class="headerlink" title="正确的实践方式："></a>正确的实践方式：</h4><p><strong>方法 A：直接查看 ARP 表（你已经做了，这是最准的）</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看内核已知的真实记录</span></span><br><span class="line">arp -n | grep 11.132.74.143</span><br></pre></td></tr></table></figure>
+<p>只要这里有记录，不管是 <code>C</code> (Completed) 还是 <code>M</code> (Modified)，说明该机器就在这，活得好好的。</p>
+<p><strong>方法 B：发起“正常询问” (不带 -D)</strong><br>普通的 <code>arping</code> 是询问：“你是谁？”</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 去掉 -D，用普通探测</span></span><br><span class="line">arping -c 1 -I eth0 11.132.74.143</span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
 </search>
