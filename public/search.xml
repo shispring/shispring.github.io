@@ -14391,7 +14391,14 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <p>每个 Pod 一个唯一 IP，通常 Node 拿一个子网</p>
 </blockquote>
 <h3 id="👍-这也是-CNI-的标准设计"><a href="#👍-这也是-CNI-的标准设计" class="headerlink" title="👍 这也是 CNI 的标准设计"></a>👍 这也是 CNI 的标准设计</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Node1: 172.16.0.0/24</span><br><span class="line">  Pod1: 172.16.0.1</span><br><span class="line">  Pod2: 172.16.0.2</span><br><span class="line">Node2: 172.16.1.0/24</span><br></pre></td></tr></table></figure>
-<h2 id="这是：-Node-级子网划分-Pod-从-Node-子网里分-IP👉-这是非常典型的-Node-scoped-IPAM-模型Flannel-Calico-Cilium-都支持这个模型"><a href="#这是：-Node-级子网划分-Pod-从-Node-子网里分-IP👉-这是非常典型的-Node-scoped-IPAM-模型Flannel-Calico-Cilium-都支持这个模型" class="headerlink" title="这是：* Node 级子网划分* Pod 从 Node 子网里分 IP👉 这是非常典型的 Node-scoped IPAM 模型Flannel &#x2F; Calico &#x2F; Cilium 都支持这个模型"></a>这是：<br>* <strong>Node 级子网划分</strong><br>* Pod 从 Node 子网里分 IP<br>👉 这是非常典型的 <strong>Node-scoped IPAM 模型</strong><br><strong>Flannel &#x2F; Calico &#x2F; Cilium 都支持这个模型</strong></h2><h2 id="Step-3：配置-IP-路由（L3-通）"><a href="#Step-3：配置-IP-路由（L3-通）" class="headerlink" title="Step 3：配置 IP + 路由（L3 通）"></a>Step 3：配置 IP + 路由（L3 通）</h2><blockquote>
+
+<p>这是：</p>
+<ul>
+<li><strong>Node 级子网划分</strong></li>
+<li>Pod 从 Node 子网里分 IP<br>👉 这是非常典型的 <strong>Node-scoped IPAM 模型</strong><br><strong>Flannel &#x2F; Calico &#x2F; Cilium 都支持这个模型</strong></li>
+</ul>
+<hr>
+<h2 id="Step-3：配置-IP-路由（L3-通）"><a href="#Step-3：配置-IP-路由（L3-通）" class="headerlink" title="Step 3：配置 IP + 路由（L3 通）"></a>Step 3：配置 IP + 路由（L3 通）</h2><blockquote>
 <p>Pod 能出网，Node 知道怎么把包送回 Pod</p>
 </blockquote>
 <h3 id="👍-这是最容易被低估，但最重要的一步"><a href="#👍-这是最容易被低估，但最重要的一步" class="headerlink" title="👍 这是最容易被低估，但最重要的一步"></a>👍 这是最容易被低估，但最重要的一步</h3><h2 id="图里提到三件事：1-给-Pod-eth0-配-IP2-给-Pod-配默认路由3-给-Node-配到-Pod-IP-的路由这是-“Pod-能通信”成立的最小条件。"><a href="#图里提到三件事：1-给-Pod-eth0-配-IP2-给-Pod-配默认路由3-给-Node-配到-Pod-IP-的路由这是-“Pod-能通信”成立的最小条件。" class="headerlink" title="图里提到三件事：1. 给 Pod eth0 配 IP2. 给 Pod 配默认路由3. 给 Node 配到 Pod IP 的路由这是 “Pod 能通信”成立的最小条件。"></a>图里提到三件事：<br>1. 给 Pod eth0 配 IP<br>2. 给 Pod 配默认路由<br>3. 给 Node 配到 Pod IP 的路由<br>这是 <strong>“Pod 能通信”成立的最小条件</strong>。</h2><h1 id="二、如果你手动“完整体验一遍-CNI”，应该怎么做？"><a href="#二、如果你手动“完整体验一遍-CNI”，应该怎么做？" class="headerlink" title="二、如果你手动“完整体验一遍 CNI”，应该怎么做？"></a>二、如果你手动“完整体验一遍 CNI”，应该怎么做？</h1><h2 id="下面是一套完全可手动复现的-CNI-行为"><a href="#下面是一套完全可手动复现的-CNI-行为" class="headerlink" title="下面是一套完全可手动复现的 CNI 行为"></a>下面是一套<strong>完全可手动复现的 CNI 行为</strong></h2><h2 id="🔧-实验前准备"><a href="#🔧-实验前准备" class="headerlink" title="🔧 实验前准备"></a>🔧 实验前准备</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建一个模拟 Pod 的 netns</span></span><br><span class="line">ip netns add pod1</span><br></pre></td></tr></table></figure>
