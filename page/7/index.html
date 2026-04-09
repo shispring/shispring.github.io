@@ -1422,10 +1422,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-06-18 14:09:06 / 修改时间：14:09:52" itemprop="dateCreated datePublished" datetime="2025-06-18T14:09:06+08:00">2025-06-18</time>
+              <time title="创建时间：2025-06-18 14:09:06" itemprop="dateCreated datePublished" datetime="2025-06-18T14:09:06+08:00">2025-06-18</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-04-09 15:32:58" itemprop="dateModified" datetime="2026-04-09T15:32:58+08:00">2026-04-09</time>
+              </span>
 
           <br>
             <span class="post-meta-item" title="本文字数">
@@ -1433,14 +1439,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
+              <span>6.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
+              <span>6 分钟</span>
             </span>
 
         </div>
@@ -1503,6 +1509,9 @@
 <li><strong>验证</strong>: 定期验证备份文件的完整性</li>
 </ul>
 <h2 id="五、故障恢复"><a href="#五、故障恢复" class="headerlink" title="五、故障恢复"></a>五、故障恢复</h2><h3 id="5-1-从快照恢复"><a href="#5-1-从快照恢复" class="headerlink" title="5.1 从快照恢复"></a>5.1 从快照恢复</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 停止etcd服务</span></span><br><span class="line">systemctl stop etcd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除现有数据目录</span></span><br><span class="line"><span class="built_in">rm</span> -rf /var/lib/etcd/*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从快照恢复</span></span><br><span class="line">etcdctl snapshot restore backup-20250613-120000.db \</span><br><span class="line">  --name etcd-1 \</span><br><span class="line">  --initial-cluster etcd-1=https://10.10.10.100:2380,etcd-2=https://10.10.10.101:2380,etcd-3=https://10.10.10.102:2380 \</span><br><span class="line">  --initial-cluster-token etcd-cluster-1 \</span><br><span class="line">  --initial-advertise-peer-urls https://10.10.10.100:2380 \</span><br><span class="line">  --data-dir /var/lib/etcd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启etcd服务</span></span><br><span class="line">systemctl start etcd</span><br></pre></td></tr></table></figure>
+
+<p>完整备份恢复流程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">正常运行</span><br><span class="line">    ↓</span><br><span class="line">① 定期备份（cron 定时执行备份命令）</span><br><span class="line">    ↓</span><br><span class="line">    etcd 数据存储在: /backup/etcd-snapshot.db</span><br><span class="line">    ↓</span><br><span class="line">② 灾难发生（数据损坏 / 误删 / 节点宕机）</span><br><span class="line">    ↓</span><br><span class="line">③ 停止所有 etcd 节点进程</span><br><span class="line">    ↓</span><br><span class="line">④ 清空各节点的旧数据目录 /var/run/etcd/default.etcd/</span><br><span class="line">    ↓</span><br><span class="line">⑤ 三个节点各自执行对应的 restore 命令</span><br><span class="line">    ↓</span><br><span class="line">⑥ 重启 etcd 进程（三节点自动组成新集群）</span><br><span class="line">    ↓</span><br><span class="line">⑦ 执行 endpoint status 验证集群状态</span><br><span class="line">    ↓</span><br><span class="line">⑧ 重启 kube-apiserver，恢复 K8s 服务</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#几个重要注意事项</span><br><span class="line">① 备份要定期做</span><br><span class="line">etcd 是 K8s 的&quot;大脑&quot;，所有资源元数据都在里面。建议至少每天备份一次，重要变更前手动备份一次。</span><br><span class="line"></span><br><span class="line">② 恢复时必须先停 etcd</span><br><span class="line">带着数据目录直接 restore 会导致数据冲突，必须先停进程、清空旧数据目录再恢复。</span><br><span class="line"></span><br><span class="line">③ 三节点 restore 要用同一个 snapshot</span><br><span class="line">三条命令必须来自同一个 .db 文件，否则集群数据不一致，无法选主。</span><br><span class="line"></span><br><span class="line">④ cluster-token 必须一致</span><br><span class="line">--initial-cluster-token=etcd-cluster-1 三个节点必须完全相同，这是集群的&quot;身份证&quot;。</span><br><span class="line"></span><br><span class="line">⑤ 恢复后数据时间点</span><br><span class="line">恢复后 K8s 的状态会回到备份那一刻，备份之后创建的 Pod/Service 等资源会消失，需要重新拉起或业务自行恢复。</span><br></pre></td></tr></table></figure>
 
 <h3 id="5-2-成员替换"><a href="#5-2-成员替换" class="headerlink" title="5.2 成员替换"></a>5.2 成员替换</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加新成员</span></span><br><span class="line">etcdctl member add etcd-new --peer-urls=https://10.236.100.100:2380</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除故障成员</span></span><br><span class="line">etcdctl member remove &lt;member-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看成员状态</span></span><br><span class="line">etcdctl member list --write-out=table</span><br></pre></td></tr></table></figure>
 
