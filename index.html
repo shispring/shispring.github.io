@@ -184,6 +184,83 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/04/09/openstack%E9%9A%94%E7%A6%BB%E7%8E%AF%E5%A2%83%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/04/09/openstack%E9%9A%94%E7%A6%BB%E7%8E%AF%E5%A2%83%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">openstack隔离环境实践</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-04-09 14:54:55 / 修改时间：15:29:02" itemprop="dateCreated datePublished" datetime="2026-04-09T14:54:55+08:00">2026-04-09</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>838</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="完整流程"><a href="#完整流程" class="headerlink" title="完整流程"></a>完整流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># 使用pyenv安装3.12版本的python</span><br><span class="line">python --version</span><br><span class="line">Python 3.12.2</span><br><span class="line"></span><br><span class="line"># 1. 创建虚拟环境</span><br><span class="line">python -m venv openstack</span><br><span class="line"></span><br><span class="line"># 2. 激活虚拟环境</span><br><span class="line">source openstack/bin/activate</span><br><span class="line"></span><br><span class="line"># 3. 安装客户端（在虚拟环境内）</span><br><span class="line">## 升级pip</span><br><span class="line">pip install --upgrade pip</span><br><span class="line">pip install --no-cache-dir -U python-openstackclient</span><br><span class="line"></span><br><span class="line"># 4. 配置认证（通常 source 一个 openrc 文件）</span><br><span class="line">source admin-openrc.sh</span><br><span class="line"></span><br><span class="line"># 5. 开始使用</span><br><span class="line">openstack server list</span><br><span class="line">openstack network list</span><br><span class="line">openstack image list</span><br></pre></td></tr></table></figure>
+
+<h2 id="admin-openrc-sh配置"><a href="#admin-openrc-sh配置" class="headerlink" title="admin-openrc.sh配置"></a>admin-openrc.sh配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">export OS_PROJECT_DOMAIN_NAME=Default</span><br><span class="line">export OS_USER_DOMAIN_NAME=Default</span><br><span class="line">export OS_PROJECT_NAME=admin</span><br><span class="line">export OS_TENANT_NAME=admin</span><br><span class="line">export OS_USERNAME=admin</span><br><span class="line">export OS_PASSWORD=xxx</span><br><span class="line">export OS_AUTH_URL=xxx</span><br><span class="line">export OS_INTERFACE=internal</span><br><span class="line">export OS_IDENTITY_API_VERSION=3</span><br><span class="line">export OS_REGION_NAME=ops_zzzc2-kvm-ceph-v3</span><br><span class="line">export OS_AUTH_PLUGIN=password</span><br><span class="line">export OS_PLACEMENT_API_VERSION=1.18</span><br><span class="line">export LANG=en_US.UTF-8</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 5. 开始使用</span><br><span class="line">openstack server list</span><br><span class="line">openstack network list</span><br><span class="line">openstack image list</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/04/07/%E8%B7%AF%E7%94%B1%E7%9B%B8%E5%85%B3%E5%9F%BA%E7%A1%80/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2082,92 +2159,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/02/09/%E8%8B%8F%E6%A0%BC%E6%8B%89%E5%BA%95%E6%8F%90%E9%97%AE%E6%B3%95%E3%80%90CRITIC%E3%80%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/02/09/%E8%8B%8F%E6%A0%BC%E6%8B%89%E5%BA%95%E6%8F%90%E9%97%AE%E6%B3%95%E3%80%90CRITIC%E3%80%91/" class="post-title-link" itemprop="url">苏格拉底提问法【CRITIC】</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-02-09 14:20:03 / 修改时间：14:26:33" itemprop="dateCreated datePublished" datetime="2026-02-09T14:20:03+08:00">2026-02-09</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="苏格拉底提问法的作用"><a href="#苏格拉底提问法的作用" class="headerlink" title="苏格拉底提问法的作用"></a>苏格拉底提问法的作用</h2><ul>
-<li>首先，苏格拉底提问法的一个主要特点是它的启发性。这种方法鼓励你提出开放性的问题，这些问题可以引导思考，而不是寻找特定的答案。</li>
-<li>其次，苏格拉底提问法也可以帮助我们挑战自己的假设。<br>最后，苏格拉底提问法也可以促进对话和理解。</li>
-</ul>
-<hr>
-<h2 id="苏格拉底提问法的六类问题"><a href="#苏格拉底提问法的六类问题" class="headerlink" title="苏格拉底提问法的六类问题"></a>苏格拉底提问法的六类问题</h2><ul>
-<li>Clarification：【澄清问题】</li>
-<li>Refute assumptions：【挑战假设】</li>
-<li>Identify evidence：【寻找证据】</li>
-<li>Think from different perspectives：【转换视角思考】</li>
-<li>Investigate potential consequences：【探究可能结果】</li>
-<li>Circle back to the original question：【回归原问题】</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">1、【C】澄清问题：澄清概念，界定清楚问题</span><br><span class="line">这个****的意思是什么？</span><br><span class="line">你为什么会问这个问题？</span><br><span class="line">你为什么会这么想/说？</span><br><span class="line">你说的****具体是指什么？</span><br><span class="line">可不可以举个例子，说明你想要表达的概念？</span><br><span class="line">是什么让你有这个问题（认知）？（问题产生的原因）</span><br><span class="line">这与我们的讨论有什么关系？</span><br><span class="line"></span><br><span class="line">2、【R】挑战假设：识别和破除隐性假设</span><br><span class="line">在这里的假设是什么？</span><br><span class="line">为什么会做这样的设想？</span><br><span class="line">你似乎正在假设****。</span><br><span class="line">你如何证明或推翻这个假设？</span><br><span class="line"></span><br><span class="line">3、【I】寻找证据：理性分析，进行逻辑推理</span><br><span class="line">你是如何得出这一结论的？</span><br><span class="line">你为什么相信这是真的？</span><br><span class="line">是什么让你相信的？</span><br><span class="line">能解释一下原因吗？</span><br><span class="line">可以举个例子吗？</span><br><span class="line">是否有理由怀疑这一结果?</span><br><span class="line">什么与这个比较类似？</span><br><span class="line">你认为****是由什么引起的？为什么？</span><br><span class="line"></span><br><span class="line">4、【T】转换视角：开阔思路，不同视角思考</span><br><span class="line">对这个问题其他人可能会怎么看</span><br><span class="line">相信****的人可能会有什么看法？</span><br><span class="line">不相信****的人可能会有什么看法？</span><br><span class="line">****和****的观点在哪些地方一致？哪些地方不一致？</span><br><span class="line">****和****的共同点或相似点是什么？</span><br><span class="line">别的不同的观点可能会是什么？</span><br><span class="line">可以用其他的方式或方法来看待这件事吗？</span><br><span class="line">还可以有其他的可能吗？</span><br><span class="line">有什么替代方案？</span><br><span class="line">为什么这是最好的？</span><br><span class="line">****的优点和缺点是什么？</span><br><span class="line">反驳观点可能是什么？为什么是必需的？</span><br><span class="line"></span><br><span class="line">5、【I】探究可能结果</span><br><span class="line">这个假设的结果是什么？</span><br><span class="line">你这么说隐含的意思是什么呢？你在暗示什么？</span><br><span class="line">这个会导致什么？</span><br><span class="line">这和我们原来学过的****有什么联系吗？</span><br><span class="line">那会有什么结果？</span><br><span class="line">那真的有可能发生吗？</span><br><span class="line">可供选择的办法是什么？</span><br><span class="line">如果那样的话，还有可能发生其他的什么事？</span><br><span class="line">你能得出什么结论？</span><br><span class="line"></span><br><span class="line">6、【C】回归原问题</span><br><span class="line">这个问题的意义是什么？</span><br><span class="line">你为什么认为我问这个问题？</span><br><span class="line">****是什么意思？</span><br><span class="line">****如何应用于日常生活？</span><br><span class="line">现在的真正的问题是什么？</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2239,7 +2230,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">185</span>
+          <span class="site-state-item-count">186</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
