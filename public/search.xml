@@ -4780,6 +4780,10 @@
 <td><code>openstack --os-region-name &lt;Region&gt; server list</code></td>
 </tr>
 </tbody></table>
+<blockquote>
+<p><strong>核心排查思路：</strong></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Region → Network → Subnet → Port → Fixed IP → Floating IP → Security Group → Server</span><br></pre></td></tr></table></figure>
 <hr>
 <h2 id="metadata数据查询"><a href="#metadata数据查询" class="headerlink" title="metadata数据查询"></a>metadata数据查询</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#在OpenStack云主机上通过请求Metadata元数据API，来获取云主机上的主机名、IP地址、SSH公钥等信息。</span><br><span class="line">#通过这些信息可以通过编写脚本来对云主机的标准化进行定制。</span><br><span class="line"></span><br><span class="line">curl http://169.254.169.254/</span><br></pre></td></tr></table></figure>
 ]]></content>
