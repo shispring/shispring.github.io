@@ -17361,4 +17361,94 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <hr>
 ]]></content>
   </entry>
+  <entry>
+    <title>iptables 与 Netfilter 指南</title>
+    <url>/2026/04/10/iptables-%E4%B8%8E-Netfilter-%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<h1 id="Linux-iptables-与-Netfilter-深度指南"><a href="#Linux-iptables-与-Netfilter-深度指南" class="headerlink" title="Linux iptables 与 Netfilter 深度指南"></a>Linux <code>iptables</code> 与 Netfilter 深度指南</h1><h2 id="1-核心架构：超越-iptables"><a href="#1-核心架构：超越-iptables" class="headerlink" title="1. 核心架构：超越 iptables"></a>1. 核心架构：超越 <code>iptables</code></h2><p>在谈论 <code>iptables</code> 时，必须区分两个概念：</p>
+<ul>
+<li><strong>Netfilter</strong>：是 Linux 内核中的一个<strong>框架</strong>，它在内核协议栈中预留了若干钩子（Hook），数据包经过时会触发这些钩子。</li>
+<li><strong>iptables</strong>：是一个<strong>用户态工具</strong>，用于向内核的 Netfilter 框架配置规则。</li>
+</ul>
+<h3 id="数据包流向图-The-Packet-Flow"><a href="#数据包流向图-The-Packet-Flow" class="headerlink" title="数据包流向图 (The Packet Flow)"></a>数据包流向图 (The Packet Flow)</h3><p>这是理解 <code>iptables</code> 的圣经。记住这个顺序，你就能解决 90% 的网络排错问题：</p>
+<ol>
+<li>**PREROUTING (流入路由前)**：刚进网卡，还没决定去哪。</li>
+<li><strong>INPUT</strong>：发给本机进程的包。</li>
+<li><strong>FORWARD</strong>：经过本机转发给其他设备的包。</li>
+<li><strong>OUTPUT</strong>：本机产生的包。</li>
+<li>**POSTROUTING (流出路由后)**：决定怎么发出去之后，准备离开网卡前。</li>
+</ol>
+<hr>
+<h2 id="2-四表五链-4-Tables-5-Chains"><a href="#2-四表五链-4-Tables-5-Chains" class="headerlink" title="2. 四表五链 (4 Tables, 5 Chains)"></a>2. 四表五链 (4 Tables, 5 Chains)</h2><h3 id="四表-Tables-决定了规则的“功能分类”"><a href="#四表-Tables-决定了规则的“功能分类”" class="headerlink" title="四表 (Tables) - 决定了规则的“功能分类”"></a>四表 (Tables) - 决定了规则的“功能分类”</h3><p>表的优先级（由高到低）：<code>raw</code> -&gt; <code>mangle</code> -&gt; <code>nat</code> -&gt; <code>filter</code>。</p>
+<ol>
+<li><strong>raw表</strong>：用于设置“免检标志”（NOTRACK），绕过连接追踪系统（conntrack）。如果数据包进入 raw，就不会再经过状态检查。</li>
+<li><strong>mangle表</strong>：用于对数据包进行“修改”（修改 TTL、ToS、打标记 MARK）。这是最灵活的表。</li>
+<li><strong>nat表</strong>：用于网络地址转换。<strong>核心注意</strong>：这里只处理连接的<strong>第一个包</strong>，后续包会直接查表，不会再跑规则。</li>
+<li><strong>filter表</strong>：默认表，用于“过滤”（放行或丢弃）。</li>
+</ol>
+<h3 id="五链-Chains-决定了规则的“挂载位置”"><a href="#五链-Chains-决定了规则的“挂载位置”" class="headerlink" title="五链 (Chains) - 决定了规则的“挂载位置”"></a>五链 (Chains) - 决定了规则的“挂载位置”</h3><ol>
+<li><strong>PREROUTING</strong>：(raw&#x2F;mangle&#x2F;nat)</li>
+<li><strong>INPUT</strong>：(mangle&#x2F;nat&#x2F;filter)</li>
+<li><strong>FORWARD</strong>：(mangle&#x2F;filter)</li>
+<li><strong>OUTPUT</strong>：(raw&#x2F;mangle&#x2F;nat&#x2F;filter)</li>
+<li><strong>POSTROUTING</strong>：(mangle&#x2F;nat)</li>
+</ol>
+<hr>
+<h2 id="3-核心语法与常用指令"><a href="#3-核心语法与常用指令" class="headerlink" title="3. 核心语法与常用指令"></a>3. 核心语法与常用指令</h2><h3 id="基础规则操作"><a href="#基础规则操作" class="headerlink" title="基础规则操作"></a>基础规则操作</h3><ul>
+<li><code>-A</code> (Append)：末尾追加。</li>
+<li><code>-I</code> (Insert)：插入到链首（非常重要，规则匹配是从上到下的）。</li>
+<li><code>-D</code> (Delete)：删除规则。</li>
+<li><code>-R</code> (Replace)：替换规则。</li>
+<li><code>-P</code> (Policy)：设置默认策略（如 <code>DROP</code>）。</li>
+<li><code>-L -n -v</code>：查看当前规则（<code>-n</code> 别解析 DNS，<code>-v</code> 查看包计数）。</li>
+</ul>
+<h3 id="常用匹配选项"><a href="#常用匹配选项" class="headerlink" title="常用匹配选项"></a>常用匹配选项</h3><ul>
+<li><code>-s</code> &#x2F; <code>-d</code>：源&#x2F;目的 IP 或网段。</li>
+<li><code>-p</code>：协议 (tcp&#x2F;udp&#x2F;icmp)。</li>
+<li><code>--dport</code> &#x2F; <code>--sport</code>：目的&#x2F;源端口（必须带 <code>-p</code>）。</li>
+<li><code>-i</code> &#x2F; <code>-o</code>：进入&#x2F;离开网卡设备（如 <code>eth0</code>, <code>br-int</code>）。</li>
+<li><code>-m state</code>：状态匹配（NEW, ESTABLISHED, RELATED）。</li>
+</ul>
+<hr>
+<h2 id="4-进阶：NAT-与-连接追踪"><a href="#4-进阶：NAT-与-连接追踪" class="headerlink" title="4. 进阶：NAT 与 连接追踪"></a>4. 进阶：NAT 与 连接追踪</h2><p>在 OpenStack 或 K8s 中，SNAT 和 DNAT 是最常用的功能。</p>
+<h3 id="DNAT-目标地址转换"><a href="#DNAT-目标地址转换" class="headerlink" title="DNAT (目标地址转换)"></a>DNAT (目标地址转换)</h3><p>通常用于负载均衡或端口映射：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将访问 80 端口的流量映射到后端 192.168.1.10</span></span><br><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.1.10:80</span><br></pre></td></tr></table></figure>
+
+<h3 id="SNAT-源地址转换"><a href="#SNAT-源地址转换" class="headerlink" title="SNAT (源地址转换)"></a>SNAT (源地址转换)</h3><p>通常用于内网访问外网：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将内网网段出的包，转换成 eth0 的出口 IP</span></span><br><span class="line">iptables -t nat -A POSTROUTING -s 192.168.1.0/24 -o eth0 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<h3 id="连接追踪-conntrack"><a href="#连接追踪-conntrack" class="headerlink" title="连接追踪 (conntrack)"></a>连接追踪 (conntrack)</h3><p>这是 <code>iptables</code> 能够实现“状态感知”的关键。</p>
+<ul>
+<li><strong>RELATED</strong>：与已有连接相关的包（如 FTP 数据通道，或者 ICMP 错误报文）。</li>
+<li><strong>ESTABLISHED</strong>：已经建立成功的连接。</li>
+<li><strong>NEW</strong>：尝试发起新连接的包。</li>
+</ul>
+<p><strong>最佳实践</strong>：总是先允许 ESTABLISHED 和 RELATED，可以极大优化性能：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-最佳实践与性能调优"><a href="#5-最佳实践与性能调优" class="headerlink" title="5. 最佳实践与性能调优"></a>5. 最佳实践与性能调优</h2><h3 id="1-规则顺序是性能生命线"><a href="#1-规则顺序是性能生命线" class="headerlink" title="1. 规则顺序是性能生命线"></a>1. 规则顺序是性能生命线</h3><p>规则查找是线性的。<strong>将高频命中规则放在最前面</strong>。例如，如果你的 80% 流量都是 <code>ESTABLISHED</code> 的包，把它放在第一条，可以减少 80% 的 CPU 遍历开销。</p>
+<h3 id="2-避免“性能杀手”"><a href="#2-避免“性能杀手”" class="headerlink" title="2. 避免“性能杀手”"></a>2. 避免“性能杀手”</h3><ul>
+<li><strong>拒绝使用主机名</strong>：始终使用 IP 地址。<code>iptables</code> 解析域名会导致每条规则检查时都触发 DNS 查询，系统会直接崩溃。</li>
+<li><strong>减少链的数量</strong>：复杂的自定义链虽然好维护，但过多的跳转（JUMP）会增加内核处理的复杂性。</li>
+</ul>
+<h3 id="3-排错技巧：日志追踪"><a href="#3-排错技巧：日志追踪" class="headerlink" title="3. 排错技巧：日志追踪"></a>3. 排错技巧：日志追踪</h3><p>在 <code>filter</code> 表中添加 LOG 规则，查看哪些包被 DROP 了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -A INPUT -p tcp --dport 80 -j LOG --log-prefix <span class="string">&quot;HTTP_TRAFFIC: &quot;</span></span><br></pre></td></tr></table></figure>
+<p>使用 <code>dmesg</code> 查看日志：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dmesg | grep HTTP_TRAFFIC</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-慎用-REJECT"><a href="#4-慎用-REJECT" class="headerlink" title="4. 慎用 REJECT"></a>4. 慎用 <code>REJECT</code></h3><p><code>DROP</code> 是直接丢包，不给回馈；<code>REJECT</code> 是告诉对方“拒绝连接”。在公网环境下，建议优先用 <code>DROP</code>，防止恶意扫描者通过 <code>REJECT</code> 探测你的内部网络存活情况。</p>
+<hr>
+<h2 id="6-避坑指南"><a href="#6-避坑指南" class="headerlink" title="6. 避坑指南"></a>6. 避坑指南</h2><ol>
+<li><strong>conntrack 表溢出</strong>：在海量连接下（例如 DPVS 场景），Linux 内核的 <code>conntrack</code> 表可能会爆满。你可以通过以下命令调大：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sysctl -w net.netfilter.nf_conntrack_max=1048576</span><br></pre></td></tr></table></figure></li>
+<li><strong>iptables 规则丢失</strong>：容器重启后，规则会丢失。生产环境必须使用 <code>iptables-persistent</code> 或类似的工具持久化规则，或者通过 <code>Kolla-Ansible</code> 等编排工具的模板自动刷入。</li>
+</ol>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>iptables</code> 的强大在于它的逻辑一致性。当你遇到网络不通时，遵循以下三个排查步骤，比直接去 debug 程序代码更有效：</p>
+<ol>
+<li><strong>Where?</strong> 包在经过 <code>PREROUTING</code> -&gt; <code>INPUT</code> -&gt; <code>FORWARD</code> 哪个链时被拦截了？（使用 <code>-v</code> 查看计数器增长情况）。</li>
+<li><strong>Why?</strong> 是被 <code>DROP</code> 掉的，还是被 <code>REJECT</code>，还是根本没匹配到规则（默认策略 DROP）？</li>
+<li><strong>How?</strong> 修改对应的规则顺序或匹配条件，通过 <code>iptables -Z</code> 重置计数器，观察包是否正常流转。</li>
+</ol>
+]]></content>
+  </entry>
 </search>
