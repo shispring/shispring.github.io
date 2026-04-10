@@ -17084,4 +17084,281 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>openstack</tag>
       </tags>
   </entry>
+  <entry>
+    <title>流量劫持</title>
+    <url>/2026/04/10/%E6%B5%81%E9%87%8F%E5%8A%AB%E6%8C%81/</url>
+    <content><![CDATA[<h2 id="一、什么是流量劫持（Traffic-Hijacking）"><a href="#一、什么是流量劫持（Traffic-Hijacking）" class="headerlink" title="一、什么是流量劫持（Traffic Hijacking）"></a>一、什么是流量劫持（Traffic Hijacking）</h2><h3 id="1-定义"><a href="#1-定义" class="headerlink" title="1. 定义"></a>1. 定义</h3><p><strong>流量劫持</strong>是指在数据从客户端到目标服务器的传输过程中，被第三方（合法或非法）<strong>拦截、篡改或重定向</strong>的行为，使得流量偏离原本的目的地。</p>
+<h3 id="2-常见目的"><a href="#2-常见目的" class="headerlink" title="2. 常见目的"></a>2. 常见目的</h3><table>
+<thead>
+<tr>
+<th>目的</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>恶意攻击</td>
+<td>窃取敏感信息、植入恶意代码</td>
+</tr>
+<tr>
+<td>广告注入</td>
+<td>在网页中插入广告</td>
+</tr>
+<tr>
+<td>流量引导</td>
+<td>将用户引导至指定服务器</td>
+</tr>
+<tr>
+<td>安全防护</td>
+<td>企业安全审计或防御（合法场景）</td>
+</tr>
+<tr>
+<td>灰度发布</td>
+<td>在运维中进行流量切换或迁移</td>
+</tr>
+</tbody></table>
+<h3 id="3-常见的流量劫持方式"><a href="#3-常见的流量劫持方式" class="headerlink" title="3. 常见的流量劫持方式"></a>3. 常见的流量劫持方式</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>所在层</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DNS 劫持</td>
+<td>应用层</td>
+<td>修改域名解析结果</td>
+</tr>
+<tr>
+<td>ARP 欺骗</td>
+<td>数据链路层</td>
+<td>伪造网关 MAC 地址</td>
+</tr>
+<tr>
+<td>BGP 劫持</td>
+<td>网络层</td>
+<td>篡改路由传播</td>
+</tr>
+<tr>
+<td>HTTP 劫持</td>
+<td>应用层</td>
+<td>注入或篡改 HTTP 内容</td>
+</tr>
+<tr>
+<td>代理&#x2F;网关劫持</td>
+<td>应用层</td>
+<td>通过代理服务器转发流量</td>
+</tr>
+<tr>
+<td>Hosts 劫持</td>
+<td>操作系统</td>
+<td>修改本地 hosts 文件</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、DNS-解析能被劫持吗？"><a href="#二、DNS-解析能被劫持吗？" class="headerlink" title="二、DNS 解析能被劫持吗？"></a>二、DNS 解析能被劫持吗？</h2><h3 id="✅-答案：可以，而且是最常见的流量劫持方式之一。"><a href="#✅-答案：可以，而且是最常见的流量劫持方式之一。" class="headerlink" title="✅ 答案：可以，而且是最常见的流量劫持方式之一。"></a>✅ 答案：<strong>可以，而且是最常见的流量劫持方式之一。</strong></h3><h3 id="1-DNS-劫持的原理"><a href="#1-DNS-劫持的原理" class="headerlink" title="1. DNS 劫持的原理"></a>1. DNS 劫持的原理</h3><p>DNS 的作用是将域名解析为 IP 地址。如果攻击者能够控制或篡改 DNS 解析过程，就可以将用户的请求引导到错误的服务器。</p>
+<h3 id="2-DNS-劫持的常见方式"><a href="#2-DNS-劫持的常见方式" class="headerlink" title="2. DNS 劫持的常见方式"></a>2. DNS 劫持的常见方式</h3><table>
+<thead>
+<tr>
+<th>劫持方式</th>
+<th>原理</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>本地 Hosts 劫持</td>
+<td>修改 <code>/etc/hosts</code></td>
+<td><code>example.com → 1.2.3.4</code></td>
+</tr>
+<tr>
+<td>路由器 DNS 劫持</td>
+<td>修改家庭或企业网关 DNS</td>
+<td>恶意 DNS 服务器</td>
+</tr>
+<tr>
+<td>ISP 劫持</td>
+<td>运营商篡改 DNS 响应</td>
+<td>广告注入</td>
+</tr>
+<tr>
+<td>DNS 缓存投毒</td>
+<td>伪造 DNS 响应并缓存</td>
+<td>Kaminsky 攻击</td>
+</tr>
+<tr>
+<td>中间人攻击</td>
+<td>拦截并修改 DNS 数据包</td>
+<td>ARP 欺骗</td>
+</tr>
+<tr>
+<td>恶意 DNS 服务器</td>
+<td>返回伪造解析结果</td>
+<td>钓鱼网站</td>
+</tr>
+</tbody></table>
+<h3 id="3-DNS-劫持的影响"><a href="#3-DNS-劫持的影响" class="headerlink" title="3. DNS 劫持的影响"></a>3. DNS 劫持的影响</h3><ul>
+<li>用户访问到伪造网站（钓鱼攻击）</li>
+<li>流量被重定向到指定服务器</li>
+<li>数据泄露或被篡改</li>
+<li>服务不可用</li>
+</ul>
+<hr>
+<h2 id="三、什么是-LocalDNS-劫持？"><a href="#三、什么是-LocalDNS-劫持？" class="headerlink" title="三、什么是 LocalDNS 劫持？"></a>三、什么是 LocalDNS 劫持？</h2><h3 id="1-LocalDNS-的定义"><a href="#1-LocalDNS-的定义" class="headerlink" title="1. LocalDNS 的定义"></a>1. LocalDNS 的定义</h3><p><strong>LocalDNS</strong> 通常指部署在用户本地网络或主机上的 DNS 解析服务，例如：</p>
+<ul>
+<li>操作系统自带的 DNS 缓存（如 <code>systemd-resolved</code>）</li>
+<li>企业内网 DNS</li>
+<li>Kubernetes 中的 <code>CoreDNS</code></li>
+<li>边缘节点的本地 DNS 缓存服务</li>
+</ul>
+<h3 id="2-LocalDNS-劫持的核心思想"><a href="#2-LocalDNS-劫持的核心思想" class="headerlink" title="2. LocalDNS 劫持的核心思想"></a>2. LocalDNS 劫持的核心思想</h3><blockquote>
+<p><strong>通过控制本地 DNS 解析结果，将特定域名解析到指定的 IP 地址，从而实现流量的重定向。</strong></p>
+</blockquote>
+<p>这种方式通常用于<strong>合法的运维场景</strong>，如流量迁移、灰度发布、灾备切换等。</p>
+<hr>
+<h2 id="四、LocalDNS-劫持的实现原理"><a href="#四、LocalDNS-劫持的实现原理" class="headerlink" title="四、LocalDNS 劫持的实现原理"></a>四、LocalDNS 劫持的实现原理</h2><h3 id="1-解析流程"><a href="#1-解析流程" class="headerlink" title="1. 解析流程"></a>1. 解析流程</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">用户请求域名</span><br><span class="line">      │</span><br><span class="line">      ▼</span><br><span class="line">本地 DNS（LocalDNS）</span><br><span class="line">      │</span><br><span class="line"> ┌────┴────┐</span><br><span class="line"> │         │</span><br><span class="line">命中规则   未命中</span><br><span class="line"> │         │</span><br><span class="line">返回指定IP  转发至上游DNS</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-实现方式"><a href="#2-实现方式" class="headerlink" title="2. 实现方式"></a>2. 实现方式</h3><h4 id="✅-方式一：Hosts-文件劫持"><a href="#✅-方式一：Hosts-文件劫持" class="headerlink" title="✅ 方式一：Hosts 文件劫持"></a>✅ 方式一：Hosts 文件劫持</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># /etc/hosts</span></span><br><span class="line">10.220.193.123  example.com</span><br></pre></td></tr></table></figure>
+
+<p><strong>特点</strong>：简单直接，但不适用于大规模环境。</p>
+<hr>
+<h4 id="✅-方式二：本地-DNS-服务（如-dnsmasq）"><a href="#✅-方式二：本地-DNS-服务（如-dnsmasq）" class="headerlink" title="✅ 方式二：本地 DNS 服务（如 dnsmasq）"></a>✅ 方式二：本地 DNS 服务（如 dnsmasq）</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># dnsmasq.conf</span></span><br><span class="line">address=/example.com/10.220.193.123</span><br></pre></td></tr></table></figure>
+
+<p><strong>特点</strong>：</p>
+<ul>
+<li>支持通配符</li>
+<li>可集中管理</li>
+<li>适合企业或边缘节点</li>
+</ul>
+<hr>
+<h4 id="✅-方式三：Kubernetes-CoreDNS-劫持"><a href="#✅-方式三：Kubernetes-CoreDNS-劫持" class="headerlink" title="✅ 方式三：Kubernetes CoreDNS 劫持"></a>✅ 方式三：Kubernetes CoreDNS 劫持</h4><p>在 Kubernetes 中，可以通过修改 <code>CoreDNS</code> 的 <code>ConfigMap</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">coredns</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">Corefile:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    .:53 &#123;</span></span><br><span class="line"><span class="string">        hosts &#123;</span></span><br><span class="line"><span class="string">            10.220.193.123 example.com</span></span><br><span class="line"><span class="string">            fallthrough</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        forward . /etc/resolv.conf</span></span><br><span class="line"><span class="string">        cache 30</span></span><br><span class="line"><span class="string">    &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>更新后生效：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl rollout restart deployment coredns -n kube-system</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="✅-方式四：iptables-重定向（透明-DNS-劫持）"><a href="#✅-方式四：iptables-重定向（透明-DNS-劫持）" class="headerlink" title="✅ 方式四：iptables 重定向（透明 DNS 劫持）"></a>✅ 方式四：iptables 重定向（透明 DNS 劫持）</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 10.220.193.123:53</span><br></pre></td></tr></table></figure>
+
+<p><strong>作用</strong>：强制所有 DNS 请求通过指定的 DNS 服务器。</p>
+<hr>
+<h2 id="五、LocalDNS-劫持的典型应用场景"><a href="#五、LocalDNS-劫持的典型应用场景" class="headerlink" title="五、LocalDNS 劫持的典型应用场景"></a>五、LocalDNS 劫持的典型应用场景</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>流量迁移</td>
+<td>将域名指向新的 VIP</td>
+</tr>
+<tr>
+<td>灰度发布</td>
+<td>部分用户访问新版本</td>
+</tr>
+<tr>
+<td>灾备切换</td>
+<td>主站故障时切换到备站</td>
+</tr>
+<tr>
+<td>内网加速</td>
+<td>将公网域名解析到内网 IP</td>
+</tr>
+<tr>
+<td>安全防护</td>
+<td>屏蔽恶意域名</td>
+</tr>
+<tr>
+<td>Kubernetes 服务治理</td>
+<td>将外部域名指向集群内部服务</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="六、DNS-劫持-vs-LocalDNS-劫持"><a href="#六、DNS-劫持-vs-LocalDNS-劫持" class="headerlink" title="六、DNS 劫持 vs LocalDNS 劫持"></a>六、DNS 劫持 vs LocalDNS 劫持</h2><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>DNS 劫持（广义）</th>
+<th>LocalDNS 劫持</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>控制范围</td>
+<td>可能是恶意或全网</td>
+<td>本地或可控范围</td>
+</tr>
+<tr>
+<td>是否合法</td>
+<td>可能非法</td>
+<td>通常合法</td>
+</tr>
+<tr>
+<td>实现位置</td>
+<td>ISP &#x2F; 路由 &#x2F; 中间人</td>
+<td>本地 DNS</td>
+</tr>
+<tr>
+<td>应用场景</td>
+<td>攻击或广告</td>
+<td>运维与流量治理</td>
+</tr>
+<tr>
+<td>可控性</td>
+<td>低</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、如何防范-DNS-劫持？"><a href="#七、如何防范-DNS-劫持？" class="headerlink" title="七、如何防范 DNS 劫持？"></a>七、如何防范 DNS 劫持？</h2><table>
+<thead>
+<tr>
+<th>防护措施</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用 HTTPS</td>
+<td>防止内容被篡改</td>
+</tr>
+<tr>
+<td>DNSSEC</td>
+<td>校验 DNS 数据完整性</td>
+</tr>
+<tr>
+<td>DoH &#x2F; DoT</td>
+<td>加密 DNS 查询</td>
+</tr>
+<tr>
+<td>固定可信 DNS</td>
+<td>如 8.8.8.8、1.1.1.1</td>
+</tr>
+<tr>
+<td>监控解析结果</td>
+<td>定期校验域名解析</td>
+</tr>
+<tr>
+<td>证书校验</td>
+<td>防止钓鱼网站</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="八、总结"><a href="#八、总结" class="headerlink" title="八、总结"></a>八、总结</h2><h3 id="🔑-核心要点"><a href="#🔑-核心要点" class="headerlink" title="🔑 核心要点"></a>🔑 核心要点</h3><ol>
+<li><p><strong>流量劫持</strong>：指网络流量被拦截、篡改或重定向的行为。</p>
+</li>
+<li><p><strong>DNS 解析可以被劫持</strong>：这是最常见的流量劫持方式之一。</p>
+</li>
+<li><p><strong>LocalDNS 劫持</strong>：</p>
+<ul>
+<li>通过控制本地 DNS 解析结果，将域名指向指定 IP。</li>
+<li>常用于流量迁移、灰度发布和灾备切换等合法场景。</li>
+</ul>
+</li>
+<li><p><strong>实现方式</strong>：Hosts、dnsmasq、CoreDNS、iptables 等。</p>
+</li>
+<li><p><strong>安全防护</strong>：DNSSEC、DoH&#x2F;DoT、HTTPS 等技术可有效降低风险。</p>
+</li>
+</ol>
+<hr>
+]]></content>
+  </entry>
 </search>
