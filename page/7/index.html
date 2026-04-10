@@ -184,6 +184,456 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/31/tcpdump%E8%A7%A3%E6%9E%90%E5%8F%8A%E5%88%86%E6%9E%90%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/07/31/tcpdump%E8%A7%A3%E6%9E%90%E5%8F%8A%E5%88%86%E6%9E%90%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">tcpdump解析及分析指南</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-07-31 13:30:06 / 修改时间：13:32:13" itemprop="dateCreated datePublished" datetime="2025-07-31T13:30:06+08:00">2025-07-31</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="tcpdump-输出解析与网络分析指南"><a href="#tcpdump-输出解析与网络分析指南" class="headerlink" title="tcpdump 输出解析与网络分析指南"></a>tcpdump 输出解析与网络分析指南</h1><h2 id="🎯-目录"><a href="#🎯-目录" class="headerlink" title="🎯 目录"></a>🎯 目录</h2><ul>
+<li><a href="#tcp-flags-%E8%AF%A6%E8%A7%A3">TCP Flags 详解</a></li>
+<li><a href="#tcpdump-%E8%BE%93%E5%87%BA%E6%A0%BC%E5%BC%8F%E8%A7%A3%E6%9E%90">tcpdump 输出格式解析</a></li>
+<li><a href="#%E5%85%B3%E9%94%AE%E5%AD%97%E6%AE%B5%E5%88%86%E6%9E%90">关键字段分析</a></li>
+<li><a href="#%E5%85%B8%E5%9E%8B%E5%9C%BA%E6%99%AF%E5%88%86%E6%9E%90">典型场景分析</a></li>
+<li><a href="#4%E5%B1%827%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%88%86%E6%9E%90">4层&#x2F;7层负载均衡分析</a></li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91%E5%BF%85%E7%9F%A5%E7%BD%91%E7%BB%9C%E7%9F%A5%E8%AF%86">服务端开发必知网络知识</a></li>
+</ul>
+<hr>
+<h2 id="TCP-Flags-详解"><a href="#TCP-Flags-详解" class="headerlink" title="TCP Flags 详解"></a>TCP Flags 详解</h2><h3 id="🏁-TCP-Flags-标志位"><a href="#🏁-TCP-Flags-标志位" class="headerlink" title="🏁 TCP Flags 标志位"></a>🏁 TCP Flags 标志位</h3><table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>符号</th>
+<th>含义</th>
+<th>作用</th>
+<th>关注度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SYN</strong></td>
+<td><code>[S]</code></td>
+<td>Synchronize</td>
+<td>发起连接请求</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>ACK</strong></td>
+<td><code>[.]</code></td>
+<td>Acknowledge</td>
+<td>确认收到数据</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>FIN</strong></td>
+<td><code>[F]</code></td>
+<td>Finish</td>
+<td>请求关闭连接</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>RST</strong></td>
+<td><code>[R]</code></td>
+<td>Reset</td>
+<td>强制重置连接</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>PSH</strong></td>
+<td><code>[P]</code></td>
+<td>Push</td>
+<td>立即推送数据</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td><strong>URG</strong></td>
+<td><code>[U]</code></td>
+<td>Urgent</td>
+<td>紧急数据指针</td>
+<td>⭐</td>
+</tr>
+<tr>
+<td><strong>ECE</strong></td>
+<td><code>[E]</code></td>
+<td>ECN Echo</td>
+<td>拥塞通知回显</td>
+<td>⭐</td>
+</tr>
+<tr>
+<td><strong>CWR</strong></td>
+<td><code>[W]</code></td>
+<td>Congestion Window Reduced</td>
+<td>拥塞窗口减少</td>
+<td>⭐</td>
+</tr>
+</tbody></table>
+<h3 id="🔍-组合标志位含义"><a href="#🔍-组合标志位含义" class="headerlink" title="🔍 组合标志位含义"></a>🔍 组合标志位含义</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 常见组合及含义</span></span><br><span class="line">[S]      <span class="comment"># SYN：连接建立请求</span></span><br><span class="line">[S.]     <span class="comment"># SYN+ACK：连接建立响应  </span></span><br><span class="line">[.]      <span class="comment"># ACK：普通数据确认</span></span><br><span class="line">[P.]     <span class="comment"># PSH+ACK：数据推送并确认</span></span><br><span class="line">[F.]     <span class="comment"># FIN+ACK：连接关闭请求</span></span><br><span class="line">[R]      <span class="comment"># RST：连接重置</span></span><br><span class="line">[R.]     <span class="comment"># RST+ACK：重置并确认</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 异常组合</span></span><br><span class="line">[S.R]    <span class="comment"># SYN+ACK+RST：拒绝连接</span></span><br><span class="line">[F.R]    <span class="comment"># FIN+ACK+RST：强制关闭</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="⚠️-RST-标志位深度解析"><a href="#⚠️-RST-标志位深度解析" class="headerlink" title="⚠️ RST 标志位深度解析"></a>⚠️ RST 标志位深度解析</h3><p><strong>RST (Reset) 的含义：</strong></p>
+<ul>
+<li>立即终止 TCP 连接</li>
+<li>释放连接占用的资源</li>
+<li>不经过正常的四次挥手过程</li>
+</ul>
+<p><strong>RST 产生的常见原因：</strong></p>
+<ol>
+<li><p><strong>端口不可达</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目标端口没有监听服务</span></span><br><span class="line">13:21:34.963769 IP client.12345 &gt; server.8080: Flags [S]</span><br><span class="line">13:21:34.963888 IP server.8080 &gt; client.12345: Flags [R.]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>防火墙拒绝</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 防火墙规则阻止连接</span></span><br><span class="line">13:21:34.963769 IP client.12345 &gt; server.80: Flags [S]</span><br><span class="line">13:21:34.964001 IP server.80 &gt; client.12345: Flags [R.]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>应用程序异常关闭</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 应用崩溃或强制关闭socket</span></span><br><span class="line">13:21:35.123456 IP client.12345 &gt; server.8080: Flags [P.]</span><br><span class="line">13:21:35.123567 IP server.8080 &gt; client.12345: Flags [R]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>超时重置</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 连接超时，系统自动重置</span></span><br><span class="line">13:21:35.500000 IP client.12345 &gt; server.8080: Flags [S]</span><br><span class="line"><span class="comment"># ... 无响应 ...</span></span><br><span class="line">13:21:40.500000 IP client.12345 &gt; server.8080: Flags [R]</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="tcpdump-输出格式解析"><a href="#tcpdump-输出格式解析" class="headerlink" title="tcpdump 输出格式解析"></a>tcpdump 输出格式解析</h2><h3 id="📋-标准输出格式"><a href="#📋-标准输出格式" class="headerlink" title="📋 标准输出格式"></a>📋 标准输出格式</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">时间戳 IP (IP头信息) 源地址.端口 &gt; 目标地址.端口: Flags [标志], 序列号信息, 长度信息</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔬-详细字段解析"><a href="#🔬-详细字段解析" class="headerlink" title="🔬 详细字段解析"></a>🔬 详细字段解析</h3><p>以这个例子为基准：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">13:21:12.082154 IP (tos 0x0, ttl 64, id 0, offset 0, flags [DF], proto TCP (6), length 172, bad cksum 0 (-&gt;3c4a)!) 10.18.60.15.54444 &gt; 106.63.103.83.443: Flags [S], seq 123456789, win 65535, options [mss 1460], length 0</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>含义</th>
+<th>关注点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>时间戳</strong></td>
+<td><code>13:21:12.082154</code></td>
+<td>精确到微秒的时间</td>
+<td>用于计算延迟和超时</td>
+</tr>
+<tr>
+<td><strong>协议</strong></td>
+<td><code>IP</code></td>
+<td>网络层协议</td>
+<td>通常是 IP</td>
+</tr>
+<tr>
+<td><strong>TOS</strong></td>
+<td><code>tos 0x0</code></td>
+<td>服务类型</td>
+<td>QoS 标记，影响优先级</td>
+</tr>
+<tr>
+<td><strong>TTL</strong></td>
+<td><code>ttl 64</code></td>
+<td>生存时间</td>
+<td>剩余跳数，用于诊断路由</td>
+</tr>
+<tr>
+<td><strong>ID</strong></td>
+<td><code>id 0</code></td>
+<td>数据包标识</td>
+<td>用于分片重组</td>
+</tr>
+<tr>
+<td><strong>Flags</strong></td>
+<td><code>flags [DF]</code></td>
+<td>IP 标志</td>
+<td>DF&#x3D;不分片，MF&#x3D;更多分片</td>
+</tr>
+<tr>
+<td><strong>协议号</strong></td>
+<td><code>proto TCP (6)</code></td>
+<td>传输层协议</td>
+<td>TCP&#x3D;6, UDP&#x3D;17, ICMP&#x3D;1</td>
+</tr>
+<tr>
+<td><strong>长度</strong></td>
+<td><code>length 172</code></td>
+<td>IP 包总长度</td>
+<td>包括头部和数据</td>
+</tr>
+<tr>
+<td><strong>校验和</strong></td>
+<td><code>bad cksum</code></td>
+<td>校验和错误</td>
+<td>⚠️ 数据包可能损坏</td>
+</tr>
+<tr>
+<td><strong>源&#x2F;目标</strong></td>
+<td><code>10.18.60.15.54444 &gt; 106.63.103.83.443</code></td>
+<td>源IP.端口 &gt; 目标IP.端口</td>
+<td>通信端点</td>
+</tr>
+<tr>
+<td><strong>TCP标志</strong></td>
+<td><code>Flags [S]</code></td>
+<td>TCP 控制位</td>
+<td>连接状态控制</td>
+</tr>
+<tr>
+<td><strong>序列号</strong></td>
+<td><code>seq 123456789</code></td>
+<td>序列号</td>
+<td>数据排序和去重</td>
+</tr>
+<tr>
+<td><strong>窗口大小</strong></td>
+<td><code>win 65535</code></td>
+<td>接收窗口</td>
+<td>流控制</td>
+</tr>
+<tr>
+<td><strong>选项</strong></td>
+<td><code>options [mss 1460]</code></td>
+<td>TCP 选项</td>
+<td>协商参数</td>
+</tr>
+<tr>
+<td><strong>数据长度</strong></td>
+<td><code>length 0</code></td>
+<td>TCP 数据长度</td>
+<td>实际载荷大小</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="关键字段分析"><a href="#关键字段分析" class="headerlink" title="关键字段分析"></a>关键字段分析</h2><h3 id="🚨-需要重点关注的异常"><a href="#🚨-需要重点关注的异常" class="headerlink" title="🚨 需要重点关注的异常"></a>🚨 需要重点关注的异常</h3><h4 id="1-校验和错误"><a href="#1-校验和错误" class="headerlink" title="1. 校验和错误"></a>1. 校验和错误</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示数据包在传输过程中被损坏</span></span><br><span class="line">bad <span class="built_in">cksum</span> 0 (-&gt;3c4a)!</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可能原因：</span></span><br><span class="line"><span class="comment"># - 网络硬件故障</span></span><br><span class="line"><span class="comment"># - 网卡驱动问题  </span></span><br><span class="line"><span class="comment"># - 传输过程中的干扰</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-TTL-异常"><a href="#2-TTL-异常" class="headerlink" title="2. TTL 异常"></a>2. TTL 异常</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># TTL 过小，可能经过太多路由器</span></span><br><span class="line">ttl 1    <span class="comment"># 即将被丢弃</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># TTL 异常大，可能是伪造包</span></span><br><span class="line">ttl 255  <span class="comment"># 可疑的最大值</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-序列号异常"><a href="#3-序列号异常" class="headerlink" title="3. 序列号异常"></a>3. 序列号异常</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 序列号不连续，可能有丢包</span></span><br><span class="line"><span class="built_in">seq</span> 1000:1500, ack 2000</span><br><span class="line"><span class="built_in">seq</span> 2000:2500, ack 2000  <span class="comment"># 跳过了 1500-2000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重复的序列号，表示重传</span></span><br><span class="line"><span class="built_in">seq</span> 1000:1500, ack 2000</span><br><span class="line"><span class="built_in">seq</span> 1000:1500, ack 2000  <span class="comment"># 重传</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="4-窗口大小异常"><a href="#4-窗口大小异常" class="headerlink" title="4. 窗口大小异常"></a>4. 窗口大小异常</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">win 0     <span class="comment"># 接收方缓冲区满，发送方应该停止发送</span></span><br><span class="line">win 65535 <span class="comment"># 最大窗口，正常</span></span><br><span class="line">win 1     <span class="comment"># 窗口很小，可能有流控问题</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="典型场景分析"><a href="#典型场景分析" class="headerlink" title="典型场景分析"></a>典型场景分析</h2><h3 id="场景1：正常-HTTP-连接建立"><a href="#场景1：正常-HTTP-连接建立" class="headerlink" title="场景1：正常 HTTP 连接建立"></a>场景1：正常 HTTP 连接建立</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 客户端发起连接</span></span><br><span class="line">13:21:34.100000 IP client.54321 &gt; server.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, options [mss 1460], length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 服务器响应连接</span></span><br><span class="line">13:21:34.100500 IP server.80 &gt; client.54321: Flags [S.], <span class="built_in">seq</span> 2000, ack 1001, win 65535, options [mss 1460], length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 客户端确认连接</span></span><br><span class="line">13:21:34.100600 IP client.54321 &gt; server.80: Flags [.], ack 2001, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 客户端发送 HTTP 请求</span></span><br><span class="line">13:21:34.100700 IP client.54321 &gt; server.80: Flags [P.], <span class="built_in">seq</span> 1001:1200, ack 2001, win 65535, length 199</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析要点：</strong></p>
+<ul>
+<li>✅ 三次握手完整 (SYN → SYN+ACK → ACK)</li>
+<li>✅ 序列号正确递增 (1000 → 1001, 2000 → 2001)</li>
+<li>✅ 响应时间正常 (0.5ms)</li>
+</ul>
+<h3 id="场景2：连接被拒绝"><a href="#场景2：连接被拒绝" class="headerlink" title="场景2：连接被拒绝"></a>场景2：连接被拒绝</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 客户端发起连接</span></span><br><span class="line">13:21:34.100000 IP client.54321 &gt; server.8080: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 服务器立即拒绝 (端口未监听)</span></span><br><span class="line">13:21:34.100100 IP server.8080 &gt; client.54321: Flags [R.], <span class="built_in">seq</span> 0, ack 1001, win 0, length 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析要点：</strong></p>
+<ul>
+<li>❌ 收到 RST 标志，连接被拒绝</li>
+<li>🔍 可能原因：端口未监听、防火墙阻止、服务未启动</li>
+</ul>
+<h3 id="场景3：连接超时重传"><a href="#场景3：连接超时重传" class="headerlink" title="场景3：连接超时重传"></a>场景3：连接超时重传</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 客户端发起连接</span></span><br><span class="line">13:21:34.100000 IP client.54321 &gt; server.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 无响应，客户端重传 (通常 1 秒后)</span></span><br><span class="line">13:21:35.100000 IP client.54321 &gt; server.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 继续重传 (通常 2 秒后)</span></span><br><span class="line">13:21:37.100000 IP client.54321 &gt; server.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 最终放弃或收到 RST</span></span><br><span class="line">13:21:41.100000 IP client.54321 &gt; server.80: Flags [R], <span class="built_in">seq</span> 1001, win 0, length 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析要点：</strong></p>
+<ul>
+<li>⚠️ 重复的 SYN 包表示重传</li>
+<li>🔍 可能原因：网络延迟、服务器负载高、丢包</li>
+</ul>
+<h3 id="场景4：数据传输中的重传"><a href="#场景4：数据传输中的重传" class="headerlink" title="场景4：数据传输中的重传"></a>场景4：数据传输中的重传</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 正常数据传输</span></span><br><span class="line">13:21:34.100000 IP client.54321 &gt; server.80: Flags [.], <span class="built_in">seq</span> 1001:2001, ack 2001, win 65535, length 1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 服务器确认</span></span><br><span class="line">13:21:34.100500 IP server.80 &gt; client.54321: Flags [.], ack 2001, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 下一个数据包</span></span><br><span class="line">13:21:34.101000 IP client.54321 &gt; server.80: Flags [.], <span class="built_in">seq</span> 2001:3001, ack 2001, win 65535, length 1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 服务器没有确认，客户端重传</span></span><br><span class="line">13:21:34.200000 IP client.54321 &gt; server.80: Flags [.], <span class="built_in">seq</span> 2001:3001, ack 2001, win 65535, length 1000</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析要点：</strong></p>
+<ul>
+<li>⚠️ 相同序列号的重复包表示重传</li>
+<li>🔍 可能原因：ACK 丢失、网络拥塞、接收方处理慢</li>
+</ul>
+<h3 id="场景5：异常连接终止"><a href="#场景5：异常连接终止" class="headerlink" title="场景5：异常连接终止"></a>场景5：异常连接终止</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 正常连接中</span></span><br><span class="line">13:21:34.100000 IP client.54321 &gt; server.80: Flags [P.], <span class="built_in">seq</span> 1001:1200, ack 2001, win 65535, length 199</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 服务器突然发送 RST (应用异常)</span></span><br><span class="line">13:21:34.100500 IP server.80 &gt; client.54321: Flags [R], <span class="built_in">seq</span> 2001, win 0, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 客户端可能还会尝试发送数据</span></span><br><span class="line">13:21:34.101000 IP client.54321 &gt; server.80: Flags [P.], <span class="built_in">seq</span> 1200:1400, ack 2001, win 65535, length 200</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 服务器继续发送 RST</span></span><br><span class="line">13:21:34.101100 IP server.80 &gt; client.54321: Flags [R], <span class="built_in">seq</span> 2001, win 0, length 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析要点：</strong></p>
+<ul>
+<li>💥 服务器主动 RST，应用层问题</li>
+<li>🔍 可能原因：程序崩溃、资源耗尽、业务逻辑错误</li>
+</ul>
+<hr>
+<h2 id="4层-7层负载均衡分析"><a href="#4层-7层负载均衡分析" class="headerlink" title="4层&#x2F;7层负载均衡分析"></a>4层&#x2F;7层负载均衡分析</h2><h3 id="🏗️-4层负载均衡（传输层）"><a href="#🏗️-4层负载均衡（传输层）" class="headerlink" title="🏗️ 4层负载均衡（传输层）"></a>🏗️ 4层负载均衡（传输层）</h3><h4 id="特征分析"><a href="#特征分析" class="headerlink" title="特征分析"></a>特征分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 客户端连接到负载均衡器</span></span><br><span class="line">13:21:34.100000 IP client.12345 &gt; lb.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 负载均衡器转发到后端服务器 (源IP可能变化)</span></span><br><span class="line">13:21:34.100100 IP lb.54321 &gt; backend1.80: Flags [S], <span class="built_in">seq</span> 2000, win 65535, length 0</span><br><span class="line"><span class="comment"># 或者保持源IP (DSR模式)</span></span><br><span class="line">13:21:34.100100 IP client.12345 &gt; backend1.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 后端服务器响应</span></span><br><span class="line">13:21:34.100200 IP backend1.80 &gt; client.12345: Flags [S.], <span class="built_in">seq</span> 3000, ack 1001, win 65535, length 0</span><br></pre></td></tr></table></figure>
+
+<h4 id="关键观察点"><a href="#关键观察点" class="headerlink" title="关键观察点"></a>关键观察点</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 连接分布 - 检查负载均衡效果</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;port 80&quot;</span> | awk <span class="string">&#x27;&#123;print $5&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 健康检查流量 - 通常是短连接</span></span><br><span class="line">13:21:34.100000 IP lb.12345 &gt; backend1.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line">13:21:34.100100 IP backend1.80 &gt; lb.12345: Flags [S.], <span class="built_in">seq</span> 2000, ack 1001, win 65535, length 0</span><br><span class="line">13:21:34.100200 IP lb.12345 &gt; backend1.80: Flags [.], ack 2001, win 65535, length 0</span><br><span class="line">13:21:34.100300 IP lb.12345 &gt; backend1.80: Flags [F.], <span class="built_in">seq</span> 1001, ack 2001, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 会话保持 - 同一客户端IP总是连接同一后端</span></span><br><span class="line">client.12345 -&gt; backend1.80  <span class="comment"># 第一次连接</span></span><br><span class="line">client.12345 -&gt; backend1.80  <span class="comment"># 后续连接保持一致</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🌐-7层负载均衡（应用层）"><a href="#🌐-7层负载均衡（应用层）" class="headerlink" title="🌐 7层负载均衡（应用层）"></a>🌐 7层负载均衡（应用层）</h3><h4 id="特征分析-1"><a href="#特征分析-1" class="headerlink" title="特征分析"></a>特征分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 客户端连接到负载均衡器</span></span><br><span class="line">13:21:34.100000 IP client.12345 &gt; lb.80: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line">13:21:34.100100 IP lb.80 &gt; client.12345: Flags [S.], <span class="built_in">seq</span> 2000, ack 1001, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 客户端发送 HTTP 请求到负载均衡器</span></span><br><span class="line">13:21:34.100200 IP client.12345 &gt; lb.80: Flags [P.], <span class="built_in">seq</span> 1001:1200, ack 2001, win 65535, length 199</span><br><span class="line"><span class="comment"># HTTP 内容: GET /api/users HTTP/1.1\r\nHost: example.com\r\n...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 负载均衡器新建连接到后端 (基于 HTTP 内容决策)</span></span><br><span class="line">13:21:34.100300 IP lb.54321 &gt; backend2.8080: Flags [S], <span class="built_in">seq</span> 3000, win 65535, length 0</span><br><span class="line">13:21:34.100400 IP backend2.8080 &gt; lb.54321: Flags [S.], <span class="built_in">seq</span> 4000, ack 3001, win 65535, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 负载均衡器转发修改后的 HTTP 请求</span></span><br><span class="line">13:21:34.100500 IP lb.54321 &gt; backend2.8080: Flags [P.], <span class="built_in">seq</span> 3001:3250, ack 4001, win 65535, length 249</span><br><span class="line"><span class="comment"># HTTP 内容可能被修改: GET /api/users HTTP/1.1\r\nHost: backend2.internal\r\nX-Forwarded-For: client_ip\r\n...</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="HTTP-请求路由分析"><a href="#HTTP-请求路由分析" class="headerlink" title="HTTP 请求路由分析"></a>HTTP 请求路由分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 根据 URL 路径路由</span></span><br><span class="line">GET /api/v1/users    -&gt; backend-api.8080</span><br><span class="line">GET /static/css/     -&gt; backend-static.80</span><br><span class="line">GET /admin/          -&gt; backend-admin.8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 Host 头路由  </span></span><br><span class="line">Host: api.example.com    -&gt; backend-api.8080</span><br><span class="line">Host: www.example.com    -&gt; backend-web.80</span><br><span class="line">Host: admin.example.com  -&gt; backend-admin.8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据请求头路由</span></span><br><span class="line">User-Agent: Mobile*      -&gt; backend-mobile.8080</span><br><span class="line">User-Agent: Desktop*     -&gt; backend-web.80</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-负载均衡问题诊断"><a href="#🔍-负载均衡问题诊断" class="headerlink" title="🔍 负载均衡问题诊断"></a>🔍 负载均衡问题诊断</h3><h4 id="常见问题模式"><a href="#常见问题模式" class="headerlink" title="常见问题模式"></a>常见问题模式</h4><ol>
+<li><p><strong>后端服务器故障</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 负载均衡器检测到后端故障</span></span><br><span class="line">13:21:34.100000 IP lb.12345 &gt; backend1.8080: Flags [S], <span class="built_in">seq</span> 1000, win 65535, length 0</span><br><span class="line">13:21:34.100100 IP backend1.8080 &gt; lb.12345: Flags [R.], <span class="built_in">seq</span> 0, ack 1001, win 0, length 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 负载均衡器切换到健康的后端</span></span><br><span class="line">13:21:34.100200 IP lb.12346 &gt; backend2.8080: Flags [S], <span class="built_in">seq</span> 2000, win 65535, length 0</span><br><span class="line">13:21:34.100300 IP backend2.8080 &gt; lb.12346: Flags [S.], <span class="built_in">seq</span> 3000, ack 2001, win 65535, length 0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>会话保持失效</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用户第一次请求到 backend1</span></span><br><span class="line">client.12345 -&gt; lb.80 -&gt; backend1.8080</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用户第二次请求错误地到了 backend2 (会话丢失)</span></span><br><span class="line">client.12345 -&gt; lb.80 -&gt; backend2.8080</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>健康检查过于频繁</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每秒多次健康检查，影响后端性能</span></span><br><span class="line">13:21:34.100 IP lb &gt; backend1.80: GET /health</span><br><span class="line">13:21:34.200 IP lb &gt; backend1.80: GET /health  </span><br><span class="line">13:21:34.300 IP lb &gt; backend1.80: GET /health</span><br><span class="line"><span class="comment"># ... 频率过高</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="服务端开发必知网络知识"><a href="#服务端开发必知网络知识" class="headerlink" title="服务端开发必知网络知识"></a>服务端开发必知网络知识</h2><h3 id="🚀-TCP-连接池优化"><a href="#🚀-TCP-连接池优化" class="headerlink" title="🚀 TCP 连接池优化"></a>🚀 TCP 连接池优化</h3><h4 id="连接复用分析"><a href="#连接复用分析" class="headerlink" title="连接复用分析"></a>连接复用分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 良好的连接复用模式</span></span><br><span class="line">13:21:34.100 IP app.12345 &gt; db.5432: Flags [S]      <span class="comment"># 建立连接</span></span><br><span class="line">13:21:34.101 IP db.5432 &gt; app.12345: Flags [S.]     <span class="comment"># 连接确认</span></span><br><span class="line">13:21:34.102 IP app.12345 &gt; db.5432: Flags [P.]     <span class="comment"># 查询1</span></span><br><span class="line">13:21:34.110 IP db.5432 &gt; app.12345: Flags [P.]     <span class="comment"># 响应1</span></span><br><span class="line">13:21:34.200 IP app.12345 &gt; db.5432: Flags [P.]     <span class="comment"># 查询2 (复用连接)</span></span><br><span class="line">13:21:34.210 IP db.5432 &gt; app.12345: Flags [P.]     <span class="comment"># 响应2</span></span><br><span class="line">13:21:34.300 IP app.12345 &gt; db.5432: Flags [P.]     <span class="comment"># 查询3 (复用连接)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 不良的连接模式 (每次请求都建立新连接)</span></span><br><span class="line">13:21:34.100 IP app.12345 &gt; db.5432: Flags [S]      <span class="comment"># 建立连接1</span></span><br><span class="line">13:21:34.102 IP app.12345 &gt; db.5432: Flags [P.]     <span class="comment"># 查询1</span></span><br><span class="line">13:21:34.110 IP app.12345 &gt; db.5432: Flags [F.]     <span class="comment"># 关闭连接1</span></span><br><span class="line">13:21:34.200 IP app.12346 &gt; db.5432: Flags [S]      <span class="comment"># 建立连接2</span></span><br><span class="line">13:21:34.202 IP app.12346 &gt; db.5432: Flags [P.]     <span class="comment"># 查询2</span></span><br><span class="line">13:21:34.210 IP app.12346 &gt; db.5432: Flags [F.]     <span class="comment"># 关闭连接2</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="连接池监控指标"><a href="#连接池监控指标" class="headerlink" title="连接池监控指标"></a>连接池监控指标</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 连接建立频率</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp[tcpflags] &amp; tcp-syn != 0&quot;</span> | \</span><br><span class="line">    grep <span class="string">&quot;app_server&quot;</span> | <span class="built_in">wc</span> -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 连接复用率  </span></span><br><span class="line">总请求数 / 新建连接数 = 复用率</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 连接超时情况</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp[tcpflags] &amp; tcp-rst != 0&quot;</span> | \</span><br><span class="line">    grep <span class="string">&quot;connection.*timeout&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔐-HTTPS-TLS-优化分析"><a href="#🔐-HTTPS-TLS-优化分析" class="headerlink" title="🔐 HTTPS&#x2F;TLS 优化分析"></a>🔐 HTTPS&#x2F;TLS 优化分析</h3><h4 id="TLS-握手性能分析"><a href="#TLS-握手性能分析" class="headerlink" title="TLS 握手性能分析"></a>TLS 握手性能分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 完整的 TLS 1.2 握手过程</span></span><br><span class="line">13:21:34.100 IP client &gt; server.443: Flags [S]           <span class="comment"># TCP SYN</span></span><br><span class="line">13:21:34.101 IP server.443 &gt; client: Flags [S.]          <span class="comment"># TCP SYN-ACK  </span></span><br><span class="line">13:21:34.102 IP client &gt; server.443: Flags [.]           <span class="comment"># TCP ACK</span></span><br><span class="line"></span><br><span class="line">13:21:34.103 IP client &gt; server.443: Flags [P.]          <span class="comment"># Client Hello</span></span><br><span class="line">13:21:34.105 IP server.443 &gt; client: Flags [P.]          <span class="comment"># Server Hello, Certificate, Server Hello Done</span></span><br><span class="line">13:21:34.108 IP client &gt; server.443: Flags [P.]          <span class="comment"># Client Key Exchange, Change Cipher Spec, Finished</span></span><br><span class="line">13:21:34.110 IP server.443 &gt; client: Flags [P.]          <span class="comment"># Change Cipher Spec, Finished</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># TLS 握手总耗时 = 110 - 100 = 10ms (4个往返)</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="TLS-会话复用"><a href="#TLS-会话复用" class="headerlink" title="TLS 会话复用"></a>TLS 会话复用</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 会话复用模式 (Session ID 或 Session Ticket)</span></span><br><span class="line">13:21:34.100 IP client &gt; server.443: Flags [P.]          <span class="comment"># Client Hello (带 Session ID)</span></span><br><span class="line">13:21:34.102 IP server.443 &gt; client: Flags [P.]          <span class="comment"># Server Hello (确认复用)</span></span><br><span class="line">13:21:34.103 IP client &gt; server.443: Flags [P.]          <span class="comment"># Change Cipher Spec, Finished</span></span><br><span class="line">13:21:34.104 IP server.443 &gt; client: Flags [P.]          <span class="comment"># Change Cipher Spec, Finished</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 复用握手总耗时 = 4ms (2个往返，节省50%时间)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🎯-微服务间通信优化"><a href="#🎯-微服务间通信优化" class="headerlink" title="🎯 微服务间通信优化"></a>🎯 微服务间通信优化</h3><h4 id="服务发现模式分析"><a href="#服务发现模式分析" class="headerlink" title="服务发现模式分析"></a>服务发现模式分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># DNS 服务发现</span></span><br><span class="line">13:21:34.100 IP app &gt; dns.53: A? user-service.internal   <span class="comment"># DNS 查询</span></span><br><span class="line">13:21:34.101 IP dns.53 &gt; app: A 10.0.1.100              <span class="comment"># DNS 响应</span></span><br><span class="line">13:21:34.102 IP app &gt; 10.0.1.100.8080: Flags [S]        <span class="comment"># 连接服务</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 服务注册中心模式 (如 Consul)</span></span><br><span class="line">13:21:34.100 IP app &gt; consul.8500: GET /v1/health/service/user-service</span><br><span class="line">13:21:34.102 IP consul.8500 &gt; app: 200 OK [&#123;<span class="string">&quot;Address&quot;</span>:<span class="string">&quot;10.0.1.100&quot;</span>,<span class="string">&quot;Port&quot;</span>:8080&#125;]</span><br><span class="line">13:21:34.103 IP app &gt; 10.0.1.100.8080: Flags [S]</span><br></pre></td></tr></table></figure>
+
+<h4 id="熔断器模式识别"><a href="#熔断器模式识别" class="headerlink" title="熔断器模式识别"></a>熔断器模式识别</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 正常请求模式</span></span><br><span class="line">13:21:34.100 IP app &gt; user-service.8080: POST /api/users</span><br><span class="line">13:21:34.110 IP user-service.8080 &gt; app: 200 OK</span><br><span class="line"></span><br><span class="line"><span class="comment"># 服务开始出现延迟</span></span><br><span class="line">13:21:35.100 IP app &gt; user-service.8080: POST /api/users</span><br><span class="line">13:21:35.500 IP user-service.8080 &gt; app: 200 OK          <span class="comment"># 400ms 延迟</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 熔断器打开，请求被快速拒绝 (本地响应，无网络请求)</span></span><br><span class="line">13:21:36.100 <span class="comment"># 无网络流量，应用直接返回降级响应</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 熔断器半开，尝试恢复</span></span><br><span class="line">13:21:37.100 IP app &gt; user-service.8080: POST /api/users <span class="comment"># 探测请求</span></span><br><span class="line">13:21:37.120 IP user-service.8080 &gt; app: 200 OK          <span class="comment"># 快速响应，熔断器关闭</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="📊-性能指标监控"><a href="#📊-性能指标监控" class="headerlink" title="📊 性能指标监控"></a>📊 性能指标监控</h3><h4 id="关键网络指标"><a href="#关键网络指标" class="headerlink" title="关键网络指标"></a>关键网络指标</h4><ol>
+<li><p><strong>连接建立时间</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算 SYN 到 SYN+ACK 的时间差</span></span><br><span class="line">tcpdump -ttt -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-ack) != 0&quot;</span> | \</span><br><span class="line">    awk <span class="string">&#x27;/SYN/ &#123;syn_time=$1&#125; /SYN.*ACK/ &#123;print &quot;Connection time:&quot;, $1-syn_time, &quot;ms&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>请求响应时间</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算 HTTP 请求到响应的时间差  </span></span><br><span class="line">tcpdump -ttt -nn -A <span class="string">&quot;port 80&quot;</span> | \</span><br><span class="line">    awk <span class="string">&#x27;/GET|POST/ &#123;req_time=$1&#125; /HTTP.*200/ &#123;print &quot;Response time:&quot;, $1-req_time, &quot;ms&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>重传率计算</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 统计重传包数量</span></span><br><span class="line">total_packets=$(tcpdump -r capture.pcap -nn | <span class="built_in">wc</span> -l)</span><br><span class="line">retrans_packets=$(tcpdump -r capture.pcap -nn | grep <span class="string">&quot;retransmission&quot;</span> | <span class="built_in">wc</span> -l)</span><br><span class="line">retrans_rate=$(<span class="built_in">echo</span> <span class="string">&quot;scale=2; <span class="variable">$retrans_packets</span> * 100 / <span class="variable">$total_packets</span>&quot;</span> | bc)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;重传率: <span class="variable">$retrans_rate</span>%&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="🛠️-问题定位工具组合"><a href="#🛠️-问题定位工具组合" class="headerlink" title="🛠️ 问题定位工具组合"></a>🛠️ 问题定位工具组合</h3><h4 id="应用层面问题定位"><a href="#应用层面问题定位" class="headerlink" title="应用层面问题定位"></a>应用层面问题定位</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 应用日志 + 网络抓包对比</span></span><br><span class="line"><span class="built_in">tail</span> -f app.log &amp;</span><br><span class="line">tcpdump -i any -nn -A <span class="string">&quot;port 8080&quot;</span> -w app_network.pcap &amp;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 数据库连接池分析</span></span><br><span class="line">tcpdump -i any -nn <span class="string">&quot;port 5432&quot;</span> | \</span><br><span class="line">    awk <span class="string">&#x27;&#123;print $1, $3, $5&#125;&#x27;</span> | \</span><br><span class="line">    <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 缓存命中率网络视角</span></span><br><span class="line">tcpdump -i any -nn <span class="string">&quot;port 6379&quot;</span> | \</span><br><span class="line">    grep -E <span class="string">&quot;(GET|SET|HGET)&quot;</span> | \</span><br><span class="line">    awk <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
+
+<h4 id="容器环境问题定位"><a href="#容器环境问题定位" class="headerlink" title="容器环境问题定位"></a>容器环境问题定位</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Kubernetes 环境网络分析</span></span><br><span class="line"><span class="comment"># 1. Pod 间通信</span></span><br><span class="line">kubectl <span class="built_in">exec</span> -it pod1 -- tcpdump -i eth0 -nn <span class="string">&quot;host pod2_ip&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. Service 负载均衡</span></span><br><span class="line">tcpdump -i any -nn <span class="string">&quot;port 80&quot;</span> | grep -E <span class="string">&quot;<span class="subst">$(kubectl get endpoints service-name -o jsonpath=&#x27;&#123;.subsets[*].addresses[*].ip&#125;&#x27;)</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. Ingress 流量分析  </span></span><br><span class="line">tcpdump -i any -nn <span class="string">&quot;port 443&quot;</span> | grep -E <span class="string">&quot;SNI.*domain\.com&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🎓-进阶技巧与最佳实践"><a href="#🎓-进阶技巧与最佳实践" class="headerlink" title="🎓 进阶技巧与最佳实践"></a>🎓 进阶技巧与最佳实践</h2><h3 id="🔬-高级过滤技巧"><a href="#🔬-高级过滤技巧" class="headerlink" title="🔬 高级过滤技巧"></a>🔬 高级过滤技巧</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 只抓握手包，分析连接建立问题</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-fin|tcp-rst) != 0&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 抓取有数据载荷的包</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp and greater 0&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 抓取异常包 (重传、乱序、重复ACK)</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp and ((tcp[tcpflags] &amp; tcp-rst) != 0 or tcp[tcpflags] &amp; tcp-syn != 0)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 分析特定应用协议</span></span><br><span class="line">tcpdump -nn -A <span class="string">&quot;port 3306&quot;</span> | grep -E <span class="string">&quot;(SELECT|INSERT|UPDATE|DELETE)&quot;</span></span><br><span class="line">tcpdump -nn -A <span class="string">&quot;port 6379&quot;</span> | grep -E <span class="string">&quot;(GET|SET|HGET|HSET)&quot;</span></span><br><span class="line">tcpdump -nn -A <span class="string">&quot;port 80&quot;</span> | grep -E <span class="string">&quot;(GET|POST|PUT|DELETE) .* HTTP&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 抓取大包 (可能的分片或性能问题)</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;greater 1500&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 抓取小包 (可能的Nagle算法问题)</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;less 100 and tcp&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="📈-性能调优实战"><a href="#📈-性能调优实战" class="headerlink" title="📈 性能调优实战"></a>📈 性能调优实战</h3><h4 id="网络拥塞分析"><a href="#网络拥塞分析" class="headerlink" title="网络拥塞分析"></a>网络拥塞分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 检测零窗口 (接收方处理不过来)</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp and tcp[14:2] = 0&quot;</span> | <span class="built_in">head</span> -20</span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例输出分析:</span></span><br><span class="line">13:21:34.100 IP client.12345 &gt; server.80: Flags [.], ack 1000, win 0, length 0</span><br><span class="line"><span class="comment"># win 0 表示客户端缓冲区满，要求服务端停止发送</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检测窗口扩大 (拥塞恢复)</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp&quot;</span> | awk <span class="string">&#x27;/win/ &#123;print $1, $NF&#125;&#x27;</span> | \</span><br><span class="line">    grep -E <span class="string">&quot;win [0-9]+&quot;</span> | <span class="built_in">sort</span> -k2 -n</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 分析重传模式</span></span><br><span class="line">tcpdump -nn -r capture.pcap | \</span><br><span class="line">    awk <span class="string">&#x27;/retransmission/ &#123;retrans++&#125; END &#123;print &quot;重传包数:&quot;, retrans&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="TCP-调优参数验证"><a href="#TCP-调优参数验证" class="headerlink" title="TCP 调优参数验证"></a>TCP 调优参数验证</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. MSS (最大段大小) 协商分析</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp[tcpflags] &amp; tcp-syn != 0&quot;</span> | grep <span class="string">&quot;mss&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例:</span></span><br><span class="line">13:21:34.100 IP client &gt; server.80: Flags [S], options [mss 1460], length 0</span><br><span class="line">13:21:34.101 IP server.80 &gt; client: Flags [S.], options [mss 1460], length 0</span><br><span class="line"><span class="comment"># 双方协商 MSS = 1460，这是以太网标准值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 窗口扩大因子分析</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp[tcpflags] &amp; tcp-syn != 0&quot;</span> | grep <span class="string">&quot;wscale&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例:</span></span><br><span class="line">options [mss 1460,sackOK,TS val 123456 ecr 0,nop,wscale 7]</span><br><span class="line"><span class="comment"># wscale 7 表示窗口可以扩大 2^7 = 128 倍</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. SACK (选择性确认) 支持检测</span></span><br><span class="line">tcpdump -nn | grep <span class="string">&quot;sackOK&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🚨-故障排查进阶"><a href="#🚨-故障排查进阶" class="headerlink" title="🚨 故障排查进阶"></a>🚨 故障排查进阶</h3><h4 id="复杂网络环境调试"><a href="#复杂网络环境调试" class="headerlink" title="复杂网络环境调试"></a>复杂网络环境调试</h4><p><strong>1. 多网卡环境分析</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查流量在哪个网卡</span></span><br><span class="line"><span class="keyword">for</span> iface <span class="keyword">in</span> $(ip <span class="built_in">link</span> show | grep -o <span class="string">&#x27;^[0-9]*: [^:]*&#x27;</span> | <span class="built_in">cut</span> -d<span class="string">&#x27; &#x27;</span> -f2); <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== <span class="variable">$iface</span> ===&quot;</span></span><br><span class="line">    <span class="built_in">timeout</span> 5 tcpdump -i <span class="variable">$iface</span> -c 10 -nn 2&gt;/dev/null | <span class="built_in">head</span> -5</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析路由决策</span></span><br><span class="line">ip route get 192.168.1.100</span><br><span class="line"><span class="comment"># via 192.168.1.1 dev eth0 src 192.168.1.50</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>2. Docker&#x2F;Kubernetes 网络调试</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 容器网络栈分析</span></span><br><span class="line">docker <span class="built_in">exec</span> container_name ip netns <span class="built_in">exec</span> netns_id tcpdump -i eth0 -nn</span><br><span class="line"></span><br><span class="line"><span class="comment"># Kubernetes Pod 网络</span></span><br><span class="line">kubectl <span class="built_in">exec</span> -it pod-name -c container-name -- tcpdump -i eth0 -nn</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析 CNI 网络</span></span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i cni0 -nn <span class="string">&quot;host pod_ip&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Service 网络分析 (iptables 规则影响)</span></span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -L -n -v | grep service_name</span><br><span class="line"><span class="built_in">sudo</span> tcpdump -i any -nn <span class="string">&quot;port service_port&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 负载均衡器后端健康检查</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 识别健康检查模式</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;port 80&quot;</span> | grep -E <span class="string">&quot;(GET /health|GET /status|GET /ping)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析健康检查频率</span></span><br><span class="line">tcpdump -nn -c 100 <span class="string">&quot;port 80 and host lb_ip&quot;</span> | \</span><br><span class="line">    grep <span class="string">&quot;health&quot;</span> | \</span><br><span class="line">    awk <span class="string">&#x27;&#123;print $1&#125;&#x27;</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查健康检查响应时间</span></span><br><span class="line">tcpdump -ttt -nn <span class="string">&quot;port 80&quot;</span> | \</span><br><span class="line">    awk <span class="string">&#x27;/GET.*health/ &#123;start=$1&#125; /200 OK/ &#123;print &quot;Health check time:&quot;, $1-start, &quot;ms&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🎯-微服务架构网络分析"><a href="#🎯-微服务架构网络分析" class="headerlink" title="🎯 微服务架构网络分析"></a>🎯 微服务架构网络分析</h3><h4 id="服务网格-Service-Mesh-流量分析"><a href="#服务网格-Service-Mesh-流量分析" class="headerlink" title="服务网格 (Service Mesh) 流量分析"></a>服务网格 (Service Mesh) 流量分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Istio/Envoy 代理流量分析</span></span><br><span class="line"><span class="comment"># 1. 边车代理入站流量</span></span><br><span class="line">tcpdump -i any -nn <span class="string">&quot;port 15001&quot;</span> | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 边车代理出站流量  </span></span><br><span class="line">tcpdump -i any -nn <span class="string">&quot;port 15000&quot;</span> | <span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 控制平面通信</span></span><br><span class="line">tcpdump -i any -nn <span class="string">&quot;port 15010&quot;</span> | grep -E <span class="string">&quot;(pilot|mixer|citadel)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 分析 mTLS 流量特征</span></span><br><span class="line">tcpdump -i any -nn -X <span class="string">&quot;port 15001&quot;</span> | grep -A5 -B5 <span class="string">&quot;TLS&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="API-网关流量模式"><a href="#API-网关流量模式" class="headerlink" title="API 网关流量模式"></a>API 网关流量模式</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 速率限制检测</span></span><br><span class="line">tcpdump -nn -A <span class="string">&quot;port 80&quot;</span> | grep -E <span class="string">&quot;429|Rate.*Limit&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 认证流量分析</span></span><br><span class="line">tcpdump -nn -A <span class="string">&quot;port 80&quot;</span> | grep -E <span class="string">&quot;Authorization:|401|403&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. API 版本路由分析</span></span><br><span class="line">tcpdump -nn -A <span class="string">&quot;port 80&quot;</span> | grep -E <span class="string">&quot;GET /v[0-9]+/&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例分析：</span></span><br><span class="line">GET /v1/users HTTP/1.1     -&gt; backend-v1.8080</span><br><span class="line">GET /v2/users HTTP/1.1     -&gt; backend-v2.8080</span><br><span class="line">GET /v3/users HTTP/1.1     -&gt; backend-v3.8080</span><br></pre></td></tr></table></figure>
+
+<h3 id="📊-监控与告警"><a href="#📊-监控与告警" class="headerlink" title="📊 监控与告警"></a>📊 监控与告警</h3><h4 id="自动化网络问题检测脚本"><a href="#自动化网络问题检测脚本" class="headerlink" title="自动化网络问题检测脚本"></a>自动化网络问题检测脚本</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># network_monitor.sh - 实时网络问题检测</span></span><br><span class="line"></span><br><span class="line">LOG_FILE=<span class="string">&quot;/var/log/network_monitor.log&quot;</span></span><br><span class="line">ALERT_THRESHOLD=10  <span class="comment"># RST包阈值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 监控异常连接重置</span></span><br><span class="line"><span class="function"><span class="title">monitor_rst</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> rst_count=$(<span class="built_in">timeout</span> 60 tcpdump -i any -nn -c 1000 2&gt;/dev/null | \</span><br><span class="line">                     grep -c <span class="string">&quot;Flags \[R\]&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$rst_count</span> -gt <span class="variable">$ALERT_THRESHOLD</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;[<span class="subst">$(date)</span>] ALERT: High RST count: <span class="variable">$rst_count</span>&quot;</span> &gt;&gt; <span class="variable">$LOG_FILE</span></span><br><span class="line">        <span class="comment"># 发送告警通知</span></span><br><span class="line">        curl -X POST <span class="string">&quot;http://alert-manager/api/v1/alerts&quot;</span> \</span><br><span class="line">             -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">             -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">                 &quot;labels&quot;: &#123;</span></span><br><span class="line"><span class="string">                     &quot;alertname&quot;: &quot;HighRSTCount&quot;,</span></span><br><span class="line"><span class="string">                     &quot;severity&quot;: &quot;warning&quot;,</span></span><br><span class="line"><span class="string">                     &quot;instance&quot;: &quot;&#x27;</span>$(hostname)<span class="string">&#x27;&quot;</span></span><br><span class="line"><span class="string">                 &#125;,</span></span><br><span class="line"><span class="string">                 &quot;annotations&quot;: &#123;</span></span><br><span class="line"><span class="string">                     &quot;description&quot;: &quot;RST count exceeded threshold: &#x27;</span><span class="variable">$rst_count</span><span class="string">&#x27;&quot;</span></span><br><span class="line"><span class="string">                 &#125;</span></span><br><span class="line"><span class="string">             &#125;&#x27;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 监控连接建立延迟</span></span><br><span class="line"><span class="function"><span class="title">monitor_connection_latency</span></span>() &#123;</span><br><span class="line">    <span class="built_in">timeout</span> 30 tcpdump -i any -nn -ttt <span class="string">&quot;tcp[tcpflags] &amp; (tcp-syn|tcp-ack) != 0&quot;</span> 2&gt;/dev/null | \</span><br><span class="line">    awk <span class="string">&#x27;</span></span><br><span class="line"><span class="string">    /Flags \[S\]/ &#123; syn_time = $1; syn_packet = $0 &#125;</span></span><br><span class="line"><span class="string">    /Flags \[S\.\]/ &#123; </span></span><br><span class="line"><span class="string">        if (syn_time &gt; 0) &#123;</span></span><br><span class="line"><span class="string">            latency = $1 - syn_time</span></span><br><span class="line"><span class="string">            if (latency &gt; 100) &#123;  # 超过100ms告警</span></span><br><span class="line"><span class="string">                print &quot;[&quot; strftime(&quot;%Y-%m-%d %H:%M:%S&quot;) &quot;] HIGH LATENCY:&quot;, latency &quot;ms&quot;</span></span><br><span class="line"><span class="string">                print &quot;SYN:&quot;, syn_packet</span></span><br><span class="line"><span class="string">                print &quot;SYN-ACK:&quot;, $0</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">            syn_time = 0</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    &#125;&#x27;</span> &gt;&gt; <span class="variable">$LOG_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 监控重传率</span></span><br><span class="line"><span class="function"><span class="title">monitor_retransmission</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> stats=$(<span class="built_in">timeout</span> 60 tcpdump -i any -nn -c 1000 2&gt;/dev/null | \</span><br><span class="line">                 awk <span class="string">&#x27;/retransmission/ &#123;retrans++&#125; END &#123;</span></span><br><span class="line"><span class="string">                     total=NR; </span></span><br><span class="line"><span class="string">                     rate=(retrans/total)*100; </span></span><br><span class="line"><span class="string">                     print retrans&quot;,&quot;total&quot;,&quot;rate</span></span><br><span class="line"><span class="string">                 &#125;&#x27;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">local</span> retrans=$(<span class="built_in">echo</span> <span class="variable">$stats</span> | <span class="built_in">cut</span> -d, -f1)</span><br><span class="line">    <span class="built_in">local</span> total=$(<span class="built_in">echo</span> <span class="variable">$stats</span> | <span class="built_in">cut</span> -d, -f2)</span><br><span class="line">    <span class="built_in">local</span> rate=$(<span class="built_in">echo</span> <span class="variable">$stats</span> | <span class="built_in">cut</span> -d, -f3)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (( $(echo &quot;<span class="variable">$rate</span> &gt; <span class="number">5.0</span>&quot; | bc -l) )); <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;[<span class="subst">$(date)</span>] ALERT: High retransmission rate: <span class="variable">$rate</span>%&quot;</span> &gt;&gt; <span class="variable">$LOG_FILE</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 主循环</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span>; <span class="keyword">do</span></span><br><span class="line">    monitor_rst</span><br><span class="line">    monitor_connection_latency  </span><br><span class="line">    monitor_retransmission</span><br><span class="line">    <span class="built_in">sleep</span> 60</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="网络质量报告生成"><a href="#网络质量报告生成" class="headerlink" title="网络质量报告生成"></a>网络质量报告生成</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># network_quality_report.sh - 生成网络质量报告</span></span><br><span class="line"></span><br><span class="line">CAPTURE_FILE=<span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">REPORT_FILE=<span class="string">&quot;network_quality_report_<span class="subst">$(date +%Y%m%d_%H%M%S)</span>.html&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成 HTML 报告</span></span><br><span class="line"><span class="built_in">cat</span> &gt; <span class="variable">$REPORT_FILE</span> &lt;&lt; <span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;<span class="built_in">head</span>&gt;</span><br><span class="line">    &lt;title&gt;网络质量分析报告&lt;/title&gt;</span><br><span class="line">    &lt;style&gt;</span><br><span class="line">        body &#123; font-family: Arial, sans-serif; margin: 20px; &#125;</span><br><span class="line">        .metric &#123; background: <span class="comment">#f5f5f5; padding: 10px; margin: 10px 0; &#125;</span></span><br><span class="line">        .warning &#123; background: <span class="comment">#fff3cd; border-left: 4px solid #ffc107; &#125;</span></span><br><span class="line">        .error &#123; background: <span class="comment">#f8d7da; border-left: 4px solid #dc3545; &#125;</span></span><br><span class="line">        .success &#123; background: <span class="comment">#d4edda; border-left: 4px solid #28a745; &#125;</span></span><br><span class="line">        table &#123; border-collapse: collapse; width: 100%; &#125;</span><br><span class="line">        th, td &#123; border: 1px solid <span class="comment">#ddd; padding: 8px; text-align: left; &#125;</span></span><br><span class="line">        th &#123; background-color: <span class="comment">#f2f2f2; &#125;</span></span><br><span class="line">    &lt;/style&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;h1&gt;网络质量分析报告&lt;/h1&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;生成时间: <span class="subst">$(date)</span>&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;分析文件: <span class="variable">$CAPTURE_FILE</span>&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础统计</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;h2&gt;基础流量统计&lt;/h2&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;div class=&#x27;metric&#x27;&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line">total_packets=$(tcpdump -r <span class="variable">$CAPTURE_FILE</span> -nn 2&gt;/dev/null | <span class="built_in">wc</span> -l)</span><br><span class="line">tcp_packets=$(tcpdump -r <span class="variable">$CAPTURE_FILE</span> -nn <span class="string">&quot;tcp&quot;</span> 2&gt;/dev/null | <span class="built_in">wc</span> -l)</span><br><span class="line">udp_packets=$(tcpdump -r <span class="variable">$CAPTURE_FILE</span> -nn <span class="string">&quot;udp&quot;</span> 2&gt;/dev/null | <span class="built_in">wc</span> -l)</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;总包数: <span class="variable">$total_packets</span>&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;TCP 包数: <span class="variable">$tcp_packets</span>&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span>  </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;UDP 包数: <span class="variable">$udp_packets</span>&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;/div&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接问题分析</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;h2&gt;连接问题分析&lt;/h2&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line">rst_count=$(tcpdump -r <span class="variable">$CAPTURE_FILE</span> -nn <span class="string">&quot;tcp[tcpflags] &amp; tcp-rst != 0&quot;</span> 2&gt;/dev/null | <span class="built_in">wc</span> -l)</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$rst_count</span> -gt 10 ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;div class=&#x27;metric error&#x27;&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;⚠️ 发现大量 RST 包: <span class="variable">$rst_count</span> 个&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;div class=&#x27;metric success&#x27;&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;✅ RST 包数量正常: <span class="variable">$rst_count</span> 个&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;/div&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重传分析</span></span><br><span class="line">retrans_count=$(tcpdump -r <span class="variable">$CAPTURE_FILE</span> -nn 2&gt;/dev/null | grep -c <span class="string">&quot;retransmission&quot;</span>)</span><br><span class="line">retrans_rate=$(<span class="built_in">echo</span> <span class="string">&quot;scale=2; <span class="variable">$retrans_count</span> * 100 / <span class="variable">$total_packets</span>&quot;</span> | bc -l)</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;h2&gt;重传分析&lt;/h2&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="keyword">if</span> (( $(echo &quot;<span class="variable">$retrans_rate</span> &gt; <span class="number">3.0</span>&quot; | bc -l) )); <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;div class=&#x27;metric warning&#x27;&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;⚠️ 重传率较高: <span class="variable">$retrans_rate</span>%&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;div class=&#x27;metric success&#x27;&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;&lt;p&gt;✅ 重传率正常: <span class="variable">$retrans_rate</span>%&lt;/p&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;/div&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 完成报告</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;/body&gt;&lt;/html&gt;&quot;</span> &gt;&gt; <span class="variable">$REPORT_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;报告已生成: <span class="variable">$REPORT_FILE</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-深度包检测技巧"><a href="#🔍-深度包检测技巧" class="headerlink" title="🔍 深度包检测技巧"></a>🔍 深度包检测技巧</h3><h4 id="应用层协议分析"><a href="#应用层协议分析" class="headerlink" title="应用层协议分析"></a>应用层协议分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. HTTP 性能分析</span></span><br><span class="line">tcpdump -nn -A -s 0 <span class="string">&quot;port 80&quot;</span> | \</span><br><span class="line">awk <span class="string">&#x27;</span></span><br><span class="line"><span class="string">/GET|POST|PUT|DELETE/ &#123;</span></span><br><span class="line"><span class="string">    method = $1; url = $2; req_time = systime()</span></span><br><span class="line"><span class="string">    printf &quot;REQUEST: %s %s at %s\n&quot;, method, url, strftime(&quot;%H:%M:%S&quot;, req_time)</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">/HTTP.*200/ &#123; </span></span><br><span class="line"><span class="string">    resp_time = systime()</span></span><br><span class="line"><span class="string">    printf &quot;RESPONSE: 200 OK at %s (duration: %ds)\n\n&quot;, strftime(&quot;%H:%M:%S&quot;, resp_time), resp_time - req_time</span></span><br><span class="line"><span class="string">&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. SQL 查询分析</span></span><br><span class="line">tcpdump -nn -A -s 0 <span class="string">&quot;port 3306&quot;</span> | \</span><br><span class="line">grep -E <span class="string">&quot;(SELECT|INSERT|UPDATE|DELETE)&quot;</span> | \</span><br><span class="line">sed <span class="string">&#x27;s/.*\(SELECT\|INSERT\|UPDATE\|DELETE\)/\1/&#x27;</span> | \</span><br><span class="line"><span class="built_in">head</span> -10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. Redis 命令分析</span></span><br><span class="line">tcpdump -nn -A -s 0 <span class="string">&quot;port 6379&quot;</span> | \</span><br><span class="line">grep -oE <span class="string">&quot;(GET|SET|HGET|HSET|LPUSH|RPOP)[^\\r\\n]*&quot;</span> | \</span><br><span class="line"><span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. DNS 查询类型统计</span></span><br><span class="line">tcpdump -nn -r capture.pcap <span class="string">&quot;port 53&quot;</span> | \</span><br><span class="line">awk <span class="string">&#x27;/A\?/ &#123;a_queries++&#125; /AAAA\?/ &#123;aaaa_queries++&#125; /MX\?/ &#123;mx_queries++&#125; /CNAME\?/ &#123;cname_queries++&#125; </span></span><br><span class="line"><span class="string">END &#123;</span></span><br><span class="line"><span class="string">    print &quot;A queries:&quot;, a_queries</span></span><br><span class="line"><span class="string">    print &quot;AAAA queries:&quot;, aaaa_queries  </span></span><br><span class="line"><span class="string">    print &quot;MX queries:&quot;, mx_queries</span></span><br><span class="line"><span class="string">    print &quot;CNAME queries:&quot;, cname_queries</span></span><br><span class="line"><span class="string">&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="网络安全分析"><a href="#网络安全分析" class="headerlink" title="网络安全分析"></a>网络安全分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 端口扫描检测</span></span><br><span class="line">tcpdump -nn <span class="string">&quot;tcp[tcpflags] &amp; tcp-syn != 0&quot;</span> | \</span><br><span class="line">awk <span class="string">&#x27;&#123;print $3, $5&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"><span class="comment"># 如果看到同一源IP对多个端口发起连接，可能是端口扫描</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. DDoS 攻击检测</span></span><br><span class="line">tcpdump -nn -c 10000 | \</span><br><span class="line">awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span> | <span class="built_in">cut</span> -d. -f1-4 | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -nr | <span class="built_in">head</span> -10</span><br><span class="line"><span class="comment"># 如果某个IP的请求数异常高，可能是攻击</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 异常流量模式检测</span></span><br><span class="line">tcpdump -nn | \</span><br><span class="line">awk <span class="string">&#x27;length($0) &gt; 200 &#123;long_packets++&#125; </span></span><br><span class="line"><span class="string">     /Flags \[R\]/ &#123;rst_packets++&#125;</span></span><br><span class="line"><span class="string">     /ttl 1/ &#123;suspicious_ttl++&#125;</span></span><br><span class="line"><span class="string">     END &#123;</span></span><br><span class="line"><span class="string">         print &quot;Long packets:&quot;, long_packets</span></span><br><span class="line"><span class="string">         print &quot;RST packets:&quot;, rst_packets</span></span><br><span class="line"><span class="string">         print &quot;Suspicious TTL:&quot;, suspicious_ttl</span></span><br><span class="line"><span class="string">     &#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. SSL/TLS 版本分析</span></span><br><span class="line">tcpdump -nn -X <span class="string">&quot;port 443&quot;</span> | \</span><br><span class="line">grep -oE <span class="string">&quot;TLS 1\.[0-3]&quot;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🎓-总结与提升建议"><a href="#🎓-总结与提升建议" class="headerlink" title="🎓 总结与提升建议"></a>🎓 总结与提升建议</h2><h3 id="📚-知识点总结"><a href="#📚-知识点总结" class="headerlink" title="📚 知识点总结"></a>📚 知识点总结</h3><h4 id="TCP-状态机理解"><a href="#TCP-状态机理解" class="headerlink" title="TCP 状态机理解"></a>TCP 状态机理解</h4><ul>
+<li><strong>LISTEN</strong>: 服务端等待连接</li>
+<li><strong>SYN_SENT</strong>: 客户端发起连接等待响应</li>
+<li><strong>SYN_RECEIVED</strong>: 服务端收到SYN等待ACK</li>
+<li><strong>ESTABLISHED</strong>: 连接建立，数据传输状态</li>
+<li><strong>FIN_WAIT_1&#x2F;2</strong>: 主动关闭方的等待状态</li>
+<li><strong>CLOSE_WAIT</strong>: 被动关闭方等待应用程序关闭</li>
+<li><strong>TIME_WAIT</strong>: 主动关闭方的最终等待状态</li>
+</ul>
+<h4 id="负载均衡器行为模式"><a href="#负载均衡器行为模式" class="headerlink" title="负载均衡器行为模式"></a>负载均衡器行为模式</h4><ul>
+<li><strong>4层LB</strong>: 基于IP+端口转发，维持连接状态</li>
+<li><strong>7层LB</strong>: 解析应用协议，可以路由和修改内容</li>
+<li><strong>健康检查</strong>: 定期探测后端服务可用性</li>
+<li><strong>会话保持</strong>: 确保同一用户的请求到达同一后端</li>
+</ul>
+<h4 id="性能优化要点"><a href="#性能优化要点" class="headerlink" title="性能优化要点"></a>性能优化要点</h4><ul>
+<li><strong>连接复用</strong>: 减少TCP握手开销</li>
+<li><strong>Keep-Alive</strong>: HTTP连接保持</li>
+<li><strong>压缩传输</strong>: 减少网络传输量</li>
+<li><strong>缓存策略</strong>: 减少不必要的网络请求</li>
+</ul>
+<h3 id="🚀-进阶学习路径"><a href="#🚀-进阶学习路径" class="headerlink" title="🚀 进阶学习路径"></a>🚀 进阶学习路径</h3><ol>
+<li><p><strong>协议深入</strong></p>
+<ul>
+<li>学习 HTTP&#x2F;2, HTTP&#x2F;3 特性</li>
+<li>理解 QUIC 协议优势</li>
+<li>掌握 WebSocket 长连接机制</li>
+</ul>
+</li>
+<li><p><strong>容器网络</strong></p>
+<ul>
+<li>Kubernetes 网络模型</li>
+<li>CNI 插件原理</li>
+<li>Service Mesh 架构</li>
+</ul>
+</li>
+<li><p><strong>监控工具</strong></p>
+<ul>
+<li>Wireshark 高级功能</li>
+<li>网络监控系统 (Prometheus + Grafana)</li>
+<li>APM 工具集成</li>
+</ul>
+</li>
+<li><p><strong>自动化运维</strong></p>
+<ul>
+<li>网络问题自动检测</li>
+<li>告警规则设计</li>
+<li>故障自愈机制</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><strong>最后更新时间:</strong> $(date +%Y-%m-%d)<br><strong>版本:</strong> v2.0<br><strong>适用场景:</strong> 服务端开发、网络运维、性能优化</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/31/tcpdump%E6%8A%93%E5%8C%85%E6%8C%87%E5%8D%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1635,89 +2085,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/06/12/dlv%E8%B0%83%E8%AF%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/06/12/dlv%E8%B0%83%E8%AF%95/" class="post-title-link" itemprop="url">dlv调试</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-06-12 16:03:13" itemprop="dateCreated datePublished" datetime="2025-06-12T16:03:13+08:00">2025-06-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-03-31 16:40:29" itemprop="dateModified" datetime="2026-03-31T16:40:29+08:00">2026-03-31</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>610</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="安装dlv"><a href="#安装dlv" class="headerlink" title="安装dlv"></a>安装dlv</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/go-delve/delve/tree/master/Documentation/installation</span><br><span class="line"></span><br><span class="line">#go1.21以上版本可以直接获取</span><br><span class="line"># Install the latest release:</span><br><span class="line">$ go install github.com/go-delve/delve/cmd/dlv@latest</span><br><span class="line"></span><br><span class="line"># Install from tree head:</span><br><span class="line">$ go install github.com/go-delve/delve/cmd/dlv@master</span><br><span class="line"></span><br><span class="line"># Install a specific version or pseudo-version:</span><br><span class="line">$ go install github.com/go-delve/delve/cmd/dlv@v1.7.3</span><br><span class="line">$ go install github.com/go-delve/delve/cmd/dlv@v1.7.4-0.20211208103735-2f13672765fe</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="编译调试"><a href="#编译调试" class="headerlink" title="编译调试"></a>编译调试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#编译二进制</span><br><span class="line">go build -gcflags &quot;all=-N -l&quot; -o main ./main.go</span><br><span class="line">#开启调试</span><br><span class="line">dlv exec ./main</span><br><span class="line">(dlv) break /home/xxx/xxx.go:206</span><br><span class="line">(dlv) continue</span><br><span class="line">(dlv) print ingress</span><br><span class="line">(dlv) locals</span><br><span class="line">(dlv) args</span><br><span class="line">(dlv) exit</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="调试命令"><a href="#调试命令" class="headerlink" title="调试命令"></a>调试命令</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/20250612160657.png" alt="这是图片" title="dlv"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1789,7 +2156,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">186</span>
+          <span class="site-state-item-count">187</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1802,7 +2169,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-count">28</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

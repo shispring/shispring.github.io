@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="📘 OpenStack 核心概念说明（容器接 VPC 场景）1. Region（区域）📌 概念说明Region 是 OpenStack 中用于划分资源的逻辑隔离单元，可以理解为一个独立的资源集群。不同 Region 之间的资源相互独立，即使名称相同，其 UUID 也不同。 🔁 Kubernetes 类比   OpenStack Kubernetes    Region Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openstack部分概念">
+<meta property="og:url" content="https://shispring.github.io/2026/04/10/openstack%E9%83%A8%E5%88%86%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="📘 OpenStack 核心概念说明（容器接 VPC 场景）1. Region（区域）📌 概念说明Region 是 OpenStack 中用于划分资源的逻辑隔离单元，可以理解为一个独立的资源集群。不同 Region 之间的资源相互独立，即使名称相同，其 UUID 也不同。 🔁 Kubernetes 类比   OpenStack Kubernetes    Region Kubernetes">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-10T03:01:25.000Z">
+<meta property="article:modified_time" content="2026-04-10T03:05:16.252Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="openstack">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2026/04/10/openstack%E9%83%A8%E5%88%86%E6%A6%82%E5%BF%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>openstack部分概念 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/04/10/openstack%E9%83%A8%E5%88%86%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          openstack部分概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-04-10 11:01:25 / 修改时间：11:05:16" itemprop="dateCreated datePublished" datetime="2026-04-10T11:01:25+08:00">2026-04-10</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="📘-OpenStack-核心概念说明（容器接-VPC-场景）"><a href="#📘-OpenStack-核心概念说明（容器接-VPC-场景）" class="headerlink" title="📘 OpenStack 核心概念说明（容器接 VPC 场景）"></a>📘 OpenStack 核心概念说明（容器接 VPC 场景）</h1><h2 id="1-Region（区域）"><a href="#1-Region（区域）" class="headerlink" title="1. Region（区域）"></a>1. Region（区域）</h2><h3 id="📌-概念说明"><a href="#📌-概念说明" class="headerlink" title="📌 概念说明"></a>📌 概念说明</h3><p><code>Region</code> 是 OpenStack 中用于划分资源的逻辑隔离单元，可以理解为一个<strong>独立的资源集群</strong>。不同 Region 之间的资源相互独立，即使名称相同，其 UUID 也不同。</p>
+<h3 id="🔁-Kubernetes-类比"><a href="#🔁-Kubernetes-类比" class="headerlink" title="🔁 Kubernetes 类比"></a>🔁 Kubernetes 类比</h3><table>
+<thead>
+<tr>
+<th>OpenStack</th>
+<th>Kubernetes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Region</td>
+<td>Kubernetes Cluster</td>
+</tr>
+<tr>
+<td>切换 Region</td>
+<td>切换 kubeconfig&#x2F;context</td>
+</tr>
+</tbody></table>
+<h3 id="📝-示例"><a href="#📝-示例" class="headerlink" title="📝 示例"></a>📝 示例</h3><ul>
+<li><p>在 Region-A 和 Region-B 中分别创建名为 <code>network-1</code> 的网络：</p>
+<ul>
+<li>两者的 <strong>UUID 不同</strong>，属于完全独立的资源。</li>
+</ul>
+</li>
+<li><p>类似于：</p>
+<ul>
+<li>A 集群中的 <code>kube-system/aaa</code> Pod</li>
+<li>B 集群中的 <code>kube-system/aaa</code> Pod<br>这两个 Pod 并不是同一个对象。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="2-Network-与-Subnet"><a href="#2-Network-与-Subnet" class="headerlink" title="2. Network 与 Subnet"></a>2. Network 与 Subnet</h2><h3 id="📌-概念说明-1"><a href="#📌-概念说明-1" class="headerlink" title="📌 概念说明"></a>📌 概念说明</h3><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Network</strong></td>
+<td>二层网络，类似一个虚拟交换机（VLAN）。</td>
+</tr>
+<tr>
+<td><strong>Subnet</strong></td>
+<td>三层网络，定义 IP 地址范围、网关和路由信息。</td>
+</tr>
+</tbody></table>
+<h3 id="🔗-关系"><a href="#🔗-关系" class="headerlink" title="🔗 关系"></a>🔗 关系</h3><ul>
+<li>一个 <strong>Subnet 只能属于一个 Network</strong>。</li>
+<li>一个 <strong>Network 可以包含多个 Subnet</strong>。</li>
+</ul>
+<h3 id="📊-关系图"><a href="#📊-关系图" class="headerlink" title="📊 关系图"></a>📊 关系图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Network</span><br><span class="line"> ├── Subnet-A (192.168.1.0/24)</span><br><span class="line"> └── Subnet-B (192.168.2.0/24)</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔁-Kubernetes-类比-1"><a href="#🔁-Kubernetes-类比-1" class="headerlink" title="🔁 Kubernetes 类比"></a>🔁 Kubernetes 类比</h3><table>
+<thead>
+<tr>
+<th>OpenStack</th>
+<th>Kubernetes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Network</td>
+<td>节点网络或 VPC</td>
+</tr>
+<tr>
+<td>Subnet</td>
+<td>Pod CIDR 或子网</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="3-Port-与-Fixed-IP"><a href="#3-Port-与-Fixed-IP" class="headerlink" title="3. Port 与 Fixed IP"></a>3. Port 与 Fixed IP</h2><h3 id="📌-Port（端口-网卡）"><a href="#📌-Port（端口-网卡）" class="headerlink" title="📌 Port（端口&#x2F;网卡）"></a>📌 Port（端口&#x2F;网卡）</h3><blockquote>
+<p>⚠️ 注意：OpenStack 中的 <strong>Port</strong> 并不是 Kubernetes 或网络协议中的 <code>TCP/UDP 端口（如 8080）</code>，而是<strong>虚拟网卡（vNIC）</strong>。</p>
+</blockquote>
+<h4 id="主要特点"><a href="#主要特点" class="headerlink" title="主要特点"></a>主要特点</h4><ul>
+<li>代表一个网络接口（类似虚拟网卡）。</li>
+<li>可以挂载到虚拟机或裸金属服务器。</li>
+<li>在容器接 VPC 场景中，Pod 通过 Port 接入网络。</li>
+</ul>
+<h3 id="📌-Fixed-IP"><a href="#📌-Fixed-IP" class="headerlink" title="📌 Fixed IP"></a>📌 Fixed IP</h3><ul>
+<li><code>Fixed IP</code> 是分配给 <code>Port</code> 的私有 IP 地址。</li>
+<li>用于 VPC 内部通信，默认无法从外部网络访问。</li>
+</ul>
+<h3 id="🔗-关系-1"><a href="#🔗-关系-1" class="headerlink" title="🔗 关系"></a>🔗 关系</h3><table>
+<thead>
+<tr>
+<th>关系</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fixed IP → Port</td>
+<td>一个 Fixed IP 只能属于一个 Port</td>
+</tr>
+<tr>
+<td>Port → Fixed IP</td>
+<td>一个 Port 可以拥有多个 Fixed IP</td>
+</tr>
+<tr>
+<td>Pod → Port</td>
+<td>一个 Pod 只会使用一个 Port</td>
+</tr>
+<tr>
+<td>Port → Pod</td>
+<td>一个 Port 在某些实现中可以被多个 Pod 共享</td>
+</tr>
+</tbody></table>
+<h3 id="🔁-Kubernetes-类比-2"><a href="#🔁-Kubernetes-类比-2" class="headerlink" title="🔁 Kubernetes 类比"></a>🔁 Kubernetes 类比</h3><table>
+<thead>
+<tr>
+<th>OpenStack</th>
+<th>Kubernetes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Port</td>
+<td>Pod 的虚拟网卡（eth0）</td>
+</tr>
+<tr>
+<td>Fixed IP</td>
+<td>Pod IP</td>
+</tr>
+</tbody></table>
+<h3 id="📊-关系图-1"><a href="#📊-关系图-1" class="headerlink" title="📊 关系图"></a>📊 关系图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Port (vNIC)</span><br><span class="line"> ├── Fixed IP: 192.168.1.10</span><br><span class="line"> └── Fixed IP: 192.168.1.11</span><br><span class="line">        │</span><br><span class="line">        └── Pod 使用其中一个 IP</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="4-Floating-IP（FIP）"><a href="#4-Floating-IP（FIP）" class="headerlink" title="4. Floating IP（FIP）"></a>4. Floating IP（FIP）</h2><h3 id="📌-概念说明-2"><a href="#📌-概念说明-2" class="headerlink" title="📌 概念说明"></a>📌 概念说明</h3><p><code>Floating IP</code> 是一个<strong>可从外部网络访问的公网 IP</strong>，通过与 <code>Fixed IP</code> 绑定，使内部资源能够被外部访问。</p>
+<h3 id="🔗-作用"><a href="#🔗-作用" class="headerlink" title="🔗 作用"></a>🔗 作用</h3><ul>
+<li>Fixed IP：仅在 VPC 内部可达。</li>
+<li>Floating IP：提供外部访问能力。</li>
+</ul>
+<h3 id="📌-容器接-VPC-的特殊情况"><a href="#📌-容器接-VPC-的特殊情况" class="headerlink" title="📌 容器接 VPC 的特殊情况"></a>📌 容器接 VPC 的特殊情况</h3><p>在某些企业私有云或容器接 VPC 场景中：</p>
+<ul>
+<li><code>Floating IP</code> 与 <code>Fixed IP</code> 的值可能 <strong>相同</strong>。</li>
+<li>这通常是因为企业内部网络（如 <code>10.x.x.x</code>）已经全网可达。</li>
+<li>虚拟化团队常将 <code>Floating IP</code> 简称为 <strong>FIP</strong>。</li>
+</ul>
+<h3 id="🔁-Kubernetes-类比-3"><a href="#🔁-Kubernetes-类比-3" class="headerlink" title="🔁 Kubernetes 类比"></a>🔁 Kubernetes 类比</h3><table>
+<thead>
+<tr>
+<th>OpenStack</th>
+<th>Kubernetes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Floating IP</td>
+<td>Service 的 External IP &#x2F; LoadBalancer IP</td>
+</tr>
+</tbody></table>
+<h3 id="📊-关系图-2"><a href="#📊-关系图-2" class="headerlink" title="📊 关系图"></a>📊 关系图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">External Network</span><br><span class="line">       │</span><br><span class="line">Floating IP (FIP)</span><br><span class="line">       │ 绑定</span><br><span class="line">Fixed IP (Private)</span><br><span class="line">       │</span><br><span class="line">     Port → Pod / VM</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-Security-Group（安全组）"><a href="#5-Security-Group（安全组）" class="headerlink" title="5. Security Group（安全组）"></a>5. Security Group（安全组）</h2><h3 id="📌-概念说明-3"><a href="#📌-概念说明-3" class="headerlink" title="📌 概念说明"></a>📌 概念说明</h3><p><code>Security Group</code> 是 OpenStack 提供的<strong>虚拟防火墙机制</strong>，用于控制网络流量的进出规则。</p>
+<h3 id="🔗-绑定关系"><a href="#🔗-绑定关系" class="headerlink" title="🔗 绑定关系"></a>🔗 绑定关系</h3><ul>
+<li>Security Group <strong>绑定在 Port 上</strong>，从而控制与该 Port 关联的实例或 Pod 的网络访问。</li>
+</ul>
+<h3 id="📌-容器接-VPC-相关安全组"><a href="#📌-容器接-VPC-相关安全组" class="headerlink" title="📌 容器接 VPC 相关安全组"></a>📌 容器接 VPC 相关安全组</h3><table>
+<thead>
+<tr>
+<th>安全组名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sg-default</code></td>
+<td>默认安全组</td>
+</tr>
+<tr>
+<td><code>sg-securityDepart-vpc-isoloation</code></td>
+<td>VPC 隔离安全组</td>
+</tr>
+<tr>
+<td><code>sg-securityDepart-vpc-isoloation-container</code></td>
+<td>容器 VPC 隔离安全组</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>✅ 这些安全组通常由虚拟化平台预先创建，容器平台只需在创建 Port 时根据是否为隔离 VPC 进行绑定，无需自行创建。</p>
+</blockquote>
+<h3 id="🔁-Kubernetes-类比-4"><a href="#🔁-Kubernetes-类比-4" class="headerlink" title="🔁 Kubernetes 类比"></a>🔁 Kubernetes 类比</h3><table>
+<thead>
+<tr>
+<th>OpenStack</th>
+<th>Kubernetes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Security Group</td>
+<td>NetworkPolicy &#x2F; 云防火墙</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="6-Hostname-与-Server-ID"><a href="#6-Hostname-与-Server-ID" class="headerlink" title="6. Hostname 与 Server ID"></a>6. Hostname 与 Server ID</h2><h3 id="📌-Hostname"><a href="#📌-Hostname" class="headerlink" title="📌 Hostname"></a>📌 Hostname</h3><ul>
+<li>指 <strong>裸金属服务器（Bare Metal）</strong> 的名称。</li>
+<li>用于标识物理主机。</li>
+</ul>
+<h3 id="📌-Server-ID"><a href="#📌-Server-ID" class="headerlink" title="📌 Server ID"></a>📌 Server ID</h3><ul>
+<li>指 <strong>虚拟机（VM）</strong> 在 OpenStack API Server 中的唯一标识（UUID）。</li>
+<li>用于管理虚拟机生命周期。</li>
+</ul>
+<h3 id="📊-对比"><a href="#📊-对比" class="headerlink" title="📊 对比"></a>📊 对比</h3><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>适用对象</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hostname</td>
+<td>裸金属</td>
+<td>物理主机名称</td>
+</tr>
+<tr>
+<td>Server ID</td>
+<td>虚拟机</td>
+<td>OpenStack 中的唯一标识</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="7-Ultron-VPC-与-Subnet（公司内部抽象）"><a href="#7-Ultron-VPC-与-Subnet（公司内部抽象）" class="headerlink" title="7. Ultron VPC 与 Subnet（公司内部抽象）"></a>7. Ultron VPC 与 Subnet（公司内部抽象）</h2><h3 id="📌-概念说明-4"><a href="#📌-概念说明-4" class="headerlink" title="📌 概念说明"></a>📌 概念说明</h3><p><code>Ultron VPC</code> 和 <code>Ultron Subnet</code> 是公司产品层面对 OpenStack 资源的<strong>统一抽象与封装</strong>，用于实现跨 Region 的资源管理。</p>
+<h3 id="🔗-设计动机"><a href="#🔗-设计动机" class="headerlink" title="🔗 设计动机"></a>🔗 设计动机</h3><p>由于 OpenStack 的资源是 <strong>Region 级别隔离的</strong>，同一个业务在多个 Region 中需要创建对应的资源。为了统一管理，公司在产品层面引入了 Ultron 的 ID 体系。</p>
+<h3 id="🔗-关系映射"><a href="#🔗-关系映射" class="headerlink" title="🔗 关系映射"></a>🔗 关系映射</h3><table>
+<thead>
+<tr>
+<th>公司内部概念</th>
+<th>OpenStack 资源</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ultron VPC ID</td>
+<td>多个 Network</td>
+<td>每个 Region 一个 Network</td>
+</tr>
+<tr>
+<td>Ultron Subnet ID</td>
+<td>多个 Subnet</td>
+<td>每个 Region 一个 Subnet</td>
+</tr>
+</tbody></table>
+<h3 id="📊-示例"><a href="#📊-示例" class="headerlink" title="📊 示例"></a>📊 示例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Ultron VPC (ID: vpc-123)</span><br><span class="line"> ├── Region-A → Network-A (UUID-1)</span><br><span class="line"> ├── Region-B → Network-B (UUID-2)</span><br><span class="line"> ├── Region-C → Network-C (UUID-3)</span><br><span class="line"> ├── Region-D → Network-D (UUID-4)</span><br><span class="line"> └── Region-E → Network-E (UUID-5)</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔁-Kubernetes-类比-5"><a href="#🔁-Kubernetes-类比-5" class="headerlink" title="🔁 Kubernetes 类比"></a>🔁 Kubernetes 类比</h3><table>
+<thead>
+<tr>
+<th>公司平台</th>
+<th>Kubernetes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ultron</td>
+<td>容器云平台（如 Stark）</td>
+</tr>
+<tr>
+<td>OpenStack</td>
+<td>Kubernetes 集群</td>
+</tr>
+<tr>
+<td>Ultron VPC</td>
+<td>跨集群的统一网络抽象</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="8-总体关系总结"><a href="#8-总体关系总结" class="headerlink" title="8. 总体关系总结"></a>8. 总体关系总结</h2><h3 id="📊-概念关系图"><a href="#📊-概念关系图" class="headerlink" title="📊 概念关系图"></a>📊 概念关系图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Ultron VPC</span><br><span class="line">   │</span><br><span class="line">   ├── Region A ── Network ── Subnet</span><br><span class="line">   │                         │</span><br><span class="line">   │                         └── Port (vNIC)</span><br><span class="line">   │                               ├── Fixed IP</span><br><span class="line">   │                               └── Security Groups</span><br><span class="line">   │                                      │</span><br><span class="line">   │                                      └── Pod / VM / Bare Metal</span><br><span class="line">   │</span><br><span class="line">   └── Floating IP (Optional)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="9-关键概念速查表"><a href="#9-关键概念速查表" class="headerlink" title="9. 关键概念速查表"></a>9. 关键概念速查表</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>中文含义</th>
+<th>关键作用</th>
+<th>Kubernetes 类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Region</td>
+<td>区域</td>
+<td>资源隔离单元</td>
+<td>Cluster</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>网络</td>
+<td>二层网络</td>
+<td>VPC&#x2F;节点网络</td>
+</tr>
+<tr>
+<td>Subnet</td>
+<td>子网</td>
+<td>IP 地址范围</td>
+<td>Pod CIDR</td>
+</tr>
+<tr>
+<td>Port</td>
+<td>虚拟网卡</td>
+<td>连接实例到网络</td>
+<td>Pod 网卡</td>
+</tr>
+<tr>
+<td>Fixed IP</td>
+<td>私网 IP</td>
+<td>VPC 内通信</td>
+<td>Pod IP</td>
+</tr>
+<tr>
+<td>Floating IP</td>
+<td>公网 IP</td>
+<td>外部访问</td>
+<td>External IP</td>
+</tr>
+<tr>
+<td>Security Group</td>
+<td>安全组</td>
+<td>网络访问控制</td>
+<td>NetworkPolicy</td>
+</tr>
+<tr>
+<td>Hostname</td>
+<td>主机名</td>
+<td>标识裸金属</td>
+<td>Node Name</td>
+</tr>
+<tr>
+<td>Server ID</td>
+<td>虚拟机 ID</td>
+<td>唯一标识</td>
+<td>Instance ID</td>
+</tr>
+<tr>
+<td>Ultron VPC</td>
+<td>跨 Region VPC</td>
+<td>统一资源管理</td>
+<td>容器云平台抽象</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="10-总结"><a href="#10-总结" class="headerlink" title="10. 总结"></a>10. 总结</h2><ul>
+<li><strong>Region</strong> 提供资源隔离，类似 Kubernetes 的集群。</li>
+<li><strong>Network&#x2F;Subnet</strong> 构成基础网络结构。</li>
+<li><strong>Port&#x2F;Fixed IP</strong> 是实例（Pod&#x2F;VM）接入网络的关键。</li>
+<li><strong>Floating IP</strong> 提供外部访问能力，在企业内网中可能与 Fixed IP 相同。</li>
+<li><strong>Security Group</strong> 提供基于规则的网络访问控制。</li>
+<li><strong>Ultron</strong> 是公司层面对 OpenStack 的抽象，实现跨 Region 的统一管理。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/openstack/" rel="tag"><i class="fa fa-tag"></i> openstack</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/04/09/openstack%E9%9A%94%E7%A6%BB%E7%8E%AF%E5%A2%83%E5%AE%9E%E8%B7%B5/" rel="prev" title="openstack隔离环境实践">
+      <i class="fa fa-chevron-left"></i> openstack隔离环境实践
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%F0%9F%93%98-OpenStack-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%AF%B4%E6%98%8E%EF%BC%88%E5%AE%B9%E5%99%A8%E6%8E%A5-VPC-%E5%9C%BA%E6%99%AF%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">📘 OpenStack 核心概念说明（容器接 VPC 场景）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Region%EF%BC%88%E5%8C%BA%E5%9F%9F%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">1. Region（区域）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E6%A6%82%E5%BF%B5%E8%AF%B4%E6%98%8E"><span class="nav-number">1.1.1.</span> <span class="nav-text">📌 概念说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%81-Kubernetes-%E7%B1%BB%E6%AF%94"><span class="nav-number">1.1.2.</span> <span class="nav-text">🔁 Kubernetes 类比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%9D-%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.1.3.</span> <span class="nav-text">📝 示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Network-%E4%B8%8E-Subnet"><span class="nav-number">1.2.</span> <span class="nav-text">2. Network 与 Subnet</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E6%A6%82%E5%BF%B5%E8%AF%B4%E6%98%8E-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">📌 概念说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%97-%E5%85%B3%E7%B3%BB"><span class="nav-number">1.2.2.</span> <span class="nav-text">🔗 关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8A-%E5%85%B3%E7%B3%BB%E5%9B%BE"><span class="nav-number">1.2.3.</span> <span class="nav-text">📊 关系图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%81-Kubernetes-%E7%B1%BB%E6%AF%94-1"><span class="nav-number">1.2.4.</span> <span class="nav-text">🔁 Kubernetes 类比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Port-%E4%B8%8E-Fixed-IP"><span class="nav-number">1.3.</span> <span class="nav-text">3. Port 与 Fixed IP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-Port%EF%BC%88%E7%AB%AF%E5%8F%A3-%E7%BD%91%E5%8D%A1%EF%BC%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">📌 Port（端口&#x2F;网卡）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E7%89%B9%E7%82%B9"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">主要特点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-Fixed-IP"><span class="nav-number">1.3.2.</span> <span class="nav-text">📌 Fixed IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%97-%E5%85%B3%E7%B3%BB-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">🔗 关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%81-Kubernetes-%E7%B1%BB%E6%AF%94-2"><span class="nav-number">1.3.4.</span> <span class="nav-text">🔁 Kubernetes 类比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8A-%E5%85%B3%E7%B3%BB%E5%9B%BE-1"><span class="nav-number">1.3.5.</span> <span class="nav-text">📊 关系图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Floating-IP%EF%BC%88FIP%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">4. Floating IP（FIP）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E6%A6%82%E5%BF%B5%E8%AF%B4%E6%98%8E-2"><span class="nav-number">1.4.1.</span> <span class="nav-text">📌 概念说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%97-%E4%BD%9C%E7%94%A8"><span class="nav-number">1.4.2.</span> <span class="nav-text">🔗 作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E5%AE%B9%E5%99%A8%E6%8E%A5-VPC-%E7%9A%84%E7%89%B9%E6%AE%8A%E6%83%85%E5%86%B5"><span class="nav-number">1.4.3.</span> <span class="nav-text">📌 容器接 VPC 的特殊情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%81-Kubernetes-%E7%B1%BB%E6%AF%94-3"><span class="nav-number">1.4.4.</span> <span class="nav-text">🔁 Kubernetes 类比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8A-%E5%85%B3%E7%B3%BB%E5%9B%BE-2"><span class="nav-number">1.4.5.</span> <span class="nav-text">📊 关系图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Security-Group%EF%BC%88%E5%AE%89%E5%85%A8%E7%BB%84%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">5. Security Group（安全组）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E6%A6%82%E5%BF%B5%E8%AF%B4%E6%98%8E-3"><span class="nav-number">1.5.1.</span> <span class="nav-text">📌 概念说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%97-%E7%BB%91%E5%AE%9A%E5%85%B3%E7%B3%BB"><span class="nav-number">1.5.2.</span> <span class="nav-text">🔗 绑定关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E5%AE%B9%E5%99%A8%E6%8E%A5-VPC-%E7%9B%B8%E5%85%B3%E5%AE%89%E5%85%A8%E7%BB%84"><span class="nav-number">1.5.3.</span> <span class="nav-text">📌 容器接 VPC 相关安全组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%81-Kubernetes-%E7%B1%BB%E6%AF%94-4"><span class="nav-number">1.5.4.</span> <span class="nav-text">🔁 Kubernetes 类比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Hostname-%E4%B8%8E-Server-ID"><span class="nav-number">1.6.</span> <span class="nav-text">6. Hostname 与 Server ID</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-Hostname"><span class="nav-number">1.6.1.</span> <span class="nav-text">📌 Hostname</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-Server-ID"><span class="nav-number">1.6.2.</span> <span class="nav-text">📌 Server ID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8A-%E5%AF%B9%E6%AF%94"><span class="nav-number">1.6.3.</span> <span class="nav-text">📊 对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-Ultron-VPC-%E4%B8%8E-Subnet%EF%BC%88%E5%85%AC%E5%8F%B8%E5%86%85%E9%83%A8%E6%8A%BD%E8%B1%A1%EF%BC%89"><span class="nav-number">1.7.</span> <span class="nav-text">7. Ultron VPC 与 Subnet（公司内部抽象）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E6%A6%82%E5%BF%B5%E8%AF%B4%E6%98%8E-4"><span class="nav-number">1.7.1.</span> <span class="nav-text">📌 概念说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%97-%E8%AE%BE%E8%AE%A1%E5%8A%A8%E6%9C%BA"><span class="nav-number">1.7.2.</span> <span class="nav-text">🔗 设计动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%97-%E5%85%B3%E7%B3%BB%E6%98%A0%E5%B0%84"><span class="nav-number">1.7.3.</span> <span class="nav-text">🔗 关系映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8A-%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.7.4.</span> <span class="nav-text">📊 示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%81-Kubernetes-%E7%B1%BB%E6%AF%94-5"><span class="nav-number">1.7.5.</span> <span class="nav-text">🔁 Kubernetes 类比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E6%80%BB%E4%BD%93%E5%85%B3%E7%B3%BB%E6%80%BB%E7%BB%93"><span class="nav-number">1.8.</span> <span class="nav-text">8. 总体关系总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8A-%E6%A6%82%E5%BF%B5%E5%85%B3%E7%B3%BB%E5%9B%BE"><span class="nav-number">1.8.1.</span> <span class="nav-text">📊 概念关系图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5%E9%80%9F%E6%9F%A5%E8%A1%A8"><span class="nav-number">1.9.</span> <span class="nav-text">9. 关键概念速查表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-%E6%80%BB%E7%BB%93"><span class="nav-number">1.10.</span> <span class="nav-text">10. 总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">187</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">NaNm</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">NaN:aN</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
