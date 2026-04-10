@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="常规操作命令12345678910111213141516171819202122232425262728293031323334353637383940414243444546#计算openstack compute service list#网络openstack network agent listopenstack network listopenstack subnet listopen">
+  <meta name="description" content="1. 🛠 环境准备1.1 加载 OpenStack 凭证在使用 CLI 前，需要加载认证环境变量（通常由 openrc 文件提供）： 1source admin-openrc.sh  1.2 查看当前环境变量1env | grep OS_  常见变量说明：    变量 说明    OS_AUTH_URL Keystone 认证地址   OS_USERNAME 用户名   OS_PROJECT_N">
 <meta property="og:type" content="article">
 <meta property="og:title" content="openstack一些命令">
 <meta property="og:url" content="https://shispring.github.io/2024/12/27/openstack%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="常规操作命令12345678910111213141516171819202122232425262728293031323334353637383940414243444546#计算openstack compute service list#网络openstack network agent listopenstack network listopenstack subnet listopen">
+<meta property="og:description" content="1. 🛠 环境准备1.1 加载 OpenStack 凭证在使用 CLI 前，需要加载认证环境变量（通常由 openrc 文件提供）： 1source admin-openrc.sh  1.2 查看当前环境变量1env | grep OS_  常见变量说明：    变量 说明    OS_AUTH_URL Keystone 认证地址   OS_USERNAME 用户名   OS_PROJECT_N">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-12-27T09:09:23.000Z">
-<meta property="article:modified_time" content="2024-12-27T09:12:00.742Z">
+<meta property="article:modified_time" content="2026-04-10T03:09:01.065Z">
 <meta property="article:author" content="shispring">
 <meta name="twitter:card" content="summary">
 
@@ -211,10 +211,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-12-27 17:09:23 / 修改时间：17:12:00" itemprop="dateCreated datePublished" datetime="2024-12-27T17:09:23+08:00">2024-12-27</time>
+              <time title="创建时间：2024-12-27 17:09:23" itemprop="dateCreated datePublished" datetime="2024-12-27T17:09:23+08:00">2024-12-27</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-04-10 11:09:01" itemprop="dateModified" datetime="2026-04-10T11:09:01+08:00">2026-04-10</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -238,14 +244,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>678</span>
+              <span>5.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>5 分钟</span>
             </span>
 
         </div>
@@ -257,8 +263,252 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="常规操作命令"><a href="#常规操作命令" class="headerlink" title="常规操作命令"></a>常规操作命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">#计算</span><br><span class="line">openstack compute service list</span><br><span class="line"></span><br><span class="line">#网络</span><br><span class="line">openstack network agent list</span><br><span class="line">openstack network list</span><br><span class="line">openstack subnet list</span><br><span class="line">openstack router list</span><br><span class="line"></span><br><span class="line">#存储</span><br><span class="line">openstack volume list</span><br><span class="line">openstack volume snapshot list</span><br><span class="line"></span><br><span class="line">#安全组</span><br><span class="line">openstack security group list</span><br><span class="line"></span><br><span class="line">#配额</span><br><span class="line">openstack quota show --all-projects</span><br><span class="line"></span><br><span class="line">#项目</span><br><span class="line">openstack project list</span><br><span class="line"></span><br><span class="line">#镜像</span><br><span class="line">openstack image list</span><br><span class="line"></span><br><span class="line">#主机</span><br><span class="line">openstack host list</span><br><span class="line"></span><br><span class="line">#主机操作</span><br><span class="line">openstack server list</span><br><span class="line">openstack server create</span><br><span class="line">openstack server show</span><br><span class="line"></span><br><span class="line">#主机规格</span><br><span class="line">openstack flavor</span><br><span class="line"></span><br><span class="line">#端口</span><br><span class="line">openstack port list</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">openstack router</span><br><span class="line"></span><br><span class="line">#登录地址</span><br><span class="line">openstack console url show INSTANCE_UUID</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+        <h2 id="1-🛠-环境准备"><a href="#1-🛠-环境准备" class="headerlink" title="1. 🛠 环境准备"></a>1. 🛠 环境准备</h2><h3 id="1-1-加载-OpenStack-凭证"><a href="#1-1-加载-OpenStack-凭证" class="headerlink" title="1.1 加载 OpenStack 凭证"></a>1.1 加载 OpenStack 凭证</h3><p>在使用 CLI 前，需要加载认证环境变量（通常由 <code>openrc</code> 文件提供）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> admin-openrc.sh</span><br></pre></td></tr></table></figure>
 
+<h3 id="1-2-查看当前环境变量"><a href="#1-2-查看当前环境变量" class="headerlink" title="1.2 查看当前环境变量"></a>1.2 查看当前环境变量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">env</span> | grep OS_</span><br></pre></td></tr></table></figure>
+
+<p>常见变量说明：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>OS_AUTH_URL</code></td>
+<td>Keystone 认证地址</td>
+</tr>
+<tr>
+<td><code>OS_USERNAME</code></td>
+<td>用户名</td>
+</tr>
+<tr>
+<td><code>OS_PROJECT_NAME</code></td>
+<td>项目（Tenant）</td>
+</tr>
+<tr>
+<td><code>OS_REGION_NAME</code></td>
+<td>Region 名称</td>
+</tr>
+</tbody></table>
+<h3 id="1-3-切换-Region"><a href="#1-3-切换-Region" class="headerlink" title="1.3 切换 Region"></a>1.3 切换 Region</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> OS_REGION_NAME=RegionOne</span><br></pre></td></tr></table></figure>
+
+<p>或在命令中指定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack --os-region-name RegionOne server list</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2-📌-常用-CLI-命令"><a href="#2-📌-常用-CLI-命令" class="headerlink" title="2. 📌 常用 CLI 命令"></a>2. 📌 常用 CLI 命令</h2><h3 id="2-1-Region-与项目"><a href="#2-1-Region-与项目" class="headerlink" title="2.1 Region 与项目"></a>2.1 Region 与项目</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看可用 Region</span></span><br><span class="line">openstack region list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看项目列表</span></span><br><span class="line">openstack project list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看当前 Token 信息</span></span><br><span class="line">openstack token issue</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-2-Network-与-Subnet"><a href="#2-2-Network-与-Subnet" class="headerlink" title="2.2 Network 与 Subnet"></a>2.2 Network 与 Subnet</h3><h4 id="Network-操作"><a href="#Network-操作" class="headerlink" title="Network 操作"></a>Network 操作</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看网络列表</span></span><br><span class="line">openstack network list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络详情</span></span><br><span class="line">openstack network show &lt;network-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建网络</span></span><br><span class="line">openstack network create &lt;network-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除网络</span></span><br><span class="line">openstack network delete &lt;network-id&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Subnet-操作"><a href="#Subnet-操作" class="headerlink" title="Subnet 操作"></a>Subnet 操作</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看子网列表</span></span><br><span class="line">openstack subnet list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看子网详情</span></span><br><span class="line">openstack subnet show &lt;subnet-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建子网</span></span><br><span class="line">openstack subnet create \</span><br><span class="line">  --network &lt;network-id&gt; \</span><br><span class="line">  --subnet-range 192.168.1.0/24 \</span><br><span class="line">  --gateway 192.168.1.1 \</span><br><span class="line">  &lt;subnet-name&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-3-Port-与-Fixed-IP"><a href="#2-3-Port-与-Fixed-IP" class="headerlink" title="2.3 Port 与 Fixed IP"></a>2.3 Port 与 Fixed IP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看端口列表</span></span><br><span class="line">openstack port list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看端口详情</span></span><br><span class="line">openstack port show &lt;port-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建端口并指定 Fixed IP</span></span><br><span class="line">openstack port create \</span><br><span class="line">  --network &lt;network-id&gt; \</span><br><span class="line">  --fixed-ip subnet=&lt;subnet-id&gt;,ip-address=192.168.1.10 \</span><br><span class="line">  &lt;port-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为端口绑定安全组</span></span><br><span class="line">openstack port <span class="built_in">set</span> --security-group &lt;sg-id&gt; &lt;port-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除端口</span></span><br><span class="line">openstack port delete &lt;port-id&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-4-Floating-IP（FIP）"><a href="#2-4-Floating-IP（FIP）" class="headerlink" title="2.4 Floating IP（FIP）"></a>2.4 Floating IP（FIP）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 Floating IP 列表</span></span><br><span class="line">openstack floating ip list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 Floating IP</span></span><br><span class="line">openstack floating ip create &lt;external-network&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绑定 Floating IP 到端口</span></span><br><span class="line">openstack floating ip <span class="built_in">set</span> --port &lt;port-id&gt; &lt;floating-ip&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解除绑定</span></span><br><span class="line">openstack floating ip <span class="built_in">unset</span> --port &lt;floating-ip&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Floating IP 详情</span></span><br><span class="line">openstack floating ip show &lt;floating-ip&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-5-Security-Group（安全组）"><a href="#2-5-Security-Group（安全组）" class="headerlink" title="2.5 Security Group（安全组）"></a>2.5 Security Group（安全组）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看安全组列表</span></span><br><span class="line">openstack security group list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看安全组详情</span></span><br><span class="line">openstack security group show &lt;sg-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建安全组</span></span><br><span class="line">openstack security group create &lt;sg-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加入方向规则（允许 SSH）</span></span><br><span class="line">openstack security group rule create \</span><br><span class="line">  --protocol tcp --dst-port 22 \</span><br><span class="line">  --ingress &lt;sg-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 允许 ICMP（Ping）</span></span><br><span class="line">openstack security group rule create \</span><br><span class="line">  --protocol icmp --ingress &lt;sg-id&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-6-Server（虚拟机）"><a href="#2-6-Server（虚拟机）" class="headerlink" title="2.6 Server（虚拟机）"></a>2.6 Server（虚拟机）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看虚拟机列表</span></span><br><span class="line">openstack server list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看虚拟机详情</span></span><br><span class="line">openstack server show &lt;server-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建虚拟机</span></span><br><span class="line">openstack server create \</span><br><span class="line">  --flavor &lt;flavor&gt; \</span><br><span class="line">  --image &lt;image&gt; \</span><br><span class="line">  --network &lt;network-id&gt; \</span><br><span class="line">  --security-group &lt;sg-id&gt; \</span><br><span class="line">  --key-name &lt;keypair&gt; \</span><br><span class="line">  &lt;server-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动/停止/重启</span></span><br><span class="line">openstack server start &lt;server-id&gt;</span><br><span class="line">openstack server stop &lt;server-id&gt;</span><br><span class="line">openstack server reboot &lt;server-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看虚拟机控制台日志</span></span><br><span class="line">openstack console <span class="built_in">log</span> show &lt;server-id&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="常规操作命令"><a href="#常规操作命令" class="headerlink" title="常规操作命令"></a>常规操作命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">#计算</span><br><span class="line">openstack compute service list</span><br><span class="line"></span><br><span class="line">#网络</span><br><span class="line">openstack network agent list</span><br><span class="line">openstack network list</span><br><span class="line">openstack subnet list</span><br><span class="line">openstack router list</span><br><span class="line"></span><br><span class="line">#存储</span><br><span class="line">openstack volume list</span><br><span class="line">openstack volume snapshot list</span><br><span class="line"></span><br><span class="line">#安全组</span><br><span class="line">openstack security group list</span><br><span class="line"></span><br><span class="line">#配额</span><br><span class="line">openstack quota show --all-projects</span><br><span class="line"></span><br><span class="line">#项目</span><br><span class="line">openstack project list</span><br><span class="line"></span><br><span class="line">#镜像</span><br><span class="line">openstack image list</span><br><span class="line"></span><br><span class="line">#主机</span><br><span class="line">openstack host list</span><br><span class="line"></span><br><span class="line">#主机操作</span><br><span class="line">openstack server list</span><br><span class="line">openstack server create</span><br><span class="line">openstack server show</span><br><span class="line"></span><br><span class="line">#主机规格</span><br><span class="line">openstack flavor</span><br><span class="line"></span><br><span class="line">#端口</span><br><span class="line">openstack port list</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">openstack router</span><br><span class="line"></span><br><span class="line">#登录地址</span><br><span class="line">openstack console url show INSTANCE_UUID</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-📌-常见运维场景示例"><a href="#3-📌-常见运维场景示例" class="headerlink" title="3. 📌 常见运维场景示例"></a>3. 📌 常见运维场景示例</h2><h3 id="3-1-创建端口并绑定-Floating-IP"><a href="#3-1-创建端口并绑定-Floating-IP" class="headerlink" title="3.1 创建端口并绑定 Floating IP"></a>3.1 创建端口并绑定 Floating IP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建端口</span></span><br><span class="line">PORT_ID=$(openstack port create \</span><br><span class="line">  --network net1 \</span><br><span class="line">  --fixed-ip subnet=subnet1,ip-address=192.168.1.10 \</span><br><span class="line">  -f value -c <span class="built_in">id</span> port1)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 Floating IP</span></span><br><span class="line">FIP=$(openstack floating ip create public \</span><br><span class="line">  -f value -c floating_ip_address)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绑定 Floating IP</span></span><br><span class="line">openstack floating ip <span class="built_in">set</span> --port <span class="variable">$PORT_ID</span> <span class="variable">$FIP</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="3-2-查看某个-IP-的归属"><a href="#3-2-查看某个-IP-的归属" class="headerlink" title="3.2 查看某个 IP 的归属"></a>3.2 查看某个 IP 的归属</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过 IP 查找端口</span></span><br><span class="line">openstack port list --fixed-ip ip-address=192.168.1.10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看端口绑定的实例</span></span><br><span class="line">openstack port show &lt;port-id&gt; -f value -c device_id</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看实例详情</span></span><br><span class="line">openstack server show &lt;server-id&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="4-🔍-故障排查指南"><a href="#4-🔍-故障排查指南" class="headerlink" title="4. 🔍 故障排查指南"></a>4. 🔍 故障排查指南</h2><h3 id="4-1-网络连通性问题"><a href="#4-1-网络连通性问题" class="headerlink" title="4.1 网络连通性问题"></a>4.1 网络连通性问题</h3><h4 id="排查步骤"><a href="#排查步骤" class="headerlink" title="排查步骤"></a>排查步骤</h4><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>命令</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>openstack port list</code></td>
+<td>确认端口存在</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>openstack port show</code></td>
+<td>检查端口状态</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>openstack security group show</code></td>
+<td>检查安全组规则</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>ping</code> &#x2F; <code>telnet</code></td>
+<td>验证网络连通性</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>traceroute</code></td>
+<td>分析网络路径</td>
+</tr>
+</tbody></table>
+<h4 id="关键检查项"><a href="#关键检查项" class="headerlink" title="关键检查项"></a>关键检查项</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看端口状态</span></span><br><span class="line">openstack port show &lt;port-id&gt; -c status -c fixed_ips</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确认端口是否绑定实例</span></span><br><span class="line">openstack port show &lt;port-id&gt; -c device_id</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="4-2-Floating-IP-无法访问"><a href="#4-2-Floating-IP-无法访问" class="headerlink" title="4.2 Floating IP 无法访问"></a>4.2 Floating IP 无法访问</h3><h4 id="排查流程"><a href="#排查流程" class="headerlink" title="排查流程"></a>排查流程</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">外部访问失败</span><br><span class="line">   │</span><br><span class="line">   ├── 是否已绑定 Port？</span><br><span class="line">   ├── 安全组是否放通？</span><br><span class="line">   ├── 实例内部服务是否启动？</span><br><span class="line">   └── 路由是否正确？</span><br></pre></td></tr></table></figure>
+
+<h4 id="排查命令"><a href="#排查命令" class="headerlink" title="排查命令"></a>排查命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 Floating IP 是否绑定</span></span><br><span class="line">openstack floating ip show &lt;fip&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看安全组</span></span><br><span class="line">openstack port show &lt;port-id&gt; -c security_group_ids</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试端口连通性</span></span><br><span class="line">nc -zv &lt;floating-ip&gt; 80</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="4-3-安全组规则问题"><a href="#4-3-安全组规则问题" class="headerlink" title="4.3 安全组规则问题"></a>4.3 安全组规则问题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看安全组规则</span></span><br><span class="line">openstack security group rule list &lt;sg-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加允许所有流量的规则（测试用）</span></span><br><span class="line">openstack security group rule create \</span><br><span class="line">  --protocol any --ingress &lt;sg-id&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ 注意：生产环境中应避免使用 <code>any</code>，仅用于临时排查。</p>
+</blockquote>
+<hr>
+<h3 id="4-4-Port-绑定异常"><a href="#4-4-Port-绑定异常" class="headerlink" title="4.4 Port 绑定异常"></a>4.4 Port 绑定异常</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看端口绑定的设备</span></span><br><span class="line">openstack port show &lt;port-id&gt; -c device_owner -c device_id</span><br><span class="line"></span><br><span class="line"><span class="comment"># 常见 device_owner</span></span><br><span class="line"><span class="comment"># compute:nova        -&gt; 虚拟机</span></span><br><span class="line"><span class="comment"># baremetal:none      -&gt; 裸金属</span></span><br><span class="line"><span class="comment"># network:router_interface -&gt; 路由器</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h4><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Port 状态为 DOWN</td>
+<td>未绑定实例</td>
+<td>绑定到 Server</td>
+</tr>
+<tr>
+<td>无 Fixed IP</td>
+<td>未分配 IP</td>
+<td>重新创建或分配</td>
+</tr>
+<tr>
+<td>安全组缺失</td>
+<td>未正确绑定</td>
+<td>重新设置安全组</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="4-5-跨-Region-资源问题"><a href="#4-5-跨-Region-资源问题" class="headerlink" title="4.5 跨 Region 资源问题"></a>4.5 跨 Region 资源问题</h3><h4 id="排查要点"><a href="#排查要点" class="headerlink" title="排查要点"></a>排查要点</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看当前 Region</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$OS_REGION_NAME</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在指定 Region 查询资源</span></span><br><span class="line">openstack --os-region-name RegionOne network list</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>找不到资源</td>
+<td>查询的 Region 不正确</td>
+</tr>
+<tr>
+<td>UUID 不一致</td>
+<td>不同 Region 资源独立</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="5-✅-最佳实践总结"><a href="#5-✅-最佳实践总结" class="headerlink" title="5. ✅ 最佳实践总结"></a>5. ✅ 最佳实践总结</h2><h3 id="5-1-命令使用最佳实践"><a href="#5-1-命令使用最佳实践" class="headerlink" title="5.1 命令使用最佳实践"></a>5.1 命令使用最佳实践</h3><table>
+<thead>
+<tr>
+<th>实践</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用 <code>-f yaml/json</code></td>
+<td>便于自动化与脚本解析</td>
+</tr>
+<tr>
+<td>使用 <code>-c</code> 指定字段</td>
+<td>提高命令输出可读性</td>
+</tr>
+<tr>
+<td>使用 <code>--os-region-name</code></td>
+<td>避免 Region 混淆</td>
+</tr>
+<tr>
+<td>通过 ID 操作资源</td>
+<td>避免名称重复问题</td>
+</tr>
+</tbody></table>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openstack port show &lt;port-id&gt; -f yaml</span><br><span class="line">openstack server list -c ID -c Name -c Status</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="5-2-故障排查最佳实践"><a href="#5-2-故障排查最佳实践" class="headerlink" title="5.2 故障排查最佳实践"></a>5.2 故障排查最佳实践</h3><ol>
+<li><p><strong>先确认 Region 与 Project</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack token issue</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>从资源关系链逐级排查</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Floating IP → Port → Fixed IP → Server → Security Group</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>优先检查安全组与路由</strong></p>
+<ul>
+<li>80% 的网络问题源于安全组配置。</li>
+</ul>
+</li>
+<li><p><strong>使用自动化脚本提高效率</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack port list -f json | jq .</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>保留审计与日志</strong></p>
+<ul>
+<li>通过 <code>openstack console log show</code> 查看实例日志。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="6-📌-常用排查命令速查表"><a href="#6-📌-常用排查命令速查表" class="headerlink" title="6. 📌 常用排查命令速查表"></a>6. 📌 常用排查命令速查表</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>查看当前 Region</td>
+<td><code>echo $OS_REGION_NAME</code></td>
+</tr>
+<tr>
+<td>查询 IP 归属</td>
+<td><code>openstack port list --fixed-ip ip-address=&lt;IP&gt;</code></td>
+</tr>
+<tr>
+<td>查看 FIP 绑定</td>
+<td><code>openstack floating ip show &lt;FIP&gt;</code></td>
+</tr>
+<tr>
+<td>查看端口状态</td>
+<td><code>openstack port show &lt;PORT_ID&gt;</code></td>
+</tr>
+<tr>
+<td>查看安全组规则</td>
+<td><code>openstack security group rule list &lt;SG_ID&gt;</code></td>
+</tr>
+<tr>
+<td>查看实例日志</td>
+<td><code>openstack console log show &lt;SERVER_ID&gt;</code></td>
+</tr>
+<tr>
+<td>指定 Region 查询</td>
+<td><code>openstack --os-region-name &lt;Region&gt; server list</code></td>
+</tr>
+</tbody></table>
+<hr>
 <h2 id="metadata数据查询"><a href="#metadata数据查询" class="headerlink" title="metadata数据查询"></a>metadata数据查询</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#在OpenStack云主机上通过请求Metadata元数据API，来获取云主机上的主机名、IP地址、SSH公钥等信息。</span><br><span class="line">#通过这些信息可以通过编写脚本来对云主机的标准化进行定制。</span><br><span class="line"></span><br><span class="line">curl http://169.254.169.254/</span><br></pre></td></tr></table></figure>
 
     </div>
@@ -340,7 +590,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%84%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">常规操作命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#metadata%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2"><span class="nav-number">2.</span> <span class="nav-text">metadata数据查询</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%F0%9F%9B%A0-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">1. 🛠 环境准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E5%8A%A0%E8%BD%BD-OpenStack-%E5%87%AD%E8%AF%81"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 加载 OpenStack 凭证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 查看当前环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-%E5%88%87%E6%8D%A2-Region"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 切换 Region</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%F0%9F%93%8C-%E5%B8%B8%E7%94%A8-CLI-%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">2. 📌 常用 CLI 命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Region-%E4%B8%8E%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Region 与项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Network-%E4%B8%8E-Subnet"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Network 与 Subnet</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Network-%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.1.</span> <span class="nav-text">Network 操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Subnet-%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.2.</span> <span class="nav-text">Subnet 操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Port-%E4%B8%8E-Fixed-IP"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 Port 与 Fixed IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-Floating-IP%EF%BC%88FIP%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 Floating IP（FIP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-Security-Group%EF%BC%88%E5%AE%89%E5%85%A8%E7%BB%84%EF%BC%89"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 Security Group（安全组）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-Server%EF%BC%88%E8%99%9A%E6%8B%9F%E6%9C%BA%EF%BC%89"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 Server（虚拟机）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%84%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4"><span class="nav-number">3.</span> <span class="nav-text">常规操作命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%F0%9F%93%8C-%E5%B8%B8%E8%A7%81%E8%BF%90%E7%BB%B4%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">3. 📌 常见运维场景示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E5%88%9B%E5%BB%BA%E7%AB%AF%E5%8F%A3%E5%B9%B6%E7%BB%91%E5%AE%9A-Floating-IP"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 创建端口并绑定 Floating IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E6%9F%A5%E7%9C%8B%E6%9F%90%E4%B8%AA-IP-%E7%9A%84%E5%BD%92%E5%B1%9E"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 查看某个 IP 的归属</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%F0%9F%94%8D-%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97"><span class="nav-number">5.</span> <span class="nav-text">4. 🔍 故障排查指南</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E7%BD%91%E7%BB%9C%E8%BF%9E%E9%80%9A%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 网络连通性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%92%E6%9F%A5%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.1.1.</span> <span class="nav-text">排查步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%A3%80%E6%9F%A5%E9%A1%B9"><span class="nav-number">5.1.2.</span> <span class="nav-text">关键检查项</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-Floating-IP-%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 Floating IP 无法访问</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%92%E6%9F%A5%E6%B5%81%E7%A8%8B"><span class="nav-number">5.2.1.</span> <span class="nav-text">排查流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%92%E6%9F%A5%E5%91%BD%E4%BB%A4"><span class="nav-number">5.2.2.</span> <span class="nav-text">排查命令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E5%AE%89%E5%85%A8%E7%BB%84%E8%A7%84%E5%88%99%E9%97%AE%E9%A2%98"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 安全组规则问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-Port-%E7%BB%91%E5%AE%9A%E5%BC%82%E5%B8%B8"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 Port 绑定异常</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">5.4.1.</span> <span class="nav-text">常见问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-%E8%B7%A8-Region-%E8%B5%84%E6%BA%90%E9%97%AE%E9%A2%98"><span class="nav-number">5.5.</span> <span class="nav-text">4.5 跨 Region 资源问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%92%E6%9F%A5%E8%A6%81%E7%82%B9"><span class="nav-number">5.5.1.</span> <span class="nav-text">排查要点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E2%9C%85-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">5. ✅ 最佳实践总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 命令使用最佳实践</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 故障排查最佳实践</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%F0%9F%93%8C-%E5%B8%B8%E7%94%A8%E6%8E%92%E6%9F%A5%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5%E8%A1%A8"><span class="nav-number">7.</span> <span class="nav-text">6. 📌 常用排查命令速查表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#metadata%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2"><span class="nav-number">8.</span> <span class="nav-text">metadata数据查询</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
