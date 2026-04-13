@@ -3463,6 +3463,7 @@
 <h2 id="三剑客（awk-grep-sed）"><a href="#三剑客（awk-grep-sed）" class="headerlink" title="三剑客（awk&#x2F;grep&#x2F;sed）"></a>三剑客（awk&#x2F;grep&#x2F;sed）</h2><blockquote>
 <p><a href="https://cloud.tencent.com/developer/article/2572621?policyId=1004">https://cloud.tencent.com/developer/article/2572621?policyId=1004</a></p>
 </blockquote>
+<h2 id="网桥工具"><a href="#网桥工具" class="headerlink" title="网桥工具"></a>网桥工具</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>linux</category>
