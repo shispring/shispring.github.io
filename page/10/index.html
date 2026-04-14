@@ -184,6 +184,152 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/19/docker-mainfest/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/03/19/docker-mainfest/" class="post-title-link" itemprop="url">docker mainfest 使用</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-03-19 11:35:56 / 修改时间：12:02:48" itemprop="dateCreated datePublished" datetime="2025-03-19T11:35:56+08:00">2025-03-19</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="1-什么是-docker-manifest？"><a href="#1-什么是-docker-manifest？" class="headerlink" title="1. 什么是 docker manifest？"></a><strong>1. 什么是 <code>docker manifest</code>？</strong></h3><p><code>docker manifest</code> 是 <strong>Docker 多架构镜像（Multi-Arch Images）</strong> 的一种机制，允许 <strong>同一个镜像名称（Tag）对应多个不同架构的镜像</strong>（如 <code>amd64</code>、<code>arm64</code>、<code>ppc64le</code> 等）。</p>
+<ul>
+<li><strong>作用</strong>：  <ul>
+<li>让 <code>docker pull my-image:latest</code> <strong>自动选择适合当前系统架构的镜像</strong>。</li>
+<li>避免用户手动指定架构（如 <code>my-image:amd64</code> 或 <code>my-image:arm64</code>）。</li>
+<li>适用于 <code>Harbor</code>、<code>Docker Hub</code>、<code>quay.io</code> 等容器镜像仓库。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="2-docker-manifest-的使用方法"><a href="#2-docker-manifest-的使用方法" class="headerlink" title="2. docker manifest 的使用方法"></a><strong>2. <code>docker manifest</code> 的使用方法</strong></h3><h4 id="（1）创建多架构镜像"><a href="#（1）创建多架构镜像" class="headerlink" title="（1）创建多架构镜像"></a><strong>（1）创建多架构镜像</strong></h4><p>假设我们已经构建了两个不同架构的镜像：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker buildx build --platform linux/amd64 -t myrepo/myimage:amd64 --push .</span><br><span class="line">docker buildx build --platform linux/arm64 -t myrepo/myimage:arm64 --push .</span><br></pre></td></tr></table></figure>
+<p>此时，Harbor 上分别有：</p>
+<ul>
+<li><code>myrepo/myimage:amd64</code></li>
+<li><code>myrepo/myimage:arm64</code></li>
+</ul>
+<h4 id="（2）创建-Manifest-List"><a href="#（2）创建-Manifest-List" class="headerlink" title="（2）创建 Manifest List"></a><strong>（2）创建 Manifest List</strong></h4><p>使用 <code>docker manifest create --insecure </code> 命令，将不同架构的镜像组合成一个 <code>manifest</code>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker manifest create  --insecure myrepo/myimage:latest \</span><br><span class="line">  myrepo/myimage:amd64 \</span><br><span class="line">  myrepo/myimage:arm64</span><br></pre></td></tr></table></figure>
+
+<h4 id="（3）标注架构"><a href="#（3）标注架构" class="headerlink" title="（3）标注架构"></a><strong>（3）标注架构</strong></h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker manifest annotate myrepo/myimage:latest myrepo/myimage:amd64 --<span class="built_in">arch</span> amd64</span><br><span class="line">docker manifest annotate myrepo/myimage:latest myrepo/myimage:arm64 --<span class="built_in">arch</span> arm64</span><br></pre></td></tr></table></figure>
+
+<h4 id="（4）推送到-Harbor"><a href="#（4）推送到-Harbor" class="headerlink" title="（4）推送到 Harbor"></a><strong>（4）推送到 Harbor</strong></h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker manifest push myrepo/myimage:latest</span><br></pre></td></tr></table></figure>
+<p>此时，Harbor 就会存储 <code>myrepo/myimage:latest</code> 这个 <strong>多架构镜像</strong>。</p>
+<hr>
+<h3 id="3-docker-pull-如何选择合适的架构？"><a href="#3-docker-pull-如何选择合适的架构？" class="headerlink" title="3. docker pull 如何选择合适的架构？"></a><strong>3. <code>docker pull</code> 如何选择合适的架构？</strong></h3><p>当你执行 <code>docker pull myrepo/myimage:latest</code> 时：</p>
+<ol>
+<li>Docker 客户端 <strong>查询远程仓库</strong>，获取 <code>manifest list</code>（即不同架构的索引）。</li>
+<li>Docker 客户端 <strong>检测本机架构</strong>：<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">uname</span> -m  <span class="comment"># 获取当前架构</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>x86_64</code> → 拉取 <code>amd64</code> 版本</li>
+<li><code>aarch64</code> → 拉取 <code>arm64</code> 版本</li>
+</ul>
+</li>
+<li>Docker 根据架构 <strong>自动拉取对应的镜像层（layers）</strong>。</li>
+</ol>
+<hr>
+<h3 id="4-如何在-Harbor-中使用-docker-manifest"><a href="#4-如何在-Harbor-中使用-docker-manifest" class="headerlink" title="4. 如何在 Harbor 中使用 docker manifest"></a><strong>4. 如何在 Harbor 中使用 <code>docker manifest</code></strong></h3><p>Harbor <strong>完全支持多架构镜像</strong>，你可以在 Harbor 的 Web UI 看到：</p>
+<ul>
+<li><code>myimage:latest</code>（<code>manifest list</code>）</li>
+<li>关联的 <code>amd64</code>、<code>arm64</code> 具体镜像</li>
+</ul>
+<p>如果要手动管理 <code>manifest</code>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker login harbor.example.com</span><br><span class="line">docker manifest create harbor.example.com/myrepo/myimage:latest \</span><br><span class="line">  harbor.example.com/myrepo/myimage:amd64 \</span><br><span class="line">  harbor.example.com/myrepo/myimage:arm64</span><br><span class="line">docker manifest push harbor.example.com/myrepo/myimage:latest</span><br></pre></td></tr></table></figure>
+
+<p><strong>Harbor 7.x 及以上版本</strong> 也可以在 Web 界面直接管理 <code>manifest</code>，查看不同架构的 Tag。</p>
+<hr>
+<h3 id="5-结论"><a href="#5-结论" class="headerlink" title="5. 结论"></a><strong>5. 结论</strong></h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>解答</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>docker manifest</code> 作用</strong></td>
+<td>支持多架构镜像，自动匹配 <code>amd64</code>、<code>arm64</code></td>
+</tr>
+<tr>
+<td><strong>Docker 何时判断架构</strong></td>
+<td><code>docker pull</code> 时会解析 <code>manifest list</code>，然后根据本机架构拉取对应版本</td>
+</tr>
+<tr>
+<td><strong>Harbor 是否支持</strong></td>
+<td><strong>支持</strong>，可以 <code>docker manifest push</code> 或在 Web 界面查看</td>
+</tr>
+<tr>
+<td><strong>如何在 Harbor 配置</strong></td>
+<td><strong>构建不同架构的镜像</strong> → <strong>创建 manifest</strong> → <strong>push 到 Harbor</strong></td>
+</tr>
+</tbody></table>
+<p>你可以先尝试 <strong><code>docker manifest inspect &lt;镜像&gt;</code></strong> 查看 Harbor 上是否已有 <code>manifest</code>，然后尝试 <code>docker pull</code> 来验证是否能正确拉取适配架构的镜像。</p>
+<h2 id="如何使用docker拉取指定架构镜像"><a href="#如何使用docker拉取指定架构镜像" class="headerlink" title="如何使用docker拉取指定架构镜像"></a>如何使用docker拉取指定架构镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#开启实验功能</span></span><br><span class="line"><span class="comment">#1 修改/etc/docker/daemon.json</span></span><br><span class="line">添加 <span class="string">&quot;experimental&quot;</span>: <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl restart docker</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证</span></span><br><span class="line">docker version | grep Experimental</span><br><span class="line"></span><br><span class="line"><span class="comment">#2 拉取指定架构</span></span><br><span class="line">docker pull --platform=arm64 xxx</span><br><span class="line">or</span><br><span class="line">docker pull --platform=amd64 xxx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证架构</span></span><br><span class="line">docker inspect &lt;image_name&gt; | grep Architecture</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/19/skaffold%E5%BA%94%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1145,208 +1291,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/14/rke%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/14/rke%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">rke命令解析</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-02-14 12:00:01 / 修改时间：12:00:43" itemprop="dateCreated datePublished" datetime="2025-02-14T12:00:01+08:00">2025-02-14</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="🔍-RKE-v1-5-13-主要功能"><a href="#🔍-RKE-v1-5-13-主要功能" class="headerlink" title="🔍 RKE v1.5.13 主要功能"></a><strong>🔍 RKE v1.5.13 主要功能</strong></h2><p>Rancher Kubernetes Engine (RKE) 是 Rancher Labs 开发的 <strong>轻量级 Kubernetes 安装工具</strong>，适用于裸机和云环境。<strong>v1.5.13</strong> 是 <strong>RKE 1.x 系列的一个稳定版本</strong>，支持 Kubernetes v1.26.x，并提供了一些关键功能：</p>
-<p>✅ <strong>多节点集群管理</strong>（支持 etcd、controlplane、worker 节点）<br>✅ <strong>高可用 Kubernetes 安装</strong>（多 etcd 保障 HA）<br>✅ <strong>SSH 远程管理</strong>（基于 SSH 访问集群，无需额外工具）<br>✅ <strong>支持多种 CNI 网络插件</strong>（Flannel、Canal、Calico、Weave）<br>✅ <strong>容器运行时支持</strong>（Docker）<br>✅ <strong>自动生成 Kubernetes 证书</strong><br>✅ <strong>故障恢复和状态管理</strong>（state file）<br>✅ <strong>集群增删节点</strong>（动态扩缩容）<br>✅ <strong>Air-Gap 离线安装</strong>（可在无外网环境安装）  </p>
-<hr>
-<h2 id="📌-常用-RKE-命令总结"><a href="#📌-常用-RKE-命令总结" class="headerlink" title="📌 常用 RKE 命令总结"></a><strong>📌 常用 RKE 命令总结</strong></h2><p>以下是 RKE 的 <strong>常用命令</strong> 及 <strong>具体使用场景</strong>，涵盖 Kubernetes 集群的 <strong>初始化、扩容、升级、删除</strong> 等操作。</p>
-<h3 id="1️⃣-初始化-Kubernetes-集群"><a href="#1️⃣-初始化-Kubernetes-集群" class="headerlink" title="1️⃣ 初始化 Kubernetes 集群"></a><strong>1️⃣ 初始化 Kubernetes 集群</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke up --config cluster.yml</span><br></pre></td></tr></table></figure>
-<p>📌 <strong>作用</strong>：</p>
-<ul>
-<li>读取 <code>cluster.yml</code> 配置文件 <strong>创建</strong> 或 <strong>更新</strong> Kubernetes 集群。</li>
-</ul>
-<p>📌 <strong>使用场景</strong>：</p>
-<ul>
-<li><strong>第一次部署</strong> Kubernetes 集群。</li>
-<li><strong>更新集群配置</strong>（例如变更节点角色、调整网络插件等）。</li>
-</ul>
-<hr>
-<h3 id="2️⃣-添加新节点"><a href="#2️⃣-添加新节点" class="headerlink" title="2️⃣ 添加新节点"></a><strong>2️⃣ 添加新节点</strong></h3><p>📌 <strong>场景：集群扩容（新增 Master 或 Worker）</strong><br><strong>➜ 修改 <code>cluster.yml</code>，然后执行：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke up --config cluster.yml</span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>集群不会重装</strong>，RKE 会自动添加新节点，并重新生成 <code>kube_config</code> 文件。</li>
-</ul>
-<hr>
-<h3 id="3️⃣-删除节点"><a href="#3️⃣-删除节点" class="headerlink" title="3️⃣ 删除节点"></a><strong>3️⃣ 删除节点</strong></h3><p>📌 <strong>场景：集群缩容（移除某个 etcd、controlplane、worker）</strong></p>
-<ol>
-<li>**编辑 <code>cluster.yml</code>**，删除对应节点信息。</li>
-<li><strong>运行 RKE 更新集群</strong>：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke up --config cluster.yml</span><br></pre></td></tr></table></figure></li>
-<li><strong>SSH 进入被移除的节点</strong>，执行：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop $(docker ps -q)</span><br><span class="line">docker <span class="built_in">rm</span> $(docker ps -aq)</span><br></pre></td></tr></table></figure></li>
-</ol>
-<hr>
-<h3 id="4️⃣-备份和恢复-etcd"><a href="#4️⃣-备份和恢复-etcd" class="headerlink" title="4️⃣ 备份和恢复 etcd"></a><strong>4️⃣ 备份和恢复 etcd</strong></h3><p>📌 <strong>场景：etcd 故障恢复</strong></p>
-<h4 id="（1）手动备份-etcd"><a href="#（1）手动备份-etcd" class="headerlink" title="（1）手动备份 etcd"></a><strong>（1）手动备份 etcd</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke etcd snapshot-save --name backup.db</span><br></pre></td></tr></table></figure>
-<ul>
-<li>备份 etcd 数据，文件存储在 <code>/opt/rke/etcd-snapshots/backup.db</code>。</li>
-</ul>
-<h4 id="（2）恢复-etcd"><a href="#（2）恢复-etcd" class="headerlink" title="（2）恢复 etcd"></a><strong>（2）恢复 etcd</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke etcd snapshot-restore --name backup.db</span><br></pre></td></tr></table></figure>
-<ul>
-<li>通过 <strong>etcd 备份文件</strong> 还原整个集群状态。</li>
-</ul>
-<hr>
-<h3 id="5️⃣-查看-RKE-版本"><a href="#5️⃣-查看-RKE-版本" class="headerlink" title="5️⃣ 查看 RKE 版本"></a><strong>5️⃣ 查看 RKE 版本</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke --version</span><br></pre></td></tr></table></figure>
-<p>📌 <strong>作用</strong>：查看当前 RKE 版本。</p>
-<hr>
-<h3 id="6️⃣-获取-kube-config-文件"><a href="#6️⃣-获取-kube-config-文件" class="headerlink" title="6️⃣ 获取 kube_config 文件"></a><strong>6️⃣ 获取 <code>kube_config</code> 文件</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke config --list-all</span><br></pre></td></tr></table></figure>
-<p>📌 <strong>作用</strong>：</p>
-<ul>
-<li>生成 <code>kube_config</code>，用于 <code>kubectl</code> 连接集群。</li>
-</ul>
-<p><strong>➜ 如果 <code>kube_config</code> 丢失，可重新生成：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke up --config cluster.yml</span><br></pre></td></tr></table></figure>
-<p>然后将 <code>kube_config_cluster.yml</code> 复制到 <code>~/.kube/config</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> kube_config_cluster.yml ~/.kube/config</span><br><span class="line"><span class="built_in">export</span> KUBECONFIG=~/.kube/config</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="7️⃣-升级-Kubernetes"><a href="#7️⃣-升级-Kubernetes" class="headerlink" title="7️⃣ 升级 Kubernetes"></a><strong>7️⃣ 升级 Kubernetes</strong></h3><p>📌 <strong>场景：Kubernetes 版本升级</strong></p>
-<ol>
-<li><strong>修改 <code>cluster.yml</code>，更新 <code>kubernetes_version</code></strong><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kubernetes_version:</span> <span class="string">&quot;v1.26.15-rancher1-1&quot;</span></span><br></pre></td></tr></table></figure></li>
-<li><strong>执行 RKE 重新部署</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke up --config cluster.yml</span><br></pre></td></tr></table></figure></li>
-</ol>
-<ul>
-<li><strong>注意</strong>：确保 <strong>所有节点</strong> 运行支持的 Docker 版本。</li>
-</ul>
-<hr>
-<h3 id="8️⃣-删除集群"><a href="#8️⃣-删除集群" class="headerlink" title="8️⃣ 删除集群"></a><strong>8️⃣ 删除集群</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke remove --config cluster.yml</span><br></pre></td></tr></table></figure>
-<p>📌 <strong>作用</strong>：</p>
-<ul>
-<li><strong>彻底删除 Kubernetes 集群</strong>，清理所有 RKE 相关容器。</li>
-</ul>
-<p>📌 <strong>慎用</strong>：</p>
-<ul>
-<li>该命令会清除所有 etcd 数据，无法恢复！</li>
-</ul>
-<hr>
-<h3 id="9️⃣-诊断集群健康"><a href="#9️⃣-诊断集群健康" class="headerlink" title="9️⃣ 诊断集群健康"></a><strong>9️⃣ 诊断集群健康</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke up --config cluster.yml --debug</span><br></pre></td></tr></table></figure>
-<p>📌 <strong>作用</strong>：</p>
-<ul>
-<li>以 <strong>Debug 模式</strong> 启动 RKE，显示详细日志信息。</li>
-<li>适用于 <strong>排查 RKE 运行失败的情况</strong>。</li>
-</ul>
-<hr>
-<h2 id="📌-总结"><a href="#📌-总结" class="headerlink" title="📌 总结"></a><strong>📌 总结</strong></h2><table>
-<thead>
-<tr>
-<th><strong>命令</strong></th>
-<th><strong>使用场景</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>rke up</code></td>
-<td>初始化或更新 Kubernetes 集群</td>
-</tr>
-<tr>
-<td><code>rke remove</code></td>
-<td><strong>删除 Kubernetes 集群</strong>（⚠️ 慎用！）</td>
-</tr>
-<tr>
-<td><code>rke etcd snapshot-save</code></td>
-<td><strong>备份 etcd</strong>（快照）</td>
-</tr>
-<tr>
-<td><code>rke etcd snapshot-restore</code></td>
-<td><strong>恢复 etcd</strong>（从备份还原）</td>
-</tr>
-<tr>
-<td><code>rke config --list-all</code></td>
-<td>获取 <code>kube_config</code> 配置</td>
-</tr>
-<tr>
-<td><code>rke --version</code></td>
-<td>查看 RKE 版本</td>
-</tr>
-<tr>
-<td><code>rke up --debug</code></td>
-<td><strong>调试模式</strong> 运行 RKE，排查错误</td>
-</tr>
-<tr>
-<td><code>rke up --config cluster.yml</code></td>
-<td><strong>添加或删除节点</strong></td>
-</tr>
-<tr>
-<td><code>rke up --config cluster.yml</code>（更新 <code>kubernetes_version</code>）</td>
-<td><strong>升级 Kubernetes</strong></td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="🚀-RKE-适用场景"><a href="#🚀-RKE-适用场景" class="headerlink" title="🚀 RKE 适用场景"></a><strong>🚀 RKE 适用场景</strong></h2><p>✅ <strong>适合离线安装</strong>（无需外部网络）<br>✅ <strong>适合多节点、云&#x2F;裸机环境</strong>（支持 HA 集群）<br>✅ <strong>免去复杂的 <code>kubeadm</code> 配置</strong>，简化 Kubernetes 安装<br>✅ <strong>自动处理证书管理</strong>，减少人为错误  </p>
-<hr>
-<h2 id="📌-你的下一步"><a href="#📌-你的下一步" class="headerlink" title="📌 你的下一步"></a><strong>📌 你的下一步</strong></h2><p>1️⃣ <strong>查看 <code>cluster.yml</code> 配置是否正确</strong>：<br>   <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> cluster.yml</span><br></pre></td></tr></table></figure><br>2️⃣ <strong>使用 <code>rke up</code> 部署集群</strong>：<br>   <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rke up --config cluster.yml</span><br></pre></td></tr></table></figure><br>3️⃣ <strong>使用 <code>kubectl</code> 连接 Kubernetes</strong>：<br>   <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1414,7 +1362,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">190</span>
+          <span class="site-state-item-count">191</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
