@@ -18149,9 +18149,45 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 ]]></content>
   </entry>
   <entry>
-    <title>架构师与程序员的关键差异</title>
-    <url>/2026/04/16/%E6%9E%B6%E6%9E%84%E5%B8%88%E4%B8%8E%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E5%85%B3%E9%94%AE%E5%B7%AE%E5%BC%82/</url>
-    <content><![CDATA[<h2 id="一、-程序员-vs-架构师：核心思维差异"><a href="#一、-程序员-vs-架构师：核心思维差异" class="headerlink" title="一、 程序员 vs 架构师：核心思维差异"></a>一、 程序员 vs 架构师：核心思维差异</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">普通程序员：拿到需求 → 想用什么技术实现 → 写代码</span><br><span class="line">架构师：拿到需求 → 抽象本质 → 分治拆分 → 评估复用 → 规划迭代 → 设计方案 → 写代码（最后一步）</span><br><span class="line"></span><br><span class="line">时间分配的差异：</span><br><span class="line">● 初级工程师：80%时间写代码，20%时间思考</span><br><span class="line">● 架构师：50%时间思考，30%时间沟通，20%时间写核心代码</span><br></pre></td></tr></table></figure>
+    <title>架构师思维</title>
+    <url>/2026/01/16/%E6%9E%B6%E6%9E%84%E5%B8%88%E4%B8%8E%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E5%85%B3%E9%94%AE%E5%B7%AE%E5%BC%82/</url>
+    <content><![CDATA[<h2 id="架构师的四个进化阶段"><a href="#架构师的四个进化阶段" class="headerlink" title="架构师的四个进化阶段"></a>架构师的四个进化阶段</h2><table>
+<thead>
+<tr>
+<th align="left">阶段</th>
+<th align="left">定位</th>
+<th align="left">核心特征 (挑战)</th>
+<th align="left">思维转化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>第一阶段：域架构师</strong></td>
+<td align="left">技术专家</td>
+<td align="left">追求技术极致（性能、优雅），易陷于“技术竖井”</td>
+<td align="left"><strong>技术合理性 &gt; 一切</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>第二阶段：跨域架构师</strong></td>
+<td align="left">技术外交官</td>
+<td align="left">解决熵增，协调局部与全局的矛盾，面临利益、认知、信息割裂</td>
+<td align="left"><strong>从“实现者”转向“协调者”</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>第三阶段：总架构师</strong></td>
+<td align="left">技术战略家</td>
+<td align="left">对抗不确定性，在技术、商业、组织三维中做决策</td>
+<td align="left"><strong>技术嗅觉 + 商业视野</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>第四阶段：CTO</strong></td>
+<td align="left">商业决策者</td>
+<td align="left">核心考量不是“酷”，而是“企业的长期生存与竞争优势”</td>
+<td align="left"><strong>技术视角下的企业CEO</strong></td>
+</tr>
+</tbody></table>
+<p>注重：商业指标上（成本、效率、风险、体验）思考<br>架构师的最高境界，是在技术理想与商业现实之间，找到让企业长期利益最大化的那个平衡点。</p>
+<hr>
+<h2 id="一、-程序员-vs-架构师：核心思维差异"><a href="#一、-程序员-vs-架构师：核心思维差异" class="headerlink" title="一、 程序员 vs 架构师：核心思维差异"></a>一、 程序员 vs 架构师：核心思维差异</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">普通程序员：拿到需求 → 想用什么技术实现 → 写代码</span><br><span class="line">架构师：拿到需求 → 抽象本质 → 分治拆分 → 评估复用 → 规划迭代 → 设计方案 → 写代码（最后一步）</span><br><span class="line"></span><br><span class="line">时间分配的差异：</span><br><span class="line">● 初级工程师：80%时间写代码，20%时间思考</span><br><span class="line">● 架构师：50%时间思考，30%时间沟通，20%时间写核心代码</span><br></pre></td></tr></table></figure>
 
 <table>
 <thead>
