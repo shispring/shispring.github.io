@@ -184,6 +184,373 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/03/31/pprof%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/03/31/pprof%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">pprof实践</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-03-31 18:22:50" itemprop="dateCreated datePublished" datetime="2026-03-31T18:22:50+08:00">2026-03-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-04-01 12:54:52" itemprop="dateModified" datetime="2026-04-01T12:54:52+08:00">2026-04-01</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="pprof常用操作"><a href="#pprof常用操作" class="headerlink" title="pprof常用操作"></a>pprof常用操作</h2><blockquote>
+<p>支持多种性能维度的分析，包括 CPU 使用率、内存分配与泄漏、goroutine 调度、函数调用耗时、阻塞操作等。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"># 安装graphviz</span><br><span class="line">yum install -y graphviz</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PPROF_BASE_URL=&quot;http://11.52.2.19:6060&quot;</span><br><span class="line"></span><br><span class="line"># 抓堆快照</span><br><span class="line">## 交互式</span><br><span class="line">go tool pprof $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"># 在 pprof 交互模式中，可以使用一些调试命令：</span><br><span class="line">#    top 20        — 查看内存占用前20的函数</span><br><span class="line">#    top 20 -cum   — 按累积分配量排序</span><br><span class="line">#    web           — 生成可视化 SVG 图（1、需安装 graphviz，2、有浏览器）</span><br><span class="line">#    list funcName — 查看某函数的逐行分配</span><br><span class="line"></span><br><span class="line">## http请求</span><br><span class="line">curl -s $PPROF_BASE_URL/debug/pprof/heap?debug=1 | head -30</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看 goroutine 是否泄漏</span><br><span class="line">curl $PPROF_BASE_URL/debug/pprof/goroutine?debug=1 | head -50</span><br><span class="line"># 或</span><br><span class="line">go tool pprof $PPROF_BASE_URL/debug/pprof/goroutine</span><br><span class="line">pprof) svg &gt; leak.svg #导出svg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#离线导出查看堆内存</span><br><span class="line">curl -s -o heap.pb.gz $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line">#浏览器查看</span><br><span class="line">go tool pprof -http=0.0.0.0:8080 ./heap.pb.gz</span><br><span class="line"></span><br><span class="line">#或者导出 SVG，然后 scp 到本地打开</span><br><span class="line">go tool pprof -svg ./heap.pb.gz &gt; heap.svg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#或者一步到位</span><br><span class="line">#查CPU：默认从当前开始收集30s的cρu使用情况, 需要等待3θs</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/profile</span><br><span class="line">#等120秒</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/profile?seconds=120</span><br><span class="line"></span><br><span class="line">#查内存</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">#查协程泄漏</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/goroutine</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#对比差异</span><br><span class="line">## 第一次</span><br><span class="line">curl -o heap1.pb.gz $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">## 等 10-30 分钟</span><br><span class="line">curl -o heap2.pb.gz $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">## 对比差异（找增长最快的函数）</span><br><span class="line">go tool pprof -base heap1.pb.gz heap2.pb.gz</span><br><span class="line">## 进入后 top 20 查看增量</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="pprof-交互模式最佳实践（命令速查表）"><a href="#pprof-交互模式最佳实践（命令速查表）" class="headerlink" title="pprof 交互模式最佳实践（命令速查表）"></a>pprof 交互模式最佳实践（命令速查表）</h2><h3 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>top 20</code></td>
+<td>按 flat 值展示前 20 个函数</td>
+<td>快速定位占内存&#x2F;CPU 最多的函数</td>
+</tr>
+<tr>
+<td><code>top 20 -cum</code></td>
+<td>按 cum（累积）值排序</td>
+<td>定位调用链上层的”源头”函数</td>
+</tr>
+<tr>
+<td><code>list &lt;函数名&gt;</code></td>
+<td>展示函数逐行的分配&#x2F;CPU 占用</td>
+<td>精确到哪一行代码造成的分配（**需要编译时保留符号，不能用 <code>-s -w</code>**）</td>
+</tr>
+<tr>
+<td><code>web</code></td>
+<td>生成调用图并打开浏览器</td>
+<td>需要 Graphviz + 浏览器，服务器上一般不可用</td>
+</tr>
+<tr>
+<td><code>svg</code></td>
+<td>生成 SVG 输出到 stdout</td>
+<td><code>go tool pprof -svg file.pb.gz &gt; out.svg</code></td>
+</tr>
+<tr>
+<td><code>png</code></td>
+<td>生成 PNG 图片</td>
+<td>同上，输出重定向到 .png</td>
+</tr>
+<tr>
+<td><code>pdf</code></td>
+<td>生成 PDF 文档</td>
+<td>适合存档分析报告</td>
+</tr>
+</tbody></table>
+<h3 id="过滤与聚焦"><a href="#过滤与聚焦" class="headerlink" title="过滤与聚焦"></a>过滤与聚焦</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>focus=&lt;正则&gt;</code></td>
+<td>只展示匹配的函数</td>
+<td>例如 <code>top 20 -focus=informer</code></td>
+</tr>
+<tr>
+<td><code>ignore=&lt;正则&gt;</code></td>
+<td>排除匹配的函数</td>
+<td>例如 <code>top 20 -ignore=runtime</code></td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>展示 profile 中的标签信息</td>
+<td>查看 label 维度</td>
+</tr>
+<tr>
+<td><code>tree</code></td>
+<td>以树形展示调用关系</td>
+<td>理解调用链层级</td>
+</tr>
+<tr>
+<td><code>traces</code></td>
+<td>展示所有采样的完整栈</td>
+<td>深入分析某类分配的完整调用路径</td>
+</tr>
+</tbody></table>
+<h3 id="切换分析类型（核心技巧）"><a href="#切换分析类型（核心技巧）" class="headerlink" title="切换分析类型（核心技巧）"></a>切换分析类型（核心技巧）</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sample_index=inuse_space</code></td>
+<td>当前堆上驻留的内存量</td>
+<td><strong>默认值</strong>，排查”现在哪些对象在占内存”</td>
+</tr>
+<tr>
+<td><code>sample_index=inuse_objects</code></td>
+<td>当前堆上驻留的对象数量</td>
+<td>排查大量小对象（如 string、slice header）</td>
+</tr>
+<tr>
+<td><code>sample_index=alloc_space</code></td>
+<td>从启动到现在累计分配的内存量</td>
+<td><strong>排查高频分配热点</strong>（即使对象已释放也能看到）</td>
+</tr>
+<tr>
+<td><code>sample_index=alloc_objects</code></td>
+<td>从启动到现在累计分配的对象数量</td>
+<td>排查 GC 压力来源</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>在交互模式中输入 <code>o</code> 可查看当前选项，<code>sample_index=alloc_space</code> 然后 <code>top 20</code> 即可切换。</p>
+</blockquote>
+<h3 id="对比分析（检测泄漏最有效）"><a href="#对比分析（检测泄漏最有效）" class="headerlink" title="对比分析（检测泄漏最有效）"></a>对比分析（检测泄漏最有效）</h3><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 抓第一次快照</td>
+<td><code>curl -o heap1.pb.gz http://IP:6060/debug/pprof/heap</code></td>
+<td>基线</td>
+</tr>
+<tr>
+<td>2. 等 10-30 分钟</td>
+<td>—</td>
+<td>等待内存增长</td>
+</tr>
+<tr>
+<td>3. 抓第二次快照</td>
+<td><code>curl -o heap2.pb.gz http://IP:6060/debug/pprof/heap</code></td>
+<td>对比点</td>
+</tr>
+<tr>
+<td>4. 差异分析</td>
+<td><code>go tool pprof -base heap1.pb.gz heap2.pb.gz</code></td>
+<td>只展示增量，找泄漏点</td>
+</tr>
+<tr>
+<td>5. 查看增量 top</td>
+<td><code>top 20</code></td>
+<td>增量最大的函数就是嫌疑对象</td>
+</tr>
+</tbody></table>
+<h3 id="其他-profile-类型"><a href="#其他-profile-类型" class="headerlink" title="其他 profile 类型"></a>其他 profile 类型</h3><table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>URL</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>heap</td>
+<td><code>/debug/pprof/heap</code></td>
+<td>内存分配（最常用）</td>
+</tr>
+<tr>
+<td>goroutine</td>
+<td><code>/debug/pprof/goroutine</code></td>
+<td>goroutine 泄漏检查</td>
+</tr>
+<tr>
+<td>profile</td>
+<td><code>/debug/pprof/profile?seconds=30</code></td>
+<td>CPU 热点（采 30 秒）</td>
+</tr>
+<tr>
+<td>allocs</td>
+<td><code>/debug/pprof/allocs</code></td>
+<td>累积分配（类似 heap 的 alloc_space）</td>
+</tr>
+<tr>
+<td>block</td>
+<td><code>/debug/pprof/block</code></td>
+<td>阻塞分析</td>
+</tr>
+<tr>
+<td>mutex</td>
+<td><code>/debug/pprof/mutex</code></td>
+<td>锁竞争分析</td>
+</tr>
+<tr>
+<td>trace</td>
+<td><code>/debug/pprof/trace?seconds=5</code></td>
+<td>运行时 trace（用 <code>go tool trace</code> 打开）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="1-生产环境什么情况下才会用-dlv？（适用场景）"><a href="#1-生产环境什么情况下才会用-dlv？（适用场景）" class="headerlink" title="1. 生产环境什么情况下才会用 dlv？（适用场景）"></a>1. 生产环境什么情况下才会用 <code>dlv</code>？（适用场景）</h2><p>只有当以下<strong>所有条件同时满足</strong>时，才会考虑在线上用 <code>dlv</code>：</p>
+<ol>
+<li><strong>日志、Metrics、pprof 甚至 Trace 都无法定位问题</strong>：比如变量内部状态异常、复杂的并发时序 Bug（Race Condition），或者某些请求走到特定分支后悄无声息地卡住（非死锁、无报错）。</li>
+<li><strong>问题无法在测试&#x2F;预发环境复现</strong>：只在生产的特定数据、特定流量规模或特定时序下才发生（所谓“海森堡 Bug”）。</li>
+<li><strong>不能重启进程</strong>：一重启现场就没了，而且问题很久才复现一次。</li>
+<li><strong>服务可以容忍短暂停顿</strong>：<code>dlv</code> 命中断点时，整个进程（或某些 Goroutine）会暂停。如果你的 Controller 卡住，可能导致心跳超时、Leader 切换甚至全量 Reconcile 重启，影响控制面稳定性。</li>
+</ol>
+<p><strong>常见的“必须用 dlv”的线上绝境：</strong></p>
+<ul>
+<li>进程死锁&#x2F;协程挂起，但 <code>pprof/goroutine</code> 导出的栈信息不足以看出具体是哪个结构体内部的锁。</li>
+<li>内存泄漏，<code>pprof/heap</code> 看出分配点，但不知道是哪个具体业务对象的切片在无限膨胀（需要看内存变量的实际值）。</li>
+<li>复杂的逻辑流转，需要在崩溃前夕（Panic 之前）打印局部变量的状态。</li>
+</ul>
+<h2 id="2-使用-dlv-交互式排查主要内容"><a href="#2-使用-dlv-交互式排查主要内容" class="headerlink" title="2. 使用 dlv 交互式排查主要内容"></a>2. 使用 <code>dlv</code> 交互式排查主要内容</h2><p>进入 dlv 交互模式后：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(dlv) goroutines             # 查看所有协程状态</span><br><span class="line">(dlv) gr 123                 # 切换到挂起或异常的 123 号协程</span><br><span class="line">(dlv) bt                     # 查看当前协程的堆栈 (Backtrace)</span><br><span class="line">(dlv) frame 3                # 跳转到堆栈的某一层</span><br><span class="line">(dlv) locals                 # 打印当前函数的所有局部变量</span><br><span class="line">(dlv) print myStruct.Field   # 打印特定变量的值</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>高危警告：</strong><br>尽量<strong>避免在线上使用 <code>break</code> (断点) 和 <code>continue</code><strong>，因为断点命中时会冻结进程，这通常会导致 K8s Liveness Probe 失败进而重启 Pod，彻底破坏案发现场。线上 <code>dlv attach</code> 的主要目的是</strong>检查当前时刻的变量状态和所有协程堆栈</strong>，看完了立刻 <code>detach</code> 或 <code>exit</code>。</p>
+</blockquote>
+<h2 id="3-为什么生产很少用"><a href="#3-为什么生产很少用" class="headerlink" title="3. 为什么生产很少用"></a>3. 为什么生产很少用</h2><p>在<strong>本地开发</strong>（特别是 IDE 环境如 VSCode&#x2F;Goland）或<strong>本地 Kind 集群</strong>中，<code>dlv</code> 是极其常用的（本地代码热更新&#x2F;单步调试）。<br>但在生产环境，<strong>成熟的团队会通过前置的可观测性建设来替代 99% 的 <code>dlv</code> 需求</strong>：</p>
+<ol>
+<li>**完善的日志 (Zap&#x2F;Klog)**：记录关键分支的上下文。</li>
+<li>**丰富的 Metrics (Prometheus)**：监控 QPS、耗时、队列深度。</li>
+<li><strong>常态化的 pprof 接口</strong>：随时抓取 CPU&#x2F;Heap&#x2F;Goroutine。</li>
+<li>**分布式追踪 (Tracing)**：如果是微服务架构，记录链路。</li>
+</ol>
+<h2 id="4-pprof-最常用的功能是哪些？"><a href="#4-pprof-最常用的功能是哪些？" class="headerlink" title="4. pprof 最常用的功能是哪些？"></a>4. pprof 最常用的功能是哪些？</h2><p>按使用频率和实用性排序：</p>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>profile</th>
+<th>路径</th>
+<th>使用频率</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>goroutine</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/goroutine</code></a></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>最常用。排查 goroutine 泄漏、卡住、堆积。<code>?debug=2</code> 直接看全部堆栈</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>heap</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/heap</code></a></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>排查内存问题首选。看当前堆上对象分布</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>profile (CPU)</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/profile</code></a></td>
+<td>⭐⭐⭐⭐</td>
+<td>CPU 热点分析，需要采样一段时间（默认 30 秒）</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>allocs</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/allocs</code></a></td>
+<td>⭐⭐⭐</td>
+<td>排查频繁分配 &#x2F; GC 压力大时使用</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>trace</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/trace</code></a></td>
+<td>⭐⭐</td>
+<td>更深入的运行时分析，数据量大，偶尔用</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Index 首页</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/</code></a></td>
+<td>⭐⭐</td>
+<td>入口页，看概览信息</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>block &#x2F; mutex</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/block</code></a></td>
+<td>⭐</td>
+<td>需要额外开启采样率才有数据，偶尔用</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>cmdline &#x2F; symbol &#x2F; threadcreate</strong></td>
+<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/cmdline</code></a></td>
+<td>⭐</td>
+<td>辅助性质，直接用得少</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/03/17/%E7%BD%91%E7%BB%9C%E9%9A%94%E7%A6%BB%E6%89%8B%E6%AE%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1783,192 +2150,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/28/%E9%99%90%E6%B5%81%E5%AE%9E%E6%93%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/01/28/%E9%99%90%E6%B5%81%E5%AE%9E%E6%93%8D/" class="post-title-link" itemprop="url">限流实操</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-01-28 17:43:21 / 修改时间：18:22:38" itemprop="dateCreated datePublished" datetime="2026-01-28T17:43:21+08:00">2026-01-28</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="限流算法"><a href="#限流算法" class="headerlink" title="限流算法"></a>限流算法</h2><table>
-<thead>
-<tr>
-<th>算法名称</th>
-<th>原理一句话</th>
-<th>优点</th>
-<th>缺点</th>
-<th>典型案例 &#x2F; 场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>计数器（Counter）</strong></td>
-<td>累加请求数，超过阈值拒绝</td>
-<td>实现极简单</td>
-<td>无时间维度；洪峰瞬间失效</td>
-<td>Demo &#x2F; 教学</td>
-</tr>
-<tr>
-<td><strong>固定窗口（Fixed Window）</strong></td>
-<td>每个时间窗口内最多 N 次</td>
-<td>简单、易理解</td>
-<td>窗口边界突刺</td>
-<td>简单接口限流</td>
-</tr>
-<tr>
-<td><strong>滑动窗口（Sliding Window）</strong></td>
-<td>统计最近 T 时间内请求数</td>
-<td>平滑、精确</td>
-<td>实现复杂、存储成本高</td>
-<td>SDK &#x2F; API 网关</td>
-</tr>
-<tr>
-<td><strong>漏桶（Leaky Bucket）</strong></td>
-<td>请求进桶，固定速率漏出</td>
-<td>输出稳定、可整形</td>
-<td>不支持突发流量</td>
-<td>网络整形、QoS</td>
-</tr>
-<tr>
-<td>⭐ <strong>令牌桶（Token Bucket）</strong></td>
-<td>定速生成令牌，请求消耗</td>
-<td>支持突发、弹性好</td>
-<td>实现略复杂</td>
-<td><strong>生产主流方案</strong></td>
-</tr>
-</tbody></table>
-<blockquote>
-<p>限流 ≠ 平滑<br>限流 &#x3D; 允许爆发，但要兜底</p>
-</blockquote>
-<h2 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h2><h3 id="核心参数"><a href="#核心参数" class="headerlink" title="核心参数"></a>核心参数</h3><table>
-<thead>
-<tr>
-<th>参数</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>rate</td>
-<td>每秒生成多少令牌</td>
-</tr>
-<tr>
-<td>capacity</td>
-<td>桶最大容量</td>
-</tr>
-<tr>
-<td>tokens</td>
-<td>当前可用令牌</td>
-</tr>
-<tr>
-<td>timestamp</td>
-<td>上次更新时间</td>
-</tr>
-</tbody></table>
-<h3 id="行为特性"><a href="#行为特性" class="headerlink" title="行为特性"></a>行为特性</h3><ul>
-<li>平时没流量 → 令牌累积</li>
-<li>突发流量 → 快速消耗</li>
-<li>超出能力 → 直接拒绝（429）</li>
-</ul>
-<blockquote>
-<p><strong>Lua 在 Redis 中是：单线程、原子执行</strong><br>✅ Redis Lua 脚本执行是 <strong>单线程、原子、阻塞</strong><br>所以不要在 Lua 中做“慢逻辑”。</p>
-</blockquote>
-<p>✅ Redis Lua 脚本不会自动持久化源代码<br>只能通过 <code>EVALSHA</code> 调用。</p>
-<h2 id="结合-docker-compose：完整加载流程"><a href="#结合-docker-compose：完整加载流程" class="headerlink" title="结合 docker-compose：完整加载流程"></a>结合 docker-compose：完整加载流程</h2><h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rate-limit-demo/</span><br><span class="line">├── app.py</span><br><span class="line">├── token_bucket.lua</span><br><span class="line">├── Dockerfile</span><br><span class="line">└── docker-compose.yml</span><br></pre></td></tr></table></figure>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"># cat token_bucket.lua</span><br><span class="line">-- token_bucket.lua</span><br><span class="line">local key = KEYS[1]</span><br><span class="line">local rate = tonumber(ARGV[1])</span><br><span class="line">local capacity = tonumber(ARGV[2])</span><br><span class="line">local now = tonumber(ARGV[3])</span><br><span class="line">local requested = tonumber(ARGV[4])</span><br><span class="line"></span><br><span class="line">local data = redis.call(&quot;HMGET&quot;, key, &quot;tokens&quot;, &quot;timestamp&quot;)</span><br><span class="line">local tokens = tonumber(data[1]) or capacity</span><br><span class="line">local last = tonumber(data[2]) or now</span><br><span class="line"></span><br><span class="line">-- 生成新令牌</span><br><span class="line">local delta = math.max(0, now - last)</span><br><span class="line">tokens = math.min(capacity, tokens + delta * rate)</span><br><span class="line"></span><br><span class="line">if tokens &lt; requested then</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 0</span><br><span class="line">else</span><br><span class="line">    tokens = tokens - requested</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 1</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"># cat app.py</span><br><span class="line">from fastapi import FastAPI, Request, HTTPException</span><br><span class="line">import redis</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">r = redis.Redis(host=&quot;redis&quot;, port=6379, decode_responses=True)</span><br><span class="line"></span><br><span class="line">with open(&quot;token_bucket.lua&quot;) as f:</span><br><span class="line">    LUA_SCRIPT = r.register_script(f.read())</span><br><span class="line"></span><br><span class="line">RATE = 5</span><br><span class="line">CAPACITY = 10</span><br><span class="line"></span><br><span class="line">@app.get(&quot;/api&quot;)</span><br><span class="line">def api(request: Request):</span><br><span class="line">    now = int(time.time())</span><br><span class="line">    allowed = LUA_SCRIPT(</span><br><span class="line">        keys=[&quot;token_bucket:api&quot;],</span><br><span class="line">        args=[RATE, CAPACITY, now, 1]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    if allowed == 0:</span><br><span class="line">        raise HTTPException(status_code=429, detail=&quot;Too Many Requests&quot;)</span><br><span class="line"></span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;ok&quot;&#125;</span><br><span class="line"></span><br><span class="line"># cat Dockerfile</span><br><span class="line">FROM docker.io/python:3.12.9</span><br><span class="line"></span><br><span class="line">WORKDIR /app</span><br><span class="line">COPY app.py token_bucket.lua ./</span><br><span class="line">RUN pip install fastapi uvicorn redis</span><br><span class="line"></span><br><span class="line">CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</span><br><span class="line"></span><br><span class="line"># cat docker-compose.yml</span><br><span class="line">services:</span><br><span class="line">  api:</span><br><span class="line">    build: .</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;8000:8000&quot;</span><br><span class="line">    depends_on:</span><br><span class="line">      - redis</span><br><span class="line"></span><br><span class="line">  redis:</span><br><span class="line">    image: docker.io/redis:7.4.7</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;6379:6379&quot;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="启动顺序"><a href="#启动顺序" class="headerlink" title="启动顺序"></a>启动顺序</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up</span><br><span class="line">   ↓</span><br><span class="line">redis 容器启动</span><br><span class="line">   ↓</span><br><span class="line">api 容器启动</span><br><span class="line">   ↓</span><br><span class="line">Python import app.py</span><br><span class="line">   ↓</span><br><span class="line">读取 token_bucket.lua</span><br><span class="line">   ↓</span><br><span class="line">SCRIPT LOAD 到 Redis</span><br><span class="line">   ↓</span><br><span class="line">返回 SHA1</span><br><span class="line">   ↓</span><br><span class="line">后续请求 → EVALSHA</span><br></pre></td></tr></table></figure>
-<hr>
-<h3 id="启动及验证命令"><a href="#启动及验证命令" class="headerlink" title="启动及验证命令"></a>启动及验证命令</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#start</span><br><span class="line">docker compose up --build</span><br><span class="line"></span><br><span class="line">#观察token变化</span><br><span class="line">while true; do   curl http://localhost:8000/api;  sleep 0.1; done</span><br><span class="line"></span><br><span class="line">#在宿主机上观测</span><br><span class="line">#装客户端：yum install -y redis</span><br><span class="line">watch -n 0.1 &quot;redis-cli HGETALL token_bucket:api&quot;</span><br><span class="line"></span><br><span class="line">#替代ab的压测方案</span><br><span class="line">hey -n 100 -c 5 -q 5 http://localhost:8000/api</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<hr>
-<h3 id="✅-初始状态的影响"><a href="#✅-初始状态的影响" class="headerlink" title="✅ 初始状态的影响"></a>✅ 初始状态的影响</h3><table>
-<thead>
-<tr>
-<th>初始状态</th>
-<th>影响</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>令牌桶满</td>
-<td>更友好突发体验</td>
-</tr>
-<tr>
-<td>令牌桶空</td>
-<td>更严格控制 steady 速率</td>
-</tr>
-<tr>
-<td>Warm-Up</td>
-<td>更稳定保护系统</td>
-</tr>
-<tr>
-<td>显式 Bootstrap</td>
-<td>服务重启时更可控</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2040,7 +2221,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">193</span>
+          <span class="site-state-item-count">194</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

@@ -184,6 +184,192 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/28/%E9%99%90%E6%B5%81%E5%AE%9E%E6%93%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/28/%E9%99%90%E6%B5%81%E5%AE%9E%E6%93%8D/" class="post-title-link" itemprop="url">限流实操</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-28 17:43:21 / 修改时间：18:22:38" itemprop="dateCreated datePublished" datetime="2026-01-28T17:43:21+08:00">2026-01-28</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="限流算法"><a href="#限流算法" class="headerlink" title="限流算法"></a>限流算法</h2><table>
+<thead>
+<tr>
+<th>算法名称</th>
+<th>原理一句话</th>
+<th>优点</th>
+<th>缺点</th>
+<th>典型案例 &#x2F; 场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>计数器（Counter）</strong></td>
+<td>累加请求数，超过阈值拒绝</td>
+<td>实现极简单</td>
+<td>无时间维度；洪峰瞬间失效</td>
+<td>Demo &#x2F; 教学</td>
+</tr>
+<tr>
+<td><strong>固定窗口（Fixed Window）</strong></td>
+<td>每个时间窗口内最多 N 次</td>
+<td>简单、易理解</td>
+<td>窗口边界突刺</td>
+<td>简单接口限流</td>
+</tr>
+<tr>
+<td><strong>滑动窗口（Sliding Window）</strong></td>
+<td>统计最近 T 时间内请求数</td>
+<td>平滑、精确</td>
+<td>实现复杂、存储成本高</td>
+<td>SDK &#x2F; API 网关</td>
+</tr>
+<tr>
+<td><strong>漏桶（Leaky Bucket）</strong></td>
+<td>请求进桶，固定速率漏出</td>
+<td>输出稳定、可整形</td>
+<td>不支持突发流量</td>
+<td>网络整形、QoS</td>
+</tr>
+<tr>
+<td>⭐ <strong>令牌桶（Token Bucket）</strong></td>
+<td>定速生成令牌，请求消耗</td>
+<td>支持突发、弹性好</td>
+<td>实现略复杂</td>
+<td><strong>生产主流方案</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>限流 ≠ 平滑<br>限流 &#x3D; 允许爆发，但要兜底</p>
+</blockquote>
+<h2 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h2><h3 id="核心参数"><a href="#核心参数" class="headerlink" title="核心参数"></a>核心参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>rate</td>
+<td>每秒生成多少令牌</td>
+</tr>
+<tr>
+<td>capacity</td>
+<td>桶最大容量</td>
+</tr>
+<tr>
+<td>tokens</td>
+<td>当前可用令牌</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>上次更新时间</td>
+</tr>
+</tbody></table>
+<h3 id="行为特性"><a href="#行为特性" class="headerlink" title="行为特性"></a>行为特性</h3><ul>
+<li>平时没流量 → 令牌累积</li>
+<li>突发流量 → 快速消耗</li>
+<li>超出能力 → 直接拒绝（429）</li>
+</ul>
+<blockquote>
+<p><strong>Lua 在 Redis 中是：单线程、原子执行</strong><br>✅ Redis Lua 脚本执行是 <strong>单线程、原子、阻塞</strong><br>所以不要在 Lua 中做“慢逻辑”。</p>
+</blockquote>
+<p>✅ Redis Lua 脚本不会自动持久化源代码<br>只能通过 <code>EVALSHA</code> 调用。</p>
+<h2 id="结合-docker-compose：完整加载流程"><a href="#结合-docker-compose：完整加载流程" class="headerlink" title="结合 docker-compose：完整加载流程"></a>结合 docker-compose：完整加载流程</h2><h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rate-limit-demo/</span><br><span class="line">├── app.py</span><br><span class="line">├── token_bucket.lua</span><br><span class="line">├── Dockerfile</span><br><span class="line">└── docker-compose.yml</span><br></pre></td></tr></table></figure>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"># cat token_bucket.lua</span><br><span class="line">-- token_bucket.lua</span><br><span class="line">local key = KEYS[1]</span><br><span class="line">local rate = tonumber(ARGV[1])</span><br><span class="line">local capacity = tonumber(ARGV[2])</span><br><span class="line">local now = tonumber(ARGV[3])</span><br><span class="line">local requested = tonumber(ARGV[4])</span><br><span class="line"></span><br><span class="line">local data = redis.call(&quot;HMGET&quot;, key, &quot;tokens&quot;, &quot;timestamp&quot;)</span><br><span class="line">local tokens = tonumber(data[1]) or capacity</span><br><span class="line">local last = tonumber(data[2]) or now</span><br><span class="line"></span><br><span class="line">-- 生成新令牌</span><br><span class="line">local delta = math.max(0, now - last)</span><br><span class="line">tokens = math.min(capacity, tokens + delta * rate)</span><br><span class="line"></span><br><span class="line">if tokens &lt; requested then</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 0</span><br><span class="line">else</span><br><span class="line">    tokens = tokens - requested</span><br><span class="line">    redis.call(&quot;HMSET&quot;, key, &quot;tokens&quot;, tokens, &quot;timestamp&quot;, now)</span><br><span class="line">    return 1</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"># cat app.py</span><br><span class="line">from fastapi import FastAPI, Request, HTTPException</span><br><span class="line">import redis</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">r = redis.Redis(host=&quot;redis&quot;, port=6379, decode_responses=True)</span><br><span class="line"></span><br><span class="line">with open(&quot;token_bucket.lua&quot;) as f:</span><br><span class="line">    LUA_SCRIPT = r.register_script(f.read())</span><br><span class="line"></span><br><span class="line">RATE = 5</span><br><span class="line">CAPACITY = 10</span><br><span class="line"></span><br><span class="line">@app.get(&quot;/api&quot;)</span><br><span class="line">def api(request: Request):</span><br><span class="line">    now = int(time.time())</span><br><span class="line">    allowed = LUA_SCRIPT(</span><br><span class="line">        keys=[&quot;token_bucket:api&quot;],</span><br><span class="line">        args=[RATE, CAPACITY, now, 1]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    if allowed == 0:</span><br><span class="line">        raise HTTPException(status_code=429, detail=&quot;Too Many Requests&quot;)</span><br><span class="line"></span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;ok&quot;&#125;</span><br><span class="line"></span><br><span class="line"># cat Dockerfile</span><br><span class="line">FROM docker.io/python:3.12.9</span><br><span class="line"></span><br><span class="line">WORKDIR /app</span><br><span class="line">COPY app.py token_bucket.lua ./</span><br><span class="line">RUN pip install fastapi uvicorn redis</span><br><span class="line"></span><br><span class="line">CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</span><br><span class="line"></span><br><span class="line"># cat docker-compose.yml</span><br><span class="line">services:</span><br><span class="line">  api:</span><br><span class="line">    build: .</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;8000:8000&quot;</span><br><span class="line">    depends_on:</span><br><span class="line">      - redis</span><br><span class="line"></span><br><span class="line">  redis:</span><br><span class="line">    image: docker.io/redis:7.4.7</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;6379:6379&quot;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="启动顺序"><a href="#启动顺序" class="headerlink" title="启动顺序"></a>启动顺序</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up</span><br><span class="line">   ↓</span><br><span class="line">redis 容器启动</span><br><span class="line">   ↓</span><br><span class="line">api 容器启动</span><br><span class="line">   ↓</span><br><span class="line">Python import app.py</span><br><span class="line">   ↓</span><br><span class="line">读取 token_bucket.lua</span><br><span class="line">   ↓</span><br><span class="line">SCRIPT LOAD 到 Redis</span><br><span class="line">   ↓</span><br><span class="line">返回 SHA1</span><br><span class="line">   ↓</span><br><span class="line">后续请求 → EVALSHA</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="启动及验证命令"><a href="#启动及验证命令" class="headerlink" title="启动及验证命令"></a>启动及验证命令</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#start</span><br><span class="line">docker compose up --build</span><br><span class="line"></span><br><span class="line">#观察token变化</span><br><span class="line">while true; do   curl http://localhost:8000/api;  sleep 0.1; done</span><br><span class="line"></span><br><span class="line">#在宿主机上观测</span><br><span class="line">#装客户端：yum install -y redis</span><br><span class="line">watch -n 0.1 &quot;redis-cli HGETALL token_bucket:api&quot;</span><br><span class="line"></span><br><span class="line">#替代ab的压测方案</span><br><span class="line">hey -n 100 -c 5 -q 5 http://localhost:8000/api</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="✅-初始状态的影响"><a href="#✅-初始状态的影响" class="headerlink" title="✅ 初始状态的影响"></a>✅ 初始状态的影响</h3><table>
+<thead>
+<tr>
+<th>初始状态</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>令牌桶满</td>
+<td>更友好突发体验</td>
+</tr>
+<tr>
+<td>令牌桶空</td>
+<td>更严格控制 steady 速率</td>
+</tr>
+<tr>
+<td>Warm-Up</td>
+<td>更稳定保护系统</td>
+</tr>
+<tr>
+<td>显式 Bootstrap</td>
+<td>服务重启时更可控</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/linux%E5%86%85%E6%A0%B8%E5%8D%8F%E8%AE%AE%E6%A0%88/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1769,83 +1955,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/12/ksoftirqd%E5%BB%B6%E8%BF%9F%E5%8F%8Abpftrace%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/01/12/ksoftirqd%E5%BB%B6%E8%BF%9F%E5%8F%8Abpftrace%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">ksoftirqd延迟及bpftrace用法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-01-12 10:14:14 / 修改时间：10:22:58" itemprop="dateCreated datePublished" datetime="2026-01-12T10:14:14+08:00">2026-01-12</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="延迟排查说明"><a href="#延迟排查说明" class="headerlink" title="延迟排查说明"></a>延迟排查说明</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://www.alibabacloud.com/help/zh/alinux/user-guide/use-ksoftirqd-to-troubleshoot-latency-issues">https://www.alibabacloud.com/help/zh/alinux/user-guide/use-ksoftirqd-to-troubleshoot-latency-issues</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">#下载</span><br><span class="line">sudo wget https://gitee.com/dtcccccc/softirq_net_latency/raw/master/softirq_net_latency.bt</span><br><span class="line"></span><br><span class="line">#安装</span><br><span class="line">yum install -y bpftrace</span><br><span class="line">#使用：通过bpftrace来检测是否存在超过100ms的NET_RX类型的softirq延迟</span><br><span class="line">bpftrace ./softirq_net_latency.bt 100000</span><br><span class="line">Attaching 5 probes...</span><br><span class="line">Tracing softirq wait-time latency ... Hit Ctrl-C to end.</span><br><span class="line"> - Will report on latency above 10000 usecs (= 10 ms)</span><br><span class="line">20:07:05 High IRQ-to-softirq latency: 11155 usec (11 ms) on CPU:3 comm:nginx</span><br><span class="line">20:07:05 High IRQ-to-softirq latency: 28662 usec (28 ms) on CPU:29 comm:cron</span><br><span class="line">20:07:05 High IRQ-to-softirq latency: 37188 usec (37 ms) on CPU:41 comm:vector-worker</span><br><span class="line"></span><br><span class="line">@softirq_wait_nanosec:</span><br><span class="line">[128, 256)           187 |                                                    |</span><br><span class="line">[256, 512)       1733833 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|</span><br><span class="line">[512, 1K)        1195045 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                 |</span><br><span class="line">[1K, 2K)          252455 |@@@@@@@                                             |</span><br><span class="line">[2K, 4K)           72816 |@@                                                  |</span><br><span class="line">[4K, 8K)           77342 |@@                                                  |</span><br><span class="line">[8K, 16K)          36643 |@                                                   |</span><br><span class="line">[16K, 32K)          8618 |                                                    |</span><br><span class="line">[32K, 64K)           926 |                                                    |</span><br><span class="line">[64K, 128K)           59 |                                                    |</span><br><span class="line">[128K, 256K)          21 |                                                    |</span><br><span class="line">[256K, 512K)          23 |                                                    |</span><br><span class="line">[512K, 1M)            22 |                                                    |</span><br><span class="line">[1M, 2M)               5 |                                                    |</span><br><span class="line">[2M, 4M)               0 |                                                    |</span><br><span class="line">[4M, 8M)               0 |                                                    |</span><br><span class="line">[8M, 16M)              1 |                                                    |</span><br><span class="line">[16M, 32M)             1 |                                                    |</span><br><span class="line">[32M, 64M)             1 |                                                    |</span><br><span class="line"></span><br><span class="line">#注</span><br><span class="line">如果报告的进程名称（comm）为ksoftirqd/$cpu，则说明延迟是由于ksoftirqd线程得不到调度导致的。</span><br><span class="line">尽管softirq任务已被转移至普通优先级的ksoftirqd内核线程进行处理，但由于该线程处理任务所需时间相对较短，绝大部分时间处于睡眠状态，因此内核调度策略仍然倾向于优先调度该线程。在这种情况下，调度延迟依然显著，需对可能的异常情况进行排查，例如当前CPU上是否存在优先级更高的实时任务，或某个任务在内核态中耗时过长，导致ksoftirqd内核线程无法获得调度等。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="softirq-net-latency-bt文件内容"><a href="#softirq-net-latency-bt文件内容" class="headerlink" title="softirq_net_latency.bt文件内容"></a>softirq_net_latency.bt文件内容</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/bpftrace</span><br><span class="line">/* SPDX-License-Identifier: GPL-2.0+</span><br><span class="line"> *</span><br><span class="line"> * Catching high network IRQ-to-softirq latency by measuing time</span><br><span class="line"> * between softirq &quot;raise&quot; until softirq function is called.  Limited</span><br><span class="line"> * to network via softirq vector NET_RX_SOFTIRQ (3).</span><br><span class="line"> *</span><br><span class="line"> * This script was used for detecting latency issues described in blog:</span><br><span class="line"> *  https://github.blog/2019-11-21-debugging-network-stalls-on-kubernetes/</span><br><span class="line"> *</span><br><span class="line"> * Output examples from this script can be seen in:</span><br><span class="line"> *  https://bugzilla.redhat.com/show_bug.cgi?id=1795049#c8</span><br><span class="line"> *</span><br><span class="line"> * 26-Jan-2020	Jesper Dangaard Brouer	Created this</span><br><span class="line"> * 27-Feb-2024	Jesper Dangaard Brouer	Updated based on production usage</span><br><span class="line"> */</span><br><span class="line">BEGIN</span><br><span class="line">&#123;</span><br><span class="line">	/* Cmdline arg#1: latency threshold input in usec */</span><br><span class="line">	@threshold_usecs = $1 ? $1: 2000;</span><br><span class="line">	/* Cmdline arg#2: enable measuring runtime of softirq func */</span><br><span class="line">	@measure_runtime = $2;</span><br><span class="line">	printf(&quot;Tracing softirq wait-time latency ... Hit Ctrl-C to end.\n&quot;);</span><br><span class="line">	printf(&quot; - Will report on latency above %d usecs (= %d ms)\n&quot;,</span><br><span class="line">	       @threshold_usecs, @threshold_usecs / 1000);</span><br><span class="line">	if (@measure_runtime) &#123;</span><br><span class="line">		printf(&quot; - Also record runtime of softirq func call\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	@threshold_ns = @threshold_usecs * 1000;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">tracepoint:irq:softirq_raise</span><br><span class="line">/args-&gt;vec == 3/   /* NET_RX_SOFTIRQ = 3 */</span><br><span class="line">&#123;</span><br><span class="line">	if (!@start[cpu]) &#123;</span><br><span class="line">		/* Only catch first softirq_raise, to measure time</span><br><span class="line">		 * until softirq_entry happens.  Other raise events</span><br><span class="line">		 * could be triggered by other NICs.</span><br><span class="line">		 */</span><br><span class="line">		@start[cpu] = nsecs;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">tracepoint:irq:softirq_entry</span><br><span class="line">/args-&gt;vec == 3/</span><br><span class="line">&#123;</span><br><span class="line">	if (@start[cpu] &gt; 0) &#123;</span><br><span class="line">		$lat = nsecs - @start[cpu];</span><br><span class="line">		@softirq_wait_nanosec = hist($lat);</span><br><span class="line"></span><br><span class="line">		/* Report on &quot;not-able-to-run&quot; events over threshold */</span><br><span class="line">		if ($lat &gt;= @threshold_ns) &#123;</span><br><span class="line">			// @stack[cpu, $lat] = kstack; //no useful stack</span><br><span class="line">			time(&quot;%H:%M:%S &quot;);</span><br><span class="line">			printf(&quot;High IRQ-to-softirq latency: %d usec (%d ms) on CPU:%d comm:%s\n&quot;,</span><br><span class="line">			       $lat / 1000, $lat / 1000000, cpu, comm);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	delete(@start[cpu]);</span><br><span class="line">	if (@measure_runtime) &#123;</span><br><span class="line">		@runtime[cpu] = nsecs;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">tracepoint:irq:softirq_exit</span><br><span class="line">/args-&gt;vec == 3/</span><br><span class="line">&#123;</span><br><span class="line">	if (@measure_runtime &amp;&amp; @runtime[cpu] &gt; 0) &#123;</span><br><span class="line">		$lat = nsecs - @runtime[cpu];</span><br><span class="line">		@runtime_nanosec = hist($lat);</span><br><span class="line"></span><br><span class="line">		/* Report on &quot;runtime&quot; events over threshold */</span><br><span class="line">		if ($lat &gt;= @threshold_ns) &#123;</span><br><span class="line">			time(&quot;%H:%M:%S &quot;);</span><br><span class="line">			printf(&quot;Long softirq runtime: %d usec (%d ms) on CPU:%d comm:%s\n&quot;,</span><br><span class="line">			       $lat / 1000, $lat / 1000000, cpu, comm);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	delete(@runtime[cpu]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">END</span><br><span class="line">&#123;	/* Default bpftrace will print all remaining maps at END */</span><br><span class="line">	clear(@measure_runtime);</span><br><span class="line">	clear(@threshold_usecs);</span><br><span class="line">	clear(@threshold_ns);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1917,7 +2026,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">193</span>
+          <span class="site-state-item-count">194</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

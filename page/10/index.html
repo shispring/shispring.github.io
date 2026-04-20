@@ -184,6 +184,125 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/" class="post-title-link" itemprop="url">k8s节点扩缩组件autoscaler与externalgrpc模式的grpc调试</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-03-25 10:33:13 / 修改时间：12:23:20" itemprop="dateCreated datePublished" datetime="2025-03-25T10:33:13+08:00">2025-03-25</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="externalgrpc-proto文件"><a href="#externalgrpc-proto文件" class="headerlink" title="externalgrpc.proto文件"></a>externalgrpc.proto文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#文件路径</span><br><span class="line">/home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos/externalgrpc.proto</span><br><span class="line"></span><br><span class="line">#涉及到的import</span><br><span class="line">syntax = &quot;proto3&quot;;</span><br><span class="line"></span><br><span class="line">package clusterautoscaler.cloudprovider.v1.externalgrpc;</span><br><span class="line"></span><br><span class="line">import &quot;google/protobuf/descriptor.proto&quot;;</span><br><span class="line">import &quot;google/protobuf/any.proto&quot;;</span><br><span class="line">import &quot;k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto&quot;;</span><br><span class="line"></span><br><span class="line">import &quot;k8s.io/api/core/v1/generated.proto&quot;;</span><br><span class="line">option go_package = &quot;cluster-autoscaler/cloudprovider/externalgrpc/protos&quot;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="grpc拼凑"><a href="#grpc拼凑" class="headerlink" title="grpc拼凑"></a>grpc拼凑</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#cluster-autoscaler-cloud-provider是云厂商提供服务的域名，配置在证书里</span><br><span class="line">#11.31.213.234是cloud provider的服务端地址</span><br><span class="line"></span><br><span class="line">#验证TLS请求(单项请求)</span><br><span class="line">#openssl s_client -connect  11.31.213.234:65535</span><br><span class="line"></span><br><span class="line">#服务端证书名称：ca.cert.pem ，路径为：</span><br><span class="line">BASEDIR=/home/xxx/cloud-config</span><br><span class="line"></span><br><span class="line">#认证可以通过的请求</span><br><span class="line">grpcurl \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    cluster-autoscaler-cloud-provider:65535    \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups  </span><br><span class="line"></span><br><span class="line">#11.31.213.234对应的cluster-autoscaler-cloud-provider服务podIP</span><br><span class="line">grpcurl -insecure \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    11.31.213.234:65535     \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#无法通过的请求：Failed to dial target host &quot;11.31.213.234:65535&quot;: tls: failed to verify certificate: x509: certificate is valid for 127.0.0.1, not 11.31.213.234</span><br><span class="line">grpcurl \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor  \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    11.31.213.234:65535     \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="如果是tls双向认证情况请求"><a href="#如果是tls双向认证情况请求" class="headerlink" title="如果是tls双向认证情况请求"></a>如果是tls双向认证情况请求</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#在路径配置客户端秘钥及证书</span><br><span class="line">grpcurl \</span><br><span class="line">    --cert $BASEDIR/client.cert.pem  \</span><br><span class="line">    --key $BASEDIR/client.key.pem \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    cluster-autoscaler-cloud-provider:65535    \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="openssl请求解析"><a href="#openssl请求解析" class="headerlink" title="openssl请求解析"></a>openssl请求解析</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">openssl s_client -connect cluster-autoscaler-backend:65535 -CAfile /home/xxx/cloud-config/dev-containerd/ca.cert.pem</span><br><span class="line">CONNECTED(00000003)</span><br><span class="line">Can&#x27;t use SSL_get_servername</span><br><span class="line">depth=1 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">verify return:1</span><br><span class="line">depth=0 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">verify return:1</span><br><span class="line">---</span><br><span class="line">Certificate chain</span><br><span class="line"> 0 s:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">   i:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">---</span><br><span class="line">Server certificate</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIICYDCCAgagAwIBAgIUcO+yQm6JNnr+ogeb...</span><br><span class="line">-----END CERTIFICATE-----</span><br><span class="line">subject=C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line"></span><br><span class="line">issuer=C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">No client certificate CA names sent</span><br><span class="line">Peer signing digest: SHA256</span><br><span class="line">Peer signature type: ECDSA</span><br><span class="line">Server Temp Key: X25519, 253 bits</span><br><span class="line">---</span><br><span class="line">SSL handshake has read 916 bytes and written 369 bytes</span><br><span class="line">Verification: OK</span><br><span class="line">---</span><br><span class="line">New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384</span><br><span class="line">Server public key is 256 bit</span><br><span class="line">Secure Renegotiation IS NOT supported</span><br><span class="line">Compression: NONE</span><br><span class="line">Expansion: NONE</span><br><span class="line">No ALPN negotiated</span><br><span class="line">Early data was not sent</span><br><span class="line">Verify return code: 0 (ok)</span><br><span class="line">---</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="📌-关键点解析"><a href="#📌-关键点解析" class="headerlink" title="📌 关键点解析"></a><strong>📌 关键点解析</strong></h2><h3 id="✅-1-TLS-连接成功"><a href="#✅-1-TLS-连接成功" class="headerlink" title="✅ 1. TLS 连接成功"></a><strong>✅ 1. TLS 连接成功</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CONNECTED(00000003)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>你的客户端 <code>openssl</code> 成功连接到了 <code>cluster-autoscaler-cloud-provider:65535</code> 端口，并完成了 TLS 握手。</li>
+</ul>
+<hr>
+<h3 id="✅-2-证书验证通过"><a href="#✅-2-证书验证通过" class="headerlink" title="✅ 2. 证书验证通过"></a><strong>✅ 2. 证书验证通过</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">depth=1 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">verify return:1</span><br><span class="line">depth=0 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">verify return:1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>你的 CA 证书 <code>/home/xxx/cloud-config/dev-containerd/ca.cert.pem</code> <strong>已经正确地验证了服务器证书</strong>。</li>
+<li><code>verify return:1</code> 表示 <code>openssl</code> 在认证每一级证书时，返回成功。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Verify return code: 0 (ok)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这个 <code>0 (ok)</code> 说明 <strong>TLS 证书链已经正确验证</strong>，你不再遇到 <code>unable to verify the first certificate</code> 之类的错误。</li>
+</ul>
+<p><strong>说明你的 CA 证书是正确的，服务器证书也是可信的。</strong> 🎉</p>
+<hr>
+<h3 id="✅-3-服务器提供的证书链"><a href="#✅-3-服务器提供的证书链" class="headerlink" title="✅ 3. 服务器提供的证书链"></a><strong>✅ 3. 服务器提供的证书链</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Certificate chain</span><br><span class="line"> 0 s:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">   i:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>s:</code> (<strong>subject</strong>) 表示服务器的证书 (<code>cluster-autoscaler-cloud-provider</code>)。</li>
+<li><code>i:</code> (<strong>issuer</strong>) 表示这个证书是由 <code>qihoo.net</code> 这个 CA 颁发的。</li>
+<li>你的 <code>CAfile</code> <strong>包含了 <code>qihoo.net</code> 的 CA 证书</strong>，所以能够正确验证服务器证书。</li>
+</ul>
+<hr>
+<h3 id="✅-4-服务器没有要求客户端证书"><a href="#✅-4-服务器没有要求客户端证书" class="headerlink" title="✅ 4. 服务器没有要求客户端证书"></a><strong>✅ 4. 服务器没有要求客户端证书</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">No client certificate CA names sent</span><br></pre></td></tr></table></figure>
+<ul>
+<li>服务器 <strong>不要求客户端提供证书</strong>，也就是说没有启用 **双向 TLS (mTLS)**。</li>
+<li>如果服务器需要 <strong>mTLS</strong>，你会看到 <code>Acceptable client certificate CA names</code>，并且 <code>openssl</code> 可能会要求 <code>-cert</code> 和 <code>-key</code>。</li>
+</ul>
+<hr>
+<h3 id="✅-5-TLS-版本与加密算法"><a href="#✅-5-TLS-版本与加密算法" class="headerlink" title="✅ 5. TLS 版本与加密算法"></a><strong>✅ 5. TLS 版本与加密算法</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384</span><br><span class="line">Server public key is 256 bit</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>TLS 版本</strong>: <code>TLSv1.3</code>（最新的 TLS 版本，更安全）。</li>
+<li><strong>加密算法</strong>: <code>AES_256_GCM_SHA384</code>（对称加密算法，安全性高）。</li>
+<li><strong>服务器公钥长度</strong>: <code>256 bit</code>，符合现代安全标准。</li>
+</ul>
+<p>你使用的 <code>openssl</code> 版本支持 TLS 1.3，没有出现协议不兼容的问题。</p>
+<hr>
+<h2 id="📌-结论"><a href="#📌-结论" class="headerlink" title="📌 结论"></a><strong>📌 结论</strong></h2><p>✅ <strong>你已经正确配置了 CA 证书</strong>，服务器证书也成功验证。<br>✅ <strong>TLS 连接建立正常</strong>，服务器使用 TLS 1.3，安全性较高。<br>✅ <strong>服务器不要求客户端证书</strong>，所以是 <strong>单向 TLS 认证</strong>。<br>✅ <strong>没有任何 SSL&#x2F;TLS 相关错误</strong>，一切正常！🎉</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/24/k8s%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E6%83%B3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1505,81 +1624,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/20/alpine%E6%BA%90%E5%8F%8A%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/20/alpine%E6%BA%90%E5%8F%8A%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">alpine源及使用</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-02-20 14:42:46 / 修改时间：14:48:45" itemprop="dateCreated datePublished" datetime="2025-02-20T14:42:46+08:00">2025-02-20</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="alpine更换国内源"><a href="#alpine更换国内源" class="headerlink" title="alpine更换国内源"></a>alpine更换国内源</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#方式一</span><br><span class="line">sed -i &#x27;s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g&#x27; /etc/apk/repositories</span><br><span class="line"></span><br><span class="line">#方式二</span><br><span class="line">cat /etc/os-release</span><br><span class="line">cat &gt; test.txt &lt;&lt; EOF</span><br><span class="line">https://mirrors.aliyun.com/alpine/v3.19/main/</span><br><span class="line">https://mirrors.aliyun.com/alpine/v3.19/community/</span><br><span class="line">EOF</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="apk工具"><a href="#apk工具" class="headerlink" title="apk工具"></a>apk工具</h2><p><a target="_blank" rel="noopener" href="https://wangchujiang.com/linux-command/c/apk.html" title="apk工具介绍">apk工具介绍</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1651,7 +1695,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">193</span>
+          <span class="site-state-item-count">194</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

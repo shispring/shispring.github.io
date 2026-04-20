@@ -184,6 +184,300 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/04/20/AI%E8%B7%AF%E5%BE%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/04/20/AI%E8%B7%AF%E5%BE%84/" class="post-title-link" itemprop="url">AI路径</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-04-20 16:21:25 / 修改时间：16:27:38" itemprop="dateCreated datePublished" datetime="2026-04-20T16:21:25+08:00">2026-04-20</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>996</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>一、算法框架（你用什么“工具”做AI）</p>
+<p>可以类比为：<br>👉 TensorFlow &#x2F; PyTorch &#x3D; 编程语言 + 工具箱<br>👉 Sklearn &#x2F; XGBoost &#x3D; 现成算法库（更偏传统机器学习）</p>
+<h2 id="1️⃣-主流框架对比"><a href="#1️⃣-主流框架对比" class="headerlink" title="1️⃣ 主流框架对比"></a>1️⃣ 主流框架对比</h2><table>
+<thead>
+<tr>
+<th>框架</th>
+<th>通俗理解</th>
+<th>适合做什么</th>
+<th>典型场景</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TensorFlow2</td>
+<td>工业级AI平台</td>
+<td>深度学习训练&#x2F;部署</td>
+<td>推荐系统、图像识别</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>PyTorch</td>
+<td>更灵活的研究工具</td>
+<td>深度学习&#x2F;大模型</td>
+<td>NLP、CV、LLM</td>
+<td>⭐⭐（最推荐入门）</td>
+</tr>
+<tr>
+<td>Sklearn</td>
+<td>“傻瓜式”机器学习库</td>
+<td>传统算法</td>
+<td>分类&#x2F;回归</td>
+<td>⭐（新手友好）</td>
+</tr>
+<tr>
+<td>XGBoost</td>
+<td>强力“刷榜神器”</td>
+<td>表格数据建模</td>
+<td>风控、预测</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>FastText</td>
+<td>文本快速处理工具</td>
+<td>文本分类</td>
+<td>评论分类</td>
+<td>⭐</td>
+</tr>
+<tr>
+<td>Caffe</td>
+<td>老牌视觉框架</td>
+<td>图像识别</td>
+<td>已逐渐淘汰</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>MXNet</td>
+<td>亚马逊用的框架</td>
+<td>深度学习</td>
+<td>较少使用</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>ONNX</td>
+<td>模型格式转换工具</td>
+<td>模型部署</td>
+<td>跨平台推理</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>TensorRT</td>
+<td>推理加速器</td>
+<td>GPU部署优化</td>
+<td>高性能推理</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>HuggingFace Transformers</td>
+<td>大模型工具库</td>
+<td>NLP&#x2F;LLM</td>
+<td>ChatGPT类应用</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>Bert</td>
+<td>NLP预训练模型</td>
+<td>文本理解</td>
+<td>搜索&#x2F;问答</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>Darknet</td>
+<td>YOLO框架</td>
+<td>目标检测</td>
+<td>安防&#x2F;监控</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>CenterNet</td>
+<td>检测模型</td>
+<td>图像识别</td>
+<td>自动驾驶</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<h3 id="建议路径"><a href="#建议路径" class="headerlink" title="建议路径"></a>建议路径</h3><table>
+<thead>
+<tr>
+<th>目标</th>
+<th>推荐框架</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>入门AI</td>
+<td>Sklearn</td>
+</tr>
+<tr>
+<td>深度学习</td>
+<td>PyTorch（首选）</td>
+</tr>
+<tr>
+<td>做NLP&#x2F;大模型</td>
+<td>HuggingFace + PyTorch</td>
+</tr>
+<tr>
+<td>工业部署</td>
+<td>TensorFlow &#x2F; TensorRT</td>
+</tr>
+</tbody></table>
+<h3 id="决策脑图"><a href="#决策脑图" class="headerlink" title="决策脑图"></a>决策脑图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">我有什么数据？</span><br><span class="line">   ↓</span><br><span class="line">我要解决什么问题？</span><br><span class="line">   ↓</span><br><span class="line">选算法分类</span><br><span class="line">   ↓</span><br><span class="line">选框架</span><br><span class="line">   ↓</span><br><span class="line">训练模型</span><br></pre></td></tr></table></figure>
+<hr>
+<p>二、算法分类（你要解决什么问题）</p>
+<p>可以理解为：</p>
+<p>👉 要让AI干什么活</p>
+<p>⸻</p>
+<h2 id="2️⃣-分类场景总览"><a href="#2️⃣-分类场景总览" class="headerlink" title="2️⃣ 分类场景总览"></a>2️⃣ 分类场景总览</h2><table>
+<thead>
+<tr>
+<th>分类</th>
+<th>通俗解释</th>
+<th>例子</th>
+<th>应用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>二分类</td>
+<td>判断“是不是”</td>
+<td>垃圾邮件</td>
+<td>风控&#x2F;审核</td>
+</tr>
+<tr>
+<td>多分类</td>
+<td>多选一</td>
+<td>猫&#x2F;狗&#x2F;鸟识别</td>
+<td>图像分类</td>
+</tr>
+<tr>
+<td>文本分类</td>
+<td>给文字贴标签</td>
+<td>评论好坏</td>
+<td>舆情分析</td>
+</tr>
+<tr>
+<td>聚类</td>
+<td>自动分组</td>
+<td>用户分群</td>
+<td>用户画像</td>
+</tr>
+<tr>
+<td>回归</td>
+<td>预测数值</td>
+<td>房价预测</td>
+<td>金融预测</td>
+</tr>
+<tr>
+<td>图像检测</td>
+<td>找出目标位置</td>
+<td>人脸框</td>
+<td>安防</td>
+</tr>
+<tr>
+<td>图像分类</td>
+<td>判断图片是什么</td>
+<td>猫&#x2F;狗</td>
+<td>相册识别</td>
+</tr>
+<tr>
+<td>NLP（自然语言）</td>
+<td>理解文字</td>
+<td>问答&#x2F;翻译</td>
+<td>ChatGPT</td>
+</tr>
+<tr>
+<td>推荐</td>
+<td>猜你喜欢</td>
+<td>抖音推荐</td>
+<td>电商&#x2F;内容</td>
+</tr>
+<tr>
+<td>词嵌入</td>
+<td>把词变向量</td>
+<td>相似词</td>
+<td>搜索</td>
+</tr>
+<tr>
+<td>排序</td>
+<td>谁排前面</td>
+<td>搜索结果</td>
+<td>搜索引擎</td>
+</tr>
+<tr>
+<td>语义分割</td>
+<td>每个像素分类</td>
+<td>自动驾驶</td>
+<td>医疗影像</td>
+</tr>
+<tr>
+<td>实例分割</td>
+<td>分割具体对象</td>
+<td>人&#x2F;车分开</td>
+<td>高级视觉</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/04/20/socat%E7%AE%80%E4%BB%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2359,373 +2653,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/03/31/pprof%E5%AE%9E%E8%B7%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/03/31/pprof%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">pprof实践</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-03-31 18:22:50" itemprop="dateCreated datePublished" datetime="2026-03-31T18:22:50+08:00">2026-03-31</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-04-01 12:54:52" itemprop="dateModified" datetime="2026-04-01T12:54:52+08:00">2026-04-01</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="pprof常用操作"><a href="#pprof常用操作" class="headerlink" title="pprof常用操作"></a>pprof常用操作</h2><blockquote>
-<p>支持多种性能维度的分析，包括 CPU 使用率、内存分配与泄漏、goroutine 调度、函数调用耗时、阻塞操作等。</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"># 安装graphviz</span><br><span class="line">yum install -y graphviz</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PPROF_BASE_URL=&quot;http://11.52.2.19:6060&quot;</span><br><span class="line"></span><br><span class="line"># 抓堆快照</span><br><span class="line">## 交互式</span><br><span class="line">go tool pprof $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"># 在 pprof 交互模式中，可以使用一些调试命令：</span><br><span class="line">#    top 20        — 查看内存占用前20的函数</span><br><span class="line">#    top 20 -cum   — 按累积分配量排序</span><br><span class="line">#    web           — 生成可视化 SVG 图（1、需安装 graphviz，2、有浏览器）</span><br><span class="line">#    list funcName — 查看某函数的逐行分配</span><br><span class="line"></span><br><span class="line">## http请求</span><br><span class="line">curl -s $PPROF_BASE_URL/debug/pprof/heap?debug=1 | head -30</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看 goroutine 是否泄漏</span><br><span class="line">curl $PPROF_BASE_URL/debug/pprof/goroutine?debug=1 | head -50</span><br><span class="line"># 或</span><br><span class="line">go tool pprof $PPROF_BASE_URL/debug/pprof/goroutine</span><br><span class="line">pprof) svg &gt; leak.svg #导出svg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#离线导出查看堆内存</span><br><span class="line">curl -s -o heap.pb.gz $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line">#浏览器查看</span><br><span class="line">go tool pprof -http=0.0.0.0:8080 ./heap.pb.gz</span><br><span class="line"></span><br><span class="line">#或者导出 SVG，然后 scp 到本地打开</span><br><span class="line">go tool pprof -svg ./heap.pb.gz &gt; heap.svg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#或者一步到位</span><br><span class="line">#查CPU：默认从当前开始收集30s的cρu使用情况, 需要等待3θs</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/profile</span><br><span class="line">#等120秒</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/profile?seconds=120</span><br><span class="line"></span><br><span class="line">#查内存</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">#查协程泄漏</span><br><span class="line">go tool pprof -http=0.0.0.0:7777 $PPROF_BASE_URL/debug/pprof/goroutine</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#对比差异</span><br><span class="line">## 第一次</span><br><span class="line">curl -o heap1.pb.gz $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">## 等 10-30 分钟</span><br><span class="line">curl -o heap2.pb.gz $PPROF_BASE_URL/debug/pprof/heap</span><br><span class="line"></span><br><span class="line">## 对比差异（找增长最快的函数）</span><br><span class="line">go tool pprof -base heap1.pb.gz heap2.pb.gz</span><br><span class="line">## 进入后 top 20 查看增量</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="pprof-交互模式最佳实践（命令速查表）"><a href="#pprof-交互模式最佳实践（命令速查表）" class="headerlink" title="pprof 交互模式最佳实践（命令速查表）"></a>pprof 交互模式最佳实践（命令速查表）</h2><h3 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h3><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>说明</th>
-<th>使用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>top 20</code></td>
-<td>按 flat 值展示前 20 个函数</td>
-<td>快速定位占内存&#x2F;CPU 最多的函数</td>
-</tr>
-<tr>
-<td><code>top 20 -cum</code></td>
-<td>按 cum（累积）值排序</td>
-<td>定位调用链上层的”源头”函数</td>
-</tr>
-<tr>
-<td><code>list &lt;函数名&gt;</code></td>
-<td>展示函数逐行的分配&#x2F;CPU 占用</td>
-<td>精确到哪一行代码造成的分配（**需要编译时保留符号，不能用 <code>-s -w</code>**）</td>
-</tr>
-<tr>
-<td><code>web</code></td>
-<td>生成调用图并打开浏览器</td>
-<td>需要 Graphviz + 浏览器，服务器上一般不可用</td>
-</tr>
-<tr>
-<td><code>svg</code></td>
-<td>生成 SVG 输出到 stdout</td>
-<td><code>go tool pprof -svg file.pb.gz &gt; out.svg</code></td>
-</tr>
-<tr>
-<td><code>png</code></td>
-<td>生成 PNG 图片</td>
-<td>同上，输出重定向到 .png</td>
-</tr>
-<tr>
-<td><code>pdf</code></td>
-<td>生成 PDF 文档</td>
-<td>适合存档分析报告</td>
-</tr>
-</tbody></table>
-<h3 id="过滤与聚焦"><a href="#过滤与聚焦" class="headerlink" title="过滤与聚焦"></a>过滤与聚焦</h3><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>说明</th>
-<th>使用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>focus=&lt;正则&gt;</code></td>
-<td>只展示匹配的函数</td>
-<td>例如 <code>top 20 -focus=informer</code></td>
-</tr>
-<tr>
-<td><code>ignore=&lt;正则&gt;</code></td>
-<td>排除匹配的函数</td>
-<td>例如 <code>top 20 -ignore=runtime</code></td>
-</tr>
-<tr>
-<td><code>tags</code></td>
-<td>展示 profile 中的标签信息</td>
-<td>查看 label 维度</td>
-</tr>
-<tr>
-<td><code>tree</code></td>
-<td>以树形展示调用关系</td>
-<td>理解调用链层级</td>
-</tr>
-<tr>
-<td><code>traces</code></td>
-<td>展示所有采样的完整栈</td>
-<td>深入分析某类分配的完整调用路径</td>
-</tr>
-</tbody></table>
-<h3 id="切换分析类型（核心技巧）"><a href="#切换分析类型（核心技巧）" class="headerlink" title="切换分析类型（核心技巧）"></a>切换分析类型（核心技巧）</h3><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>说明</th>
-<th>使用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>sample_index=inuse_space</code></td>
-<td>当前堆上驻留的内存量</td>
-<td><strong>默认值</strong>，排查”现在哪些对象在占内存”</td>
-</tr>
-<tr>
-<td><code>sample_index=inuse_objects</code></td>
-<td>当前堆上驻留的对象数量</td>
-<td>排查大量小对象（如 string、slice header）</td>
-</tr>
-<tr>
-<td><code>sample_index=alloc_space</code></td>
-<td>从启动到现在累计分配的内存量</td>
-<td><strong>排查高频分配热点</strong>（即使对象已释放也能看到）</td>
-</tr>
-<tr>
-<td><code>sample_index=alloc_objects</code></td>
-<td>从启动到现在累计分配的对象数量</td>
-<td>排查 GC 压力来源</td>
-</tr>
-</tbody></table>
-<blockquote>
-<p>在交互模式中输入 <code>o</code> 可查看当前选项，<code>sample_index=alloc_space</code> 然后 <code>top 20</code> 即可切换。</p>
-</blockquote>
-<h3 id="对比分析（检测泄漏最有效）"><a href="#对比分析（检测泄漏最有效）" class="headerlink" title="对比分析（检测泄漏最有效）"></a>对比分析（检测泄漏最有效）</h3><table>
-<thead>
-<tr>
-<th>步骤</th>
-<th>命令</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1. 抓第一次快照</td>
-<td><code>curl -o heap1.pb.gz http://IP:6060/debug/pprof/heap</code></td>
-<td>基线</td>
-</tr>
-<tr>
-<td>2. 等 10-30 分钟</td>
-<td>—</td>
-<td>等待内存增长</td>
-</tr>
-<tr>
-<td>3. 抓第二次快照</td>
-<td><code>curl -o heap2.pb.gz http://IP:6060/debug/pprof/heap</code></td>
-<td>对比点</td>
-</tr>
-<tr>
-<td>4. 差异分析</td>
-<td><code>go tool pprof -base heap1.pb.gz heap2.pb.gz</code></td>
-<td>只展示增量，找泄漏点</td>
-</tr>
-<tr>
-<td>5. 查看增量 top</td>
-<td><code>top 20</code></td>
-<td>增量最大的函数就是嫌疑对象</td>
-</tr>
-</tbody></table>
-<h3 id="其他-profile-类型"><a href="#其他-profile-类型" class="headerlink" title="其他 profile 类型"></a>其他 profile 类型</h3><table>
-<thead>
-<tr>
-<th>Profile</th>
-<th>URL</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>heap</td>
-<td><code>/debug/pprof/heap</code></td>
-<td>内存分配（最常用）</td>
-</tr>
-<tr>
-<td>goroutine</td>
-<td><code>/debug/pprof/goroutine</code></td>
-<td>goroutine 泄漏检查</td>
-</tr>
-<tr>
-<td>profile</td>
-<td><code>/debug/pprof/profile?seconds=30</code></td>
-<td>CPU 热点（采 30 秒）</td>
-</tr>
-<tr>
-<td>allocs</td>
-<td><code>/debug/pprof/allocs</code></td>
-<td>累积分配（类似 heap 的 alloc_space）</td>
-</tr>
-<tr>
-<td>block</td>
-<td><code>/debug/pprof/block</code></td>
-<td>阻塞分析</td>
-</tr>
-<tr>
-<td>mutex</td>
-<td><code>/debug/pprof/mutex</code></td>
-<td>锁竞争分析</td>
-</tr>
-<tr>
-<td>trace</td>
-<td><code>/debug/pprof/trace?seconds=5</code></td>
-<td>运行时 trace（用 <code>go tool trace</code> 打开）</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="1-生产环境什么情况下才会用-dlv？（适用场景）"><a href="#1-生产环境什么情况下才会用-dlv？（适用场景）" class="headerlink" title="1. 生产环境什么情况下才会用 dlv？（适用场景）"></a>1. 生产环境什么情况下才会用 <code>dlv</code>？（适用场景）</h2><p>只有当以下<strong>所有条件同时满足</strong>时，才会考虑在线上用 <code>dlv</code>：</p>
-<ol>
-<li><strong>日志、Metrics、pprof 甚至 Trace 都无法定位问题</strong>：比如变量内部状态异常、复杂的并发时序 Bug（Race Condition），或者某些请求走到特定分支后悄无声息地卡住（非死锁、无报错）。</li>
-<li><strong>问题无法在测试&#x2F;预发环境复现</strong>：只在生产的特定数据、特定流量规模或特定时序下才发生（所谓“海森堡 Bug”）。</li>
-<li><strong>不能重启进程</strong>：一重启现场就没了，而且问题很久才复现一次。</li>
-<li><strong>服务可以容忍短暂停顿</strong>：<code>dlv</code> 命中断点时，整个进程（或某些 Goroutine）会暂停。如果你的 Controller 卡住，可能导致心跳超时、Leader 切换甚至全量 Reconcile 重启，影响控制面稳定性。</li>
-</ol>
-<p><strong>常见的“必须用 dlv”的线上绝境：</strong></p>
-<ul>
-<li>进程死锁&#x2F;协程挂起，但 <code>pprof/goroutine</code> 导出的栈信息不足以看出具体是哪个结构体内部的锁。</li>
-<li>内存泄漏，<code>pprof/heap</code> 看出分配点，但不知道是哪个具体业务对象的切片在无限膨胀（需要看内存变量的实际值）。</li>
-<li>复杂的逻辑流转，需要在崩溃前夕（Panic 之前）打印局部变量的状态。</li>
-</ul>
-<h2 id="2-使用-dlv-交互式排查主要内容"><a href="#2-使用-dlv-交互式排查主要内容" class="headerlink" title="2. 使用 dlv 交互式排查主要内容"></a>2. 使用 <code>dlv</code> 交互式排查主要内容</h2><p>进入 dlv 交互模式后：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(dlv) goroutines             # 查看所有协程状态</span><br><span class="line">(dlv) gr 123                 # 切换到挂起或异常的 123 号协程</span><br><span class="line">(dlv) bt                     # 查看当前协程的堆栈 (Backtrace)</span><br><span class="line">(dlv) frame 3                # 跳转到堆栈的某一层</span><br><span class="line">(dlv) locals                 # 打印当前函数的所有局部变量</span><br><span class="line">(dlv) print myStruct.Field   # 打印特定变量的值</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>高危警告：</strong><br>尽量<strong>避免在线上使用 <code>break</code> (断点) 和 <code>continue</code><strong>，因为断点命中时会冻结进程，这通常会导致 K8s Liveness Probe 失败进而重启 Pod，彻底破坏案发现场。线上 <code>dlv attach</code> 的主要目的是</strong>检查当前时刻的变量状态和所有协程堆栈</strong>，看完了立刻 <code>detach</code> 或 <code>exit</code>。</p>
-</blockquote>
-<h2 id="3-为什么生产很少用"><a href="#3-为什么生产很少用" class="headerlink" title="3. 为什么生产很少用"></a>3. 为什么生产很少用</h2><p>在<strong>本地开发</strong>（特别是 IDE 环境如 VSCode&#x2F;Goland）或<strong>本地 Kind 集群</strong>中，<code>dlv</code> 是极其常用的（本地代码热更新&#x2F;单步调试）。<br>但在生产环境，<strong>成熟的团队会通过前置的可观测性建设来替代 99% 的 <code>dlv</code> 需求</strong>：</p>
-<ol>
-<li>**完善的日志 (Zap&#x2F;Klog)**：记录关键分支的上下文。</li>
-<li>**丰富的 Metrics (Prometheus)**：监控 QPS、耗时、队列深度。</li>
-<li><strong>常态化的 pprof 接口</strong>：随时抓取 CPU&#x2F;Heap&#x2F;Goroutine。</li>
-<li>**分布式追踪 (Tracing)**：如果是微服务架构，记录链路。</li>
-</ol>
-<h2 id="4-pprof-最常用的功能是哪些？"><a href="#4-pprof-最常用的功能是哪些？" class="headerlink" title="4. pprof 最常用的功能是哪些？"></a>4. pprof 最常用的功能是哪些？</h2><p>按使用频率和实用性排序：</p>
-<table>
-<thead>
-<tr>
-<th>排名</th>
-<th>profile</th>
-<th>路径</th>
-<th>使用频率</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td><strong>goroutine</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/goroutine</code></a></td>
-<td>⭐⭐⭐⭐⭐</td>
-<td>最常用。排查 goroutine 泄漏、卡住、堆积。<code>?debug=2</code> 直接看全部堆栈</td>
-</tr>
-<tr>
-<td>2</td>
-<td><strong>heap</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/heap</code></a></td>
-<td>⭐⭐⭐⭐⭐</td>
-<td>排查内存问题首选。看当前堆上对象分布</td>
-</tr>
-<tr>
-<td>3</td>
-<td><strong>profile (CPU)</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/profile</code></a></td>
-<td>⭐⭐⭐⭐</td>
-<td>CPU 热点分析，需要采样一段时间（默认 30 秒）</td>
-</tr>
-<tr>
-<td>4</td>
-<td><strong>allocs</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/allocs</code></a></td>
-<td>⭐⭐⭐</td>
-<td>排查频繁分配 &#x2F; GC 压力大时使用</td>
-</tr>
-<tr>
-<td>5</td>
-<td><strong>trace</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/trace</code></a></td>
-<td>⭐⭐</td>
-<td>更深入的运行时分析，数据量大，偶尔用</td>
-</tr>
-<tr>
-<td>6</td>
-<td><strong>Index 首页</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/</code></a></td>
-<td>⭐⭐</td>
-<td>入口页，看概览信息</td>
-</tr>
-<tr>
-<td>7</td>
-<td><strong>block &#x2F; mutex</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/block</code></a></td>
-<td>⭐</td>
-<td>需要额外开启采样率才有数据，偶尔用</td>
-</tr>
-<tr>
-<td>8</td>
-<td><strong>cmdline &#x2F; symbol &#x2F; threadcreate</strong></td>
-<td><a href="cmd/manager/controller/controller.go"><code>/debug/pprof/cmdline</code></a></td>
-<td>⭐</td>
-<td>辅助性质，直接用得少</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2797,7 +2724,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">193</span>
+          <span class="site-state-item-count">194</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
