@@ -18313,4 +18313,107 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>修养</tag>
       </tags>
   </entry>
+  <entry>
+    <title>socat简介</title>
+    <url>/2026/04/20/socat%E7%AE%80%E4%BB%8B/</url>
+    <content><![CDATA[<p>Socat (SOcket CAT) 确实是 Netcat (nc) 的“瑞士军刀”版。如果说 <code>nc</code> 是用来做简单连接的，那么 <code>socat</code> 就是用来处理各种数据流“隧道”的。</p>
+<p>它的核心威力在于它<strong>支持几乎所有的地址类型</strong>（TCP, UDP, UNIX socket, pipes, SSL&#x2F;TLS, OPENSSL, PTY&#x2F;TTY, 文件, 甚至是在这些协议之间进行任意组合转换）。</p>
+<p><code>socat</code> 核心场景与最佳实践。</p>
+<hr>
+<h3 id="1-为什么比-nc-更高阶？"><a href="#1-为什么比-nc-更高阶？" class="headerlink" title="1. 为什么比 nc 更高阶？"></a>1. 为什么比 <code>nc</code> 更高阶？</h3><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">Netcat (nc)</th>
+<th align="left">Socat</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>协议支持</strong></td>
+<td align="left">主要 TCP&#x2F;UDP</td>
+<td align="left">TCP, UDP, SSL&#x2F;TLS, UNIX 域套接字, 串口, 管道, IPv6, SOCKS4&#x2F;5 等</td>
+</tr>
+<tr>
+<td align="left"><strong>地址组合</strong></td>
+<td align="left">相对简单 (ip:port)</td>
+<td align="left">强大的地址寻址 (支持选项参数，如 <code>fork</code>, <code>reuseaddr</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>灵活性</strong></td>
+<td align="left">单向&#x2F;简单双向流</td>
+<td align="left">任意两点（双向）数据重定向，支持多地址参数</td>
+</tr>
+<tr>
+<td align="left"><strong>SSL&#x2F;TLS</strong></td>
+<td align="left">不原生支持</td>
+<td align="left">原生支持 (使用 OpenSSL 库)</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="2-核心应用场景与最佳实践命令"><a href="#2-核心应用场景与最佳实践命令" class="headerlink" title="2. 核心应用场景与最佳实践命令"></a>2. 核心应用场景与最佳实践命令</h3><h4 id="A-端口转发-Port-Forwarding"><a href="#A-端口转发-Port-Forwarding" class="headerlink" title="A. 端口转发 (Port Forwarding)"></a>A. 端口转发 (Port Forwarding)</h4><p>将本地端口流量转发到远程地址，或者将两个套接字桥接起来。</p>
+<ul>
+<li><strong>本地端口转发（将本地 8080 转发到远程 80）：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">socat TCP-LISTEN:8080,fork,reuseaddr TCP:remote-host:80</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>fork</code>: 处理多个并发连接。</li>
+<li><code>reuseaddr</code>: 防止服务器重启后端口占用。</li>
+</ul>
+</li>
+</ul>
+<h4 id="B-协议转换（TCP-转-UNIX-Socket）"><a href="#B-协议转换（TCP-转-UNIX-Socket）" class="headerlink" title="B. 协议转换（TCP 转 UNIX Socket）"></a>B. 协议转换（TCP 转 UNIX Socket）</h4><p>常用于让非本地应用访问本地只能通过 Socket 通信的服务（如 Docker socket）。</p>
+<ul>
+<li><strong>将 TCP 端口映射为 UNIX Socket：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">socat UNIX-LISTEN:/tmp/my.sock,fork TCP:127.0.0.1:8080</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="C-SSL-TLS-加密封装-最强杀手锏"><a href="#C-SSL-TLS-加密封装-最强杀手锏" class="headerlink" title="C. SSL&#x2F;TLS 加密封装 (最强杀手锏)"></a>C. SSL&#x2F;TLS 加密封装 (最强杀手锏)</h4><p>如果你的后端服务（如 Redis 或老旧 API）不支持 TLS，可以用 <code>socat</code> 做一层反向代理（Wrapper）。</p>
+<ul>
+<li><strong>在本地将 plaintext 转为 TLS (服务器端):</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">socat OPENSSL-LISTEN:443,cert=server.crt,key=server.key,fork TCP:127.0.0.1:8080</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这条命令让 <code>443</code> 端口变成了 HTTPS&#x2F;TLS 端口，后台服务依然监听 <code>8080</code> 的明文。</li>
+</ul>
+</li>
+</ul>
+<h4 id="D-文件与流的管道化"><a href="#D-文件与流的管道化" class="headerlink" title="D. 文件与流的管道化"></a>D. 文件与流的管道化</h4><p><code>socat</code> 可以把任何东西当成 Socket。</p>
+<ul>
+<li><p><strong>创建文件作为 Socket 监听（简单 IPC）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">socat UNIX-LISTEN:/tmp/mysocket.sock,fork EXEC:/bin/bash</span><br></pre></td></tr></table></figure>
+<p>(注意：这是一个简单的本地后门，仅用于调试)</p>
+</li>
+<li><p><strong>传输文件 (代替 scp&#x2F;nc):</strong></p>
+<ul>
+<li>接收端: <code>socat -u TCP-LISTEN:9999,fork OPEN:received_file.txt,create</code></li>
+<li>发送端: <code>socat -u OPEN:file_to_send.txt TCP:receiver-ip:9999</code></li>
+<li><code>-u</code> 表示单向模式 (unidirectional)。</li>
+</ul>
+</li>
+</ul>
+<h4 id="E-串口调试-TTY"><a href="#E-串口调试-TTY" class="headerlink" title="E. 串口调试 (TTY)"></a>E. 串口调试 (TTY)</h4><ul>
+<li><strong>将串口通信重定向到 TCP 端口：</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">socat /dev/ttyUSB0,raw,<span class="built_in">echo</span>=0 TCP-LISTEN:5000</span><br></pre></td></tr></table></figure>
+这使得远程机器可以通过网络连接 <code>5000</code> 端口直接控制串口设备。</li>
+</ul>
+<hr>
+<h3 id="3-编写-Socat-命令的通用范式"><a href="#3-编写-Socat-命令的通用范式" class="headerlink" title="3. 编写 Socat 命令的通用范式"></a>3. 编写 Socat 命令的通用范式</h3><p>Socat 的语法结构非常稳定：<br><code>socat [options] &lt;address1&gt; &lt;address2&gt;</code></p>
+<ul>
+<li><strong>Address1</strong>: 你要监听的（或连接的）源</li>
+<li><strong>Address2</strong>: 流量去往的目的地</li>
+<li><strong>Options</strong>: 紧跟在地址后面，用逗号分隔</li>
+</ul>
+<p><strong>推荐的“健壮”配置：</strong><br>如果你在服务器端使用 <code>socat</code>，永远记得带上这几个选项：<br><code>TCP-LISTEN:8080,fork,reuseaddr,bind=127.0.0.1</code></p>
+<ol>
+<li><code>fork</code>: 处理并发。</li>
+<li><code>reuseaddr</code>: 允许快速重启（不用等待 TIME_WAIT）。</li>
+<li><code>bind=127.0.0.1</code>: 默认只监听本地，除非你明确需要暴露在公网上。</li>
+</ol>
+<hr>
+<h3 id="4-调试小贴士"><a href="#4-调试小贴士" class="headerlink" title="4. 调试小贴士"></a>4. 调试小贴士</h3><ul>
+<li><p><strong>查看详细过程</strong>: 加上 <code>-v</code> 或 <code>-vv</code> 参数。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">socat -v TCP-LISTEN:8080,fork TCP:localhost:80</span><br></pre></td></tr></table></figure>
+<p>这会把传输的原始二进制数据（包括 headers）打印在终端上，是调试协议问题的神器。</p>
+</li>
+<li><p><strong>权限问题</strong>: 如果涉及 <code>UNIX-LISTEN</code> 或 <code>TTY</code>，确保当前用户有读写 <code>/tmp</code> 或 <code>/dev/</code> 下文件的权限。</p>
+</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
 </search>
