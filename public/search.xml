@@ -18655,7 +18655,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </thead>
 <tbody><tr>
 <td>创建标签</td>
-<td><code>git tag -a v1.0.0 -m &quot;msg&quot;</code></td>
+<td><code>git tag -a v1.0.0 -m &quot;release: xxx&quot;</code></td>
 </tr>
 <tr>
 <td>指定commit</td>
