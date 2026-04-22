@@ -18643,4 +18643,60 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </tbody></table>
 ]]></content>
   </entry>
+  <entry>
+    <title>零碎记录</title>
+    <url>/2025/08/22/%E9%9B%B6%E7%A2%8E%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h2 id="git-tag-标签"><a href="#git-tag-标签" class="headerlink" title="git tag 标签"></a>git tag 标签</h2><table>
+<thead>
+<tr>
+<th>操作</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建标签</td>
+<td><code>git tag -a v1.0.0 -m &quot;msg&quot;</code></td>
+</tr>
+<tr>
+<td>指定commit</td>
+<td><code>git tag -a v1.0.0 &lt;commit&gt;</code></td>
+</tr>
+<tr>
+<td>查看标签</td>
+<td><code>git tag -l</code></td>
+</tr>
+<tr>
+<td>查看详情</td>
+<td><code>git show v1.0.0</code></td>
+</tr>
+<tr>
+<td>推送单个</td>
+<td><code>git push origin v1.0.0</code></td>
+</tr>
+<tr>
+<td>推送全部</td>
+<td><code>git push origin --tags</code></td>
+</tr>
+<tr>
+<td>删除本地</td>
+<td><code>git tag -d v1.0.0</code></td>
+</tr>
+<tr>
+<td>删除远程</td>
+<td><code>git push origin --delete tag v1.0.0</code></td>
+</tr>
+<tr>
+<td>切换标签</td>
+<td><code>git checkout v1.0.0</code></td>
+</tr>
+<tr>
+<td>基于标签建分支</td>
+<td><code>git checkout -b xxx v1.0.0</code></td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
 </search>

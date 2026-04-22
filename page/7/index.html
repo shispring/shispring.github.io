@@ -184,6 +184,123 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">tcpkill工作原理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-08-13 11:51:41 / 修改时间：11:54:31" itemprop="dateCreated datePublished" datetime="2025-08-13T11:51:41+08:00">2025-08-13</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="tcpkill-工作原理"><a href="#tcpkill-工作原理" class="headerlink" title="tcpkill 工作原理"></a>tcpkill 工作原理</h2><p><code>tcpkill</code> 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：</p>
+<ol>
+<li><strong>监听网络流量</strong>：在指定网络接口上监听符合过滤条件的数据包</li>
+<li><strong>伪造 RST 包</strong>：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包</li>
+<li><strong>双向发送</strong>：同时向连接的两端发送 RST 包，确保连接被彻底终止</li>
+</ol>
+<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装 sudo yun install -y dsniff</span></span><br><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-i eth0</code>：在 eth0 网络接口上监听</li>
+<li><code>host 11.123.253.133 and port 80</code>：过滤条件，只处理涉及 IP 11.123.253.133 且端口为 80 的连接</li>
+</ul>
+<h2 id="tcpkill-输出解释"><a href="#tcpkill-输出解释" class="headerlink" title="tcpkill 输出解释"></a>tcpkill 输出解释</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tcpkill: listening on eth0 [host 11.123.253.133 and port 80]</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434213725:434213725(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434214227:434214227(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434215231:434215231(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599879870:599879870(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599880372:599880372(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599881376:599881376(0) win 0</span><br></pre></td></tr></table></figure>
+
+<p>每行格式：<code>源IP:端口 &gt; 目标IP:端口: R 序列号:序列号(数据长度) win 窗口大小</code></p>
+<ul>
+<li><code>R</code>：表示 RST（Reset）标志位</li>
+<li>序列号：TCP 序列号，tcpkill 会尝试不同的序列号以确保 RST 包被接受</li>
+<li><code>(0)</code>：数据长度为 0</li>
+<li><code>win 0</code>：窗口大小为 0</li>
+</ul>
+<h2 id="抓包分析"><a href="#抓包分析" class="headerlink" title="抓包分析"></a>抓包分析</h2><p>从您提供的抓包数据可以看出完整的攻击过程：</p>
+<h3 id="1-正常通信阶段"><a href="#1-正常通信阶段" class="headerlink" title="1. 正常通信阶段"></a>1. 正常通信阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">11:40:00.911181 - 服务器发送 HTTP 数据 (73 字节)</span><br><span class="line">11:40:00.911221 - 客户端发送 ACK 确认</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-RST-攻击阶段"><a href="#2-RST-攻击阶段" class="headerlink" title="2. RST 攻击阶段"></a>2. RST 攻击阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">11:40:01.310146 开始 - tcpkill 发送多个 RST 包</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键观察点</strong>：</p>
+<ol>
+<li><strong>TTL 变化</strong>：正常包 TTL&#x3D;51，RST 包 TTL&#x3D;64，说明 RST 包是本地伪造的</li>
+<li><strong>序列号策略</strong>：tcpkill 发送多个不同序列号的 RST 包，增加成功率</li>
+<li><strong>双向攻击</strong>：既伪造服务器向客户端发送 RST，也伪造客户端向服务器发送 RST</li>
+<li><strong>时间差</strong>：RST 包在正常通信后约 0.4 秒发送</li>
+</ol>
+<h2 id="技术细节"><a href="#技术细节" class="headerlink" title="技术细节"></a>技术细节</h2><p><strong>为什么发送多个 RST 包？</strong></p>
+<ul>
+<li>TCP 只接受序列号在有效窗口范围内的 RST 包</li>
+<li>tcpkill 通过发送不同序列号的 RST 包来提高成功概率</li>
+<li>从抓包可见，序列号呈递增趋势（434213725 → 434214227 → 434215231）</li>
+</ul>
+<p><strong>双向攻击的意义</strong>：</p>
+<ul>
+<li>确保连接两端都收到 RST 包</li>
+<li>即使一方的 RST 包被过滤，另一方仍可能生效</li>
+<li>提高攻击成功率</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/11/%E5%A4%A7%E5%9E%8BPCAP%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3120,147 +3237,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/07/29/SSE-%E4%B8%8E-WebSocket-%E7%A4%BA%E4%BE%8B%E9%A1%B9%E7%9B%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/07/29/SSE-%E4%B8%8E-WebSocket-%E7%A4%BA%E4%BE%8B%E9%A1%B9%E7%9B%AE/" class="post-title-link" itemprop="url">SSE 与 WebSocket 示例项目</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-07-29 14:25:59 / 修改时间：15:57:51" itemprop="dateCreated datePublished" datetime="2025-07-29T14:25:59+08:00">2025-07-29</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>本项目演示：</p>
-<ul>
-<li>使用 Go 构建 SSE（Server-Sent Events）服务</li>
-<li>使用 Go 构建 WebSocket 服务</li>
-<li>客户端如何接收消息</li>
-<li>与 nginx 配置整合测试</li>
-</ul>
-<hr>
-<h2 id="🧱-项目结构"><a href="#🧱-项目结构" class="headerlink" title="🧱 项目结构"></a>🧱 项目结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── client</span><br><span class="line">│  ├── sse.go</span><br><span class="line">│  └── ws.go</span><br><span class="line">├── go.mod</span><br><span class="line">├── go.sum</span><br><span class="line">├── nginx</span><br><span class="line">│  └── nginx.conf</span><br><span class="line">└── server</span><br><span class="line">    └── main.go</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="📘-SSE-服务端（支持-id、event）"><a href="#📘-SSE-服务端（支持-id、event）" class="headerlink" title="📘 SSE 服务端（支持 id、event）"></a>📘 SSE 服务端（支持 id、event）</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 文件: server/main.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;log&quot;</span></span><br><span class="line">  <span class="string">&quot;net/http&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="string">&quot;github.com/gorilla/websocket&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> upgrader = websocket.Upgrader&#123;</span><br><span class="line">  CheckOrigin: <span class="function"><span class="keyword">func</span><span class="params">(r *http.Request)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">wsHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">  upgrader := websocket.Upgrader&#123;</span><br><span class="line">    CheckOrigin: <span class="function"><span class="keyword">func</span><span class="params">(r *http.Request)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">  conn, err := upgrader.Upgrade(w, r, <span class="literal">nil</span>)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    log.Println(<span class="string">&quot;Upgrade failed:&quot;</span>, err)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">defer</span> conn.Close()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    msg := fmt.Sprintf(<span class="string">&quot;WebSocket message %d&quot;</span>, i)</span><br><span class="line">    conn.WriteMessage(websocket.TextMessage, []<span class="type">byte</span>(msg))</span><br><span class="line">    time.Sleep(<span class="number">1</span> * time.Second)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SSE 服务端</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sseHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">  flusher, ok := w.(http.Flusher)</span><br><span class="line">  <span class="keyword">if</span> !ok &#123;</span><br><span class="line">    http.Error(w, <span class="string">&quot;Streaming unsupported!&quot;</span>, http.StatusInternalServerError)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// SSE 使用 text/event-stream 类型</span></span><br><span class="line">  w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/event-stream&quot;</span>)</span><br><span class="line">  <span class="comment">// 不缓存</span></span><br><span class="line">  w.Header().Set(<span class="string">&quot;Cache-Control&quot;</span>, <span class="string">&quot;no-cache&quot;</span>)</span><br><span class="line">  <span class="comment">// 保持连接  </span></span><br><span class="line">  w.Header().Set(<span class="string">&quot;Connection&quot;</span>, <span class="string">&quot;keep-alive&quot;</span>)</span><br><span class="line">  w.WriteHeader(http.StatusOK)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    fmt.Fprintf(w, <span class="string">&quot;id: %d\n&quot;</span>, i)</span><br><span class="line">    fmt.Fprintf(w, <span class="string">&quot;event: message\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// SSE 格式，每条 event 必须以空行结尾,data: 是标准前缀，表示数据内容</span></span><br><span class="line">    fmt.Fprintf(w, <span class="string">&quot;data: SSE message %d\n\n&quot;</span>, i)</span><br><span class="line">    <span class="comment">// 强制刷新，立即发送给客户端</span></span><br><span class="line">    flusher.Flush()</span><br><span class="line">    time.Sleep(<span class="number">1</span> * time.Second)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  http.HandleFunc(<span class="string">&quot;/sse&quot;</span>, sseHandler)</span><br><span class="line">  http.HandleFunc(<span class="string">&quot;/ws&quot;</span>, wsHandler)</span><br><span class="line">  log.Println(<span class="string">&quot;Listening on :8080...&quot;</span>)</span><br><span class="line">  http.ListenAndServe(<span class="string">&quot;:8080&quot;</span>, <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="🧪-SSE-客户端（Go-示例）"><a href="#🧪-SSE-客户端（Go-示例）" class="headerlink" title="🧪 SSE 客户端（Go 示例）"></a>🧪 SSE 客户端（Go 示例）</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#文件client/sse.<span class="keyword">go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;bufio&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;log&quot;</span></span><br><span class="line">  <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    <span class="string">&quot;strings&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  resp, err := http.Get(<span class="string">&quot;http://localhost:8081/sse&quot;</span>)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    log.Fatalf(<span class="string">&quot;Client request failed: %v&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">defer</span> resp.Body.Close()</span><br><span class="line"></span><br><span class="line">  scanner := bufio.NewScanner(resp.Body)</span><br><span class="line">  <span class="keyword">for</span> scanner.Scan() &#123;</span><br><span class="line">    line := scanner.Text()</span><br><span class="line">    <span class="keyword">if</span> strings.HasPrefix(line, <span class="string">&quot;data: &quot;</span>) &#123;</span><br><span class="line">      fmt.Println(<span class="string">&quot;Received:&quot;</span>, strings.TrimPrefix(line, <span class="string">&quot;data: &quot;</span>))</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="🧪-Websocket-客户端（Go-示例）"><a href="#🧪-Websocket-客户端（Go-示例）" class="headerlink" title="🧪 Websocket 客户端（Go 示例）"></a>🧪 Websocket 客户端（Go 示例）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">#文件client/ws.go</span><br><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">  &quot;log&quot;</span><br><span class="line">  &quot;net/url&quot;</span><br><span class="line">  &quot;os&quot;</span><br><span class="line">  &quot;os/signal&quot;</span><br><span class="line">  &quot;time&quot;</span><br><span class="line"></span><br><span class="line">  &quot;github.com/gorilla/websocket&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">  interrupt := make(chan os.Signal, 1)</span><br><span class="line">  signal.Notify(interrupt, os.Interrupt)</span><br><span class="line"></span><br><span class="line">  u := url.URL&#123;Scheme: &quot;ws&quot;, Host: &quot;localhost:8081&quot;, Path: &quot;/ws&quot;&#125;</span><br><span class="line">  log.Printf(&quot;connecting to %s&quot;, u.String())</span><br><span class="line"></span><br><span class="line">  c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)</span><br><span class="line">  if err != nil &#123;</span><br><span class="line">    log.Fatal(&quot;dial error:&quot;, err)</span><br><span class="line">  &#125;</span><br><span class="line">  defer c.Close()</span><br><span class="line"></span><br><span class="line">  done := make(chan struct&#123;&#125;)</span><br><span class="line"></span><br><span class="line">  go func() &#123;</span><br><span class="line">    defer close(done)</span><br><span class="line">    for &#123;</span><br><span class="line">      _, message, err := c.ReadMessage()</span><br><span class="line">      if err != nil &#123;</span><br><span class="line">        log.Println(&quot;read error:&quot;, err)</span><br><span class="line">        return</span><br><span class="line">      &#125;</span><br><span class="line">      log.Printf(&quot;recv: %s&quot;, message)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  // 发送一条消息</span><br><span class="line">  err = c.WriteMessage(websocket.TextMessage, []byte(&quot;hello websocket&quot;))</span><br><span class="line">  if err != nil &#123;</span><br><span class="line">    log.Println(&quot;write error:&quot;, err)</span><br><span class="line">    return</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // 等待或者中断</span><br><span class="line">  select &#123;</span><br><span class="line">  case &lt;-time.After(time.Second * 10):</span><br><span class="line">  case &lt;-interrupt:</span><br><span class="line">    log.Println(&quot;interrupt&quot;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // 优雅关闭</span><br><span class="line">  err = c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, &quot;&quot;))</span><br><span class="line">  if err != nil &#123;</span><br><span class="line">    log.Println(&quot;close error:&quot;, err)</span><br><span class="line">    return</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="⚙️-Nginx-配置（nginx-nginx-conf）"><a href="#⚙️-Nginx-配置（nginx-nginx-conf）" class="headerlink" title="⚙️ Nginx 配置（nginx&#x2F;nginx.conf）"></a>⚙️ Nginx 配置（nginx&#x2F;nginx.conf）</h2><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#NGINX 代理 WebSocket</span></span><br><span class="line"><span class="comment">#确保 NGINX 配置了 proxy_http_version 1.1 和 Upgrade 头</span></span><br><span class="line"><span class="comment">#如果你要支持 wss://，需要配置 TLS 证书或通过 NGINX termination</span></span><br><span class="line"></span><br><span class="line"><span class="attribute">worker_processes</span> <span class="number">1</span>;</span><br><span class="line"><span class="section">events</span> &#123;</span><br><span class="line">    <span class="attribute">worker_connections</span> <span class="number">1024</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="section">http</span> &#123;</span><br><span class="line">    <span class="attribute">include</span>       mime.types;</span><br><span class="line">    <span class="attribute">default_type</span>  application/octet-stream;</span><br><span class="line">    <span class="attribute">sendfile</span>        <span class="literal">on</span>;</span><br><span class="line">    <span class="attribute">keepalive_timeout</span>  <span class="number">65</span>;</span><br><span class="line"></span><br><span class="line">    <span class="section">upstream</span> backend &#123;</span><br><span class="line">        <span class="attribute">server</span> <span class="number">172.17.0.1:8080</span>; //或者使用宿主机的<span class="attribute">ip</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        <span class="attribute">listen</span> <span class="number">8081</span>;</span><br><span class="line"></span><br><span class="line">        <span class="section">location</span> /sse &#123;</span><br><span class="line">            <span class="attribute">proxy_pass</span> http://backend/sse;</span><br><span class="line">            <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">            <span class="attribute">proxy_set_header</span> Connection <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">            <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">            <span class="attribute">proxy_set_header</span> X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">            <span class="attribute">chunked_transfer_encoding</span> <span class="literal">off</span>;</span><br><span class="line">            <span class="attribute">proxy_buffering</span> <span class="literal">off</span>;   <span class="comment"># &lt;-- 关闭缓冲，对 SSE 非常重要</span></span><br><span class="line">            <span class="attribute">proxy_cache</span> <span class="literal">off</span>;</span><br><span class="line">            <span class="attribute">proxy_read_timeout</span> <span class="number">3600s</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="section">location</span> /ws &#123;</span><br><span class="line">            <span class="attribute">proxy_pass</span> http://backend/ws;</span><br><span class="line">            <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">            <span class="attribute">proxy_set_header</span> Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">            <span class="attribute">proxy_set_header</span> Connection <span class="string">&quot;Upgrade&quot;</span>;</span><br><span class="line">            <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">	    <span class="attribute">proxy_read_timeout</span> <span class="number">3600s</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🚀-启动测试"><a href="#🚀-启动测试" class="headerlink" title="🚀 启动测试"></a>🚀 启动测试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#容器启动nginx</span><br><span class="line">docker run --rm -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf:ro -p 8081:8081 nginx</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🔬-WebSocket-客户端测试（使用-wscat-或浏览器）"><a href="#🔬-WebSocket-客户端测试（使用-wscat-或浏览器）" class="headerlink" title="🔬 WebSocket 客户端测试（使用 wscat 或浏览器）"></a>🔬 WebSocket 客户端测试（使用 wscat 或浏览器）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在 Linux 上运行 Docker 时，如果服务运行在宿主机，可以让 NGINX 容器通过 宿主 IP 访问服务。</span></span><br><span class="line"><span class="comment">#ip addr show docker0</span></span><br><span class="line">5: docker0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1450 qdisc noqueue state UP group default</span><br><span class="line">    <span class="built_in">link</span>/ether 02:42:06:96:79:9e brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::42:6ff:fe96:799e/64 scope <span class="built_in">link</span></span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#访问方式</span></span><br><span class="line">SSE:</span><br><span class="line">①非代理</span><br><span class="line">curl http://localhost:8080/sse</span><br><span class="line">②使用代理</span><br><span class="line">curl http://localhost:8081/sse</span><br><span class="line"></span><br><span class="line">WebSocket:</span><br><span class="line">①使用npm插件wscat</span><br><span class="line"><span class="comment">#npm安装地址：https://nodejs.org/en/download</span></span><br><span class="line"><span class="comment">#升级：npm install -g npm@11.5.1</span></span><br><span class="line">npm install -g wscat</span><br><span class="line"><span class="comment">#普通明文连接，服务端监听的是 非加密 的 WebSocket</span></span><br><span class="line">wscat -c ws://localhost:8081/ws</span><br><span class="line"></span><br><span class="line"><span class="comment">#wss://...</span></span><br><span class="line">加密连接（TLS），客户端期待服务端提供 有效的 HTTPS 证书 和支持 TLS 握手。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">②在线访问</span><br><span class="line">https://www.piesocket.com/websocket-tester</span><br><span class="line">chrome插件请求：PieSocket WebSocket Tester</span><br><span class="line">ws://10.16.217.194:8080/ws</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<hr>
-<h2 id="📑-SSE-与-WebSocket-对比"><a href="#📑-SSE-与-WebSocket-对比" class="headerlink" title="📑 SSE 与 WebSocket 对比"></a>📑 SSE 与 WebSocket 对比</h2><table>
-<thead>
-<tr>
-<th>特性</th>
-<th>SSE</th>
-<th>WebSocket</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>协议</td>
-<td>HTTP 单向</td>
-<td>TCP 双向</td>
-</tr>
-<tr>
-<td>通信方向</td>
-<td>服务端 → 客户端</td>
-<td>双向</td>
-</tr>
-<tr>
-<td>使用场景</td>
-<td>实时数据推送（如日志&#x2F;股价）</td>
-<td>聊天室、在线游戏等交互应用</td>
-</tr>
-<tr>
-<td>浏览器支持</td>
-<td>较好（但不支持 IE）</td>
-<td>广泛支持</td>
-</tr>
-<tr>
-<td>连接数量</td>
-<td>多 tab 共用连接</td>
-<td>每 tab 独立连接</td>
-</tr>
-<tr>
-<td>中间件兼容性</td>
-<td>支持传统代理（如 nginx）</td>
-<td>需显式支持升级</td>
-</tr>
-</tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> +--------------------+</span><br><span class="line"> |     WebSocket      | &lt;-- 双向、长连接、低延迟</span><br><span class="line"> +--------------------+</span><br><span class="line">            ↑</span><br><span class="line">    实时性强、互动性强</span><br><span class="line">            ↓</span><br><span class="line">+---------------------+</span><br><span class="line">|  HTTP Stream / SSE  | &lt;-- 单向、长连接、简单</span><br><span class="line">+---------------------+</span><br><span class="line">            ↑</span><br><span class="line">   仅服务推送数据、轻实时</span><br><span class="line">            ↓</span><br><span class="line">   +------------------+</span><br><span class="line">   | HTTP Keep-Alive  | &lt;-- 短连接的改进版</span><br><span class="line">   +------------------+</span><br><span class="line">            ↑</span><br><span class="line">    常规请求，非实时</span><br><span class="line">            ↓</span><br><span class="line">   +------------------+</span><br><span class="line">   |   短连接（HTTP） | &lt;-- 最原始的方式</span><br><span class="line">   +------------------+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -3332,7 +3308,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">194</span>
+          <span class="site-state-item-count">195</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -3345,7 +3321,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-count">30</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
