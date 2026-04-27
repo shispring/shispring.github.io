@@ -18704,4 +18704,13 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>git</tag>
       </tags>
   </entry>
+  <entry>
+    <title>硬件相关故障</title>
+    <url>/2026/04/27/%E7%A1%AC%E4%BB%B6%E7%9B%B8%E5%85%B3%E6%95%85%E9%9A%9C/</url>
+    <content><![CDATA[<h2 id="主要分6类"><a href="#主要分6类" class="headerlink" title="主要分6类"></a>主要分6类</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、内存故障：系统日志中扫描到的内存错误</span><br><span class="line">2、磁盘故障：直联SATA和SSD硬盘</span><br><span class="line">    1) 硬件错误，如掉盘、介质错误、扇区错误、HBA卡报错等</span><br><span class="line">    2) Smartctl属性值超过阈值，可能存在性能问题或潜在故障风险</span><br><span class="line">3、文件系统故障：</span><br><span class="line">    1) 文件系统错误或只读</span><br><span class="line">    2) dev_existence_error：fstab或grub配置中的文件系统或文件不存在，可能导致服务器重启失败</span><br><span class="line">4、RAID盘故障：Raid卡及Raid卡上的SATA和SSD硬盘</span><br><span class="line">    1) Raid卡报错</span><br><span class="line">    2) Raid掉盘</span><br><span class="line">    3) Raid卡上的硬盘Smartctl属性值超过阈值，可能导致性能问题或潜在故障风险</span><br><span class="line">5、Flash卡故障：</span><br><span class="line">    1) Flash卡的剩余寿命超过阈值</span><br><span class="line">    2) 介质错误超过阈值</span><br><span class="line">6、GPU 故障：GPU卡数量减少</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>hardware</tag>
+      </tags>
+  </entry>
 </search>
