@@ -19408,6 +19408,52 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li>AI 插帧与超分辨率</li>
 <li>OBS + FFmpeg 实时推流</li>
 </ol>
+<hr>
+<h1 id="关于P系列-K系列理解模型"><a href="#关于P系列-K系列理解模型" class="headerlink" title="关于P系列&amp; K系列理解模型"></a>关于P系列&amp; K系列理解模型</h1><hr>
+<h1 id="P-系列"><a href="#P-系列" class="headerlink" title="P 系列"></a>P 系列</h1><p>来自：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">电视广播</span><br></pre></td></tr></table></figure>
+
+<p>强调：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">垂直扫描线</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">720P</span><br><span class="line">1080P</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="K-系列"><a href="#K-系列" class="headerlink" title="K 系列"></a>K 系列</h1><p>来自：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">数字电影</span><br></pre></td></tr></table></figure>
+
+<p>强调：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">水平像素数量</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">2K</span><br><span class="line">4K</span><br><span class="line">8K</span><br></pre></td></tr></table></figure>
+
+<p>更严谨专业人士通常会直接说：</p>
+<table>
+<thead>
+<tr>
+<th>说法</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1080P</td>
+<td>1920×1080</td>
+</tr>
+<tr>
+<td>1440P</td>
+<td>2560×1440</td>
+</tr>
+<tr>
+<td>UHD</td>
+<td>3840×2160</td>
+</tr>
+<tr>
+<td>DCI 4K</td>
+<td>4096×2160</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>ffmpeg</tag>
