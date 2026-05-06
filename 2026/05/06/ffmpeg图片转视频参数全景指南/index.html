@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="FFmpeg 图片转视频参数全景指南一、FFmpeg 图片转视频整体流程典型流程： 1234567891011图片输入  ↓按指定速度拼接  ↓缩放&#x2F;裁剪&#x2F;补黑边  ↓视频编码(H264&#x2F;H265)  ↓音频编码(AAC)  ↓输出 MP4  示例命令： 1234ffmpeg -framerate 0.4 -pattern_type glob -i &quot;IMG_*.JPG&quot; -i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ffmpeg图片转视频参数全景指南">
+<meta property="og:url" content="https://shispring.github.io/2026/05/06/ffmpeg%E5%9B%BE%E7%89%87%E8%BD%AC%E8%A7%86%E9%A2%91%E5%8F%82%E6%95%B0%E5%85%A8%E6%99%AF%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="FFmpeg 图片转视频参数全景指南一、FFmpeg 图片转视频整体流程典型流程： 1234567891011图片输入  ↓按指定速度拼接  ↓缩放&#x2F;裁剪&#x2F;补黑边  ↓视频编码(H264&#x2F;H265)  ↓音频编码(AAC)  ↓输出 MP4  示例命令： 1234ffmpeg -framerate 0.4 -pattern_type glob -i &quot;IMG_*.JPG&quot; -i">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-06T03:11:59.000Z">
+<meta property="article:modified_time" content="2026-05-06T03:14:24.176Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="ffmpeg">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2026/05/06/ffmpeg%E5%9B%BE%E7%89%87%E8%BD%AC%E8%A7%86%E9%A2%91%E5%8F%82%E6%95%B0%E5%85%A8%E6%99%AF%E6%8C%87%E5%8D%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ffmpeg图片转视频参数全景指南 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/05/06/ffmpeg%E5%9B%BE%E7%89%87%E8%BD%AC%E8%A7%86%E9%A2%91%E5%8F%82%E6%95%B0%E5%85%A8%E6%99%AF%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ffmpeg图片转视频参数全景指南
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-05-06 11:11:59 / 修改时间：11:14:24" itemprop="dateCreated datePublished" datetime="2026-05-06T11:11:59+08:00">2026-05-06</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="FFmpeg-图片转视频参数全景指南"><a href="#FFmpeg-图片转视频参数全景指南" class="headerlink" title="FFmpeg 图片转视频参数全景指南"></a>FFmpeg 图片转视频参数全景指南</h1><h2 id="一、FFmpeg-图片转视频整体流程"><a href="#一、FFmpeg-图片转视频整体流程" class="headerlink" title="一、FFmpeg 图片转视频整体流程"></a>一、FFmpeg 图片转视频整体流程</h2><p>典型流程：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">图片输入</span><br><span class="line">  ↓</span><br><span class="line">按指定速度拼接</span><br><span class="line">  ↓</span><br><span class="line">缩放/裁剪/补黑边</span><br><span class="line">  ↓</span><br><span class="line">视频编码(H264/H265)</span><br><span class="line">  ↓</span><br><span class="line">音频编码(AAC)</span><br><span class="line">  ↓</span><br><span class="line">输出 MP4</span><br></pre></td></tr></table></figure>
+
+<p>示例命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -framerate 0.4 -pattern_type glob -i <span class="string">&quot;IMG_*.JPG&quot;</span> -i jiaohuanyusheng.mp3 \</span><br><span class="line">-filter:v <span class="string">&quot;scale=2560:1440:force_original_aspect_ratio=decrease,pad=2560:1440:-1:-1:color=black&quot;</span> \</span><br><span class="line">-c:v libx264 -preset fast -crf 18 -r 10 -pix_fmt yuv420p \</span><br><span class="line">-c:a aac -shortest -y output.mp4</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="二、FFmpeg-参数说明总表"><a href="#二、FFmpeg-参数说明总表" class="headerlink" title="二、FFmpeg 参数说明总表"></a>二、FFmpeg 参数说明总表</h1><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>示例值</th>
+<th>含义</th>
+<th>作用</th>
+<th>常见场景</th>
+<th>推荐值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-framerate</code></td>
+<td><code>0.4</code></td>
+<td>输入帧率</td>
+<td>控制每秒读取多少张图片</td>
+<td>图片转视频</td>
+<td><code>0.2 ~ 1</code></td>
+</tr>
+<tr>
+<td><code>-pattern_type glob</code></td>
+<td><code>glob</code></td>
+<td>通配符匹配</td>
+<td>支持 <code>IMG_*.JPG</code></td>
+<td>图片批量输入</td>
+<td>固定写法</td>
+</tr>
+<tr>
+<td><code>-i</code></td>
+<td><code>IMG_*.JPG</code></td>
+<td>输入源</td>
+<td>指定图片&#x2F;音频&#x2F;视频</td>
+<td>所有场景</td>
+<td>必填</td>
+</tr>
+<tr>
+<td><code>scale</code></td>
+<td><code>2560:1440</code></td>
+<td>缩放分辨率</td>
+<td>调整视频输出大小</td>
+<td>高清视频</td>
+<td>1080P&#x2F;2K&#x2F;4K</td>
+</tr>
+<tr>
+<td><code>force_original_aspect_ratio=decrease</code></td>
+<td><code>decrease</code></td>
+<td>保持宽高比</td>
+<td>防止图片拉伸变形</td>
+<td>图片视频</td>
+<td>强烈建议开启</td>
+</tr>
+<tr>
+<td><code>pad</code></td>
+<td><code>2560:1440:-1:-1</code></td>
+<td>补黑边</td>
+<td>补齐目标分辨率</td>
+<td>图片比例不一致</td>
+<td>推荐开启</td>
+</tr>
+<tr>
+<td><code>-c:v</code></td>
+<td><code>libx264</code></td>
+<td>视频编码器</td>
+<td>决定压缩格式</td>
+<td>通用视频</td>
+<td><code>libx264</code></td>
+</tr>
+<tr>
+<td><code>-preset</code></td>
+<td><code>fast</code></td>
+<td>编码速度预设</td>
+<td>平衡速度与压缩率</td>
+<td>编码优化</td>
+<td><code>medium/slow</code></td>
+</tr>
+<tr>
+<td><code>-crf</code></td>
+<td><code>18</code></td>
+<td>恒定画质参数</td>
+<td>控制视频质量</td>
+<td>所有场景</td>
+<td><code>18~23</code></td>
+</tr>
+<tr>
+<td><code>-r</code></td>
+<td><code>10</code></td>
+<td>输出帧率</td>
+<td>控制最终视频 fps</td>
+<td>图片视频</td>
+<td><code>10~30</code></td>
+</tr>
+<tr>
+<td><code>-pix_fmt</code></td>
+<td><code>yuv420p</code></td>
+<td>像素格式</td>
+<td>提高播放器兼容性</td>
+<td>全平台</td>
+<td><code>yuv420p</code></td>
+</tr>
+<tr>
+<td><code>-c:a</code></td>
+<td><code>aac</code></td>
+<td>音频编码器</td>
+<td>MP4 标准音频编码</td>
+<td>所有场景</td>
+<td><code>aac</code></td>
+</tr>
+<tr>
+<td><code>-shortest</code></td>
+<td>开启</td>
+<td>最短流结束</td>
+<td>避免黑屏尾巴</td>
+<td>音乐配图</td>
+<td>推荐开启</td>
+</tr>
+<tr>
+<td><code>-y</code></td>
+<td>开启</td>
+<td>自动覆盖文件</td>
+<td>防止重复询问</td>
+<td>自动化脚本</td>
+<td>推荐开启</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="三、核心参数深度解析"><a href="#三、核心参数深度解析" class="headerlink" title="三、核心参数深度解析"></a>三、核心参数深度解析</h1><h2 id="1-framerate-输入帧率"><a href="#1-framerate-输入帧率" class="headerlink" title="1. -framerate 输入帧率"></a>1. <code>-framerate</code> 输入帧率</h2><p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-framerate 0.4</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每秒显示 0.4 张图片</span><br></pre></td></tr></table></figure>
+
+<p>即：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1 张图片显示 2.5 秒</span><br></pre></td></tr></table></figure>
+
+<p>计算方式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1 / 0.4 = 2.5 秒</span><br></pre></td></tr></table></figure>
+
+<p>推荐值：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PPT&#x2F;纪念视频</td>
+<td>0.2 ~ 0.5</td>
+</tr>
+<tr>
+<td>图片快速切换</td>
+<td>1 ~ 3</td>
+</tr>
+<tr>
+<td>延时摄影</td>
+<td>10 ~ 30</td>
+</tr>
+</tbody></table>
+<p>注意：</p>
+<p><code>-framerate</code> 是输入图片速率，不是最终视频帧率。</p>
+<hr>
+<h2 id="2-r-输出帧率"><a href="#2-r-输出帧率" class="headerlink" title="2. -r 输出帧率"></a>2. <code>-r</code> 输出帧率</h2><p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-r 10</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">最终视频每秒输出 10 帧</span><br></pre></td></tr></table></figure>
+
+<p>FFmpeg 会自动复制静态图片帧。</p>
+<p>推荐值：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐 fps</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>静态图片视频</td>
+<td>5~10</td>
+</tr>
+<tr>
+<td>普通视频</td>
+<td>24~30</td>
+</tr>
+<tr>
+<td>游戏视频</td>
+<td>60</td>
+</tr>
+<tr>
+<td>体育&#x2F;电竞</td>
+<td>120</td>
+</tr>
+</tbody></table>
+<p>说明：</p>
+<p>图片视频通常不需要高 fps。</p>
+<hr>
+<h2 id="3-crf-视频质量参数（最重要）"><a href="#3-crf-视频质量参数（最重要）" class="headerlink" title="3. -crf 视频质量参数（最重要）"></a>3. <code>-crf</code> 视频质量参数（最重要）</h2><p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-crf 18</span><br></pre></td></tr></table></figure>
+
+<p>CRF：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Constant Rate Factor</span><br><span class="line">恒定画质模式</span><br></pre></td></tr></table></figure>
+
+<p>规律：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">数字越小 → 画质越高 → 文件越大</span><br><span class="line">数字越大 → 压缩越强 → 文件越小</span><br></pre></td></tr></table></figure>
+
+<p>推荐值：</p>
+<table>
+<thead>
+<tr>
+<th>CRF</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>无损</td>
+</tr>
+<tr>
+<td>16~18</td>
+<td>收藏级高质量</td>
+</tr>
+<tr>
+<td>20~23</td>
+<td>高清常用</td>
+</tr>
+<tr>
+<td>24~28</td>
+<td>网络分享</td>
+</tr>
+<tr>
+<td>30+</td>
+<td>明显失真</td>
+</tr>
+</tbody></table>
+<p>推荐：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>纪念收藏</td>
+<td>18</td>
+</tr>
+<tr>
+<td>B站&#x2F;Youtube</td>
+<td>20~23</td>
+</tr>
+<tr>
+<td>微信分享</td>
+<td>23~28</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-preset-编码速度"><a href="#4-preset-编码速度" class="headerlink" title="4. -preset 编码速度"></a>4. <code>-preset</code> 编码速度</h2><p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-preset fast</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">编码速度与压缩率的平衡</span><br></pre></td></tr></table></figure>
+
+<p>等级：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ultrafast</span><br><span class="line">superfast</span><br><span class="line">veryfast</span><br><span class="line">fast</span><br><span class="line">medium（默认）</span><br><span class="line">slow</span><br><span class="line">slower</span><br><span class="line">veryslow</span><br></pre></td></tr></table></figure>
+
+<p>规律：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">越慢 → 压缩越好 → 文件越小</span><br><span class="line">越快 → 编码越快 → 文件越大</span><br></pre></td></tr></table></figure>
+
+<p>推荐：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>快速测试</td>
+<td>fast</td>
+</tr>
+<tr>
+<td>日常编码</td>
+<td>medium</td>
+</tr>
+<tr>
+<td>收藏压制</td>
+<td>slow</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="5-c-v-视频编码器"><a href="#5-c-v-视频编码器" class="headerlink" title="5. -c:v 视频编码器"></a>5. <code>-c:v</code> 视频编码器</h2><table>
+<thead>
+<tr>
+<th>编码器</th>
+<th>特点</th>
+<th>优点</th>
+<th>缺点</th>
+<th>推荐场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>libx264</code></td>
+<td>H264</td>
+<td>兼容性最好</td>
+<td>文件较大</td>
+<td>通用场景</td>
+</tr>
+<tr>
+<td><code>libx265</code></td>
+<td>H265&#x2F;HEVC</td>
+<td>压缩率高</td>
+<td>编码慢</td>
+<td>4K&#x2F;电视</td>
+</tr>
+<tr>
+<td><code>av1</code></td>
+<td>新一代编码</td>
+<td>压缩最强</td>
+<td>极慢</td>
+<td>高端流媒体</td>
+</tr>
+</tbody></table>
+<p>推荐：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>微信&#x2F;B站</td>
+<td>H264</td>
+</tr>
+<tr>
+<td>NAS&#x2F;电视收藏</td>
+<td>H265</td>
+</tr>
+<tr>
+<td>长期归档</td>
+<td>AV1</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="6-pix-fmt-yuv420p"><a href="#6-pix-fmt-yuv420p" class="headerlink" title="6. -pix_fmt yuv420p"></a>6. <code>-pix_fmt yuv420p</code></h2><p>作用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">提高播放器兼容性</span><br></pre></td></tr></table></figure>
+
+<p>如果不指定：</p>
+<p>可能出现：</p>
+<ul>
+<li>手机无法播放</li>
+<li>微信无法识别</li>
+<li>Safari 黑屏</li>
+<li>电视无法解码</li>
+</ul>
+<p>推荐：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-pix_fmt yuv420p</span><br></pre></td></tr></table></figure>
+
+<p>几乎属于 MP4 标配。</p>
+<hr>
+<h1 id="四、图片转视频重点关注指标"><a href="#四、图片转视频重点关注指标" class="headerlink" title="四、图片转视频重点关注指标"></a>四、图片转视频重点关注指标</h1><h1 id="核心指标优先级"><a href="#核心指标优先级" class="headerlink" title="核心指标优先级"></a>核心指标优先级</h1><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>重要程度</th>
+<th>影响</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CRF&#x2F;码率</td>
+<td>极高</td>
+<td>画质</td>
+<td>决定清晰度本质</td>
+</tr>
+<tr>
+<td>编码器</td>
+<td>极高</td>
+<td>兼容&#x2F;体积</td>
+<td>决定压缩效率</td>
+</tr>
+<tr>
+<td>分辨率</td>
+<td>高</td>
+<td>清晰度</td>
+<td>决定最大细节</td>
+</tr>
+<tr>
+<td>帧率</td>
+<td>中</td>
+<td>流畅度</td>
+<td>静态图片影响较小</td>
+</tr>
+<tr>
+<td>preset</td>
+<td>中</td>
+<td>文件大小</td>
+<td>编码优化</td>
+</tr>
+<tr>
+<td>像素格式</td>
+<td>中</td>
+<td>兼容性</td>
+<td>平台播放能力</td>
+</tr>
+<tr>
+<td>音频码率</td>
+<td>低</td>
+<td>音质</td>
+<td>对图片视频影响有限</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="五、分辨率全景图"><a href="#五、分辨率全景图" class="headerlink" title="五、分辨率全景图"></a>五、分辨率全景图</h1><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>分辨率</th>
+<th>常见叫法</th>
+<th>场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>720P</td>
+<td>1280×720</td>
+<td>HD</td>
+<td>老设备&#x2F;小视频</td>
+</tr>
+<tr>
+<td>1080P</td>
+<td>1920×1080</td>
+<td>Full HD</td>
+<td>主流视频</td>
+</tr>
+<tr>
+<td>2K</td>
+<td>2560×1440</td>
+<td>1440P</td>
+<td>高质量视频</td>
+</tr>
+<tr>
+<td>4K</td>
+<td>3840×2160</td>
+<td>UHD</td>
+<td>电视&#x2F;影院</td>
+</tr>
+<tr>
+<td>8K</td>
+<td>7680×4320</td>
+<td>8K UHD</td>
+<td>专业影视</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="六、什么是码率（Bitrate）"><a href="#六、什么是码率（Bitrate）" class="headerlink" title="六、什么是码率（Bitrate）"></a>六、什么是码率（Bitrate）</h1><p>码率本质：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每秒使用多少数据存储视频</span><br></pre></td></tr></table></figure>
+
+<p>单位：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mbps</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">8 Mbps</span><br></pre></td></tr></table></figure>
+
+<p>表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每秒使用 8Mb 数据</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="七、码率与分辨率关系"><a href="#七、码率与分辨率关系" class="headerlink" title="七、码率与分辨率关系"></a>七、码率与分辨率关系</h1><p>很多人误区：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">4K 一定比 1080P 清晰</span><br></pre></td></tr></table></figure>
+
+<p>实际上：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">低码率4K</span><br><span class="line">可能比</span><br><span class="line">高码率1080P更糊</span><br></pre></td></tr></table></figure>
+
+<p>原因：</p>
+<p>分辨率决定：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">理论细节上限</span><br></pre></td></tr></table></figure>
+
+<p>码率决定：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">实际保留了多少细节</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="八、常见场景推荐方案"><a href="#八、常见场景推荐方案" class="headerlink" title="八、常见场景推荐方案"></a>八、常见场景推荐方案</h1><h2 id="1-微信-朋友圈"><a href="#1-微信-朋友圈" class="headerlink" title="1. 微信&#x2F;朋友圈"></a>1. 微信&#x2F;朋友圈</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分辨率</td>
+<td>1080P</td>
+</tr>
+<tr>
+<td>编码器</td>
+<td>H264</td>
+</tr>
+<tr>
+<td>CRF</td>
+<td>23~28</td>
+</tr>
+<tr>
+<td>帧率</td>
+<td>24~30</td>
+</tr>
+<tr>
+<td>重点</td>
+<td>文件别太大</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="2-B站-Youtube"><a href="#2-B站-Youtube" class="headerlink" title="2. B站&#x2F;Youtube"></a>2. B站&#x2F;Youtube</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分辨率</td>
+<td>1440P&#x2F;4K</td>
+</tr>
+<tr>
+<td>编码器</td>
+<td>H264&#x2F;H265</td>
+</tr>
+<tr>
+<td>CRF</td>
+<td>18~23</td>
+</tr>
+<tr>
+<td>帧率</td>
+<td>30~60</td>
+</tr>
+<tr>
+<td>重点</td>
+<td>平台高码率转码</td>
+</tr>
+</tbody></table>
+<p>原因：</p>
+<p>很多平台会对高分辨率视频分配更高码率。</p>
+<hr>
+<h2 id="3-照片纪念视频"><a href="#3-照片纪念视频" class="headerlink" title="3. 照片纪念视频"></a>3. 照片纪念视频</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分辨率</td>
+<td>1080P&#x2F;2K</td>
+</tr>
+<tr>
+<td>编码器</td>
+<td>H264</td>
+</tr>
+<tr>
+<td>CRF</td>
+<td>18~22</td>
+</tr>
+<tr>
+<td>帧率</td>
+<td>5~10</td>
+</tr>
+<tr>
+<td>重点</td>
+<td>画质稳定</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-电视-NAS-收藏"><a href="#4-电视-NAS-收藏" class="headerlink" title="4. 电视&#x2F;NAS 收藏"></a>4. 电视&#x2F;NAS 收藏</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分辨率</td>
+<td>4K</td>
+</tr>
+<tr>
+<td>编码器</td>
+<td>H265</td>
+</tr>
+<tr>
+<td>CRF</td>
+<td>18~20</td>
+</tr>
+<tr>
+<td>帧率</td>
+<td>24~30</td>
+</tr>
+<tr>
+<td>重点</td>
+<td>长期存储</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="九、常见-FFmpeg-图片视频模板"><a href="#九、常见-FFmpeg-图片视频模板" class="headerlink" title="九、常见 FFmpeg 图片视频模板"></a>九、常见 FFmpeg 图片视频模板</h1><h2 id="1-高质量纪念视频"><a href="#1-高质量纪念视频" class="headerlink" title="1. 高质量纪念视频"></a>1. 高质量纪念视频</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -framerate 0.4 -pattern_type glob -i <span class="string">&quot;IMG_*.JPG&quot;</span> \</span><br><span class="line">-i music.mp3 \</span><br><span class="line">-filter:v <span class="string">&quot;scale=2560:1440:force_original_aspect_ratio=decrease,pad=2560:1440:-1:-1:color=black&quot;</span> \</span><br><span class="line">-c:v libx264 -preset medium -crf 18 -r 10 -pix_fmt yuv420p \</span><br><span class="line">-c:a aac -shortest output.mp4</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2-微信分享小体积版本"><a href="#2-微信分享小体积版本" class="headerlink" title="2. 微信分享小体积版本"></a>2. 微信分享小体积版本</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -framerate 0.5 -pattern_type glob -i <span class="string">&quot;IMG_*.JPG&quot;</span> \</span><br><span class="line">-i music.mp3 \</span><br><span class="line">-filter:v <span class="string">&quot;scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black&quot;</span> \</span><br><span class="line">-c:v libx264 -preset fast -crf 26 -r 24 -pix_fmt yuv420p \</span><br><span class="line">-c:a aac -shortest output_wechat.mp4</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-4K-收藏版"><a href="#3-4K-收藏版" class="headerlink" title="3. 4K 收藏版"></a>3. 4K 收藏版</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -framerate 0.3 -pattern_type glob -i <span class="string">&quot;IMG_*.JPG&quot;</span> \</span><br><span class="line">-i music.mp3 \</span><br><span class="line">-filter:v <span class="string">&quot;scale=3840:2160:force_original_aspect_ratio=decrease,pad=3840:2160:-1:-1:color=black&quot;</span> \</span><br><span class="line">-c:v libx265 -preset slow -crf 18 -r 24 -pix_fmt yuv420p \</span><br><span class="line">-c:a aac -shortest output_4k.mp4</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="十、FFmpeg-参数理解模型"><a href="#十、FFmpeg-参数理解模型" class="headerlink" title="十、FFmpeg 参数理解模型"></a>十、FFmpeg 参数理解模型</h1><p>以后看任何 FFmpeg 命令：</p>
+<p>都可以拆成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">输入(Input)</span><br><span class="line">↓</span><br><span class="line">滤镜(Filter)</span><br><span class="line">↓</span><br><span class="line">编码(Codec)</span><br><span class="line">↓</span><br><span class="line">输出(Container)</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>对应参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>输入</td>
+<td><code>-i</code> <code>-framerate</code></td>
+</tr>
+<tr>
+<td>滤镜</td>
+<td><code>scale</code> <code>pad</code></td>
+</tr>
+<tr>
+<td>编码</td>
+<td><code>-c:v</code> <code>-crf</code> <code>-preset</code></td>
+</tr>
+<tr>
+<td>输出</td>
+<td><code>mp4</code> <code>mkv</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="十一、真正决定视频质量的四大核心"><a href="#十一、真正决定视频质量的四大核心" class="headerlink" title="十一、真正决定视频质量的四大核心"></a>十一、真正决定视频质量的四大核心</h1><table>
+<thead>
+<tr>
+<th>核心因素</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分辨率</td>
+<td>决定理论细节</td>
+</tr>
+<tr>
+<td>CRF&#x2F;码率</td>
+<td>决定实际清晰度</td>
+</tr>
+<tr>
+<td>编码器</td>
+<td>决定压缩效率</td>
+</tr>
+<tr>
+<td>帧率</td>
+<td>决定流畅度</td>
+</tr>
+</tbody></table>
+<p>其中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CRF/码率</span><br><span class="line">是最核心的画质指标</span><br></pre></td></tr></table></figure>
+
+<p>其次：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">编码器</span><br></pre></td></tr></table></figure>
+
+<p>最后才是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">分辨率</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="十二、推荐学习路线"><a href="#十二、推荐学习路线" class="headerlink" title="十二、推荐学习路线"></a>十二、推荐学习路线</h1><p>建议后续深入：</p>
+<ol>
+<li>H264&#x2F;H265 编码原理</li>
+<li>GOP&#x2F;I帧&#x2F;P帧&#x2F;B帧</li>
+<li>色彩空间(YUV&#x2F;RGB)</li>
+<li>视频容器(MP4&#x2F;MKV)</li>
+<li>硬件编码(NVENC&#x2F;QSV&#x2F;VAAPI)</li>
+<li>HDR&#x2F;BT.2020</li>
+<li>FFmpeg filter_complex</li>
+<li>字幕与转场</li>
+<li>AI 插帧与超分辨率</li>
+<li>OBS + FFmpeg 实时推流</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/ffmpeg/" rel="tag"><i class="fa fa-tag"></i> ffmpeg</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/04/27/%E7%A1%AC%E4%BB%B6%E7%9B%B8%E5%85%B3%E6%95%85%E9%9A%9C/" rel="prev" title="硬件相关故障">
+      <i class="fa fa-chevron-left"></i> 硬件相关故障
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#FFmpeg-%E5%9B%BE%E7%89%87%E8%BD%AC%E8%A7%86%E9%A2%91%E5%8F%82%E6%95%B0%E5%85%A8%E6%99%AF%E6%8C%87%E5%8D%97"><span class="nav-number">1.</span> <span class="nav-text">FFmpeg 图片转视频参数全景指南</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81FFmpeg-%E5%9B%BE%E7%89%87%E8%BD%AC%E8%A7%86%E9%A2%91%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">一、FFmpeg 图片转视频整体流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81FFmpeg-%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E%E6%80%BB%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">二、FFmpeg 参数说明总表</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%A0%B8%E5%BF%83%E5%8F%82%E6%95%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">三、核心参数深度解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-framerate-%E8%BE%93%E5%85%A5%E5%B8%A7%E7%8E%87"><span class="nav-number">3.1.</span> <span class="nav-text">1. -framerate 输入帧率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-r-%E8%BE%93%E5%87%BA%E5%B8%A7%E7%8E%87"><span class="nav-number">3.2.</span> <span class="nav-text">2. -r 输出帧率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-crf-%E8%A7%86%E9%A2%91%E8%B4%A8%E9%87%8F%E5%8F%82%E6%95%B0%EF%BC%88%E6%9C%80%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">3. -crf 视频质量参数（最重要）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-preset-%E7%BC%96%E7%A0%81%E9%80%9F%E5%BA%A6"><span class="nav-number">3.4.</span> <span class="nav-text">4. -preset 编码速度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-c-v-%E8%A7%86%E9%A2%91%E7%BC%96%E7%A0%81%E5%99%A8"><span class="nav-number">3.5.</span> <span class="nav-text">5. -c:v 视频编码器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-pix-fmt-yuv420p"><span class="nav-number">3.6.</span> <span class="nav-text">6. -pix_fmt yuv420p</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%9B%BE%E7%89%87%E8%BD%AC%E8%A7%86%E9%A2%91%E9%87%8D%E7%82%B9%E5%85%B3%E6%B3%A8%E6%8C%87%E6%A0%87"><span class="nav-number">4.</span> <span class="nav-text">四、图片转视频重点关注指标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%8C%87%E6%A0%87%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">5.</span> <span class="nav-text">核心指标优先级</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%88%86%E8%BE%A8%E7%8E%87%E5%85%A8%E6%99%AF%E5%9B%BE"><span class="nav-number">6.</span> <span class="nav-text">五、分辨率全景图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E7%A0%81%E7%8E%87%EF%BC%88Bitrate%EF%BC%89"><span class="nav-number">7.</span> <span class="nav-text">六、什么是码率（Bitrate）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E7%A0%81%E7%8E%87%E4%B8%8E%E5%88%86%E8%BE%A8%E7%8E%87%E5%85%B3%E7%B3%BB"><span class="nav-number">8.</span> <span class="nav-text">七、码率与分辨率关系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%B8%B8%E8%A7%81%E5%9C%BA%E6%99%AF%E6%8E%A8%E8%8D%90%E6%96%B9%E6%A1%88"><span class="nav-number">9.</span> <span class="nav-text">八、常见场景推荐方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%BE%AE%E4%BF%A1-%E6%9C%8B%E5%8F%8B%E5%9C%88"><span class="nav-number">9.1.</span> <span class="nav-text">1. 微信&#x2F;朋友圈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-B%E7%AB%99-Youtube"><span class="nav-number">9.2.</span> <span class="nav-text">2. B站&#x2F;Youtube</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%85%A7%E7%89%87%E7%BA%AA%E5%BF%B5%E8%A7%86%E9%A2%91"><span class="nav-number">9.3.</span> <span class="nav-text">3. 照片纪念视频</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E7%94%B5%E8%A7%86-NAS-%E6%94%B6%E8%97%8F"><span class="nav-number">9.4.</span> <span class="nav-text">4. 电视&#x2F;NAS 收藏</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%B8%B8%E8%A7%81-FFmpeg-%E5%9B%BE%E7%89%87%E8%A7%86%E9%A2%91%E6%A8%A1%E6%9D%BF"><span class="nav-number">10.</span> <span class="nav-text">九、常见 FFmpeg 图片视频模板</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%AB%98%E8%B4%A8%E9%87%8F%E7%BA%AA%E5%BF%B5%E8%A7%86%E9%A2%91"><span class="nav-number">10.1.</span> <span class="nav-text">1. 高质量纪念视频</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%BE%AE%E4%BF%A1%E5%88%86%E4%BA%AB%E5%B0%8F%E4%BD%93%E7%A7%AF%E7%89%88%E6%9C%AC"><span class="nav-number">10.2.</span> <span class="nav-text">2. 微信分享小体积版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4K-%E6%94%B6%E8%97%8F%E7%89%88"><span class="nav-number">10.3.</span> <span class="nav-text">3. 4K 收藏版</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E3%80%81FFmpeg-%E5%8F%82%E6%95%B0%E7%90%86%E8%A7%A3%E6%A8%A1%E5%9E%8B"><span class="nav-number">11.</span> <span class="nav-text">十、FFmpeg 参数理解模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E7%9C%9F%E6%AD%A3%E5%86%B3%E5%AE%9A%E8%A7%86%E9%A2%91%E8%B4%A8%E9%87%8F%E7%9A%84%E5%9B%9B%E5%A4%A7%E6%A0%B8%E5%BF%83"><span class="nav-number">12.</span> <span class="nav-text">十一、真正决定视频质量的四大核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E6%8E%A8%E8%8D%90%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF"><span class="nav-number">13.</span> <span class="nav-text">十二、推荐学习路线</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">197</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">NaNm</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">NaN:aN</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
