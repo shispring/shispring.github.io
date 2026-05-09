@@ -1780,6 +1780,8 @@
 <td><code>crane auth login REGISTRY</code></td>
 </tr>
 </tbody></table>
+<hr>
+<h2 id="systemd-manager-tui"><a href="#systemd-manager-tui" class="headerlink" title="systemd-manager-tui"></a>systemd-manager-tui</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://github.com/matheus-git/systemd-manager-tui</span><br><span class="line">rpm -ivh https://github.com/matheus-git/systemd-manager-tui/releases/download/v1.2.4/systemd-manager-tui-1.2.4.x86_64.rpm</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>tools</category>
