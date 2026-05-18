@@ -19519,8 +19519,31 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
     <url>/2026/05/18/audio2txt/</url>
     <content><![CDATA[<h2 id="视频号下载文件"><a href="#视频号下载文件" class="headerlink" title="视频号下载文件"></a>视频号下载文件</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#二进制</span><br><span class="line">https://github.com/ltaoo/wx_channels_download</span><br><span class="line"></span><br><span class="line">#首次运行用管理员命令运行</span><br><span class="line">sudo ./wx_video_download</span><br><span class="line"></span><br><span class="line">#打开相应视频号页面，点击相应下载</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<h2 id="ffmpeg切片"><a href="#ffmpeg切片" class="headerlink" title="ffmpeg切片"></a>ffmpeg切片</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#先切片,每30分钟一段</span><br><span class="line">ffmpeg -i input.mp3 \</span><br><span class="line">-f segment \</span><br><span class="line">-segment_time 1800 \</span><br><span class="line">-c copy \</span><br><span class="line">chunk_%03d.mp3</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#截取5分钟测试</span><br><span class="line">ffmpeg -i input.mp3 -t 300 test.mp3</span><br></pre></td></tr></table></figure>
-
+<h2 id="ffmpeg切片"><a href="#ffmpeg切片" class="headerlink" title="ffmpeg切片"></a>ffmpeg切片</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#先切片,每30分钟一段</span><br><span class="line">ffmpeg -i input.mp3 \</span><br><span class="line">-f segment \</span><br><span class="line">-segment_time 1800 \</span><br><span class="line">-c copy \</span><br><span class="line">chunk_%03d.mp3</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#截取5分钟测试</span><br><span class="line">ffmpeg -i input.mp3 -t 300 test.mp3</span><br><span class="line"></span><br><span class="line">注意：</span><br><span class="line">wav 更稳定，pyannote 对音频切片精度要求非常严格，WhisperX 内部做了兼容</span><br><span class="line">WAV:无压缩、样本精确</span><br><span class="line">MP3:压缩、有 frame padding</span><br><span class="line"></span><br><span class="line">ffmpeg -i input.mp3 \</span><br><span class="line">-ar 16000 \</span><br><span class="line">-ac 1 \</span><br><span class="line">-c:a pcm_s16le \</span><br><span class="line">input.wav</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-ar 16000</td>
+<td>16k采样率</td>
+</tr>
+<tr>
+<td>-ac 1</td>
+<td>单声道</td>
+</tr>
+<tr>
+<td>pcm_s16le</td>
+<td>原始PCM</td>
+</tr>
+<tr>
+<td>input.wav</td>
+<td>输出 wav</td>
+</tr>
+</tbody></table>
 <h2 id="CPU环境下运行Python脚本-ASR"><a href="#CPU环境下运行Python脚本-ASR" class="headerlink" title="CPU环境下运行Python脚本(ASR)"></a>CPU环境下运行Python脚本(ASR)</h2><ul>
 <li>安装：pip install faster-whisper</li>
 </ul>
@@ -19625,6 +19648,53 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </li>
 </ul>
 <h3 id="AI多模态工程-完整-Pipeline"><a href="#AI多模态工程-完整-Pipeline" class="headerlink" title="AI多模态工程,完整 Pipeline"></a>AI多模态工程,完整 Pipeline</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MP3</span><br><span class="line">↓</span><br><span class="line">ffmpeg 解码：AI不能直接处理mp3音频解码</span><br><span class="line">↓</span><br><span class="line">VAD（语音活动检测）:检测哪里有人说话,避免静音浪费算力</span><br><span class="line">↓</span><br><span class="line">Whisper ASR（语音转文字）：语音 → 文本</span><br><span class="line">↓</span><br><span class="line">Alignment（词级时间对齐）：精确时间轴</span><br><span class="line">↓</span><br><span class="line">Speaker Diarization（说话人分离）：识别谁在说话</span><br><span class="line">↓</span><br><span class="line">结构化 Transcript</span><br><span class="line">↓</span><br><span class="line">LLM 总结/知识抽取</span><br></pre></td></tr></table></figure>
+<ul>
+<li>AI 音频概念<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sample Rate</td>
+<td>采样率</td>
+</tr>
+<tr>
+<td>PCM</td>
+<td>原始波形</td>
+</tr>
+<tr>
+<td>Mono</td>
+<td>单声道</td>
+</tr>
+<tr>
+<td>Stereo</td>
+<td>双声道</td>
+</tr>
+<tr>
+<td>Resample</td>
+<td>重采样</td>
+</tr>
+<tr>
+<td>VAD</td>
+<td>语音检测</td>
+</tr>
+<tr>
+<td>ASR</td>
+<td>语音识别</td>
+</tr>
+<tr>
+<td>Alignment</td>
+<td>时间对齐</td>
+</tr>
+<tr>
+<td>Diarization</td>
+<td>说话人分离</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
 <hr>
 <h2 id="AI-Infra体系理解"><a href="#AI-Infra体系理解" class="headerlink" title="AI Infra体系理解"></a>AI Infra体系理解</h2><h3 id="第一层：深度学习框架"><a href="#第一层：深度学习框架" class="headerlink" title="第一层：深度学习框架"></a>第一层：深度学习框架</h3><table>
 <thead>
