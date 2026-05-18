@@ -19527,8 +19527,73 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">from faster_whisper import WhisperModel</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">AUDIO_FILE = &quot;input.mp3&quot;</span><br><span class="line"></span><br><span class="line">print(&quot;Loading model...&quot;)</span><br><span class="line"></span><br><span class="line">start = time.time()</span><br><span class="line"></span><br><span class="line">model = WhisperModel(</span><br><span class="line">    &quot;small&quot;,          # 推荐先 small</span><br><span class="line">    device=&quot;cpu&quot;,</span><br><span class="line">    compute_type=&quot;int8&quot;,   # CPU 推荐 int8</span><br><span class="line">    cpu_threads=8          # 根据你的CPU调整</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">print(&quot;Model loaded&quot;)</span><br><span class="line"></span><br><span class="line">segments, info = model.transcribe(</span><br><span class="line">    AUDIO_FILE,</span><br><span class="line">    language=&quot;zh&quot;,</span><br><span class="line">    beam_size=5,</span><br><span class="line">    vad_filter=True</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">print(&quot;Writing output...&quot;)</span><br><span class="line"></span><br><span class="line">with open(&quot;output.txt&quot;, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line"></span><br><span class="line">    for segment in segments:</span><br><span class="line"></span><br><span class="line">        line = (</span><br><span class="line">            f&quot;[&#123;segment.start:.2f&#125;s&quot;</span><br><span class="line">            f&quot; -&gt; &#123;segment.end:.2f&#125;s] &quot;</span><br><span class="line">            f&quot;&#123;segment.text&#125;&quot;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        print(line)</span><br><span class="line"></span><br><span class="line">        f.write(line + &quot;\n&quot;)</span><br><span class="line"></span><br><span class="line">end = time.time()</span><br><span class="line"></span><br><span class="line">print(f&quot;\nDone!&quot;)</span><br><span class="line">print(f&quot;Language: &#123;info.language&#125;&quot;)</span><br><span class="line">print(f&quot;Duration: &#123;info.duration:.2f&#125; sec&quot;)</span><br><span class="line">print(f&quot;Time cost: &#123;end - start:.2f&#125; sec&quot;)</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h2 id="说话人分离（diarization）"><a href="#说话人分离（diarization）" class="headerlink" title="说话人分离（diarization）"></a>说话人分离（diarization）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">whisperx input.mp3 \</span><br><span class="line">--model base \</span><br><span class="line">--language zh \</span><br><span class="line">--device cpu</span><br><span class="line"></span><br><span class="line">只做了：Whisper ASR + VAD，没有真正启用 diarization（说话人分离）</span><br><span class="line">ASR（语音转文字）</span><br><span class="line">VAD（语音活动检测）</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">whisperx input.mp3 \</span><br><span class="line">--model base \</span><br><span class="line">--language zh \</span><br><span class="line">--device cpu \</span><br><span class="line">--diarize</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="说话人分离（diarization）"><a href="#说话人分离（diarization）" class="headerlink" title="说话人分离（diarization）"></a>说话人分离（diarization）</h2><ul>
+<li>安装：pip install whisperx</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">whisperx input.mp3 \</span><br><span class="line">--model base \</span><br><span class="line">--language zh \</span><br><span class="line">--device cpu</span><br><span class="line"></span><br><span class="line">只做了：Whisper ASR + VAD，没有真正启用 diarization（说话人分离）</span><br><span class="line">ASR（语音转文字）</span><br><span class="line">VAD（语音活动检测）</span><br><span class="line"></span><br><span class="line">-----------------</span><br><span class="line"></span><br><span class="line">1、注册huggingface</span><br><span class="line">2、接受 pyannote 模型协议</span><br><span class="line">https://huggingface.co/pyannote/speaker-diarization-community-1</span><br><span class="line">3、创建 Token（Read即可）</span><br><span class="line">https://huggingface.co/settings/tokens</span><br><span class="line">4、本地登录（推荐）</span><br><span class="line">huggingface-cli login   ---&gt; 粘贴 token</span><br><span class="line">5、设置环境变量（推荐）</span><br><span class="line">export HF_TOKEN=hf_xxxxxxx</span><br><span class="line">6、执行</span><br><span class="line">whisperx input.mp3 \</span><br><span class="line">--model base \</span><br><span class="line">--language zh \</span><br><span class="line">--device cpu \</span><br><span class="line">--diarize</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
+<ul>
+<li><p>WhisperX 背后：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>模型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ASR</td>
+<td>Whisper</td>
+</tr>
+<tr>
+<td>Alignment</td>
+<td>wav2vec2</td>
+</tr>
+<tr>
+<td>Diarization</td>
+<td>pyannote</td>
+</tr>
+<tr>
+<td>VAD</td>
+<td>pyannote vad</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>AI 圈：不仅仅是代码,还包括：</p>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HuggingFace</td>
+<td>模型仓库</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>权限认证</td>
+</tr>
+<tr>
+<td>License</td>
+<td>模型授权</td>
+</tr>
+<tr>
+<td>gated model</td>
+<td>限制访问</td>
+</tr>
+<tr>
+<td>safetensors</td>
+<td>权重格式</td>
+</tr>
+<tr>
+<td>pytorch_model.bin</td>
+<td>模型参数</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
 <h2 id="AI多模态工程"><a href="#AI多模态工程" class="headerlink" title="AI多模态工程"></a>AI多模态工程</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">音频</span><br><span class="line">↓</span><br><span class="line">VAD</span><br><span class="line">↓</span><br><span class="line">ASR</span><br><span class="line">↓</span><br><span class="line">Speaker Diarization</span><br><span class="line">↓</span><br><span class="line">LLM角色推断</span><br><span class="line">↓</span><br><span class="line">知识抽取</span><br><span class="line">↓</span><br><span class="line">RAG</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
