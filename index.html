@@ -209,7 +209,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-05-18 15:01:59 / 修改时间：16:40:48" itemprop="dateCreated datePublished" datetime="2026-05-18T15:01:59+08:00">2026-05-18</time>
+              <time title="创建时间：2026-05-18 15:01:59 / 修改时间：17:10:06" itemprop="dateCreated datePublished" datetime="2026-05-18T15:01:59+08:00">2026-05-18</time>
             </span>
 
           <br>
@@ -218,14 +218,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.1k</span>
+              <span>2.8k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -247,7 +247,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">from faster_whisper import WhisperModel</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">AUDIO_FILE = &quot;input.mp3&quot;</span><br><span class="line"></span><br><span class="line">print(&quot;Loading model...&quot;)</span><br><span class="line"></span><br><span class="line">start = time.time()</span><br><span class="line"></span><br><span class="line">model = WhisperModel(</span><br><span class="line">    &quot;small&quot;,          # 推荐先 small</span><br><span class="line">    device=&quot;cpu&quot;,</span><br><span class="line">    compute_type=&quot;int8&quot;,   # CPU 推荐 int8</span><br><span class="line">    cpu_threads=8          # 根据你的CPU调整</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">print(&quot;Model loaded&quot;)</span><br><span class="line"></span><br><span class="line">segments, info = model.transcribe(</span><br><span class="line">    AUDIO_FILE,</span><br><span class="line">    language=&quot;zh&quot;,</span><br><span class="line">    beam_size=5,</span><br><span class="line">    vad_filter=True</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">print(&quot;Writing output...&quot;)</span><br><span class="line"></span><br><span class="line">with open(&quot;output.txt&quot;, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line"></span><br><span class="line">    for segment in segments:</span><br><span class="line"></span><br><span class="line">        line = (</span><br><span class="line">            f&quot;[&#123;segment.start:.2f&#125;s&quot;</span><br><span class="line">            f&quot; -&gt; &#123;segment.end:.2f&#125;s] &quot;</span><br><span class="line">            f&quot;&#123;segment.text&#125;&quot;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        print(line)</span><br><span class="line"></span><br><span class="line">        f.write(line + &quot;\n&quot;)</span><br><span class="line"></span><br><span class="line">end = time.time()</span><br><span class="line"></span><br><span class="line">print(f&quot;\nDone!&quot;)</span><br><span class="line">print(f&quot;Language: &#123;info.language&#125;&quot;)</span><br><span class="line">print(f&quot;Duration: &#123;info.duration:.2f&#125; sec&quot;)</span><br><span class="line">print(f&quot;Time cost: &#123;end - start:.2f&#125; sec&quot;)</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h2 id="说话人分离（diarization）"><a href="#说话人分离（diarization）" class="headerlink" title="说话人分离（diarization）"></a>说话人分离（diarization）</h2><ul>
+<h2 id="音频-AI-分析-Pipeline"><a href="#音频-AI-分析-Pipeline" class="headerlink" title="音频 AI 分析 Pipeline"></a>音频 AI 分析 Pipeline</h2><h3 id="说话人分离（diarization）"><a href="#说话人分离（diarization）" class="headerlink" title="说话人分离（diarization）"></a>说话人分离（diarization）</h3><ul>
 <li>安装：pip install whisperx</li>
 </ul>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">whisperx input.mp3 \</span><br><span class="line">--model base \</span><br><span class="line">--language zh \</span><br><span class="line">--device cpu</span><br><span class="line"></span><br><span class="line">只做了：Whisper ASR + VAD，没有真正启用 diarization（说话人分离）</span><br><span class="line">ASR（语音转文字）</span><br><span class="line">VAD（语音活动检测）</span><br><span class="line"></span><br><span class="line">-----------------</span><br><span class="line"></span><br><span class="line">1、注册huggingface</span><br><span class="line">2、接受 pyannote 模型协议</span><br><span class="line">https://huggingface.co/pyannote/speaker-diarization-community-1</span><br><span class="line">3、创建 Token（Read即可）</span><br><span class="line">https://huggingface.co/settings/tokens</span><br><span class="line">4、本地登录（推荐）</span><br><span class="line">huggingface-cli login   ---&gt; 粘贴 token</span><br><span class="line">5、设置环境变量（推荐）</span><br><span class="line">export HF_TOKEN=hf_xxxxxxx</span><br><span class="line">6、执行</span><br><span class="line">whisperx input.mp3 \</span><br><span class="line">--model base \</span><br><span class="line">--language zh \</span><br><span class="line">--device cpu \</span><br><span class="line">--diarize</span><br><span class="line"></span><br></pre></td></tr></table></figure>
@@ -313,8 +313,176 @@
 </tr>
 </tbody></table>
 </li>
+<li><p>文件作用</p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>input.txt</td>
+<td>纯文本</td>
+</tr>
+<tr>
+<td>input.json</td>
+<td>完整结构化数据</td>
+</tr>
+<tr>
+<td>input.srt</td>
+<td>视频字幕</td>
+</tr>
+<tr>
+<td>input.vtt</td>
+<td>Web字幕</td>
+</tr>
+<tr>
+<td>input.tsv</td>
+<td>表格时间轴</td>
+</tr>
+</tbody></table>
+</li>
 </ul>
-<h2 id="AI多模态工程"><a href="#AI多模态工程" class="headerlink" title="AI多模态工程"></a>AI多模态工程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">音频</span><br><span class="line">↓</span><br><span class="line">VAD</span><br><span class="line">↓</span><br><span class="line">ASR</span><br><span class="line">↓</span><br><span class="line">Speaker Diarization</span><br><span class="line">↓</span><br><span class="line">LLM角色推断</span><br><span class="line">↓</span><br><span class="line">知识抽取</span><br><span class="line">↓</span><br><span class="line">RAG</span><br></pre></td></tr></table></figure>
+<h3 id="AI多模态工程-完整-Pipeline"><a href="#AI多模态工程-完整-Pipeline" class="headerlink" title="AI多模态工程,完整 Pipeline"></a>AI多模态工程,完整 Pipeline</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">MP3</span><br><span class="line">↓</span><br><span class="line">ffmpeg 解码：AI不能直接处理mp3音频解码</span><br><span class="line">↓</span><br><span class="line">VAD（语音活动检测）:检测哪里有人说话,避免静音浪费算力</span><br><span class="line">↓</span><br><span class="line">Whisper ASR（语音转文字）：语音 → 文本</span><br><span class="line">↓</span><br><span class="line">Alignment（词级时间对齐）：精确时间轴</span><br><span class="line">↓</span><br><span class="line">Speaker Diarization（说话人分离）：识别谁在说话</span><br><span class="line">↓</span><br><span class="line">结构化 Transcript</span><br><span class="line">↓</span><br><span class="line">LLM 总结/知识抽取</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="AI-Infra体系理解"><a href="#AI-Infra体系理解" class="headerlink" title="AI Infra体系理解"></a>AI Infra体系理解</h2><h3 id="第一层：深度学习框架"><a href="#第一层：深度学习框架" class="headerlink" title="第一层：深度学习框架"></a>第一层：深度学习框架</h3><table>
+<thead>
+<tr>
+<th>框架</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PyTorch</td>
+<td>当前主流</td>
+</tr>
+<tr>
+<td>TensorFlow</td>
+<td>Google系</td>
+</tr>
+<tr>
+<td>JAX</td>
+<td>Google研究</td>
+</tr>
+</tbody></table>
+<h3 id="第二层：模型工具库"><a href="#第二层：模型工具库" class="headerlink" title="第二层：模型工具库"></a>第二层：模型工具库</h3><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Transformers</td>
+<td>LLM模型</td>
+</tr>
+<tr>
+<td>Diffusers</td>
+<td>图像模型</td>
+</tr>
+<tr>
+<td>WhisperX</td>
+<td>语音增强</td>
+</tr>
+</tbody></table>
+<h3 id="第三层：推理引擎"><a href="#第三层：推理引擎" class="headerlink" title="第三层：推理引擎"></a>第三层：推理引擎</h3><table>
+<thead>
+<tr>
+<th>引擎</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>vLLM</td>
+<td>最流行</td>
+</tr>
+<tr>
+<td>SGLang</td>
+<td>Agent优化</td>
+</tr>
+<tr>
+<td>llama.cpp</td>
+<td>CPU推理</td>
+</tr>
+<tr>
+<td>TensorRT-LLM</td>
+<td>NVIDIA优化</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td>本地运行</td>
+</tr>
+</tbody></table>
+<h3 id="第四层：模型层"><a href="#第四层：模型层" class="headerlink" title="第四层：模型层"></a>第四层：模型层</h3><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Whisper</td>
+<td>ASR</td>
+</tr>
+<tr>
+<td>Qwen</td>
+<td>LLM</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td>LLM</td>
+</tr>
+<tr>
+<td>pyannote</td>
+<td>speaker</td>
+</tr>
+<tr>
+<td>Stable Diffusion</td>
+<td>图像</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="类比"><a href="#类比" class="headerlink" title="类比"></a>类比</h2><table>
+<thead>
+<tr>
+<th>层级</th>
+<th>代表</th>
+<th>作用</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI框架层</td>
+<td>PyTorch</td>
+<td>张量&#x2F;GPU&#x2F;训练</td>
+<td>Linux内核</td>
+</tr>
+<tr>
+<td>模型库层</td>
+<td>Transformers</td>
+<td>加载模型</td>
+<td>apt&#x2F;yum</td>
+</tr>
+<tr>
+<td>模型层</td>
+<td>Whisper&#x2F;Llama</td>
+<td>AI能力本身</td>
+<td>nginx&#x2F;mysql</td>
+</tr>
+<tr>
+<td>推理引擎层</td>
+<td>vLLM&#x2F;SGLang&#x2F;Ollama</td>
+<td>高性能推理</td>
+<td>containerd</td>
+</tr>
+<tr>
+<td>应用层</td>
+<td>WhisperX&#x2F;OpenWebUI</td>
+<td>最终功能</td>
+<td>kubectl&#x2F;dashboard</td>
+</tr>
+</tbody></table>
 
       
     </div>
