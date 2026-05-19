@@ -13466,6 +13466,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li><strong>延迟：</strong> 局域网 &lt; 1ms，公网 &lt; 100ms</li>
 </ul>
 <hr>
+<h2 id="内核丢包检查"><a href="#内核丢包检查" class="headerlink" title="内核丢包检查"></a>内核丢包检查</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 看每个核的丢包</span><br><span class="line">cat /proc/net/softnet_stat | awk &#x27;&#123;print &quot;CPU &quot;NR-1&quot; dropped: &quot;$2&#125;&#x27;</span><br><span class="line"></span><br><span class="line"># 看总丢包数</span><br><span class="line">cat /proc/net/softnet_stat | awk &#x27;&#123;sum += $2&#125; END &#123;print &quot;Total dropped: &quot;sum&#125;&#x27;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>linux</tag>

@@ -555,7 +555,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-02-05 10:30:50" itemprop="dateModified" datetime="2026-02-05T10:30:50+08:00">2026-02-05</time>
+                <time title="修改时间：2026-05-19 11:31:38" itemprop="dateModified" datetime="2026-05-19T11:31:38+08:00">2026-05-19</time>
               </span>
 
           <br>
@@ -564,14 +564,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
+              <span>8.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
+              <span>8 分钟</span>
             </span>
 
         </div>
@@ -841,6 +841,7 @@
 <li><strong>延迟：</strong> 局域网 &lt; 1ms，公网 &lt; 100ms</li>
 </ul>
 <hr>
+<h2 id="内核丢包检查"><a href="#内核丢包检查" class="headerlink" title="内核丢包检查"></a>内核丢包检查</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 看每个核的丢包</span><br><span class="line">cat /proc/net/softnet_stat | awk &#x27;&#123;print &quot;CPU &quot;NR-1&quot; dropped: &quot;$2&#125;&#x27;</span><br><span class="line"></span><br><span class="line"># 看总丢包数</span><br><span class="line">cat /proc/net/softnet_stat | awk &#x27;&#123;sum += $2&#125; END &#123;print &quot;Total dropped: &quot;sum&#125;&#x27;</span><br></pre></td></tr></table></figure>
 
       
     </div>
