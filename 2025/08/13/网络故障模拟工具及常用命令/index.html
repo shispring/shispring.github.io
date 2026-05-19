@@ -28,8 +28,9 @@
 <meta property="og:description" content="网络故障模拟工具与常用命令本文档提供了一系列网络故障模拟工具和常用命令，用于测试应用程序在各种网络条件下的行为，特别是长连接（如SSE、WebSocket）的稳定性测试。 1. 常用网络故障模拟工具对比   工具名称 主要功能 优势 局限性 适用场景    tc&#x2F;netem 延迟、丢包、重排、复制、损坏 内置Linux内核，精确控制 配置较复杂 全面的网络条件模拟   iptables">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-08-13T04:09:51.000Z">
-<meta property="article:modified_time" content="2025-08-13T04:17:56.000Z">
+<meta property="article:modified_time" content="2026-05-19T07:58:23.717Z">
 <meta property="article:author" content="shispring">
+<meta property="article:tag" content="network">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="https://shispring.github.io/2025/08/13/%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
@@ -211,10 +212,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-08-13 12:09:51 / 修改时间：12:17:56" itemprop="dateCreated datePublished" datetime="2025-08-13T12:09:51+08:00">2025-08-13</time>
+              <time title="创建时间：2025-08-13 12:09:51" itemprop="dateCreated datePublished" datetime="2025-08-13T12:09:51+08:00">2025-08-13</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-05-19 15:58:23" itemprop="dateModified" datetime="2026-05-19T15:58:23+08:00">2026-05-19</time>
+              </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -229,14 +236,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
+              <span>6.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
+              <span>6 分钟</span>
             </span>
 
         </div>
@@ -367,7 +374,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">go get github.com/tylertreat/comcast</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加延迟和丢包</span></span><br><span class="line">comcast --device=eth0 --latency=250 --packet-loss=10%</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止模拟</span></span><br><span class="line">comcast --stop</span><br></pre></td></tr></table></figure>
 
 <h3 id="3-pumba-Docker环境"><a href="#3-pumba-Docker环境" class="headerlink" title="3. pumba (Docker环境)"></a>3. pumba (Docker环境)</h3><p>专门为Docker容器设计的网络混沌测试工具：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为指定容器添加延迟</span></span><br><span class="line">pumba netem --interface eth0 delay --time 3000 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络中断</span></span><br><span class="line">pumba netem --interface eth0 loss --percent 100 --correlation 100 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">pumba netem --interface eth0 rate --rate 1kbit my_container</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为指定容器添加延迟</span></span><br><span class="line">pumba netem --interface eth0 delay --<span class="keyword">time</span> 3000 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟网络中断</span></span><br><span class="line">pumba netem --interface eth0 loss --percent 100 --correlation 100 my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制带宽</span></span><br><span class="line">pumba netem --interface eth0 rate --rate 1kbit my_container</span><br></pre></td></tr></table></figure>
 
 <h3 id="4-Chaos-Mesh-Kubernetes环境"><a href="#4-Chaos-Mesh-Kubernetes环境" class="headerlink" title="4. Chaos Mesh (Kubernetes环境)"></a>4. Chaos Mesh (Kubernetes环境)</h3><p>为Kubernetes设计的混沌工程平台：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络延迟示例</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">chaos-mesh.org/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">NetworkChaos</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">network-delay-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">action:</span> <span class="string">delay</span></span><br><span class="line">  <span class="attr">mode:</span> <span class="string">one</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">namespaces:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line">    <span class="attr">labelSelectors:</span></span><br><span class="line">      <span class="attr">&quot;app&quot;:</span> <span class="string">&quot;web-server&quot;</span></span><br><span class="line">  <span class="attr">delay:</span></span><br><span class="line">    <span class="attr">latency:</span> <span class="string">&quot;10ms&quot;</span></span><br><span class="line">    <span class="attr">correlation:</span> <span class="string">&quot;100&quot;</span></span><br><span class="line">    <span class="attr">jitter:</span> <span class="string">&quot;0ms&quot;</span></span><br><span class="line">  <span class="attr">duration:</span> <span class="string">&quot;30s&quot;</span></span><br></pre></td></tr></table></figure>
@@ -429,6 +436,10 @@
     
 
       <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/network/" rel="tag"><i class="fa fa-tag"></i> network</a>
+          </div>
 
         
 
