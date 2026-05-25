@@ -923,7 +923,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-05-19 16:00:48" itemprop="dateModified" datetime="2026-05-19T16:00:48+08:00">2026-05-19</time>
+                <time title="修改时间：2026-05-25 10:31:46" itemprop="dateModified" datetime="2026-05-25T10:31:46+08:00">2026-05-25</time>
               </span>
 
           <br>
@@ -932,7 +932,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
+              <span>1.6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -952,8 +952,10 @@
 
       
           <h2 id="网络不通问题排查"><a href="#网络不通问题排查" class="headerlink" title="网络不通问题排查"></a>网络不通问题排查</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg">https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg</a></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg">https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/RAtep6g6YX-okNQ3T39A4A">https://mp.weixin.qq.com/s/RAtep6g6YX-okNQ3T39A4A</a></p>
 </blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">网络不通</span><br><span class="line">  │</span><br><span class="line">  ├─ ping 127.0.0.1 ──&gt; 不通 ──&gt; 协议栈/内核问题</span><br><span class="line">  │</span><br><span class="line">  ├─ ping 网关 ──&gt; 不通</span><br><span class="line">  │     │</span><br><span class="line">  │     ├─ ip link show ──&gt; DOWN ──&gt; 网卡没启动</span><br><span class="line">  │     ├─ ip addr show ──&gt; 无IP ──&gt; IP未配置</span><br><span class="line">  │     └─ ip route show ──&gt; 无默认路由 ──&gt; 路由缺失</span><br><span class="line">  │</span><br><span class="line">  ├─ ping 外网IP通，但域名不通</span><br><span class="line">  │     └─ /etc/resolv.conf ──&gt; DNS配置丢失</span><br><span class="line">  │</span><br><span class="line">  └─ 根因追查</span><br><span class="line">        ├─ 配置文件 ONBOOT=no</span><br><span class="line">        ├─ NetworkManager 与 network 服务冲突</span><br><span class="line">        └─ 日志确认操作时间线</span><br></pre></td></tr></table></figure>
+
 <h2 id="容器与宿主机之间复制文件"><a href="#容器与宿主机之间复制文件" class="headerlink" title="容器与宿主机之间复制文件"></a>容器与宿主机之间复制文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">kubectl cp &lt;pod_name&gt;:&lt;container_path&gt; &lt;local_path&gt;</span><br><span class="line">kubectl cp &lt;local_path&gt; &lt;pod_name&gt;:&lt;container_path&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#docker</span><br><span class="line">docker cp &lt;container_name&gt;:&lt;container_path&gt; &lt;host_path&gt;</span><br><span class="line">docker cp &lt;host_path&gt; &lt;container_name&gt;:&lt;container_path&gt;</span><br></pre></td></tr></table></figure>
 
 <hr>

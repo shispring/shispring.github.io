@@ -6408,8 +6408,10 @@ validate</p>
     <title>k8s问题排查类总结</title>
     <url>/2025/02/10/k8s%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E7%B1%BB%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<h2 id="网络不通问题排查"><a href="#网络不通问题排查" class="headerlink" title="网络不通问题排查"></a>网络不通问题排查</h2><blockquote>
-<p><a href="https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg">https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg</a></p>
+<p><a href="https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg">https://mp.weixin.qq.com/s/kKDQCCxqIl-q9_KqCmZdCg</a><br><a href="https://mp.weixin.qq.com/s/RAtep6g6YX-okNQ3T39A4A">https://mp.weixin.qq.com/s/RAtep6g6YX-okNQ3T39A4A</a></p>
 </blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">网络不通</span><br><span class="line">  │</span><br><span class="line">  ├─ ping 127.0.0.1 ──&gt; 不通 ──&gt; 协议栈/内核问题</span><br><span class="line">  │</span><br><span class="line">  ├─ ping 网关 ──&gt; 不通</span><br><span class="line">  │     │</span><br><span class="line">  │     ├─ ip link show ──&gt; DOWN ──&gt; 网卡没启动</span><br><span class="line">  │     ├─ ip addr show ──&gt; 无IP ──&gt; IP未配置</span><br><span class="line">  │     └─ ip route show ──&gt; 无默认路由 ──&gt; 路由缺失</span><br><span class="line">  │</span><br><span class="line">  ├─ ping 外网IP通，但域名不通</span><br><span class="line">  │     └─ /etc/resolv.conf ──&gt; DNS配置丢失</span><br><span class="line">  │</span><br><span class="line">  └─ 根因追查</span><br><span class="line">        ├─ 配置文件 ONBOOT=no</span><br><span class="line">        ├─ NetworkManager 与 network 服务冲突</span><br><span class="line">        └─ 日志确认操作时间线</span><br></pre></td></tr></table></figure>
+
 <h2 id="容器与宿主机之间复制文件"><a href="#容器与宿主机之间复制文件" class="headerlink" title="容器与宿主机之间复制文件"></a>容器与宿主机之间复制文件</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kubectl cp &lt;pod_name&gt;:&lt;container_path&gt; &lt;local_path&gt;</span><br><span class="line">kubectl cp &lt;local_path&gt; &lt;pod_name&gt;:&lt;container_path&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#docker</span><br><span class="line">docker cp &lt;container_name&gt;:&lt;container_path&gt; &lt;host_path&gt;</span><br><span class="line">docker cp &lt;host_path&gt; &lt;container_name&gt;:&lt;container_path&gt;</span><br></pre></td></tr></table></figure>
 
 <hr>
