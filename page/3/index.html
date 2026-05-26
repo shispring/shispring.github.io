@@ -215,7 +215,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-05-26 18:52:41" itemprop="dateModified" datetime="2026-05-26T18:52:41+08:00">2026-05-26</time>
+                <time title="修改时间：2026-05-26 18:59:54" itemprop="dateModified" datetime="2026-05-26T18:59:54+08:00">2026-05-26</time>
               </span>
 
           <br>
@@ -224,7 +224,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
+              <span>1.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -338,7 +338,7 @@
 </tr>
 </tbody></table>
 <h2 id="关于ovs"><a href="#关于ovs" class="headerlink" title="关于ovs"></a>关于ovs</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/JCpeng/p/15153902.html">https://www.cnblogs.com/JCpeng/p/15153902.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/JCpeng/p/15153902.html">https://www.cnblogs.com/JCpeng/p/15153902.html</a><br><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000019612525">https://segmentfault.com/a/1190000019612525</a></p>
 </blockquote>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl 用于控制ovs db</span><br><span class="line">ovs-ofctl 用于管理OpenFlow switch 的 flow</span><br><span class="line">ovs-dpctl 用于管理ovs的datapath</span><br><span class="line">ovs-appctl 用于查询和管理ovs daemon</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看 OVS bridge</span><br><span class="line">ovs-vsctl show</span><br><span class="line"></span><br><span class="line">#查看 bridge</span><br><span class="line">ovs-vsctl list-br</span><br><span class="line"></span><br><span class="line">#查看某 bridge 的 port</span><br><span class="line">ovs-vsctl list-ports br-int</span><br><span class="line"></span><br><span class="line">#查看 interface</span><br><span class="line">ovs-vsctl list interface</span><br><span class="line"></span><br><span class="line">#查看 OpenFlow 流表（非常重要）</span><br><span class="line">ovs-ofctl dump-flows br-int</span><br><span class="line"></span><br><span class="line">#查看 tunnel</span><br><span class="line">ovs-vsctl show | grep vxlan</span><br><span class="line"></span><br><span class="line">#查看 ovsdb</span><br><span class="line">ovsdb-client dump</span><br><span class="line"></span><br><span class="line">#ovs查看控制器列表</span><br><span class="line">ovs-vsctl list controller</span><br></pre></td></tr></table></figure>
 
