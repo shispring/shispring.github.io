@@ -20017,4 +20017,15 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>ml</tag>
       </tags>
   </entry>
+  <entry>
+    <title>调度框架</title>
+    <url>/2026/05/26/%E8%B0%83%E5%BA%A6%E6%A1%86%E6%9E%B6/</url>
+    <content><![CDATA[<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><blockquote>
+<p><a href="https://tanjunchen.github.io/post/2024-04-06-scheduler-framework-01">https://tanjunchen.github.io/post/2024-04-06-scheduler-framework-01</a></p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>scheduler</tag>
+      </tags>
+  </entry>
 </search>

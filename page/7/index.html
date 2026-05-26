@@ -184,6 +184,128 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/16/lsns%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">lsns命令使用指南与故障排查</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-16 10:49:11 / 修改时间：10:49:35" itemprop="dateCreated datePublished" datetime="2025-09-16T10:49:11+08:00">2025-09-16</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="lsns基础用法"><a href="#lsns基础用法" class="headerlink" title="lsns基础用法"></a>lsns基础用法</h2><h3 id="1-基本命令"><a href="#1-基本命令" class="headerlink" title="1. 基本命令"></a>1. 基本命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有命名空间</span></span><br><span class="line">lsns</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定进程的命名空间</span></span><br><span class="line">lsns -p &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定类型的命名空间</span></span><br><span class="line">lsns -t net        <span class="comment"># 网络命名空间</span></span><br><span class="line">lsns -t mnt        <span class="comment"># 挂载命名空间</span></span><br><span class="line">lsns -t pid        <span class="comment"># PID命名空间</span></span><br><span class="line">lsns -t user       <span class="comment"># 用户命名空间</span></span><br><span class="line">lsns -t uts        <span class="comment"># UTS命名空间</span></span><br><span class="line">lsns -t ipc        <span class="comment"># IPC命名空间</span></span><br><span class="line">lsns -t cgroup     <span class="comment"># cgroup命名空间</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示详细输出格式</span></span><br><span class="line">lsns -l            <span class="comment"># 长格式显示</span></span><br><span class="line">lsns -J            <span class="comment"># JSON格式输出</span></span><br><span class="line">lsns -r            <span class="comment"># 显示原始设备号</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示特定列</span></span><br><span class="line">lsns -o NS,TYPE,NPROCS,PID,USER,NETNSID,COMMAND</span><br><span class="line"></span><br><span class="line"><span class="comment"># 不显示头部</span></span><br><span class="line">lsns -n</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-高级用法"><a href="#2-高级用法" class="headerlink" title="2. 高级用法"></a>2. 高级用法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看特定命名空间的详细信息</span></span><br><span class="line">lsns --nsfs-file /proc/1/ns/net</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按类型和进程数排序</span></span><br><span class="line">lsns -t net -o NS,TYPE,NPROCS,PID,COMMAND | <span class="built_in">sort</span> -k3 -nr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器相关的命名空间</span></span><br><span class="line">lsns | grep docker</span><br><span class="line">lsns | grep containerd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看systemd相关命名空间</span></span><br><span class="line">lsns | grep systemd</span><br></pre></td></tr></table></figure>
+
+<h2 id="命名空间操作命令"><a href="#命名空间操作命令" class="headerlink" title="命名空间操作命令"></a>命名空间操作命令</h2><h3 id="1-进入命名空间"><a href="#1-进入命名空间" class="headerlink" title="1. 进入命名空间"></a>1. 进入命名空间</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进入特定进程的网络命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入多个命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n -p -m bash     <span class="comment"># 网络+PID+挂载</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入所有命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -a bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用ip命令进入网络命名空间</span></span><br><span class="line">ip netns <span class="built_in">exec</span> &lt;netns-name&gt; bash</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-查看命名空间详情"><a href="#2-查看命名空间详情" class="headerlink" title="2. 查看命名空间详情"></a>2. 查看命名空间详情</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看进程的命名空间文件</span></span><br><span class="line"><span class="built_in">ls</span> -la /proc/&lt;PID&gt;/ns/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看网络命名空间</span></span><br><span class="line">ip netns list</span><br><span class="line">ip netns show</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看挂载命名空间</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/mounts</span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/mountinfo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看PID命名空间</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;PID&gt;/status | grep NSpid</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-命名空间监控"><a href="#3-命名空间监控" class="headerlink" title="3. 命名空间监控"></a>3. 命名空间监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实时监控命名空间变化</span></span><br><span class="line">watch -n 1 <span class="string">&#x27;lsns -t net&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看命名空间统计</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
+
+<h2 id="故障排查场景和命令清单"><a href="#故障排查场景和命令清单" class="headerlink" title="故障排查场景和命令清单"></a>故障排查场景和命令清单</h2><h3 id="🔍-场景1-容器网络问题"><a href="#🔍-场景1-容器网络问题" class="headerlink" title="🔍 场景1: 容器网络问题"></a>🔍 场景1: 容器网络问题</h3><p><strong>症状</strong>: 容器无法访问网络，DNS解析失败</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看容器网络命名空间</span></span><br><span class="line">docker inspect &lt;container&gt; | grep NetworkMode</span><br><span class="line">lsns -t net | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器网络命名空间排查</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -n bash</span><br><span class="line">ip addr show                    <span class="comment"># 查看网络接口</span></span><br><span class="line">ip route show                   <span class="comment"># 查看路由表</span></span><br><span class="line"><span class="built_in">cat</span> /etc/resolv.conf            <span class="comment"># 查看DNS配置</span></span><br><span class="line">ping 8.8.8.8                    <span class="comment"># 测试网络连通性</span></span><br><span class="line">nslookup google.com             <span class="comment"># 测试DNS解析</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 对比宿主机网络</span></span><br><span class="line"><span class="built_in">exit</span>  <span class="comment"># 退出容器网络命名空间</span></span><br><span class="line">ip addr show                    <span class="comment"># 宿主机网络接口</span></span><br><span class="line">ip route show                   <span class="comment"># 宿主机路由表</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景2-容器文件系统问题"><a href="#🔍-场景2-容器文件系统问题" class="headerlink" title="🔍 场景2: 容器文件系统问题"></a>🔍 场景2: 容器文件系统问题</h3><p><strong>症状</strong>: 容器内文件丢失，挂载点异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看挂载命名空间</span></span><br><span class="line">lsns -t mnt | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器挂载命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -m bash</span><br><span class="line">mount | grep &lt;path&gt;             <span class="comment"># 查看特定路径挂载</span></span><br><span class="line"><span class="built_in">df</span> -h                           <span class="comment"># 查看磁盘使用</span></span><br><span class="line">findmnt                         <span class="comment"># 详细挂载信息</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 对比宿主机挂载</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line">mount | grep &lt;container-volume&gt;</span><br><span class="line">docker inspect &lt;container&gt; | grep Mounts</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景3-进程PID问题"><a href="#🔍-场景3-进程PID问题" class="headerlink" title="🔍 场景3: 进程PID问题"></a>🔍 场景3: 进程PID问题</h3><p><strong>症状</strong>: 容器内PID冲突，进程管理异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看PID命名空间</span></span><br><span class="line">lsns -t pid | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 进入容器PID命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -p bash</span><br><span class="line">ps aux                          <span class="comment"># 查看容器内进程</span></span><br><span class="line">pstree                          <span class="comment"># 进程树</span></span><br><span class="line"><span class="built_in">cat</span> /proc/1/cmdline             <span class="comment"># 容器内PID 1进程</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 查看宿主机视角的进程</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line">ps aux | grep &lt;container-name&gt;</span><br><span class="line">pstree -p &lt;container-pid&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景4-用户权限问题"><a href="#🔍-场景4-用户权限问题" class="headerlink" title="🔍 场景4: 用户权限问题"></a>🔍 场景4: 用户权限问题</h3><p><strong>症状</strong>: 容器内用户权限异常，文件访问被拒绝</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看用户命名空间</span></span><br><span class="line">lsns -t user | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查用户映射</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/uid_map</span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/gid_map</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 进入容器用户命名空间</span></span><br><span class="line">nsenter -t &lt;container-pid&gt; -U bash</span><br><span class="line"><span class="built_in">id</span>                              <span class="comment"># 查看当前用户</span></span><br><span class="line"><span class="built_in">whoami</span></span><br><span class="line"><span class="built_in">ls</span> -la /                        <span class="comment"># 查看文件权限</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景5-系统调用和cgroup问题"><a href="#🔍-场景5-系统调用和cgroup问题" class="headerlink" title="🔍 场景5: 系统调用和cgroup问题"></a>🔍 场景5: 系统调用和cgroup问题</h3><p><strong>症状</strong>: 容器资源限制异常，性能问题</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看cgroup命名空间</span></span><br><span class="line">lsns -t cgroup | grep &lt;container-pid&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查cgroup配置</span></span><br><span class="line"><span class="built_in">cat</span> /proc/&lt;container-pid&gt;/cgroup</span><br><span class="line">systemd-cgls | grep &lt;container&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 查看资源使用</span></span><br><span class="line">docker stats &lt;container&gt;</span><br><span class="line"><span class="built_in">cat</span> /sys/fs/cgroup/memory/docker/&lt;container-id&gt;/memory.usage_in_bytes</span><br><span class="line"><span class="built_in">cat</span> /sys/fs/cgroup/cpu/docker/&lt;container-id&gt;/cpu.shares</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景6-Kubernetes-Pod网络问题"><a href="#🔍-场景6-Kubernetes-Pod网络问题" class="headerlink" title="🔍 场景6: Kubernetes Pod网络问题"></a>🔍 场景6: Kubernetes Pod网络问题</h3><p><strong>症状</strong>: Pod间通信失败，Service访问异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查找Pod进程</span></span><br><span class="line">kubectl get pods -o wide</span><br><span class="line">ps aux | grep &lt;pod-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 查看Pod网络命名空间</span></span><br><span class="line">PID=$(pgrep -f &lt;pod-container&gt;)</span><br><span class="line">lsns -t net | grep <span class="variable">$PID</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 进入Pod网络空间排查</span></span><br><span class="line">nsenter -t <span class="variable">$PID</span> -n bash</span><br><span class="line">ip addr show                    <span class="comment"># 查看Pod IP</span></span><br><span class="line">ip route show                   <span class="comment"># 查看路由</span></span><br><span class="line">iptables -L                     <span class="comment"># 查看防火墙规则（如果有权限）</span></span><br><span class="line">nslookup kubernetes.default     <span class="comment"># 测试集群DNS</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 查看CNI配置</span></span><br><span class="line"><span class="built_in">cat</span> /etc/cni/net.d/*            <span class="comment"># CNI插件配置</span></span><br><span class="line">ip <span class="built_in">link</span> show                    <span class="comment"># 网络设备</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="🔍-场景7-容器启动失败"><a href="#🔍-场景7-容器启动失败" class="headerlink" title="🔍 场景7: 容器启动失败"></a>🔍 场景7: 容器启动失败</h3><p><strong>症状</strong>: 容器启动后立即退出，状态异常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看容器日志</span></span><br><span class="line">docker logs &lt;container&gt;</span><br><span class="line">kubectl logs &lt;pod&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 查看容器命名空间状态</span></span><br><span class="line">docker inspect &lt;container&gt; | grep State -A 10</span><br><span class="line">lsns | grep &lt;container-name&gt;    <span class="comment"># 看是否还有命名空间残留</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 模拟容器环境调试</span></span><br><span class="line">docker run -it --<span class="built_in">rm</span> &lt;image&gt; bash</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">kubectl run debug-pod --image=&lt;image&gt; -it --<span class="built_in">rm</span> -- bash</span><br></pre></td></tr></table></figure>
+
+<h2 id="命名空间排查最佳实践"><a href="#命名空间排查最佳实践" class="headerlink" title="命名空间排查最佳实践"></a>命名空间排查最佳实践</h2><h3 id="1-排查流程"><a href="#1-排查流程" class="headerlink" title="1. 排查流程"></a>1. 排查流程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Step 1: 识别问题进程</span></span><br><span class="line">ps aux | grep &lt;service-name&gt;</span><br><span class="line">pgrep -f &lt;pattern&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 2: 查看命名空间概况</span></span><br><span class="line">lsns -p &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 3: 针对性进入问题命名空间</span></span><br><span class="line">nsenter -t &lt;PID&gt; -n -p -m bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step 4: 在命名空间内排查</span></span><br><span class="line"><span class="comment"># 网络: ip addr, ip route, netstat</span></span><br><span class="line"><span class="comment"># 文件系统: mount, df, ls</span></span><br><span class="line"><span class="comment"># 进程: ps, pstree</span></span><br><span class="line"><span class="comment"># 权限: id, whoami, ls -la</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-常用组合命令"><a href="#2-常用组合命令" class="headerlink" title="2. 常用组合命令"></a>2. 常用组合命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 快速查看容器所有命名空间信息</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">container_ns_info</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> pid=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== 命名空间概况 ===&quot;</span></span><br><span class="line">    lsns -p <span class="variable">$pid</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 网络信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -n ip addr show</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 挂载信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -m mount | <span class="built_in">head</span> -10</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n=== 进程信息 ===&quot;</span></span><br><span class="line">    nsenter -t <span class="variable">$pid</span> -p ps aux | <span class="built_in">head</span> -10</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用: container_ns_info &lt;PID&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-监控脚本"><a href="#3-监控脚本" class="headerlink" title="3. 监控脚本"></a>3. 监控脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># ns_monitor.sh - 命名空间监控脚本</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;=== 命名空间统计 ===&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;类型统计:&quot;</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n进程数最多的命名空间:&quot;</span></span><br><span class="line">lsns | awk <span class="string">&#x27;NR&gt;1 &#123;print $2, $3, $5&#125;&#x27;</span> | <span class="built_in">sort</span> -k2 -nr | <span class="built_in">head</span> -5</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\n容器相关命名空间:&quot;</span></span><br><span class="line">lsns | grep -E <span class="string">&quot;(docker|containerd|runc)&quot;</span> | <span class="built_in">wc</span> -l</span><br></pre></td></tr></table></figure>
+
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>⚠️ <strong>安全提醒</strong>:</p>
+<ul>
+<li>使用<code>nsenter</code>需要root权限或相应的capabilities</li>
+<li>进入生产容器命名空间要谨慎，避免影响业务</li>
+<li>某些命名空间操作可能影响系统稳定性</li>
+</ul>
+<p>💡 <strong>最佳实践</strong>:</p>
+<ul>
+<li>先用<code>lsns</code>观察，再用<code>nsenter</code>进入</li>
+<li>排查时记录操作步骤，便于复现和分析</li>
+<li>结合容器编排工具的日志和状态信息</li>
+<li>定期监控命名空间数量，避免泄漏</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/11/%E5%9F%BA%E7%A1%80%E9%95%9C%E5%83%8F%E5%AF%B9%E6%AF%94/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1626,123 +1748,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/13/tcpkill%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">tcpkill工作原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-08-13 11:51:41 / 修改时间：11:54:31" itemprop="dateCreated datePublished" datetime="2025-08-13T11:51:41+08:00">2025-08-13</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="tcpkill-工作原理"><a href="#tcpkill-工作原理" class="headerlink" title="tcpkill 工作原理"></a>tcpkill 工作原理</h2><p><code>tcpkill</code> 是一个网络工具，用于强制终止 TCP 连接。其工作机制如下：</p>
-<ol>
-<li><strong>监听网络流量</strong>：在指定网络接口上监听符合过滤条件的数据包</li>
-<li><strong>伪造 RST 包</strong>：当检测到目标连接的数据包时，立即伪造 TCP RST（Reset）包</li>
-<li><strong>双向发送</strong>：同时向连接的两端发送 RST 包，确保连接被彻底终止</li>
-</ol>
-<h2 id="命令解析"><a href="#命令解析" class="headerlink" title="命令解析"></a>命令解析</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装 sudo yun install -y dsniff</span></span><br><span class="line"><span class="built_in">sudo</span> tcpkill -i eth0 host 11.123.253.133 and port 80</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>-i eth0</code>：在 eth0 网络接口上监听</li>
-<li><code>host 11.123.253.133 and port 80</code>：过滤条件，只处理涉及 IP 11.123.253.133 且端口为 80 的连接</li>
-</ul>
-<h2 id="tcpkill-输出解释"><a href="#tcpkill-输出解释" class="headerlink" title="tcpkill 输出解释"></a>tcpkill 输出解释</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tcpkill: listening on eth0 [host 11.123.253.133 and port 80]</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434213725:434213725(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434214227:434214227(0) win 0</span><br><span class="line">11.123.253.133:80 &gt; 172.22.3.89:46890: R 434215231:434215231(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599879870:599879870(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599880372:599880372(0) win 0</span><br><span class="line">172.22.3.89:46890 &gt; 11.123.253.133:80: R 599881376:599881376(0) win 0</span><br></pre></td></tr></table></figure>
-
-<p>每行格式：<code>源IP:端口 &gt; 目标IP:端口: R 序列号:序列号(数据长度) win 窗口大小</code></p>
-<ul>
-<li><code>R</code>：表示 RST（Reset）标志位</li>
-<li>序列号：TCP 序列号，tcpkill 会尝试不同的序列号以确保 RST 包被接受</li>
-<li><code>(0)</code>：数据长度为 0</li>
-<li><code>win 0</code>：窗口大小为 0</li>
-</ul>
-<h2 id="抓包分析"><a href="#抓包分析" class="headerlink" title="抓包分析"></a>抓包分析</h2><p>从您提供的抓包数据可以看出完整的攻击过程：</p>
-<h3 id="1-正常通信阶段"><a href="#1-正常通信阶段" class="headerlink" title="1. 正常通信阶段"></a>1. 正常通信阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">11:40:00.911181 - 服务器发送 HTTP 数据 (73 字节)</span><br><span class="line">11:40:00.911221 - 客户端发送 ACK 确认</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-RST-攻击阶段"><a href="#2-RST-攻击阶段" class="headerlink" title="2. RST 攻击阶段"></a>2. RST 攻击阶段</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">11:40:01.310146 开始 - tcpkill 发送多个 RST 包</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键观察点</strong>：</p>
-<ol>
-<li><strong>TTL 变化</strong>：正常包 TTL&#x3D;51，RST 包 TTL&#x3D;64，说明 RST 包是本地伪造的</li>
-<li><strong>序列号策略</strong>：tcpkill 发送多个不同序列号的 RST 包，增加成功率</li>
-<li><strong>双向攻击</strong>：既伪造服务器向客户端发送 RST，也伪造客户端向服务器发送 RST</li>
-<li><strong>时间差</strong>：RST 包在正常通信后约 0.4 秒发送</li>
-</ol>
-<h2 id="技术细节"><a href="#技术细节" class="headerlink" title="技术细节"></a>技术细节</h2><p><strong>为什么发送多个 RST 包？</strong></p>
-<ul>
-<li>TCP 只接受序列号在有效窗口范围内的 RST 包</li>
-<li>tcpkill 通过发送不同序列号的 RST 包来提高成功概率</li>
-<li>从抓包可见，序列号呈递增趋势（434213725 → 434214227 → 434215231）</li>
-</ul>
-<p><strong>双向攻击的意义</strong>：</p>
-<ul>
-<li>确保连接两端都收到 RST 包</li>
-<li>即使一方的 RST 包被过滤，另一方仍可能生效</li>
-<li>提高攻击成功率</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1814,7 +1819,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">204</span>
+          <span class="site-state-item-count">205</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1827,7 +1832,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
