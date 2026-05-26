@@ -28,7 +28,7 @@
 <meta property="og:description" content="📊 网络隔离手段概览   手段名称 作用层级 通俗比喻 状态特性 作用范围 底层核心实现 备注    安全组 L3&#x2F;L4（实例网卡） 虚拟机的”贴身保镖” 有状态 云服务器实例（VM&#x2F;网卡） OVS 流表 &#x2F; Netfilter + conntrack 出站默认放行，入站默认拒绝   网络 ACL L3&#x2F;L4（子网） 小区的”无情门卫” 无状态 整个云子网">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-03-17T12:24:38.000Z">
-<meta property="article:modified_time" content="2026-05-26T10:59:54.401Z">
+<meta property="article:modified_time" content="2026-05-26T11:02:07.605Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="network">
 <meta name="twitter:card" content="summary">
@@ -220,7 +220,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-05-26 18:59:54" itemprop="dateModified" datetime="2026-05-26T18:59:54+08:00">2026-05-26</time>
+                <time title="修改时间：2026-05-26 19:02:07" itemprop="dateModified" datetime="2026-05-26T19:02:07+08:00">2026-05-26</time>
               </span>
 
           
@@ -236,14 +236,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.4k</span>
+              <span>1.8k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -352,7 +352,9 @@
 <h2 id="关于ovs"><a href="#关于ovs" class="headerlink" title="关于ovs"></a>关于ovs</h2><blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/JCpeng/p/15153902.html">https://www.cnblogs.com/JCpeng/p/15153902.html</a><br><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000019612525">https://segmentfault.com/a/1190000019612525</a></p>
 </blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl 用于控制ovs db</span><br><span class="line">ovs-ofctl 用于管理OpenFlow switch 的 flow</span><br><span class="line">ovs-dpctl 用于管理ovs的datapath</span><br><span class="line">ovs-appctl 用于查询和管理ovs daemon</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看 OVS bridge</span><br><span class="line">ovs-vsctl show</span><br><span class="line"></span><br><span class="line">#查看 bridge</span><br><span class="line">ovs-vsctl list-br</span><br><span class="line"></span><br><span class="line">#查看某 bridge 的 port</span><br><span class="line">ovs-vsctl list-ports br-int</span><br><span class="line"></span><br><span class="line">#查看 interface</span><br><span class="line">ovs-vsctl list interface</span><br><span class="line"></span><br><span class="line">#查看 OpenFlow 流表（非常重要）</span><br><span class="line">ovs-ofctl dump-flows br-int</span><br><span class="line"></span><br><span class="line">#查看 tunnel</span><br><span class="line">ovs-vsctl show | grep vxlan</span><br><span class="line"></span><br><span class="line">#查看 ovsdb</span><br><span class="line">ovsdb-client dump</span><br><span class="line"></span><br><span class="line">#ovs查看控制器列表</span><br><span class="line">ovs-vsctl list controller</span><br></pre></td></tr></table></figure>
+<h3 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bridge：网桥，虚拟交换机。</span><br><span class="line">port：端口，类型有normal、internal、patch、tunnel。每创建一个port，ovs会自动创建一个同名接口interface挂载到该port上。</span><br><span class="line">normal：主机网卡挂载到ovs网桥上，ovs自动创建同名port处理这块网卡进出的数据包。挂载到ovs上的网卡设备不支持分配IP，之前网卡配置的IP不可访问。</span><br><span class="line">internal：ovs创建网桥后默认创建与网桥同名的internal port。只有internal类型端口才支持配置IP。</span><br><span class="line">interface：网络接口设备。port是ovs网桥上的虚拟端口，interface挂载在port上。一般port和interface是一对一的关系，只有在配置port为bond模式后，port和interface是一对多的关系。这个网络接口设备可能是创建internal类型port时ovs自动生成的，也可能是挂载的主机网卡对应的接口。</span><br></pre></td></tr></table></figure>
+
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl 用于控制ovs db</span><br><span class="line">ovs-ofctl 用于管理OpenFlow switch 的 flow</span><br><span class="line">ovs-dpctl 用于管理ovs的datapath</span><br><span class="line">ovs-appctl 用于查询和管理ovs daemon</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看 OVS bridge</span><br><span class="line">ovs-vsctl show</span><br><span class="line"></span><br><span class="line">#查看 bridge</span><br><span class="line">ovs-vsctl list-br</span><br><span class="line"></span><br><span class="line">#查看某 bridge 的 port</span><br><span class="line">ovs-vsctl list-ports br-int</span><br><span class="line"></span><br><span class="line">#查看 interface</span><br><span class="line">ovs-vsctl list interface</span><br><span class="line"></span><br><span class="line">#查看 OpenFlow 流表（非常重要）</span><br><span class="line">ovs-ofctl dump-flows br-int</span><br><span class="line"></span><br><span class="line">#查看 tunnel</span><br><span class="line">ovs-vsctl show | grep vxlan</span><br><span class="line"></span><br><span class="line">#查看 ovsdb</span><br><span class="line">ovsdb-client dump</span><br><span class="line"></span><br><span class="line">#ovs查看控制器列表</span><br><span class="line">ovs-vsctl list controller</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -437,7 +439,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%8A-%E7%BD%91%E7%BB%9C%E9%9A%94%E7%A6%BB%E6%89%8B%E6%AE%B5%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">📊 网络隔离手段概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Eovs"><span class="nav-number">2.</span> <span class="nav-text">关于ovs</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%8A-%E7%BD%91%E7%BB%9C%E9%9A%94%E7%A6%BB%E6%89%8B%E6%AE%B5%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">📊 网络隔离手段概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Eovs"><span class="nav-number">2.</span> <span class="nav-text">关于ovs</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">2.1.</span> <span class="nav-text">术语</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4"><span class="nav-number">2.2.</span> <span class="nav-text">命令</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
