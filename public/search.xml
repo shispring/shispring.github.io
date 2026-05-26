@@ -16345,7 +16345,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   <entry>
     <title>网络隔离手段</title>
     <url>/2026/03/17/%E7%BD%91%E7%BB%9C%E9%9A%94%E7%A6%BB%E6%89%8B%E6%AE%B5/</url>
-    <content><![CDATA[<h2 id="📊-网络隔离手段概览"><a href="#📊-网络隔离手段概览" class="headerlink" title="**📊 网络隔离手段概览 **"></a>**📊 网络隔离手段概览 **</h2><table>
+    <content><![CDATA[<h2 id="📊-网络隔离手段概览"><a href="#📊-网络隔离手段概览" class="headerlink" title="📊 网络隔离手段概览"></a>📊 网络隔离手段概览</h2><table>
 <thead>
 <tr>
 <th align="left">手段名称</th>
@@ -16439,6 +16439,10 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <td align="left">提供网络边界隔离，需配合 SG&#x2F;ACL 限制连接</td>
 </tr>
 </tbody></table>
+<h2 id="关于ovs"><a href="#关于ovs" class="headerlink" title="关于ovs"></a>关于ovs</h2><blockquote>
+<p><a href="https://www.cnblogs.com/JCpeng/p/15153902.html">https://www.cnblogs.com/JCpeng/p/15153902.html</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ovs-vsctl 用于控制ovs db</span><br><span class="line">ovs-ofctl 用于管理OpenFlow switch 的 flow</span><br><span class="line">ovs-dpctl 用于管理ovs的datapath</span><br><span class="line">ovs-appctl 用于查询和管理ovs daemon</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看 OVS bridge</span><br><span class="line">ovs-vsctl show</span><br><span class="line"></span><br><span class="line">#查看 bridge</span><br><span class="line">ovs-vsctl list-br</span><br><span class="line"></span><br><span class="line">#查看某 bridge 的 port</span><br><span class="line">ovs-vsctl list-ports br-int</span><br><span class="line"></span><br><span class="line">#查看 interface</span><br><span class="line">ovs-vsctl list interface</span><br><span class="line"></span><br><span class="line">#查看 OpenFlow 流表（非常重要）</span><br><span class="line">ovs-ofctl dump-flows br-int</span><br><span class="line"></span><br><span class="line">#查看 tunnel</span><br><span class="line">ovs-vsctl show | grep vxlan</span><br><span class="line"></span><br><span class="line">#查看 ovsdb</span><br><span class="line">ovsdb-client dump</span><br><span class="line"></span><br><span class="line">#ovs查看控制器列表</span><br><span class="line">ovs-vsctl list controller</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>network</tag>
