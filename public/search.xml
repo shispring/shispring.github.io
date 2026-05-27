@@ -1861,7 +1861,10 @@
 </tr>
 </tbody></table>
 <hr>
-<h3 id="ipvsadm-用法表"><a href="#ipvsadm-用法表" class="headerlink" title="ipvsadm 用法表"></a>ipvsadm 用法表</h3><table>
+<h3 id="ipvsadm-用法表"><a href="#ipvsadm-用法表" class="headerlink" title="ipvsadm 用法表"></a>ipvsadm 用法表</h3><blockquote>
+<p><a href="https://www.biglittleant.cn/2020/09/03/lvsadm_user/">https://www.biglittleant.cn/2020/09/03/lvsadm_user/</a></p>
+</blockquote>
+<table>
 <thead>
 <tr>
 <th><strong>功能</strong></th>
