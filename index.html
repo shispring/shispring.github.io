@@ -938,7 +938,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-02 10:11:44" itemprop="dateModified" datetime="2026-06-02T10:11:44+08:00">2026-06-02</time>
+                <time title="修改时间：2026-06-03 18:01:20" itemprop="dateModified" datetime="2026-06-03T18:01:20+08:00">2026-06-03</time>
               </span>
 
           <br>
@@ -947,7 +947,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5k</span>
+              <span>5.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -966,7 +966,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="微信视频号下载文件"><a href="#微信视频号下载文件" class="headerlink" title="微信视频号下载文件"></a>微信视频号下载文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#二进制</span><br><span class="line">https://github.com/ltaoo/wx_channels_download</span><br><span class="line"></span><br><span class="line">#首次运行用管理员命令运行</span><br><span class="line">sudo ./wx_video_download</span><br><span class="line"></span><br><span class="line">#打开相应视频号页面，点击相应下载</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+          <h2 id="ASR工具"><a href="#ASR工具" class="headerlink" title="ASR工具"></a>ASR工具</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://modelscope.github.io/FunASR/zh/index.html">https://modelscope.github.io/FunASR/zh/index.html</a><br>Whisper</p>
+</blockquote>
+<h2 id="微信视频号下载文件"><a href="#微信视频号下载文件" class="headerlink" title="微信视频号下载文件"></a>微信视频号下载文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#二进制</span><br><span class="line">https://github.com/ltaoo/wx_channels_download</span><br><span class="line"></span><br><span class="line">#首次运行用管理员命令运行</span><br><span class="line">sudo ./wx_video_download</span><br><span class="line"></span><br><span class="line">#打开相应视频号页面，点击相应下载</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h2 id="ffmpeg切片"><a href="#ffmpeg切片" class="headerlink" title="ffmpeg切片"></a>ffmpeg切片</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">#先切片,每30分钟一段</span><br><span class="line">ffmpeg -i input.mp3 \</span><br><span class="line">-f segment \</span><br><span class="line">-segment_time 1800 \</span><br><span class="line">-c copy \</span><br><span class="line">chunk_%03d.mp3</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#截取5分钟测试</span><br><span class="line">ffmpeg -i input.mp3 -t 300 test.mp3</span><br><span class="line"></span><br><span class="line">注意：</span><br><span class="line">wav 更稳定，pyannote 对音频切片精度要求非常严格，WhisperX 内部做了兼容</span><br><span class="line">WAV:无压缩、样本精确</span><br><span class="line">MP3:压缩、有 frame padding</span><br><span class="line"></span><br><span class="line">ffmpeg -i input.mp3 \</span><br><span class="line">-ar 16000 \</span><br><span class="line">-ac 1 \</span><br><span class="line">-c:a pcm_s16le \</span><br><span class="line">input.wav</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <table>
