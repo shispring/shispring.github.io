@@ -20155,4 +20155,90 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>scheduler</tag>
       </tags>
   </entry>
+  <entry>
+    <title>AI Infra 基础</title>
+    <url>/2026/06/02/AI-Infra-%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<h2 id="AI发展主线"><a href="#AI发展主线" class="headerlink" title="AI发展主线"></a>AI发展主线</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">感知机 → 神经网络 → 深度神经网络 → CNN → RNN → LSTM → Transformer → 大语言模型（GPT、Claude等）</span><br></pre></td></tr></table></figure>
+
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">梯度 = 参数变化对误差的影响程度</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="Transformen结构"><a href="#Transformen结构" class="headerlink" title="Transformen结构"></a>Transformen结构</h2><h2 id="Tokenizer"><a href="#Tokenizer" class="headerlink" title="Tokenizer"></a>Tokenizer</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">https://tiktokenizer.vercel.app/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="Embedding"><a href="#Embedding" class="headerlink" title="Embedding"></a>Embedding</h2><h2 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h2><h2 id="CNN-vs-RNN-vs-Transformer"><a href="#CNN-vs-RNN-vs-Transformer" class="headerlink" title="CNN vs RNN vs Transformer"></a>CNN vs RNN vs Transformer</h2><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>CNN</th>
+<th>RNN</th>
+<th>Transformer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全称</td>
+<td>卷积神经网络</td>
+<td>循环神经网络</td>
+<td>注意力网络</td>
+</tr>
+<tr>
+<td>擅长</td>
+<td>图像</td>
+<td>序列</td>
+<td>序列</td>
+</tr>
+<tr>
+<td>输入</td>
+<td>图片</td>
+<td>文本&#x2F;语音</td>
+<td>文本&#x2F;语音&#x2F;图片</td>
+</tr>
+<tr>
+<td>是否考虑顺序</td>
+<td>弱</td>
+<td>强</td>
+<td>强</td>
+</tr>
+<tr>
+<td>并行计算</td>
+<td>强</td>
+<td>弱</td>
+<td>极强</td>
+</tr>
+<tr>
+<td>长距离记忆</td>
+<td>差</td>
+<td>一般</td>
+<td>极强</td>
+</tr>
+<tr>
+<td>训练速度</td>
+<td>快</td>
+<td>慢</td>
+<td>快</td>
+</tr>
+<tr>
+<td>梯度消失</td>
+<td>较少</td>
+<td>非常严重</td>
+<td>基本解决</td>
+</tr>
+<tr>
+<td>梯度爆炸</td>
+<td>少</td>
+<td>常见</td>
+<td>少</td>
+</tr>
+<tr>
+<td>当前主流</td>
+<td>部分场景</td>
+<td>基本淘汰</td>
+<td>绝对主流</td>
+</tr>
+</tbody></table>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a href="https://github.com/Infrasys-AI/AIInfra">https://github.com/Infrasys-AI/AIInfra</a><br>神经元：<a href="https://alexlenail.me/NN-SVG/">https://alexlenail.me/NN-SVG/</a><br><a href="https://playground.tensorflow.org/">https://playground.tensorflow.org/</a><br><a href="https://www.geogebra.org/">https://www.geogebra.org/</a></p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>ai</tag>
+      </tags>
+  </entry>
 </search>
