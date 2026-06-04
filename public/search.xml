@@ -2417,6 +2417,7 @@
 <td>高，需改节点配置，可能影响其他业务</td>
 </tr>
 </tbody></table>
+<h3 id="系统组件考虑"><a href="#系统组件考虑" class="headerlink" title="系统组件考虑"></a>系统组件考虑</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#越接近 Kubernetes 基础设施层，越应该容忍 Node 故障；越接近业务层，越应该尽快迁移到健康节点。</span><br><span class="line">#允许 Pod 在节点未就绪时继续运行，不会立刻驱逐</span><br><span class="line">#允许 Pod 在节点不可达（网络断开等）时继续存活</span><br><span class="line"></span><br><span class="line">tolerations:</span><br><span class="line">- key: node.kubernetes.io/not-ready</span><br><span class="line">  effect: NoExecute</span><br><span class="line">  operator: Exists</span><br><span class="line"></span><br><span class="line">- key: node.kubernetes.io/unreachable</span><br><span class="line">  effect: NoExecute</span><br><span class="line">  operator: Exists</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>k8s</category>

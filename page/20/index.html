@@ -702,7 +702,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-04-16 12:01:17" itemprop="dateModified" datetime="2026-04-16T12:01:17+08:00">2026-04-16</time>
+                <time title="修改时间：2026-06-04 16:13:30" itemprop="dateModified" datetime="2026-06-04T16:13:30+08:00">2026-06-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -720,7 +720,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
+              <span>2.6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -828,6 +828,7 @@
 <td>高，需改节点配置，可能影响其他业务</td>
 </tr>
 </tbody></table>
+<h3 id="系统组件考虑"><a href="#系统组件考虑" class="headerlink" title="系统组件考虑"></a>系统组件考虑</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#越接近 Kubernetes 基础设施层，越应该容忍 Node 故障；越接近业务层，越应该尽快迁移到健康节点。</span><br><span class="line">#允许 Pod 在节点未就绪时继续运行，不会立刻驱逐</span><br><span class="line">#允许 Pod 在节点不可达（网络断开等）时继续存活</span><br><span class="line"></span><br><span class="line">tolerations:</span><br><span class="line">- key: node.kubernetes.io/not-ready</span><br><span class="line">  effect: NoExecute</span><br><span class="line">  operator: Exists</span><br><span class="line"></span><br><span class="line">- key: node.kubernetes.io/unreachable</span><br><span class="line">  effect: NoExecute</span><br><span class="line">  operator: Exists</span><br></pre></td></tr></table></figure>
 
       
     </div>
