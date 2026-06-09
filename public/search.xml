@@ -3555,6 +3555,9 @@
 <p><a href="https://cloud.tencent.com/developer/article/2572621?policyId=1004">https://cloud.tencent.com/developer/article/2572621?policyId=1004</a></p>
 </blockquote>
 <h2 id="网桥工具"><a href="#网桥工具" class="headerlink" title="网桥工具"></a>网桥工具</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br></pre></td></tr></table></figure>
+
+<h2 id="ssh私钥登录"><a href="#ssh私钥登录" class="headerlink" title="ssh私钥登录"></a>ssh私钥登录</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#导出目标主机11.100.100.100用户私钥登录步骤</span><br><span class="line"></span><br><span class="line">## 切换到目标用户</span><br><span class="line">su - xxx</span><br><span class="line"></span><br><span class="line">## 生成 SSH 密钥对</span><br><span class="line">ssh-keygen -t ed25519</span><br><span class="line"></span><br><span class="line">## 将公钥加入授权列表</span><br><span class="line">cat id_ed25519.pub &gt;&gt; ~/.ssh/authorized_keys</span><br><span class="line"></span><br><span class="line">## 修正权限</span><br><span class="line">chmod 600 id_ed25519</span><br><span class="line"></span><br><span class="line">## 获取私钥</span><br><span class="line">cat ~/.ssh/id_ed25519</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 在登录机创建私钥文件</span><br><span class="line">vim id_ed25519</span><br><span class="line">chmod 600 ~/.ssh/id_ed25519</span><br><span class="line"></span><br><span class="line">## SSH 登录</span><br><span class="line">ssh -i id_ed25519 xxx@11.100.100.100</span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <categories>
         <category>linux</category>
