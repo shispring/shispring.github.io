@@ -496,6 +496,101 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/10/network%E6%8B%93%E6%89%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/10/network%E6%8B%93%E6%89%91/" class="post-title-link" itemprop="url">network拓扑</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-01-10 16:37:49" itemprop="dateCreated datePublished" datetime="2026-01-10T16:37:49+08:00">2026-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-06-10 17:50:38" itemprop="dateModified" datetime="2026-06-10T17:50:38+08:00">2026-06-10</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一般拓扑"><a href="#一般拓扑" class="headerlink" title="一般拓扑"></a>一般拓扑</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">                ┌────────────┐</span><br><span class="line">                │   Switch   │</span><br><span class="line">                └─────┬──────┘</span><br><span class="line">                      │</span><br><span class="line">                 eth0 ens192</span><br><span class="line">                      │</span><br><span class="line">          ┌───────────┴───────────┐</span><br><span class="line">          │        Linux          │</span><br><span class="line">          └───────────┬───────────┘</span><br><span class="line">                      │</span><br><span class="line">                linux bridge</span><br><span class="line">                  cni0/flannel.1</span><br><span class="line">                      │</span><br><span class="line">      ┌───────────────┼──────────────┐</span><br><span class="line">      │               │              │</span><br><span class="line">   vethxxx        vethyyy       vethzzz</span><br><span class="line">      │               │              │</span><br><span class="line">   Pod-A          Pod-B         Pod-C</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#ovs情况</span><br><span class="line">                Pod-A</span><br><span class="line">                  |</span><br><span class="line">            eth0@if100</span><br><span class="line">                  |</span><br><span class="line">             veth100</span><br><span class="line">                  |</span><br><span class="line">                OVS</span><br><span class="line">             (br-int)</span><br><span class="line">                  |</span><br><span class="line">        ┌─────────┼─────────┐</span><br><span class="line">        │         │         │</span><br><span class="line">      Geneve    VXLAN     eth0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="拓扑命令"><a href="#拓扑命令" class="headerlink" title="拓扑命令"></a>拓扑命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># RHEL/CentOS/Fedora</span><br><span class="line">dnf install -y plotnetcfg graphviz</span><br><span class="line">或者</span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/epel/7/x86_64/Packages/p/plotnetcfg-0.4.1-2.el7.x86_64.rpm</span><br><span class="line"></span><br><span class="line"># 生成SVG（清晰可缩放）</span><br><span class="line">sudo plotnetcfg | dot -Tsvg &gt; net-topo.svg</span><br><span class="line"></span><br><span class="line"># 生成PNG</span><br><span class="line">sudo plotnetcfg | dot -Tpng &gt; net-topo.png</span><br><span class="line"></span><br><span class="line"># 生成PDF</span><br><span class="line">sudo plotnetcfg | dot -Tpdf &gt; net-topo.pdf</span><br><span class="line"></span><br><span class="line"># 超大图</span><br><span class="line">sudo plotnetcfg &gt; topo.dot</span><br><span class="line"></span><br><span class="line">sudo dot -Gsplines=true \</span><br><span class="line">    -Grankdir=LR \</span><br><span class="line">    -Tsvg topo.dot \</span><br><span class="line">    -o topo.svg</span><br><span class="line"></span><br><span class="line"># 使用json输出</span><br><span class="line">plotnetcfg -f json &gt; network_config.json</span><br></pre></td></tr></table></figure>
+
+<h2 id="ip命令"><a href="#ip命令" class="headerlink" title="ip命令"></a>ip命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># 列出所有接口（含veth、bridge、loopback）</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 看veth pair配对（关键！）</span><br><span class="line">ip link show | grep -E &quot;veth|peer&quot;</span><br><span class="line"></span><br><span class="line"># 看网桥端口（物理网卡+虚拟网卡接入）</span><br><span class="line">ip bridge show</span><br><span class="line"></span><br><span class="line"># 看网络命名空间（容器/隔离环境）</span><br><span class="line">ip netns list</span><br><span class="line">ip netns exec &lt;ns名&gt; ip link</span><br><span class="line"></span><br><span class="line"># 更详细命令</span><br><span class="line">ip -d link show</span><br></pre></td></tr></table></figure>
+
+<h2 id="bridge-utils（传统-brctl，查-Linux-网桥）"><a href="#bridge-utils（传统-brctl，查-Linux-网桥）" class="headerlink" title="bridge-utils（传统 brctl，查 Linux 网桥）"></a>bridge-utils（传统 brctl，查 Linux 网桥）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br><span class="line">brctl show  # 直接显示网桥+所有端口（含eth、veth）</span><br></pre></td></tr></table></figure>
+
+<h2 id="Open-vSwitch（OVS-虚拟交换机）"><a href="#Open-vSwitch（OVS-虚拟交换机）" class="headerlink" title="Open vSwitch（OVS 虚拟交换机）"></a>Open vSwitch（OVS 虚拟交换机）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show  # 显示OVS网桥、端口、veth、vxlan</span><br></pre></td></tr></table></figure>
+
+<h2 id="跨设备拓扑发现（LLDP，查邻接设备）"><a href="#跨设备拓扑发现（LLDP，查邻接设备）" class="headerlink" title="跨设备拓扑发现（LLDP，查邻接设备）"></a>跨设备拓扑发现（LLDP，查邻接设备）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum install -y lldpd</span><br><span class="line">lldpctl</span><br><span class="line">或者</span><br><span class="line">lldpcli show neighbors -f json</span><br></pre></td></tr></table></figure>
+
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">查看 veth：</span><br><span class="line">ip -o link | grep veth</span><br><span class="line"></span><br><span class="line">查看 bridge：</span><br><span class="line">ip -o link | grep bridge</span><br><span class="line"></span><br><span class="line">查看 VXLAN：</span><br><span class="line">ip -d link show | grep vxlan</span><br><span class="line"></span><br><span class="line">查看隧道：</span><br><span class="line">ip tunnel show</span><br><span class="line"></span><br><span class="line">网桥查看</span><br><span class="line">bridge vlan</span><br><span class="line">bridge link</span><br><span class="line">查看 FDB：</span><br><span class="line">bridge fdb show</span><br></pre></td></tr></table></figure>
+
+<h2 id="分层思维"><a href="#分层思维" class="headerlink" title="分层思维"></a>分层思维</h2><ul>
+<li>按 L1 → L2 → L3 → L4 → K8s 一层层往上查<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">L1 物理层</span><br><span class="line"> └── lldpctl</span><br><span class="line"></span><br><span class="line">L2 二层</span><br><span class="line"> ├── bridge</span><br><span class="line"> ├── ovs</span><br><span class="line"> └── fdb</span><br><span class="line"></span><br><span class="line">L3 三层</span><br><span class="line"> ├── ip route</span><br><span class="line"> ├── ip rule</span><br><span class="line"> └── arp/neigh</span><br><span class="line"></span><br><span class="line">L4-L7</span><br><span class="line"> ├── ss</span><br><span class="line"> ├── conntrack</span><br><span class="line"> └── tcpdump</span><br><span class="line"></span><br><span class="line">K8s层</span><br><span class="line"> ├── Pod</span><br><span class="line"> ├── veth</span><br><span class="line"> ├── CNI</span><br><span class="line"> └── Service</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1901,90 +1996,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/13/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2k3s/" class="post-title-link" itemprop="url">安装部署k3s</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-11-13 17:12:18 / 修改时间：23:00:10" itemprop="dateCreated datePublished" datetime="2025-11-13T17:12:18+08:00">2025-11-13</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://forums.rancher.cn/t/k3s/3314">https://forums.rancher.cn/t/k3s/3314</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | \</span><br><span class="line">  INSTALL_K3S_MIRROR=cn \</span><br><span class="line">  INSTALL_K3S_SKIP_SELINUX_RPM=true \</span><br><span class="line">  K3S_TOKEN=12345 sh -s - \</span><br><span class="line">  --system-default-registry=registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
-<p>📘 说明：<br>• INSTALL_K3S_SKIP_SELINUX_RPM&#x3D;true：告诉安装脚本跳过 k3s-selinux 安装；</p>
-<h3 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl status k3s</span><br><span class="line"></span><br><span class="line">k3s --version</span><br></pre></td></tr></table></figure>
-
-<h3 id="🧠-K3s-的-kubeconfig-默认路径"><a href="#🧠-K3s-的-kubeconfig-默认路径" class="headerlink" title="🧠 K3s 的 kubeconfig 默认路径"></a>🧠 K3s 的 kubeconfig 默认路径</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#默认路径</span><br><span class="line">/etc/rancher/k3s/k3s.yaml</span><br><span class="line"></span><br><span class="line">#kubectl 使用时需要显式指定该配置文件，或者将其复制到 $HOME/.kube/config。</span><br><span class="line">kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get nodes</span><br><span class="line"></span><br><span class="line">#copy</span><br><span class="line">sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config</span><br></pre></td></tr></table></figure>
-
-<h3 id="部署helm"><a href="#部署helm" class="headerlink" title="部署helm"></a>部署helm</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#helm与k8s版本兼容匹配：https://helm.sh/zh/docs/topics/version_skew</span><br><span class="line">wget https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">tar zxvf helm-v3.15.3-linux-amd64.tar.gz</span><br><span class="line">mv linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br></pre></td></tr></table></figure>
-<hr>
-<h3 id="部署cert-manager"><a href="#部署cert-manager" class="headerlink" title="部署cert-manager"></a>部署cert-manager</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#安装certcert-manager</span><br><span class="line">#安装CRD： https://github.com/cert-manager/cert-manager/releases</span><br><span class="line"></span><br><span class="line">kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/&lt;VERSION&gt;/cert-manager.crds.yaml</span><br><span class="line">eg:</span><br><span class="line">https://github.com/cert-manager/cert-manager/releases/download/v1.19.1/cert-manager.crds.yaml</span><br><span class="line"></span><br><span class="line">#使用helm安装</span><br><span class="line">helm repo add jetstack https://charts.jetstack.io</span><br><span class="line"></span><br><span class="line">helm repo update</span><br><span class="line">helm install cert-manager jetstack/cert-manager \</span><br><span class="line"> --namespace cert-manager \</span><br><span class="line"> --create-namespace</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2056,7 +2067,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">206</span>
+          <span class="site-state-item-count">207</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
