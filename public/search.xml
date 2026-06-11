@@ -20280,4 +20280,21 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>openvswitch相关实践</title>
+    <url>/2026/06/11/openvswitch%E7%9B%B8%E5%85%B3%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<h2 id="ovs-vsctl-操作"><a href="#ovs-vsctl-操作" class="headerlink" title="ovs-vsctl 操作"></a>ovs-vsctl 操作</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">确认宿主机 OVS 是否存在</span><br><span class="line">ovs-vsctl show</span><br><span class="line"></span><br><span class="line">查看所有 Bridge</span><br><span class="line">ovs-vsctl list-br</span><br><span class="line"></span><br><span class="line">查看 Bridge 下有哪些端口</span><br><span class="line">ovs-vsctl list-ports br-int</span><br><span class="line"></span><br><span class="line">查看完整拓扑</span><br><span class="line">ovs-vsctl show</span><br><span class="line"></span><br><span class="line">查看 OVS Interface</span><br><span class="line">ovs-vsctl list interface</span><br><span class="line">只看名字</span><br><span class="line">ovs-vsctl --columns=name list interface</span><br><span class="line"></span><br><span class="line">查看 Port</span><br><span class="line">ovs-vsctl list port</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="ovs-dpctl-命令"><a href="#ovs-dpctl-命令" class="headerlink" title="ovs-dpctl 命令"></a>ovs-dpctl 命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">查看 datapath</span><br><span class="line">ovs-dpctl show</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="查看-OpenFlow-流表"><a href="#查看-OpenFlow-流表" class="headerlink" title="查看 OpenFlow 流表"></a>查看 OpenFlow 流表</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ovs-ofctl dump-flows br-int</span><br><span class="line"></span><br><span class="line">ovs-ofctl dump-flows br-provider</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看-VM-对应的-tap"><a href="#查看-VM-对应的-tap" class="headerlink" title="查看 VM 对应的 tap"></a>查看 VM 对应的 tap</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">virsh list</span><br></pre></td></tr></table></figure>
+
+<h2 id="通过MAC反查"><a href="#通过MAC反查" class="headerlink" title="通过MAC反查"></a>通过MAC反查</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ovs-vsctl --format=table \</span><br><span class="line">list interface | grep -B5 -A5 fa:16:3e:d7:8d:30</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
 </search>
