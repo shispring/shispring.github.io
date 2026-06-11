@@ -527,7 +527,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-10 17:50:38" itemprop="dateModified" datetime="2026-06-10T17:50:38+08:00">2026-06-10</time>
+                <time title="修改时间：2026-06-11 15:00:46" itemprop="dateModified" datetime="2026-06-11T15:00:46+08:00">2026-06-11</time>
               </span>
 
           <br>
@@ -536,14 +536,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.6k</span>
+              <span>1.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -559,7 +559,7 @@
 
 <h2 id="拓扑命令"><a href="#拓扑命令" class="headerlink" title="拓扑命令"></a>拓扑命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># RHEL/CentOS/Fedora</span><br><span class="line">dnf install -y plotnetcfg graphviz</span><br><span class="line">或者</span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/epel/7/x86_64/Packages/p/plotnetcfg-0.4.1-2.el7.x86_64.rpm</span><br><span class="line"></span><br><span class="line"># 生成SVG（清晰可缩放）</span><br><span class="line">sudo plotnetcfg | dot -Tsvg &gt; net-topo.svg</span><br><span class="line"></span><br><span class="line"># 生成PNG</span><br><span class="line">sudo plotnetcfg | dot -Tpng &gt; net-topo.png</span><br><span class="line"></span><br><span class="line"># 生成PDF</span><br><span class="line">sudo plotnetcfg | dot -Tpdf &gt; net-topo.pdf</span><br><span class="line"></span><br><span class="line"># 超大图</span><br><span class="line">sudo plotnetcfg &gt; topo.dot</span><br><span class="line"></span><br><span class="line">sudo dot -Gsplines=true \</span><br><span class="line">    -Grankdir=LR \</span><br><span class="line">    -Tsvg topo.dot \</span><br><span class="line">    -o topo.svg</span><br><span class="line"></span><br><span class="line"># 使用json输出</span><br><span class="line">plotnetcfg -f json &gt; network_config.json</span><br></pre></td></tr></table></figure>
 
-<h2 id="ip命令"><a href="#ip命令" class="headerlink" title="ip命令"></a>ip命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># 列出所有接口（含veth、bridge、loopback）</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 看veth pair配对（关键！）</span><br><span class="line">ip link show | grep -E &quot;veth|peer&quot;</span><br><span class="line"></span><br><span class="line"># 看网桥端口（物理网卡+虚拟网卡接入）</span><br><span class="line">ip bridge show</span><br><span class="line"></span><br><span class="line"># 看网络命名空间（容器/隔离环境）</span><br><span class="line">ip netns list</span><br><span class="line">ip netns exec &lt;ns名&gt; ip link</span><br><span class="line"></span><br><span class="line"># 更详细命令</span><br><span class="line">ip -d link show</span><br></pre></td></tr></table></figure>
+<h2 id="ip命令"><a href="#ip命令" class="headerlink" title="ip命令"></a>ip命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">nmcli device show eth0</span><br><span class="line"></span><br><span class="line"># 列出所有接口（含veth、bridge、loopback）</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 看veth pair配对（关键！）</span><br><span class="line">ip link show | grep -E &quot;veth|peer&quot;</span><br><span class="line"></span><br><span class="line"># 看网桥端口（物理网卡+虚拟网卡接入）</span><br><span class="line">ip bridge show</span><br><span class="line"></span><br><span class="line"># 看网络命名空间（容器/隔离环境）</span><br><span class="line">ip netns list</span><br><span class="line">ip netns exec &lt;ns名&gt; ip link</span><br><span class="line"></span><br><span class="line"># 更详细命令</span><br><span class="line">ip -d link show</span><br></pre></td></tr></table></figure>
 
 <h2 id="bridge-utils（传统-brctl，查-Linux-网桥）"><a href="#bridge-utils（传统-brctl，查-Linux-网桥）" class="headerlink" title="bridge-utils（传统 brctl，查 Linux 网桥）"></a>bridge-utils（传统 brctl，查 Linux 网桥）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br><span class="line">brctl show  # 直接显示网桥+所有端口（含eth、veth）</span><br></pre></td></tr></table></figure>
 
