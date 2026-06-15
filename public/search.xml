@@ -20306,4 +20306,13 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>AI Gateway</title>
+    <url>/2026/06/15/AI-Gateway/</url>
+    <content><![CDATA[<h2 id="LiteLLM"><a href="#LiteLLM" class="headerlink" title="LiteLLM"></a>LiteLLM</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mkdir litellm</span><br><span class="line">uv venv --python 3.12 --seed</span><br><span class="line"></span><br><span class="line">source .venv/bin/activate</span><br><span class="line"></span><br><span class="line">curl -fsSL https://gh-proxy.org/https://raw.githubusercontent.com/BerriAI/litellm/main/scripts/install.sh | sh</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>ai</tag>
+      </tags>
+  </entry>
 </search>
