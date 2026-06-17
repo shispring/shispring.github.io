@@ -464,7 +464,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-17 16:05:50" itemprop="dateModified" datetime="2026-06-17T16:05:50+08:00">2026-06-17</time>
+                <time title="修改时间：2026-06-18 00:00:51" itemprop="dateModified" datetime="2026-06-18T00:00:51+08:00">2026-06-18</time>
               </span>
 
           <br>
@@ -473,14 +473,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>896</span>
+              <span>3.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -492,10 +492,256 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="初始化-使用非stack账户"><a href="#初始化-使用非stack账户" class="headerlink" title="初始化(使用非stack账户)"></a>初始化(使用非stack账户)</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">更新系统</span><br><span class="line">sudo apt update &amp;&amp; sudo apt upgrade -y</span><br><span class="line">安装依赖</span><br><span class="line">sudo apt install -y git python3-pip</span><br><span class="line"></span><br><span class="line">#本机无法访问github仓库时，配置走代理(拉取etcd时用到)</span><br><span class="line">git config --global url.&quot;https://gh-proxy.org/https://github.com/&quot;.insteadOf &quot;https://github.com/&quot;</span><br><span class="line"></span><br><span class="line">mkdir -p /home/xxx/openstack</span><br><span class="line">mkdir -p /opt/stack</span><br><span class="line">sudo ln -s /home/xxx/openstack /opt/stack</span><br><span class="line"></span><br><span class="line"># 克隆DevStack</span><br><span class="line">git clone https://opendev.org/openstack/devstack</span><br><span class="line">git branch -a</span><br><span class="line">git checkout stable/2025.1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+          <h2 id="1-环境说明"><a href="#1-环境说明" class="headerlink" title="1. 环境说明"></a>1. 环境说明</h2><h3 id="系统版本"><a href="#系统版本" class="headerlink" title="系统版本"></a>系统版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/os-release</span><br></pre></td></tr></table></figure>
 
-<h2 id="配置-注意python版本与openstack兼容问题"><a href="#配置-注意python版本与openstack兼容问题" class="headerlink" title="配置(注意python版本与openstack兼容问题)"></a>配置(注意python版本与openstack兼容问题)</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; local.conf &lt;&lt; &#x27;EOF&#x27;</span><br><span class="line">[[local|localrc]]</span><br><span class="line"># 固定稳定分支</span><br><span class="line">GIT_BRANCH=stable/2025.1</span><br><span class="line"># 浅克隆，只拉最新提交</span><br><span class="line">GIT_DEPTH=1</span><br><span class="line"></span><br><span class="line"># 开启官方测试套件，不需要就删除此行</span><br><span class="line">enable_service tempest</span><br><span class="line"></span><br><span class="line"># 统一全平台密码</span><br><span class="line">ADMIN_PASSWORD=admin123</span><br><span class="line">DATABASE_PASSWORD=$ADMIN_PASSWORD</span><br><span class="line">RABBIT_PASSWORD=$ADMIN_PASSWORD</span><br><span class="line">SERVICE_PASSWORD=$ADMIN_PASSWORD</span><br><span class="line"></span><br><span class="line"># 使用当前账号部署，不创建stack用户</span><br><span class="line">STACK_USER=xxx</span><br><span class="line">FORCE=yes</span><br><span class="line"></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">./stack.sh</span><br><span class="line"># 安装完成后，会输出访问地址和账号</span><br><span class="line"></span><br><span class="line">#如果安装失败，停止服务、卸载，然后重试</span><br><span class="line">./unstack.sh</span><br><span class="line">./clean.sh</span><br></pre></td></tr></table></figure>
+<p>示例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ubuntu 22.04.5 LTS</span><br></pre></td></tr></table></figure>
+
+<h3 id="部署目标"><a href="#部署目标" class="headerlink" title="部署目标"></a>部署目标</h3><p>部署单机版 OpenStack DevStack：</p>
+<ul>
+<li>Keystone</li>
+<li>Glance</li>
+<li>Nova</li>
+<li>Neutron</li>
+<li>OVN</li>
+<li>Placement</li>
+<li>noVNC</li>
+</ul>
+<p>用于：</p>
+<ul>
+<li>OpenStack 学习</li>
+<li>API 验证</li>
+<li>VM 创建测试</li>
+<li>OVN 网络验证</li>
+</ul>
+<hr>
+<h2 id="2-企业环境特点"><a href="#2-企业环境特点" class="headerlink" title="2. 企业环境特点"></a>2. 企业环境特点</h2><p>本环境存在以下限制：</p>
+<h3 id="无法创建-stack-用户"><a href="#无法创建-stack-用户" class="headerlink" title="无法创建 stack 用户"></a>无法创建 stack 用户</h3><p>官方文档要求：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> useradd -s /bin/bash -d /opt/stack -m stack</span><br></pre></td></tr></table></figure>
+
+<p>但企业环境禁止创建用户。</p>
+<p>因此采用当前用户部署：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">whoami</span></span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">daxiong</span><br></pre></td></tr></table></figure>
+
+<p>要求：</p>
+<ul>
+<li>当前用户具备 sudo 权限</li>
+<li>当前用户可写入 &#x2F;opt&#x2F;stack</li>
+</ul>
+<hr>
+<h3 id="GitHub-无法直连"><a href="#GitHub-无法直连" class="headerlink" title="GitHub 无法直连"></a>GitHub 无法直连</h3><p>OpenStack 主仓库位于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://opendev.org</span><br></pre></td></tr></table></figure>
+
+<p>但部分依赖（例如 noVNC）来自 GitHub。</p>
+<p>需要配置 Git Proxy。</p>
+<hr>
+<h2 id="3-准备部署目录"><a href="#3-准备部署目录" class="headerlink" title="3. 准备部署目录"></a>3. 准备部署目录</h2><p>创建 OpenStack 工作目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /opt/stack</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R <span class="variable">$USER</span>:<span class="variable">$USER</span> /opt/stack</span><br></pre></td></tr></table></figure>
+
+<p>验证：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">touch</span> /opt/stack/test</span><br><span class="line"></span><br><span class="line"><span class="built_in">rm</span> -f /opt/stack/test</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="4-Git-配置"><a href="#4-Git-配置" class="headerlink" title="4. Git 配置"></a>4. Git 配置</h2><h3 id="提高大仓库下载稳定性"><a href="#提高大仓库下载稳定性" class="headerlink" title="提高大仓库下载稳定性"></a>提高大仓库下载稳定性</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global http.postBuffer 524288000</span><br></pre></td></tr></table></figure>
+
+<h3 id="GitHub-代理（可选）"><a href="#GitHub-代理（可选）" class="headerlink" title="GitHub 代理（可选）"></a>GitHub 代理（可选）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git config --global \</span><br><span class="line">url.<span class="string">&quot;https://gh-proxy.org/https://github.com/&quot;</span>.insteadOf \</span><br><span class="line"><span class="string">&quot;https://github.com/&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>验证：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --list</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url.https://gh-proxy.org/https://github.com/.insteadof=https://github.com/</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-获取-DevStack"><a href="#5-获取-DevStack" class="headerlink" title="5. 获取 DevStack"></a>5. 获取 DevStack</h2><p>克隆 DevStack：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~</span><br><span class="line"></span><br><span class="line">git <span class="built_in">clone</span> https://opendev.org/openstack/devstack</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> devstack</span><br></pre></td></tr></table></figure>
+
+<p>切换稳定分支：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout stable/2025.1</span><br></pre></td></tr></table></figure>
+
+<p>验证：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">* stable/2025.1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="6-关闭-Ubuntu-自动升级"><a href="#6-关闭-Ubuntu-自动升级" class="headerlink" title="6. 关闭 Ubuntu 自动升级"></a>6. 关闭 Ubuntu 自动升级</h2><p>避免安装过程中出现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Could not get lock /var/lib/dpkg/lock-frontend</span><br></pre></td></tr></table></figure>
+
+<p>停止自动升级：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl stop unattended-upgrades</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">disable</span> unattended-upgrades</span><br></pre></td></tr></table></figure>
+
+<p>验证：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status unattended-upgrades</span><br></pre></td></tr></table></figure>
+
+<p>应显示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">disabled</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-创建-local-conf"><a href="#7-创建-local-conf" class="headerlink" title="7. 创建 local.conf"></a>7. 创建 local.conf</h2><p>在 DevStack 根目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim local.conf</span><br></pre></td></tr></table></figure>
+
+<p>内容如下：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[[local|localrc]]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HOST_IP</span>=<span class="number">11.93</span>.<span class="number">100.100</span></span><br><span class="line"><span class="attr">HOSTNAME</span>=p90297v</span><br><span class="line"></span><br><span class="line"><span class="attr">ADMIN_PASSWORD</span>=admin123</span><br><span class="line"><span class="attr">DATABASE_PASSWORD</span>=<span class="variable">$ADMIN_PASSWORD</span></span><br><span class="line"><span class="attr">RABBIT_PASSWORD</span>=<span class="variable">$ADMIN_PASSWORD</span></span><br><span class="line"><span class="attr">SERVICE_PASSWORD</span>=<span class="variable">$ADMIN_PASSWORD</span></span><br><span class="line"></span><br><span class="line"><span class="attr">GIT_BRANCH</span>=stable/<span class="number">2025.1</span></span><br><span class="line"><span class="attr">RECLONE</span>=<span class="literal">False</span></span><br><span class="line"><span class="attr">GIT_DEPTH</span>=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SERVICE_HOST</span>=<span class="variable">$HOST_IP</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Q_AGENT</span>=ovn</span><br><span class="line"></span><br><span class="line">enable_service ovn-northd</span><br><span class="line">enable_service ovn-controller</span><br><span class="line"></span><br><span class="line">enable_service n-novnc</span><br><span class="line"></span><br><span class="line">disable_service tempest</span><br><span class="line">disable_service horizon</span><br><span class="line"></span><br><span class="line"><span class="attr">SKIP_WAIT_FOR_COMPUTE_HOSTNAME</span>=<span class="literal">True</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LOGFILE</span>=/opt/stack/logs/stack.sh.log</span><br><span class="line"><span class="attr">SCREEN_LOGDIR</span>=/opt/stack/logs/screen</span><br><span class="line"></span><br><span class="line"><span class="attr">FORCE</span>=<span class="literal">yes</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="8-参数说明"><a href="#8-参数说明" class="headerlink" title="8. 参数说明"></a>8. 参数说明</h2><h3 id="HOST-IP"><a href="#HOST-IP" class="headerlink" title="HOST_IP"></a>HOST_IP</h3><p>固定 OpenStack 对外地址。</p>
+<p>示例：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">HOST_IP</span>=<span class="number">11.93</span>.<span class="number">100.100</span></span><br></pre></td></tr></table></figure>
+
+<p>避免多网卡环境自动识别错误。</p>
+<hr>
+<h3 id="HOSTNAME"><a href="#HOSTNAME" class="headerlink" title="HOSTNAME"></a>HOSTNAME</h3><p>固定 Nova Compute 注册名称。</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">HOSTNAME</span>=p90297v</span><br></pre></td></tr></table></figure>
+
+<p>避免：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Didn&#x27;t find service registered by hostname</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="Q-AGENT-ovn"><a href="#Q-AGENT-ovn" class="headerlink" title="Q_AGENT&#x3D;ovn"></a>Q_AGENT&#x3D;ovn</h3><p>启用 OVN 网络架构。</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Q_AGENT</span>=ovn</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">OVN Northbound</span><br><span class="line">OVN Southbound</span><br><span class="line">OVN Controller</span><br></pre></td></tr></table></figure>
+
+<p>替代传统：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Open vSwitch Agent</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="SKIP-WAIT-FOR-COMPUTE-HOSTNAME"><a href="#SKIP-WAIT-FOR-COMPUTE-HOSTNAME" class="headerlink" title="SKIP_WAIT_FOR_COMPUTE_HOSTNAME"></a>SKIP_WAIT_FOR_COMPUTE_HOSTNAME</h3><p>跳过 Nova Compute Hostname 检查。</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">SKIP_WAIT_FOR_COMPUTE_HOSTNAME</span>=<span class="literal">True</span></span><br></pre></td></tr></table></figure>
+
+<p>用于规避：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Didn&#x27;t find service registered by hostname after 60 seconds</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="n-novnc"><a href="#n-novnc" class="headerlink" title="n-novnc"></a>n-novnc</h3><p>启用控制台访问：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">enable_service n-novnc</span><br></pre></td></tr></table></figure>
+
+<p>后续可通过 Horizon 或 API 访问实例控制台。</p>
+<hr>
+<h2 id="9-开始安装"><a href="#9-开始安装" class="headerlink" title="9. 开始安装"></a>9. 开始安装</h2><p>执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stack.sh</span><br></pre></td></tr></table></figure>
+
+<p>安装时间：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">30 ~ 90 分钟</span><br></pre></td></tr></table></figure>
+
+<p>取决于：</p>
+<ul>
+<li>网络速度</li>
+<li>GitHub 代理情况</li>
+<li>apt 下载速度</li>
+</ul>
+<hr>
+<h2 id="10-安装成功标志"><a href="#10-安装成功标志" class="headerlink" title="10. 安装成功标志"></a>10. 安装成功标志</h2><p>最终看到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">This is your host IP address: 11.93.100.100</span><br><span class="line"></span><br><span class="line">Keystone is serving at:</span><br><span class="line"></span><br><span class="line">http://11.93.100.100/identity/</span><br><span class="line"></span><br><span class="line">The default users are:</span><br><span class="line">admin</span><br><span class="line">demo</span><br><span class="line"></span><br><span class="line">The password:</span><br><span class="line">admin123</span><br></pre></td></tr></table></figure>
+
+<p>即安装成功。</p>
+<hr>
+<h2 id="11-加载-OpenStack-环境变量"><a href="#11-加载-OpenStack-环境变量" class="headerlink" title="11. 加载 OpenStack 环境变量"></a>11. 加载 OpenStack 环境变量</h2><p>管理员：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> openrc admin admin</span><br></pre></td></tr></table></figure>
+
+<p>测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack service list</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="12-基础验证"><a href="#12-基础验证" class="headerlink" title="12. 基础验证"></a>12. 基础验证</h2><p>查看服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack service list</span><br></pre></td></tr></table></figure>
+
+<p>查看 Endpoint：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack endpoint list</span><br></pre></td></tr></table></figure>
+
+<p>查看 Compute：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack compute service list</span><br></pre></td></tr></table></figure>
+
+<p>查看网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack network agent list</span><br></pre></td></tr></table></figure>
+
+<p>查看 Hypervisor：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack hypervisor list</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="13-查看日志"><a href="#13-查看日志" class="headerlink" title="13. 查看日志"></a>13. 查看日志</h2><p>DevStack 主日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">tail</span> -f /opt/stack/logs/stack.sh.log</span><br></pre></td></tr></table></figure>
+
+<p>Screen 日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /opt/stack/logs/screen/</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">n-api.log</span><br><span class="line">n-cpu.log</span><br><span class="line">q-svc.log</span><br><span class="line">ovn-controller.log</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="14-卸载-DevStack"><a href="#14-卸载-DevStack" class="headerlink" title="14. 卸载 DevStack"></a>14. 卸载 DevStack</h2><p>停止服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./unstack.sh</span><br></pre></td></tr></table></figure>
+
+<p>清理环境：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./clean.sh</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="15-常见问题"><a href="#15-常见问题" class="headerlink" title="15. 常见问题"></a>15. 常见问题</h2><h3 id="Python-版本不匹配"><a href="#Python-版本不匹配" class="headerlink" title="Python 版本不匹配"></a>Python 版本不匹配</h3><p>错误：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Package requires Python &gt;=3.11</span><br></pre></td></tr></table></figure>
+
+<p>原因：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">项目被拉到 master 分支</span><br><span class="line">而不是 stable/2025.1</span><br></pre></td></tr></table></figure>
+
+<p>检查：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt/stack/glance</span><br><span class="line"></span><br><span class="line">git branch</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="GitHub-下载失败"><a href="#GitHub-下载失败" class="headerlink" title="GitHub 下载失败"></a>GitHub 下载失败</h3><p>错误：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gnutls_handshake() failed</span><br></pre></td></tr></table></figure>
+
+<p>原因：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GitHub Proxy 不支持 Git Smart Protocol</span><br></pre></td></tr></table></figure>
+
+<p>解决：</p>
+<ul>
+<li>更换代理</li>
+<li>手动克隆仓库</li>
+<li>使用企业网络代理</li>
+</ul>
+<hr>
+<h3 id="Compute-Wait-超时"><a href="#Compute-Wait-超时" class="headerlink" title="Compute Wait 超时"></a>Compute Wait 超时</h3><p>错误：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Didn&#x27;t find service registered by hostname</span><br></pre></td></tr></table></figure>
+
+<p>解决：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">HOSTNAME</span>=&lt;固定主机名&gt;</span><br><span class="line"></span><br><span class="line"><span class="attr">SKIP_WAIT_FOR_COMPUTE_HOSTNAME</span>=<span class="literal">True</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="apt-lock"><a href="#apt-lock" class="headerlink" title="apt lock"></a>apt lock</h3><p>错误：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Could not get lock /var/lib/dpkg/lock-frontend</span><br></pre></td></tr></table></figure>
+
+<p>解决：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl stop unattended-upgrades</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">disable</span> unattended-upgrades</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="16-下一步实验"><a href="#16-下一步实验" class="headerlink" title="16. 下一步实验"></a>16. 下一步实验</h2><p>推荐验证完整 OpenStack 流程：</p>
+<ol>
+<li>上传 CirrOS 镜像</li>
+<li>创建 Flavor</li>
+<li>创建 Network</li>
+<li>创建 Subnet</li>
+<li>创建 Router</li>
+<li>创建 Security Group</li>
+<li>创建 Keypair</li>
+<li>创建虚拟机</li>
+<li>分配 Floating IP</li>
+<li>SSH 登录实例</li>
+</ol>
+<p>完成后即可掌握：</p>
+<ul>
+<li>Keystone</li>
+<li>Glance</li>
+<li>Nova</li>
+<li>Neutron</li>
+<li>OVN</li>
+<li>Placement</li>
+</ul>
+<p>之间的协作关系。</p>
 
       
     </div>
