@@ -20503,13 +20503,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <hr>
 <h2 id="13-查看日志"><a href="#13-查看日志" class="headerlink" title="13. 查看日志"></a>13. 查看日志</h2><p>DevStack 主日志：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">tail</span> -f /opt/stack/logs/stack.sh.log</span><br></pre></td></tr></table></figure>
-
-<p>Screen 日志：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ls</span> /opt/stack/logs/screen/</span><br></pre></td></tr></table></figure>
-
-<p>例如：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">n-api.log</span><br><span class="line">n-cpu.log</span><br><span class="line">q-svc.log</span><br><span class="line">ovn-controller.log</span><br></pre></td></tr></table></figure>
-
 <hr>
 <h2 id="14-卸载-DevStack"><a href="#14-卸载-DevStack" class="headerlink" title="14. 卸载 DevStack"></a>14. 卸载 DevStack</h2><p>停止服务：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./unstack.sh</span><br></pre></td></tr></table></figure>
