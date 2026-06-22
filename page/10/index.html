@@ -464,7 +464,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-22 11:36:51" itemprop="dateModified" datetime="2026-06-22T11:36:51+08:00">2026-06-22</time>
+                <time title="修改时间：2026-06-22 11:44:52" itemprop="dateModified" datetime="2026-06-22T11:44:52+08:00">2026-06-22</time>
               </span>
 
           <br>
@@ -647,7 +647,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> openrc admin admin</span><br></pre></td></tr></table></figure>
 
 <p>测试：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">openstack service list</span><br><span class="line"></span><br><span class="line"><span class="comment">#本地端口转发</span></span><br><span class="line">ssh -N -L 0.0.0.0:8891:11.93.100.100:80 daxiong@10.16.100.100</span><br><span class="line">浏览器访问：</span><br><span class="line">http://10.16.100.100:8891</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">openstack service list</span><br><span class="line"></span><br><span class="line"><span class="comment">#本地端口转发</span></span><br><span class="line">ssh -fgN -L 0.0.0.0:8891:11.93.100.100:80 daxiong@10.16.100.100</span><br><span class="line">浏览器访问：</span><br><span class="line">http://10.16.100.100:8891</span><br></pre></td></tr></table></figure>
 
 <hr>
 <h2 id="12-基础验证"><a href="#12-基础验证" class="headerlink" title="12. 基础验证"></a>12. 基础验证</h2><p>查看服务：</p>
