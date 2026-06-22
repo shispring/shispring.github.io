@@ -20482,7 +20482,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">source</span> openrc admin admin</span><br></pre></td></tr></table></figure>
 
 <p>测试：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">openstack service list</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">openstack service list</span><br><span class="line"></span><br><span class="line"><span class="comment">#本地端口转发</span></span><br><span class="line">ssh -N -L 0.0.0.0:8891:11.93.100.100:80 daxiong@10.16.100.100</span><br><span class="line">浏览器访问：</span><br><span class="line">http://10.16.100.100:8891</span><br></pre></td></tr></table></figure>
 
 <hr>
 <h2 id="12-基础验证"><a href="#12-基础验证" class="headerlink" title="12. 基础验证"></a>12. 基础验证</h2><p>查看服务：</p>
