@@ -687,7 +687,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-23 10:39:25" itemprop="dateModified" datetime="2026-06-23T10:39:25+08:00">2026-06-23</time>
+                <time title="修改时间：2026-06-23 11:41:22" itemprop="dateModified" datetime="2026-06-23T11:41:22+08:00">2026-06-23</time>
               </span>
 
           <br>
@@ -696,7 +696,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.7k</span>
+              <span>2.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -721,6 +721,132 @@
 
 <h2 id="ip命令"><a href="#ip命令" class="headerlink" title="ip命令"></a>ip命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">nmcli device show eth0</span><br><span class="line"></span><br><span class="line"># 列出所有接口（含veth、bridge、loopback）</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 看veth pair配对（关键！）</span><br><span class="line">ip link show | grep -E &quot;veth|peer&quot;</span><br><span class="line"></span><br><span class="line"># 看网桥端口（物理网卡+虚拟网卡接入）</span><br><span class="line">ip bridge show</span><br><span class="line"></span><br><span class="line"># 看网络命名空间（容器/隔离环境）</span><br><span class="line">ip netns list</span><br><span class="line">ip netns exec &lt;ns名&gt; ip link</span><br><span class="line"></span><br><span class="line"># 更详细命令</span><br><span class="line">ip -d link show</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">netstat -rn</span><br></pre></td></tr></table></figure>
 
+<table>
+<thead>
+<tr>
+<th align="left">关键字</th>
+<th align="left">含义</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>default</strong></td>
+<td align="left">默认路由</td>
+<td align="left">兜底路径，所有匹配不到的流量都走它。</td>
+</tr>
+<tr>
+<td align="left"><strong>via <IP></strong></td>
+<td align="left">网关地址</td>
+<td align="left">下一跳地址。</td>
+</tr>
+<tr>
+<td align="left"><strong>dev <int></strong></td>
+<td align="left">接口名称</td>
+<td align="left">数据包出口。</td>
+</tr>
+<tr>
+<td align="left"><strong>proto <p></strong></td>
+<td align="left">协议来源</td>
+<td align="left"><code>kernel</code> 是内核自动配置，<code>static</code> 是你手动添加的。</td>
+</tr>
+<tr>
+<td align="left"><strong>scope <s ></strong></td>
+<td align="left">作用域</td>
+<td align="left"><code>link</code> (本地链路)、<code>host</code> (仅本机)、<code>global</code> (全网)。</td>
+</tr>
+<tr>
+<td align="left"><strong>src <IP></strong></td>
+<td align="left">源地址选择</td>
+<td align="left">发出包时默认采用此 IP 作为源 IP。</td>
+</tr>
+<tr>
+<td align="left"><strong>metric <n></strong></td>
+<td align="left">优先级</td>
+<td align="left">数字越小越优先（路由开销）。</td>
+</tr>
+<tr>
+<td align="left"><strong>table <table></strong></td>
+<td align="left">路由表 ID</td>
+<td align="left">指定使用哪张表（通常是 <code>main</code> 或 <code>local</code>）。</td>
+</tr>
+<tr>
+<td align="left"><strong>onlink</strong></td>
+<td align="left">强制直连</td>
+<td align="left">即使网关 IP 不在直连网段，也强制认为是直连。</td>
+</tr>
+<tr>
+<td align="left"><strong>prohibit&#x2F;unreachable</strong></td>
+<td align="left">黑洞路由</td>
+<td align="left">故意丢弃包并告知发送方无法到达。</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="left">Scope</th>
+<th align="left">传输方式</th>
+<th align="left">场景</th>
+<th align="left">需要网关 (via) 吗？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>host</strong></td>
+<td align="left">内核自我消化</td>
+<td align="left">回环地址、本机接口 IP</td>
+<td align="left">绝对不需要</td>
+</tr>
+<tr>
+<td align="left"><strong>link</strong></td>
+<td align="left">二层直接寻址 (ARP)</td>
+<td align="left">同一局域网内的设备</td>
+<td align="left">不需要 (直连)</td>
+</tr>
+<tr>
+<td align="left"><strong>global</strong></td>
+<td align="left">三层路由转发</td>
+<td align="left">跨局域网、互联网</td>
+<td align="left">必须通过网关</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="left">类型</th>
+<th align="left">含义</th>
+<th align="left">核心特征</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>直连路由</strong></td>
+<td align="left">目的地就在你的网线上。</td>
+<td align="left">自动生成，不需要下一跳（网关）。</td>
+</tr>
+<tr>
+<td align="left"><strong>主机路由</strong></td>
+<td align="left">目的地是一个具体的单机 IP。</td>
+<td align="left">指向极度精确，优先级高。</td>
+</tr>
+<tr>
+<td align="left"><strong>静态路由</strong></td>
+<td align="left">你手动告诉系统怎么走远方的路。</td>
+<td align="left">人为配置，告知下一跳网关。</td>
+</tr>
+<tr>
+<td align="left"><strong>默认路由</strong></td>
+<td align="left">最后的兜底方案。</td>
+<td align="left">“所有我不知道去哪儿的路，都走这里”。</td>
+</tr>
+</tbody></table>
+<p>系统查路由表遵循一个原则：**最长前缀匹配 (Longest Prefix Match)**。</p>
+<ul>
+<li><strong>谁最细致，谁先赢。</strong></li>
+<li><strong>优先级排序：</strong><ol>
+<li>**主机路由 (&#x2F;32)**：最精确。</li>
+<li>**具体网段路由 (&#x2F;24, &#x2F;22 等)**：比较精确。</li>
+<li>**默认路由 (&#x2F;0)**：最笼统（最后被匹配）。</li>
+</ol>
+</li>
+</ul>
 <h2 id="bridge-utils（传统-brctl，查-Linux-网桥）"><a href="#bridge-utils（传统-brctl，查-Linux-网桥）" class="headerlink" title="bridge-utils（传统 brctl，查 Linux 网桥）"></a>bridge-utils（传统 brctl，查 Linux 网桥）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br><span class="line">brctl show  # 直接显示网桥+所有端口（含eth、veth）</span><br></pre></td></tr></table></figure>
 
 <h2 id="Open-vSwitch（OVS-虚拟交换机）"><a href="#Open-vSwitch（OVS-虚拟交换机）" class="headerlink" title="Open vSwitch（OVS 虚拟交换机）"></a>Open vSwitch（OVS 虚拟交换机）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show  # 显示OVS网桥、端口、veth、vxlan</span><br></pre></td></tr></table></figure>
