@@ -20269,7 +20269,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 
 <h2 id="ip命令"><a href="#ip命令" class="headerlink" title="ip命令"></a>ip命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmcli device show eth0</span><br><span class="line"></span><br><span class="line"># 列出所有接口（含veth、bridge、loopback）</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 看veth pair配对（关键！）</span><br><span class="line">ip link show | grep -E &quot;veth|peer&quot;</span><br><span class="line"></span><br><span class="line"># 看网桥端口（物理网卡+虚拟网卡接入）</span><br><span class="line">ip bridge show</span><br><span class="line"></span><br><span class="line"># 看网络命名空间（容器/隔离环境）</span><br><span class="line">ip netns list</span><br><span class="line">ip netns exec &lt;ns名&gt; ip link</span><br><span class="line"></span><br><span class="line"># 更详细命令</span><br><span class="line">ip -d link show</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">netstat -rn</span><br></pre></td></tr></table></figure>
 
-<table>
+<h3 id="常见路由状态汇总表"><a href="#常见路由状态汇总表" class="headerlink" title="常见路由状态汇总表"></a>常见路由状态汇总表</h3><table>
 <thead>
 <tr>
 <th align="left">关键字</th>
@@ -20395,6 +20395,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </ol>
 </li>
 </ul>
+<hr>
 <h2 id="bridge-utils（传统-brctl，查-Linux-网桥）"><a href="#bridge-utils（传统-brctl，查-Linux-网桥）" class="headerlink" title="bridge-utils（传统 brctl，查 Linux 网桥）"></a>bridge-utils（传统 brctl，查 Linux 网桥）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br><span class="line">brctl show  # 直接显示网桥+所有端口（含eth、veth）</span><br></pre></td></tr></table></figure>
 
 <h2 id="Open-vSwitch（OVS-虚拟交换机）"><a href="#Open-vSwitch（OVS-虚拟交换机）" class="headerlink" title="Open vSwitch（OVS 虚拟交换机）"></a>Open vSwitch（OVS 虚拟交换机）</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ovs-vsctl show  # 显示OVS网桥、端口、veth、vxlan</span><br></pre></td></tr></table></figure>
