@@ -20283,37 +20283,37 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <td align="left">兜底路径，所有匹配不到的流量都走它。</td>
 </tr>
 <tr>
-<td align="left"><strong>via <IP></strong></td>
+<td align="left"><strong>via</strong></td>
 <td align="left">网关地址</td>
 <td align="left">下一跳地址。</td>
 </tr>
 <tr>
-<td align="left"><strong>dev <int></strong></td>
+<td align="left"><strong>dev</strong></td>
 <td align="left">接口名称</td>
 <td align="left">数据包出口。</td>
 </tr>
 <tr>
-<td align="left"><strong>proto <p></strong></td>
+<td align="left"><strong>proto</strong></td>
 <td align="left">协议来源</td>
 <td align="left"><code>kernel</code> 是内核自动配置，<code>static</code> 是你手动添加的。</td>
 </tr>
 <tr>
-<td align="left"><strong>scope <s ></strong></td>
+<td align="left"><strong>scope</strong></td>
 <td align="left">作用域</td>
 <td align="left"><code>link</code> (本地链路)、<code>host</code> (仅本机)、<code>global</code> (全网)。</td>
 </tr>
 <tr>
-<td align="left"><strong>src <IP></strong></td>
+<td align="left"><strong>src</strong></td>
 <td align="left">源地址选择</td>
 <td align="left">发出包时默认采用此 IP 作为源 IP。</td>
 </tr>
 <tr>
-<td align="left"><strong>metric <n></strong></td>
+<td align="left"><strong>metric</strong></td>
 <td align="left">优先级</td>
 <td align="left">数字越小越优先（路由开销）。</td>
 </tr>
 <tr>
-<td align="left"><strong>table <table></strong></td>
+<td align="left"><strong>table</strong></td>
 <td align="left">路由表 ID</td>
 <td align="left">指定使用哪张表（通常是 <code>main</code> 或 <code>local</code>）。</td>
 </tr>
