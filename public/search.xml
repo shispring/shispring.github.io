@@ -20759,6 +20759,34 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <td>Gang &#x2F; Priority &#x2F; DRF &#x2F; Proportion（策略实现）</td>
 </tr>
 </tbody></table>
+<table>
+<thead>
+<tr>
+<th>核心调度插件</th>
+<th>核心作用（精准释义）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Gang Scheduling（组队调度）</strong></td>
+<td>采用「全有或全无」调度机制，训练任务所有 Pod（PS&#x2F;Worker）资源全部满足后才统一启动，杜绝部分 Pod 就绪、部分 Pending 的卡死死锁问题，完美适配分布式训练场景。</td>
+</tr>
+<tr>
+<td><strong>Queue（队列优先级调度）</strong></td>
+<td>基于自定义队列划分资源池，支持权重、资源配额、抢占保护配置，高优先级业务优先调度，可抢占低优先级空闲任务资源，保障核心AI训练任务优先运行。</td>
+</tr>
+<tr>
+<td><strong>Fair-Share &#x2F; DRF（公平资源调度）</strong></td>
+<td>多团队&#x2F;多队列共享GPU集群时，按队列权重动态分配空闲资源，基于DRF主导资源公平算法均衡资源占比，避免单业务、单团队独占集群GPU&#x2F;CPU资源，实现资源合理均分。</td>
+</tr>
+<tr>
+<td><strong>Bin Packing &#x2F; Spread（节点排布调度）</strong></td>
+<td>双策略灵活适配场景：Bin Packing 紧凑打包调度，填满节点资源、减少资源碎片，提升集群资源利用率；Spread 分散打散调度，将Pod分布在不同节点，规避单点故障，提升任务容错性。</td>
+</tr>
+<tr>
+<td><strong>Topology Aware（拓扑感知调度）</strong></td>
+<td>硬件层级感知集群拓扑，自动识别NVLink、RDMA、网卡、机架等网络层级，优先将通信频繁的训练Pod调度至近距离节点，大幅降低多卡&#x2F;多机分布式训练的通信延迟。</td>
+</tr>
+</tbody></table>
 <h3 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h3><ul>
 <li><strong>DRF（Dominant Resource Fairness）</strong>：多维资源公平，必须会推导</li>
 <li><strong>Bin-Packing vs Spread</strong>：GPU 场景偏 bin-packing（节省碎片），在线服务偏 spread（高可用）</li>
