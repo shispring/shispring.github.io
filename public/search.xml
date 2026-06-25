@@ -20255,6 +20255,10 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
 <p><a href="https://github.com/Infrasys-AI/AIInfra">https://github.com/Infrasys-AI/AIInfra</a><br>神经元：<a href="https://alexlenail.me/NN-SVG/">https://alexlenail.me/NN-SVG/</a><br><a href="https://playground.tensorflow.org/">https://playground.tensorflow.org/</a><br><a href="https://www.geogebra.org/">https://www.geogebra.org/</a></p>
 </blockquote>
+<h2 id="k8s调度GPU过程"><a href="#k8s调度GPU过程" class="headerlink" title="k8s调度GPU过程"></a>k8s调度GPU过程</h2><blockquote>
+<p><a href="https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g">https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NVIDIA Driver</span><br><span class="line">    ↓</span><br><span class="line">NVIDIA Container Toolkit</span><br><span class="line">    ↓</span><br><span class="line">NVIDIA Device Plugin</span><br><span class="line">    ↓</span><br><span class="line">kubelet 注册 nvidia.com/gpu</span><br><span class="line">    ↓</span><br><span class="line">scheduler 根据 nvidia.com/gpu 调度 Pod</span><br><span class="line">    ↓</span><br><span class="line">GPU Pod 启动后使用 GPU</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>ai</tag>

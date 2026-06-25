@@ -394,7 +394,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-03 14:11:44" itemprop="dateModified" datetime="2026-06-03T14:11:44+08:00">2026-06-03</time>
+                <time title="修改时间：2026-06-25 17:45:19" itemprop="dateModified" datetime="2026-06-25T17:45:19+08:00">2026-06-25</time>
               </span>
 
           <br>
@@ -403,7 +403,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>463</span>
+              <span>659</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -500,6 +500,10 @@
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/Infrasys-AI/AIInfra">https://github.com/Infrasys-AI/AIInfra</a><br>神经元：<a target="_blank" rel="noopener" href="https://alexlenail.me/NN-SVG/">https://alexlenail.me/NN-SVG/</a><br><a target="_blank" rel="noopener" href="https://playground.tensorflow.org/">https://playground.tensorflow.org/</a><br><a target="_blank" rel="noopener" href="https://www.geogebra.org/">https://www.geogebra.org/</a></p>
 </blockquote>
+<h2 id="k8s调度GPU过程"><a href="#k8s调度GPU过程" class="headerlink" title="k8s调度GPU过程"></a>k8s调度GPU过程</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g">https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">NVIDIA Driver</span><br><span class="line">    ↓</span><br><span class="line">NVIDIA Container Toolkit</span><br><span class="line">    ↓</span><br><span class="line">NVIDIA Device Plugin</span><br><span class="line">    ↓</span><br><span class="line">kubelet 注册 nvidia.com/gpu</span><br><span class="line">    ↓</span><br><span class="line">scheduler 根据 nvidia.com/gpu 调度 Pod</span><br><span class="line">    ↓</span><br><span class="line">GPU Pod 启动后使用 GPU</span><br></pre></td></tr></table></figure>
 
       
     </div>

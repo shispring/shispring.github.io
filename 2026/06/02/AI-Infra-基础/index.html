@@ -28,7 +28,7 @@
 <meta property="og:description" content="AI发展主线1感知机 → 神经网络 → 深度神经网络 → CNN → RNN → LSTM → Transformer → 大语言模型（GPT、Claude等）  概念12梯度 &#x3D; 参数变化对误差的影响程度 Transformen结构Tokenizer12https:&#x2F;&#x2F;tiktokenizer.vercel.app&#x2F;  EmbeddingAttentionCNN vs RNN vs Transf">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-06-02T06:17:06.000Z">
-<meta property="article:modified_time" content="2026-06-03T06:11:44.569Z">
+<meta property="article:modified_time" content="2026-06-25T09:45:19.686Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="ai">
 <meta name="twitter:card" content="summary">
@@ -220,7 +220,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-03 14:11:44" itemprop="dateModified" datetime="2026-06-03T14:11:44+08:00">2026-06-03</time>
+                <time title="修改时间：2026-06-25 17:45:19" itemprop="dateModified" datetime="2026-06-25T17:45:19+08:00">2026-06-25</time>
               </span>
 
           
@@ -236,7 +236,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>463</span>
+              <span>659</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -333,6 +333,10 @@
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/Infrasys-AI/AIInfra">https://github.com/Infrasys-AI/AIInfra</a><br>神经元：<a target="_blank" rel="noopener" href="https://alexlenail.me/NN-SVG/">https://alexlenail.me/NN-SVG/</a><br><a target="_blank" rel="noopener" href="https://playground.tensorflow.org/">https://playground.tensorflow.org/</a><br><a target="_blank" rel="noopener" href="https://www.geogebra.org/">https://www.geogebra.org/</a></p>
 </blockquote>
+<h2 id="k8s调度GPU过程"><a href="#k8s调度GPU过程" class="headerlink" title="k8s调度GPU过程"></a>k8s调度GPU过程</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g">https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">NVIDIA Driver</span><br><span class="line">    ↓</span><br><span class="line">NVIDIA Container Toolkit</span><br><span class="line">    ↓</span><br><span class="line">NVIDIA Device Plugin</span><br><span class="line">    ↓</span><br><span class="line">kubelet 注册 nvidia.com/gpu</span><br><span class="line">    ↓</span><br><span class="line">scheduler 根据 nvidia.com/gpu 调度 Pod</span><br><span class="line">    ↓</span><br><span class="line">GPU Pod 启动后使用 GPU</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -417,7 +421,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AI%E5%8F%91%E5%B1%95%E4%B8%BB%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">AI发展主线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformen%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">Transformen结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tokenizer"><span class="nav-number">4.</span> <span class="nav-text">Tokenizer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Embedding"><span class="nav-number">5.</span> <span class="nav-text">Embedding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention"><span class="nav-number">6.</span> <span class="nav-text">Attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CNN-vs-RNN-vs-Transformer"><span class="nav-number">7.</span> <span class="nav-text">CNN vs RNN vs Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AI%E5%8F%91%E5%B1%95%E4%B8%BB%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">AI发展主线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformen%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">Transformen结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tokenizer"><span class="nav-number">4.</span> <span class="nav-text">Tokenizer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Embedding"><span class="nav-number">5.</span> <span class="nav-text">Embedding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention"><span class="nav-number">6.</span> <span class="nav-text">Attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CNN-vs-RNN-vs-Transformer"><span class="nav-number">7.</span> <span class="nav-text">CNN vs RNN vs Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#k8s%E8%B0%83%E5%BA%A6GPU%E8%BF%87%E7%A8%8B"><span class="nav-number">9.</span> <span class="nav-text">k8s调度GPU过程</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
