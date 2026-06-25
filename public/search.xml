@@ -20765,6 +20765,35 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li><strong>Backfill</strong>：用小作业填空隙，提高利用率</li>
 <li><strong>Preemption vs Reclaim</strong>：preempt 抢跨 Queue 的低优先级；reclaim 拿回本 Queue 被借出的资源</li>
 </ul>
+<h3 id="调度架构"><a href="#调度架构" class="headerlink" title="调度架构"></a>调度架构</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>PS-Worker（Volcano两类task）</th>
+<th>AllReduce 架构（无PS）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>节点角色</td>
+<td>PS（存参数）+ Worker（算梯度）</td>
+<td>全部都是Worker，无独立参数节点</td>
+</tr>
+<tr>
+<td>梯度聚合</td>
+<td>PS单点汇总所有梯度</td>
+<td>Worker之间互相AllReduce交换梯度</td>
+</tr>
+<tr>
+<td>Volcano定义</td>
+<td>tasks分ps、worker两套模板</td>
+<td>只定义单一worker task</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>超大参数量模型、参数分片</td>
+<td>中小模型、多卡多机高速互联</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>调度</tag>
