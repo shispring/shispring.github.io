@@ -184,6 +184,301 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/20/tcp%E5%8D%8A%E8%BF%9E%E6%8E%A5-%E5%85%A8%E8%BF%9E%E6%8E%A5%E6%A0%B8%E5%BF%83%E5%8F%82%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/20/tcp%E5%8D%8A%E8%BF%9E%E6%8E%A5-%E5%85%A8%E8%BF%9E%E6%8E%A5%E6%A0%B8%E5%BF%83%E5%8F%82%E6%95%B0/" class="post-title-link" itemprop="url">tcp半连接/全连接核心参数</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-20 14:34:27 / 修改时间：14:35:01" itemprop="dateCreated datePublished" datetime="2026-01-20T14:34:27+08:00">2026-01-20</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、TCP-半连接-全连接核心参数对照表"><a href="#一、TCP-半连接-全连接核心参数对照表" class="headerlink" title="一、TCP 半连接 &#x2F; 全连接核心参数对照表"></a>一、TCP 半连接 &#x2F; 全连接核心参数对照表</h2><h3 id="1️⃣-net-ipv4-tcp-max-syn-backlog"><a href="#1️⃣-net-ipv4-tcp-max-syn-backlog" class="headerlink" title="1️⃣ net.ipv4.tcp_max_syn_backlog"></a>1️⃣ <code>net.ipv4.tcp_max_syn_backlog</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_max_syn_backlog</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>半连接队列（SYN_RECV 阶段）</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>内核允许的最大 <strong>半连接（SYN 已收到，三次握手未完成）</strong> 数量</td>
+</tr>
+<tr>
+<td><strong>典型现象</strong></td>
+<td>队列满时：不回 SYN+ACK 或启用 syncookies</td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><strong>不同值的影响</strong></td>
+<td><ul><li>小：突发连接时大量 SYN 超时</li><li>大：提升并发连接建立能力（需内存）</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_max_syn_backlog</code></td>
+</tr>
+<tr>
+<td><strong>是否单独生效</strong></td>
+<td>❌ 否（受 somaxconn、listen backlog 共同限制）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="2️⃣-net-ipv4-tcp-syncookies"><a href="#2️⃣-net-ipv4-tcp-syncookies" class="headerlink" title="2️⃣ net.ipv4.tcp_syncookies"></a>2️⃣ <code>net.ipv4.tcp_syncookies</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_syncookies</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>半连接队列溢出时</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>半连接队列满时，是否启用 <strong>SYN Cookies</strong></td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><strong>不同值的作用</strong></td>
+<td><ul><li><code>0</code>：关闭（队列满直接丢 SYN）</li><li><code>1</code>：仅队列满时启用（⭐推荐）</li><li><code>2</code>：无条件启用（防 SYN flood）</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_syncookies</code></td>
+</tr>
+<tr>
+<td><strong>注意点</strong></td>
+<td>开启时部分 TCP 扩展（窗口扩大、时间戳）可能受限</td>
+</tr>
+</tbody></table>
+<p>✅ <strong>结论</strong>：你的配置是生产环境<strong>最合理值</strong></p>
+<hr>
+<h3 id="3️⃣-net-core-somaxconn"><a href="#3️⃣-net-core-somaxconn" class="headerlink" title="3️⃣ net.core.somaxconn"></a>3️⃣ <code>net.core.somaxconn</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>somaxconn</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>全连接队列（accept queue）</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>系统层面允许的 <strong>listen backlog 最大值</strong></td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><strong>不同值的影响</strong></td>
+<td><ul><li>小：accept 队列很容易满</li><li>大：支撑高并发 accept</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/core/somaxconn</code></td>
+</tr>
+<tr>
+<td><strong>是否决定最终值</strong></td>
+<td>❌ 否（还取决于应用 listen backlog）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="4️⃣-net-ipv4-tcp-abort-on-overflow"><a href="#4️⃣-net-ipv4-tcp-abort-on-overflow" class="headerlink" title="4️⃣ net.ipv4.tcp_abort_on_overflow"></a>4️⃣ <code>net.ipv4.tcp_abort_on_overflow</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_abort_on_overflow</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>全连接队列满</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>accept 队列满时，如何处理客户端 ACK</td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><strong>不同值的作用</strong></td>
+<td><ul><li><code>0</code>：丢 ACK（客户端重试 → 看起来像超时）</li><li><code>1</code>：回 RST（客户端立刻失败）</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_abort_on_overflow</code></td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td><ul><li>0：线上业务（避免误伤）</li><li>1：压测&#x2F;定位问题</li></ul></td>
+</tr>
+</tbody></table>
+<p>⚠️ <strong>这是排障神器，但不建议长期线上开启 1</strong></p>
+<hr>
+<h3 id="5️⃣-net-ipv4-tcp-synack-retries"><a href="#5️⃣-net-ipv4-tcp-synack-retries" class="headerlink" title="5️⃣ net.ipv4.tcp_synack_retries"></a>5️⃣ <code>net.ipv4.tcp_synack_retries</code></h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>名称</strong></td>
+<td>tcp_synack_retries</td>
+</tr>
+<tr>
+<td><strong>作用阶段</strong></td>
+<td>半连接保活</td>
+</tr>
+<tr>
+<td><strong>含义</strong></td>
+<td>SYN+ACK 最大重传次数</td>
+</tr>
+<tr>
+<td><strong>你的当前值</strong></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><strong>默认值</strong></td>
+<td>通常是 5</td>
+</tr>
+<tr>
+<td><strong>不同值的影响</strong></td>
+<td><ul><li>大：半连接驻留时间长</li><li>小：更快释放半连接</li></ul></td>
+</tr>
+<tr>
+<td><strong>查看方式</strong></td>
+<td><code>cat /proc/sys/net/ipv4/tcp_synack_retries</code></td>
+</tr>
+<tr>
+<td><strong>经验值</strong></td>
+<td>2～5（内网服务可适当调小）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、一个非常重要但常被忽略的事实"><a href="#二、一个非常重要但常被忽略的事实" class="headerlink" title="二、一个非常重要但常被忽略的事实"></a>二、一个<strong>非常重要但常被忽略的事实</strong></h2><h3 id="❗-半连接-全连接真正的“生效长度”公式"><a href="#❗-半连接-全连接真正的“生效长度”公式" class="headerlink" title="❗ 半连接 &#x2F; 全连接真正的“生效长度”公式"></a>❗ 半连接 &#x2F; 全连接真正的“生效长度”公式</h3><h4 id="🔹-半连接队列最大长度"><a href="#🔹-半连接队列最大长度" class="headerlink" title="🔹 半连接队列最大长度"></a>🔹 半连接队列最大长度</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">min(</span><br><span class="line">  net.ipv4.tcp_max_syn_backlog,</span><br><span class="line">  net.core.somaxconn,</span><br><span class="line">  listen(backlog)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h4 id="🔹-全连接队列最大长度"><a href="#🔹-全连接队列最大长度" class="headerlink" title="🔹 全连接队列最大长度"></a>🔹 全连接队列最大长度</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">min(</span><br><span class="line">  net.core.somaxconn,</span><br><span class="line">  listen(backlog)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>👉 <strong>只调内核参数，不调应用 backlog &#x3D; 白调</strong></p>
+<hr>
+<h2 id="三、Redis-NGINX-backlog-配置对照"><a href="#三、Redis-NGINX-backlog-配置对照" class="headerlink" title="三、Redis &#x2F; NGINX backlog 配置对照"></a>三、Redis &#x2F; NGINX backlog 配置对照</h2><h3 id="🟥-Redis"><a href="#🟥-Redis" class="headerlink" title="🟥 Redis"></a>🟥 Redis</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># redis.conf</span><br><span class="line">tcp-backlog 511</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>实际生效值：</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">min(tcp-backlog, somaxconn)</span><br></pre></td></tr></table></figure>
+
+<p>📌 建议：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcp-backlog 4096</span><br></pre></td></tr></table></figure>
+
+<p>并配合：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -w net.core.somaxconn=4096</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="🟩-NGINX"><a href="#🟩-NGINX" class="headerlink" title="🟩 NGINX"></a>🟩 NGINX</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">listen</span> <span class="number">80</span> backlog=<span class="number">4096</span>;</span><br></pre></td></tr></table></figure>
+
+<p>⚠️ 如果不显式配置：</p>
+<ul>
+<li>由 NGINX 内部默认值决定</li>
+<li>很多版本默认 <strong>511</strong></li>
+</ul>
+<p>📌 高并发入口（Ingress &#x2F; API Gateway）<strong>一定要显式写 backlog</strong></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/19/tc%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1644,184 +1939,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/27/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/27/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">Go并发编程最佳实践指南</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-11-27 17:55:54" itemprop="dateCreated datePublished" datetime="2025-11-27T17:55:54+08:00">2025-11-27</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-12-22 18:38:14" itemprop="dateModified" datetime="2025-12-22T18:38:14+08:00">2025-12-22</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Go-并发编程最佳实践指南"><a href="#Go-并发编程最佳实践指南" class="headerlink" title="Go 并发编程最佳实践指南"></a>Go 并发编程最佳实践指南</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
-<li>errgroup</li>
-<li>sync.WaitGroup</li>
-<li>sync.Mutex</li>
-<li>Channel</li>
-<li>Context</li>
-<li>最佳实践总结</li>
-</ol>
-<hr>
-<h2 id="errgroup"><a href="#errgroup" class="headerlink" title="errgroup"></a>errgroup</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><code>errgroup</code> 提供了一种优雅的方式来管理一组并发的 goroutine，并统一处理错误。它是 <code>golang.org/x/sync/errgroup</code> 包中的功能。</p>
-<h3 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h3><ul>
-<li>并发执行多个任务</li>
-<li>任意一个任务失败，整体失败</li>
-<li>支持 context 取消</li>
-<li>支持并发限制</li>
-</ul>
-<h3 id="基础用法"><a href="#基础用法" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;golang.org/x/sync/errgroup&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 创建 errgroup</span></span><br><span class="line">  group, _ := errgroup.WithContext(context.Background())</span><br><span class="line"></span><br><span class="line">  concurrencyCount := <span class="number">5</span></span><br><span class="line">  group.SetLimit(concurrencyCount)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 并发执行多个任务</span></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= concurrencyCount; i++ &#123;</span><br><span class="line">    i := i <span class="comment">// 避免闭包问题</span></span><br><span class="line">    group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d started\n&quot;</span>, i)</span><br><span class="line">      time.Sleep(time.Second)</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待所有任务完成</span></span><br><span class="line">  <span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">&quot;Error: %v\n&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="带并发限制的用法"><a href="#带并发限制的用法" class="headerlink" title="带并发限制的用法"></a>带并发限制的用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;golang.org/x/sync/errgroup&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  group, _ := errgroup.WithContext(context.Background())</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 限制并发数为 3</span></span><br><span class="line">  group.SetLimit(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 并发执行 10 个任务</span></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">10</span>; i++ &#123;</span><br><span class="line">    i := i</span><br><span class="line">    group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d started\n&quot;</span>, i)</span><br><span class="line">      time.Sleep(time.Second)</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">&quot;Error: %v\n&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;golang.org/x/sync/errgroup&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  group, ctx := errgroup.WithContext(context.Background())</span><br><span class="line"></span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;Task 1&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;Task 2&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;task 2 failed&quot;</span>)</span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;Task 3&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Wait 返回第一个错误</span></span><br><span class="line">  <span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">&quot;First error: %v\n&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="sync-WaitGroup"><a href="#sync-WaitGroup" class="headerlink" title="sync.WaitGroup"></a>sync.WaitGroup</h2><h3 id="简介-1"><a href="#简介-1" class="headerlink" title="简介"></a>简介</h3><p><code>WaitGroup</code> 用于等待一组 goroutine 完成，不关心错误处理。</p>
-<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 添加 3 个 goroutine</span></span><br><span class="line">  wg.Add(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++ &#123;</span><br><span class="line">    i := i</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      <span class="keyword">defer</span> wg.Done() <span class="comment">// 任务完成时调用</span></span><br><span class="line">      fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      time.Sleep(time.Second)</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待所有 goroutine 完成</span></span><br><span class="line">  wg.Wait()</span><br><span class="line">  fmt.Println(<span class="string">&quot;All tasks completed&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="vs-errgroup"><a href="#vs-errgroup" class="headerlink" title="vs errgroup"></a>vs errgroup</h3><table>
-<thead>
-<tr>
-<th>特性</th>
-<th>WaitGroup</th>
-<th>errgroup</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>错误处理</td>
-<td>不支持</td>
-<td>支持</td>
-</tr>
-<tr>
-<td>并发限制</td>
-<td>不支持</td>
-<td>支持</td>
-</tr>
-<tr>
-<td>Context 支持</td>
-<td>不支持</td>
-<td>支持</td>
-</tr>
-<tr>
-<td>使用场景</td>
-<td>简单并发</td>
-<td>复杂并发</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="sync-Mutex"><a href="#sync-Mutex" class="headerlink" title="sync.Mutex"></a>sync.Mutex</h2><h3 id="简介-2"><a href="#简介-2" class="headerlink" title="简介"></a>简介</h3><p>用于保护共享数据的互斥锁。</p>
-<h3 id="基础用法-1"><a href="#基础用法-1" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> mu sync.Mutex</span><br><span class="line">  counter := <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      mu.Lock()</span><br><span class="line">      counter++</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Counter: %d\n&quot;</span>, counter)</span><br><span class="line">      mu.Unlock()</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待所有 goroutine 完成</span></span><br><span class="line">  time.Sleep(time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="sync-RWMutex（读写锁）"><a href="#sync-RWMutex（读写锁）" class="headerlink" title="sync.RWMutex（读写锁）"></a>sync.RWMutex（读写锁）</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> rwmu sync.RWMutex</span><br><span class="line">  data := <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span>&#123;<span class="string">&quot;count&quot;</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 写操作</span></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    rwmu.Lock()</span><br><span class="line">    data[<span class="string">&quot;count&quot;</span>]++</span><br><span class="line">    rwmu.Unlock()</span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 读操作（可以并发）</span></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      rwmu.RLock()</span><br><span class="line">      fmt.Printf(<span class="string">&quot;Count: %d\n&quot;</span>, data[<span class="string">&quot;count&quot;</span>])</span><br><span class="line">      rwmu.RUnlock()</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  time.Sleep(time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h2><h3 id="简介-3"><a href="#简介-3" class="headerlink" title="简介"></a>简介</h3><p>Channel 是 Go 中用于 goroutine 之间通信的机制。</p>
-<h3 id="基础用法-2"><a href="#基础用法-2" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 创建 channel</span></span><br><span class="line">  ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">int</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    ch &lt;- <span class="number">42</span> <span class="comment">// 发送</span></span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  value := &lt;-ch <span class="comment">// 接收</span></span><br><span class="line">  fmt.Printf(<span class="string">&quot;Received: %d\n&quot;</span>, value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="使用-select-处理多个-channel"><a href="#使用-select-处理多个-channel" class="headerlink" title="使用 select 处理多个 channel"></a>使用 select 处理多个 channel</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  ch1 := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">string</span>)</span><br><span class="line">  ch2 := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">string</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    time.Sleep(time.Second)</span><br><span class="line">    ch1 &lt;- <span class="string">&quot;result 1&quot;</span></span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    time.Sleep(<span class="number">2</span> * time.Second)</span><br><span class="line">    ch2 &lt;- <span class="string">&quot;result 2&quot;</span></span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 等待第一个完成的</span></span><br><span class="line">  <span class="keyword">select</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> res1 := &lt;-ch1:</span><br><span class="line">    fmt.Println(<span class="string">&quot;Got:&quot;</span>, res1)</span><br><span class="line">  <span class="keyword">case</span> res2 := &lt;-ch2:</span><br><span class="line">    fmt.Println(<span class="string">&quot;Got:&quot;</span>, res2)</span><br><span class="line">  <span class="keyword">case</span> &lt;-time.After(<span class="number">3</span> * time.Second):</span><br><span class="line">    fmt.Println(<span class="string">&quot;Timeout&quot;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><h3 id="简介-4"><a href="#简介-4" class="headerlink" title="简介"></a>简介</h3><p>Context 用于控制 goroutine 的生命周期、超时和取消。</p>
-<h3 id="基础用法-3"><a href="#基础用法-3" class="headerlink" title="基础用法"></a>基础用法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 创建带超时的 context</span></span><br><span class="line">  ctx, cancel := context.WithTimeout(context.Background(), <span class="number">2</span>*time.Second)</span><br><span class="line">  <span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 模拟耗时操作</span></span><br><span class="line">  <span class="keyword">select</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> &lt;-time.After(<span class="number">3</span> * time.Second):</span><br><span class="line">    fmt.Println(<span class="string">&quot;Operation completed&quot;</span>)</span><br><span class="line">  <span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">    fmt.Println(<span class="string">&quot;Operation cancelled:&quot;</span>, ctx.Err())</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="取消-Context"><a href="#取消-Context" class="headerlink" title="取消 Context"></a>取消 Context</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;sync&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</span><br><span class="line">    wg.Add(<span class="number">1</span>)</span><br><span class="line">    i := i</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      <span class="keyword">defer</span> wg.Done()</span><br><span class="line">      <span class="keyword">select</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> &lt;-time.After(<span class="number">5</span> * time.Second):</span><br><span class="line">        fmt.Printf(<span class="string">&quot;Task %d completed\n&quot;</span>, i)</span><br><span class="line">      <span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">        fmt.Printf(<span class="string">&quot;Task %d cancelled\n&quot;</span>, i)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2 秒后取消所有 goroutine</span></span><br><span class="line">  time.Sleep(<span class="number">2</span> * time.Second)</span><br><span class="line">  cancel()</span><br><span class="line"></span><br><span class="line">  wg.Wait()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="最佳实践总结"><a href="#最佳实践总结" class="headerlink" title="最佳实践总结"></a>最佳实践总结</h2><h3 id="1-优先使用-errgroup"><a href="#1-优先使用-errgroup" class="headerlink" title="1. 优先使用 errgroup"></a>1. 优先使用 errgroup</h3><p>当需要管理多个 goroutine 且需要错误处理时，优先使用 <code>errgroup</code>：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">group, ctx := errgroup.WithContext(context.Background())</span><br><span class="line">group.SetLimit(<span class="number">10</span>) <span class="comment">// 限制并发</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> item := <span class="keyword">range</span> items &#123;</span><br><span class="line">  item := item</span><br><span class="line">  group.Go(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> processItem(ctx, item)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := group.Wait(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  log.Error(<span class="string">&quot;Processing failed:&quot;</span>, err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-避免闭包陷阱"><a href="#2-避免闭包陷阱" class="headerlink" title="2. 避免闭包陷阱"></a>2. 避免闭包陷阱</h3><p><strong>错误方式：</strong></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(i) <span class="comment">// 可能打印 10 次</span></span><br><span class="line">  &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>正确方式：</strong></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">  i := i <span class="comment">// 创建本地副本</span></span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(i)</span><br><span class="line">  &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-使用-Context-控制超时和取消"><a href="#3-使用-Context-控制超时和取消" class="headerlink" title="3. 使用 Context 控制超时和取消"></a>3. 使用 Context 控制超时和取消</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ctx, cancel := context.WithTimeout(context.Background(), <span class="number">5</span>*time.Second)</span><br><span class="line"><span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">group, groupCtx := errgroup.WithContext(ctx)</span><br><span class="line"><span class="comment">// 在 groupCtx 中检查取消信号</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="4-合理设置并发限制"><a href="#4-合理设置并发限制" class="headerlink" title="4. 合理设置并发限制"></a>4. 合理设置并发限制</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">group := errgroup.Group&#123;&#125;</span><br><span class="line">group.SetLimit(runtime.NumCPU()) <span class="comment">// 根据 CPU 核心数限制</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="5-优雅的错误包装"><a href="#5-优雅的错误包装" class="headerlink" title="5. 优雅的错误包装"></a>5. 优雅的错误包装</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> err := processItem(ctx, item); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;process item %d: %w&quot;</span>, item.ID, err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://golang.org/pkg/sync/">Go sync 包文档</a></li>
-<li><a target="_blank" rel="noopener" href="https://golang.org/pkg/context/">Go context 包文档</a></li>
-<li><a target="_blank" rel="noopener" href="https://pkg.go.dev/golang.org/x/sync/errgroup">golang.org&#x2F;x&#x2F;sync&#x2F;errgroup</a></li>
-<li><a target="_blank" rel="noopener" href="https://golang.org/doc/effective_go#concurrency">Effective Go - Concurrency</a></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1889,7 +2010,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">210</span>
+          <span class="site-state-item-count">211</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1902,7 +2023,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-count">36</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
