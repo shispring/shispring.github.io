@@ -3501,6 +3501,9 @@
 </tbody></table>
 <p>通过上述分析，结合抓包与服务端日志，应该能定位到 TCPing 丢包的具体原因，并制定解决方案。</p>
 <h2 id="相关命令安装"><a href="#相关命令安装" class="headerlink" title="相关命令安装"></a>相关命令安装</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yum install -y iperf3 ethtool bc net-tools sysstat hwloc hwloc-gui iptraf-ng stress-ng</span><br><span class="line">#压测CPU、内存</span><br><span class="line">stress-ng --cpu 36 --cpu-method all --timeout 0</span><br><span class="line">stress-ng --vm 8 --vm-bytes 80G --timeout 0</span><br></pre></td></tr></table></figure>
+
+<h2 id="centos命令使用"><a href="#centos命令使用" class="headerlink" title="centos命令使用"></a>centos命令使用</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#centos7的安装包及网络工具</span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/centos/7.9.2009/os/x86_64/Packages/mtr-0.85-7.el7.x86_64.rpm</span><br><span class="line">mtr 10.228.130.8</span><br><span class="line"></span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/centos/7.9.2009/os/x86_64/Packages/iptraf-ng-1.1.4-7.el7.x86_64.rpm</span><br><span class="line">iptraf-ng -d eth0</span><br><span class="line"></span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/epel/7/x86_64/Packages/n/nethogs-0.8.5-1.el7.x86_64.rpm</span><br><span class="line">nethogs eth0</span><br><span class="line"></span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/epel/7/x86_64/Packages/i/iftop-1.0-0.21.pre4.el7.x86_64.rpm</span><br><span class="line">iftop -i eth0 -P -n -f &quot;dst host 10.228.100.100&quot;</span><br></pre></td></tr></table></figure>
+
 ]]></content>
   </entry>
   <entry>
