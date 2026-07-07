@@ -2065,7 +2065,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-07 17:11:57" itemprop="dateModified" datetime="2026-07-07T17:11:57+08:00">2026-07-07</time>
+                <time title="修改时间：2026-07-07 17:12:36" itemprop="dateModified" datetime="2026-07-07T17:12:36+08:00">2026-07-07</time>
               </span>
 
           <br>
@@ -2074,7 +2074,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
+              <span>1.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -2188,6 +2188,80 @@
 <td><code>iperf3 -6 -c &lt;IPv6&gt;</code></td>
 <td>IPv6性能</td>
 <td>吞吐、丢包</td>
+</tr>
+</tbody></table>
+<h3 id="常见字段说明"><a href="#常见字段说明" class="headerlink" title="常见字段说明"></a>常见字段说明</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>TCP</th>
+<th>UDP</th>
+<th>含义</th>
+<th>是否重点关注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Interval</td>
+<td>✔</td>
+<td>✔</td>
+<td>当前统计时间窗口</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>✔</td>
+<td>✔</td>
+<td>当前时间段传输的数据量</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>Bitrate</td>
+<td>✔</td>
+<td>✔</td>
+<td>当前时间段平均带宽</td>
+<td>✔✔✔</td>
+</tr>
+<tr>
+<td>Retr</td>
+<td>✔</td>
+<td>✘</td>
+<td>TCP重传次数，越少越好</td>
+<td>✔✔✔</td>
+</tr>
+<tr>
+<td>Cwnd</td>
+<td>✔</td>
+<td>✘</td>
+<td>TCP拥塞窗口大小，反映发送窗口</td>
+<td>✔✔</td>
+</tr>
+<tr>
+<td>Jitter</td>
+<td>✘</td>
+<td>✔</td>
+<td>UDP抖动，越小越好</td>
+<td>✔✔✔</td>
+</tr>
+<tr>
+<td>Lost&#x2F;Total Datagrams</td>
+<td>✘</td>
+<td>✔</td>
+<td>UDP丢包数&#x2F;总包数</td>
+<td>✔✔✔</td>
+</tr>
+<tr>
+<td>Total Datagrams</td>
+<td>✘</td>
+<td>✔</td>
+<td>UDP发送的数据报总数</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>sender &#x2F; receiver</td>
+<td>✔</td>
+<td>✔</td>
+<td>发送端&#x2F;接收端统计汇总</td>
+<td>✔</td>
 </tr>
 </tbody></table>
 
