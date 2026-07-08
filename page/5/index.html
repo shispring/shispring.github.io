@@ -1512,7 +1512,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-08 14:06:52" itemprop="dateModified" datetime="2026-07-08T14:06:52+08:00">2026-07-08</time>
+                <time title="修改时间：2026-07-08 14:08:29" itemprop="dateModified" datetime="2026-07-08T14:08:29+08:00">2026-07-08</time>
               </span>
 
           <br>
@@ -1521,7 +1521,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3k</span>
+              <span>3.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -1550,6 +1550,7 @@
 
 <h2 id="搭建mgr节点并开启dashboard"><a href="#搭建mgr节点并开启dashboard" class="headerlink" title="搭建mgr节点并开启dashboard"></a>搭建mgr节点并开启dashboard</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --privileged=true --name ceph-mgr --network ceph-network --ip 172.20.0.14 -e CLUSTER=ceph -p 7000:7000 -p 18080:18080 --pid=container:ceph-mon -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ ceph/daemon:latest-nautilus mgr</span><br><span class="line"></span><br><span class="line">#设置监听所有地址，端口7000，关闭ssl</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_addr 0.0.0.0</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/ssl false</span><br><span class="line">#暴漏18080端口，宿主机可访问</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_port 18080</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr ceph mgr module disable dashboard</span><br><span class="line">docker exec -it ceph-mgr ceph mgr module enable dashboard</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr sh -c &#x27;echo &quot;Admin@123456&quot; &gt; /tmp/pass &amp;&amp; ceph dashboard ac-user-create admin administrator -i /tmp/pass &amp;&amp; rm -f /tmp/pass&#x27;</span><br><span class="line">docker exec -it ceph-mgr ceph mgr services</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h2 id="搭建rgw节点"><a href="#搭建rgw节点" class="headerlink" title="搭建rgw节点"></a>搭建rgw节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker exec ceph-mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-rgw --network ceph-network --ip 172.20.0.15 -e CLUSTER=ceph -e RGW_NAME=ceph-rgw -p 7480:7480 -v /var/lib/ceph/:/var/lib/ceph/ -v /etc/ceph:/etc/ceph -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus rgw</span><br><span class="line"></span><br><span class="line">#检查ceph状态</span><br><span class="line">docker exec ceph-mon ceph -s</span><br><span class="line"></span><br><span class="line">#测试添加rgw用户，生成access_key和secret_key用于访问</span><br><span class="line">docker exec ceph-rgw radosgw-admin user create --uid=&quot;test&quot; --display-name=&quot;test user&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="ssl端口转发访问"><a href="#ssl端口转发访问" class="headerlink" title="ssl端口转发访问"></a>ssl端口转发访问</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ssh -N -L 0.0.0.0:18080:10.147.100.100:18080 xxx@10.16.100.100</span><br><span class="line">#浏览器访问</span><br><span class="line">http://10.16.100.100:18080</span><br></pre></td></tr></table></figure>
 
       
     </div>
