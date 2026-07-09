@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
   </script>
 
-  <meta name="description" content="下载镜像12docker pull swr.cn-north-4.myhuaweicloud.com&#x2F;ddn-k8s&#x2F;docker.io&#x2F;ceph&#x2F;daemon:latest-nautilusdocker tag  swr.cn-north-4.myhuaweicloud.com&#x2F;ddn-k8s&#x2F;docker.io&#x2F;ceph&#x2F;daemon:latest-nautilus  docker.io&#x2F;ce">
+  <meta name="description" content="概念解析1. 集群核心控制组件   缩写 完整英文 中文名称 核心作用    MON Monitor 监控节点 集群总元数据中心，保存集群拓扑、认证、存储池配置，仲裁集群状态，端口6789   MGR Manager 管理节点 集群管理、Dashboard、Prometheus监控、调度任务，对外API   OSD Object Storage Daemon 对象存储守护进程 真正承载数据，单块磁">
 <meta property="og:type" content="article">
 <meta property="og:title" content="单机docker部署ceph实践">
 <meta property="og:url" content="https://shispring.github.io/2026/01/08/%E5%8D%95%E6%9C%BAdocker%E9%83%A8%E7%BD%B2ceph%E5%AE%9E%E8%B7%B5/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="下载镜像12docker pull swr.cn-north-4.myhuaweicloud.com&#x2F;ddn-k8s&#x2F;docker.io&#x2F;ceph&#x2F;daemon:latest-nautilusdocker tag  swr.cn-north-4.myhuaweicloud.com&#x2F;ddn-k8s&#x2F;docker.io&#x2F;ceph&#x2F;daemon:latest-nautilus  docker.io&#x2F;ce">
+<meta property="og:description" content="概念解析1. 集群核心控制组件   缩写 完整英文 中文名称 核心作用    MON Monitor 监控节点 集群总元数据中心，保存集群拓扑、认证、存储池配置，仲裁集群状态，端口6789   MGR Manager 管理节点 集群管理、Dashboard、Prometheus监控、调度任务，对外API   OSD Object Storage Daemon 对象存储守护进程 真正承载数据，单块磁">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-01-08T05:54:13.000Z">
-<meta property="article:modified_time" content="2026-07-08T09:54:28.852Z">
+<meta property="article:modified_time" content="2026-07-09T06:56:08.462Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="ceph">
 <meta name="twitter:card" content="summary">
@@ -220,7 +220,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-08 17:54:28" itemprop="dateModified" datetime="2026-07-08T17:54:28+08:00">2026-07-08</time>
+                <time title="修改时间：2026-07-09 14:56:08" itemprop="dateModified" datetime="2026-07-09T14:56:08+08:00">2026-07-09</time>
               </span>
 
           
@@ -236,14 +236,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>6.6k</span>
+              <span>7.6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>6 分钟</span>
+              <span>7 分钟</span>
             </span>
 
         </div>
@@ -255,21 +255,188 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="下载镜像"><a href="#下载镜像" class="headerlink" title="下载镜像"></a>下载镜像</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ceph/daemon:latest-nautilus</span><br><span class="line">docker tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ceph/daemon:latest-nautilus  docker.io/ceph/daemon:latest-nautilus</span><br></pre></td></tr></table></figure>
+        <h1 id="概念解析"><a href="#概念解析" class="headerlink" title="概念解析"></a>概念解析</h1><h2 id="1-集群核心控制组件"><a href="#1-集群核心控制组件" class="headerlink" title="1. 集群核心控制组件"></a>1. 集群核心控制组件</h2><table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>完整英文</th>
+<th>中文名称</th>
+<th>核心作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MON</td>
+<td>Monitor</td>
+<td>监控节点</td>
+<td>集群总元数据中心，保存集群拓扑、认证、存储池配置，仲裁集群状态，端口6789</td>
+</tr>
+<tr>
+<td>MGR</td>
+<td>Manager</td>
+<td>管理节点</td>
+<td>集群管理、Dashboard、Prometheus监控、调度任务，对外API</td>
+</tr>
+<tr>
+<td>OSD</td>
+<td>Object Storage Daemon</td>
+<td>对象存储守护进程</td>
+<td>真正承载数据，单块磁盘对应一个OSD，负责数据三副本&#x2F;纠删码、PG数据读写</td>
+</tr>
+<tr>
+<td>MDS</td>
+<td>Metadata Server</td>
+<td>文件元数据服务</td>
+<td>仅CephFS分布式文件系统使用，管理目录、文件元数据</td>
+</tr>
+<tr>
+<td>RGW</td>
+<td>Rados Gateway</td>
+<td>对象存储网关</td>
+<td>基于底层RADOS封装S3&#x2F;Swift标准HTTP接口，对外提供对象存储服务</td>
+</tr>
+</tbody></table>
+<h2 id="2-底层存储核心概念"><a href="#2-底层存储核心概念" class="headerlink" title="2. 底层存储核心概念"></a>2. 底层存储核心概念</h2><table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>完整英文</th>
+<th>中文</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RADOS</td>
+<td>Reliable Autonomic Distributed Object Store</td>
+<td>可靠自主分布式对象存储</td>
+<td>Ceph底层内核，所有数据（块&#x2F;文件&#x2F;对象）最终都存在RADOS对象</td>
+</tr>
+<tr>
+<td>PG</td>
+<td>Placement Group</td>
+<td>放置组</td>
+<td>数据分片最小单元，OSD之间数据均衡、副本同步的载体</td>
+</tr>
+<tr>
+<td>Pool</td>
+<td>Storage Pool</td>
+<td>存储池</td>
+<td>逻辑资源隔离分区，RBD&#x2F;CephFS&#x2F;RGW分别使用独立Pool</td>
+</tr>
+<tr>
+<td>RBD</td>
+<td>Rados Block Device</td>
+<td>分布式块设备</td>
+<td>基于RADOS的块存储，等价云硬盘，供虚拟机&#x2F;K8s PVC使用</td>
+</tr>
+<tr>
+<td>CephFS</td>
+<td>Ceph File System</td>
+<td>Ceph分布式文件系统</td>
+<td>POSIX标准共享文件存储，多节点同时挂载读写目录</td>
+</tr>
+</tbody></table>
+<h2 id="3-对象存储-RGW-S3-专属名词"><a href="#3-对象存储-RGW-S3-专属名词" class="headerlink" title="3. 对象存储 RGW &#x2F; S3 专属名词"></a>3. 对象存储 RGW &#x2F; S3 专属名词</h2><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>完整英文</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bucket</td>
+<td>Bucket</td>
+<td>存储桶</td>
+</tr>
+<tr>
+<td>Object</td>
+<td>Object</td>
+<td>对象</td>
+</tr>
+<tr>
+<td>AK</td>
+<td>Access Key</td>
+<td>访问密钥ID</td>
+</tr>
+<tr>
+<td>SK</td>
+<td>Secret Key</td>
+<td>私有密钥</td>
+</tr>
+<tr>
+<td>REST API</td>
+<td>Representational State Transfer API</td>
+<td>标准化HTTP接口</td>
+</tr>
+</tbody></table>
+<h2 id="4-权限-认证相关"><a href="#4-权限-认证相关" class="headerlink" title="4. 权限&#x2F;认证相关"></a>4. 权限&#x2F;认证相关</h2><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>全称</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Keyring</td>
+<td>Keyring</td>
+<td>密钥环</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>Client</td>
+<td>Ceph客户端账号</td>
+</tr>
+<tr>
+<td>CSI</td>
+<td>Container Storage Interface</td>
+<td>容器存储标准接口</td>
+</tr>
+<tr>
+<td>JWT</td>
+<td>JSON Web Token</td>
+<td>加密令牌</td>
+</tr>
+</tbody></table>
+<h2 id="5-镜像-块存储专属名词"><a href="#5-镜像-块存储专属名词" class="headerlink" title="5. 镜像&#x2F;块存储专属名词"></a>5. 镜像&#x2F;块存储专属名词</h2><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>全称</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Image</td>
+<td>RBD Image</td>
+<td>RBD镜像</td>
+</tr>
+<tr>
+<td>Snapshot</td>
+<td>Snapshot</td>
+<td>快照</td>
+</tr>
+<tr>
+<td>Feature</td>
+<td>Image Feature</td>
+<td>镜像特性</td>
+</tr>
+</tbody></table>
+<h1 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h1><h2 id="1-配置专用网络"><a href="#1-配置专用网络" class="headerlink" title="1 配置专用网络"></a>1 配置专用网络</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker network create --driver bridge --subnet 172.20.0.0/16 ceph-network</span><br><span class="line"></span><br><span class="line">docker network inspect ceph-network</span><br></pre></td></tr></table></figure>
 
-<h2 id="配置专用网络"><a href="#配置专用网络" class="headerlink" title="配置专用网络"></a>配置专用网络</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker network create --driver bridge --subnet 172.20.0.0/16 ceph-network</span><br><span class="line"></span><br><span class="line">docker network inspect ceph-network</span><br></pre></td></tr></table></figure>
+<h2 id="2-下载镜像"><a href="#2-下载镜像" class="headerlink" title="2 下载镜像"></a>2 下载镜像</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ceph/daemon:latest-nautilus</span><br><span class="line">docker tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ceph/daemon:latest-nautilus  docker.io/ceph/daemon:latest-nautilus</span><br></pre></td></tr></table></figure>
 
-<h2 id="搭建monitor节点"><a href="#搭建monitor节点" class="headerlink" title="搭建monitor节点"></a>搭建monitor节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name ceph-mon --network ceph-network --ip 172.20.0.10 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_IP=172.20.0.10 -e MON_NAME=ceph-mon -e CEPH_PUBLIC_NETWORK=172.20.0.0/16 -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/log/ceph/:/var/log/ceph/ ceph/daemon:latest-nautilus mon</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="3-搭建monitor节点"><a href="#3-搭建monitor节点" class="headerlink" title="3 搭建monitor节点"></a>3 搭建monitor节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name ceph-mon --network ceph-network --ip 172.20.0.10 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_IP=172.20.0.10 -e MON_NAME=ceph-mon -e CEPH_PUBLIC_NETWORK=172.20.0.0/16 -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/log/ceph/:/var/log/ceph/ ceph/daemon:latest-nautilus mon</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<h2 id="搭建osd节点"><a href="#搭建osd节点" class="headerlink" title="搭建osd节点"></a>搭建osd节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker exec ceph-mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-1 --network ceph-network --ip 172.20.0.11 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/1:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-2 --network ceph-network --ip 172.20.0.12 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/2:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-3 --network ceph-network --ip 172.20.0.13 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/3:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="4-搭建osd节点"><a href="#4-搭建osd节点" class="headerlink" title="4 搭建osd节点"></a>4 搭建osd节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker exec ceph-mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-1 --network ceph-network --ip 172.20.0.11 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/1:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-2 --network ceph-network --ip 172.20.0.12 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/2:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-3 --network ceph-network --ip 172.20.0.13 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/3:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<h2 id="搭建mgr节点并开启dashboard"><a href="#搭建mgr节点并开启dashboard" class="headerlink" title="搭建mgr节点并开启dashboard"></a>搭建mgr节点并开启dashboard</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --privileged=true --name ceph-mgr --network ceph-network --ip 172.20.0.14 -e CLUSTER=ceph -p 7000:7000 -p 18080:18080 --pid=container:ceph-mon -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ ceph/daemon:latest-nautilus mgr</span><br><span class="line"></span><br><span class="line">#设置监听所有地址，端口7000，关闭ssl</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_addr 0.0.0.0</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/ssl false</span><br><span class="line">#暴漏18080端口，宿主机可访问</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_port 18080</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr ceph mgr module disable dashboard</span><br><span class="line">docker exec -it ceph-mgr ceph mgr module enable dashboard</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr sh -c &#x27;echo &quot;Admin@123456&quot; &gt; /tmp/pass &amp;&amp; ceph dashboard ac-user-create admin administrator -i /tmp/pass &amp;&amp; rm -f /tmp/pass&#x27;</span><br><span class="line">docker exec -it ceph-mgr ceph mgr services</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="搭建rgw节点"><a href="#搭建rgw节点" class="headerlink" title="搭建rgw节点"></a>搭建rgw节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker exec ceph-mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-rgw --network ceph-network --ip 172.20.0.15 -e CLUSTER=ceph -e RGW_NAME=ceph-rgw -p 7480:7480 -v /var/lib/ceph/:/var/lib/ceph/ -v /etc/ceph:/etc/ceph -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus rgw</span><br><span class="line"></span><br><span class="line">#检查ceph状态</span><br><span class="line">docker exec ceph-mon ceph -s</span><br><span class="line"></span><br><span class="line">#测试添加rgw用户，生成access_key和secret_key用于访问</span><br><span class="line">docker exec ceph-rgw radosgw-admin user create --uid=&quot;test&quot; --display-name=&quot;test user&quot;</span><br></pre></td></tr></table></figure>
-<h2 id="ssl端口转发访问"><a href="#ssl端口转发访问" class="headerlink" title="ssl端口转发访问"></a>ssl端口转发访问</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ssh -N -L 0.0.0.0:18080:10.147.100.100:18080 xxx@10.16.100.100</span><br><span class="line">#浏览器访问</span><br><span class="line">http://10.16.100.100:18080</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#获取api token认证</span><br><span class="line">curl -s -X POST &quot;http://10.147.100.100:18080/api/auth&quot; -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/vnd.ceph.api.v1.0+json&quot; -d &#x27;&#123;&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;Admin@123456&quot;&#125;&#x27; | jq</span><br></pre></td></tr></table></figure>
+<h2 id="5-搭建mgr节点并开启dashboard"><a href="#5-搭建mgr节点并开启dashboard" class="headerlink" title="5 搭建mgr节点并开启dashboard"></a>5 搭建mgr节点并开启dashboard</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --privileged=true --name ceph-mgr --network ceph-network --ip 172.20.0.14 -e CLUSTER=ceph -p 7000:7000 -p 18080:18080 --pid=container:ceph-mon -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ ceph/daemon:latest-nautilus mgr</span><br><span class="line"></span><br><span class="line">#设置监听所有地址，端口7000，关闭ssl</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_addr 0.0.0.0</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/ssl false</span><br><span class="line">#暴漏18080端口，宿主机可访问</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_port 18080</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr ceph mgr module disable dashboard</span><br><span class="line">docker exec -it ceph-mgr ceph mgr module enable dashboard</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr sh -c &#x27;echo &quot;Admin@123456&quot; &gt; /tmp/pass &amp;&amp; ceph dashboard ac-user-create admin administrator -i /tmp/pass &amp;&amp; rm -f /tmp/pass&#x27;</span><br><span class="line">docker exec -it ceph-mgr ceph mgr services</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="6-搭建rgw节点"><a href="#6-搭建rgw节点" class="headerlink" title="6 搭建rgw节点"></a>6 搭建rgw节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker exec ceph-mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-rgw --network ceph-network --ip 172.20.0.15 -e CLUSTER=ceph -e RGW_NAME=ceph-rgw -p 7480:7480 -v /var/lib/ceph/:/var/lib/ceph/ -v /etc/ceph:/etc/ceph -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus rgw</span><br><span class="line"></span><br><span class="line">#检查ceph状态</span><br><span class="line">docker exec ceph-mon ceph -s</span><br><span class="line"></span><br><span class="line">#测试添加rgw用户，生成access_key和secret_key用于访问</span><br><span class="line">docker exec ceph-rgw radosgw-admin user create --uid=&quot;test&quot; --display-name=&quot;test user&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="7-ssl端口转发访问"><a href="#7-ssl端口转发访问" class="headerlink" title="7 ssl端口转发访问"></a>7 ssl端口转发访问</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ssh -N -L 0.0.0.0:18080:10.147.100.100:18080 xxx@10.16.100.100</span><br><span class="line">#浏览器访问</span><br><span class="line">http://10.16.100.100:18080</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#获取api token认证</span><br><span class="line">curl -s -X POST &quot;http://10.147.100.100:18080/api/auth&quot; -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/vnd.ceph.api.v1.0+json&quot; -d &#x27;&#123;&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;Admin@123456&quot;&#125;&#x27; | jq</span><br></pre></td></tr></table></figure>
 
-<h2 id="基础状态查看"><a href="#基础状态查看" class="headerlink" title="基础状态查看"></a>基础状态查看</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 1. 查看集群整体健康状态</span><br><span class="line">docker exec -it ceph-mon ceph -s</span><br><span class="line"></span><br><span class="line"># 2. 查看集群详细健康告警</span><br><span class="line">docker exec -it ceph-mon ceph health detail</span><br><span class="line"></span><br><span class="line"># 3. 查看OSd磁盘、在线状态</span><br><span class="line">docker exec -it ceph-mon ceph osd tree</span><br><span class="line"></span><br><span class="line"># 4. 查看存储池列表</span><br><span class="line">docker exec -it ceph-mon ceph osd pool ls</span><br></pre></td></tr></table></figure>
+<h2 id="8-基础状态查看"><a href="#8-基础状态查看" class="headerlink" title="8 基础状态查看"></a>8 基础状态查看</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 1. 查看集群整体健康状态</span><br><span class="line">docker exec -it ceph-mon ceph -s</span><br><span class="line"></span><br><span class="line"># 2. 查看集群详细健康告警</span><br><span class="line">docker exec -it ceph-mon ceph health detail</span><br><span class="line"></span><br><span class="line"># 3. 查看OSd磁盘、在线状态</span><br><span class="line">docker exec -it ceph-mon ceph osd tree</span><br><span class="line"></span><br><span class="line"># 4. 查看存储池列表</span><br><span class="line">docker exec -it ceph-mon ceph osd pool ls</span><br></pre></td></tr></table></figure>
 
-<h2 id="块存储RBD-（云主机硬盘）Demo"><a href="#块存储RBD-（云主机硬盘）Demo" class="headerlink" title="块存储RBD （云主机硬盘）Demo"></a>块存储RBD （云主机硬盘）Demo</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># 创建rbd存储池，副本数2</span><br><span class="line">docker exec -it ceph-mon ceph osd pool create k8s-rbd-pool 64 64</span><br><span class="line"># 初始化rbd功能</span><br><span class="line">docker exec -it ceph-mon rbd pool init k8s-rbd-pool</span><br><span class="line"></span><br><span class="line"># 创建10G镜像</span><br><span class="line">docker exec -it ceph-mon rbd create test-disk --pool k8s-rbd-pool --size 10G</span><br><span class="line"># 列出镜像</span><br><span class="line">docker exec -it ceph-mon rbd ls k8s-rbd-pool</span><br><span class="line"># 镜像扩容到20G</span><br><span class="line">docker exec -it ceph-mon rbd resize test-disk --pool k8s-rbd-pool --size 20G</span><br><span class="line"></span><br><span class="line"># 查看镜像容量、特性</span><br><span class="line">docker exec -it ceph-mon rbd info k8s-rbd-pool/test-disk</span><br><span class="line"># 查看实际占用空间</span><br><span class="line">docker exec -it ceph-mon rbd du k8s-rbd-pool/test-disk</span><br><span class="line"></span><br><span class="line"># 创建用户 k8s-rbd，赋予pool读写权限</span><br><span class="line">docker exec -it ceph-mon ceph auth get-or-create client.k8s-rbd mon &#x27;allow r&#x27; osd &#x27;allow rwx pool=k8s-rbd-pool&#x27;</span><br><span class="line"># 导出密钥（后面K8s Secret要用）</span><br><span class="line">docker exec -it ceph-mon ceph auth get-key client.k8s-rbd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="RBD测试Demo"><a href="#RBD测试Demo" class="headerlink" title="RBD测试Demo"></a>RBD测试Demo</h1><h2 id="块存储RBD-（云主机硬盘）"><a href="#块存储RBD-（云主机硬盘）" class="headerlink" title="块存储RBD （云主机硬盘）"></a>块存储RBD （云主机硬盘）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># 创建rbd存储池，副本数2</span><br><span class="line">docker exec -it ceph-mon ceph osd pool create k8s-rbd-pool 64 64</span><br><span class="line"># 初始化rbd功能</span><br><span class="line">docker exec -it ceph-mon rbd pool init k8s-rbd-pool</span><br><span class="line"></span><br><span class="line"># 创建10G镜像</span><br><span class="line">docker exec -it ceph-mon rbd create test-disk --pool k8s-rbd-pool --size 10G</span><br><span class="line"># 列出镜像</span><br><span class="line">docker exec -it ceph-mon rbd ls k8s-rbd-pool</span><br><span class="line"># 镜像扩容到20G</span><br><span class="line">docker exec -it ceph-mon rbd resize test-disk --pool k8s-rbd-pool --size 20G</span><br><span class="line"></span><br><span class="line"># 查看镜像容量、特性</span><br><span class="line">docker exec -it ceph-mon rbd info k8s-rbd-pool/test-disk</span><br><span class="line"># 查看实际占用空间</span><br><span class="line">docker exec -it ceph-mon rbd du k8s-rbd-pool/test-disk</span><br><span class="line"></span><br><span class="line"># 创建用户 k8s-rbd，赋予pool读写权限</span><br><span class="line">docker exec -it ceph-mon ceph auth get-or-create client.k8s-rbd mon &#x27;allow r&#x27; osd &#x27;allow rwx pool=k8s-rbd-pool&#x27;</span><br><span class="line"># 导出密钥（后面K8s Secret要用）</span><br><span class="line">docker exec -it ceph-mon ceph auth get-key client.k8s-rbd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h2 id="容器挂载块存储"><a href="#容器挂载块存储" class="headerlink" title="容器挂载块存储"></a>容器挂载块存储</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">docker pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/quay.io/ceph/ceph:v19.2.3</span><br><span class="line">docker tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/quay.io/ceph/ceph:v19.2.3  quay.io/ceph/ceph:v19.2.3</span><br><span class="line"></span><br><span class="line">mkdir -p /data/rbd-disk</span><br><span class="line"></span><br><span class="line">docker run -it --rm \</span><br><span class="line">--privileged \</span><br><span class="line">--network=ceph-network \</span><br><span class="line">-v /dev:/dev \</span><br><span class="line">-v /data/rbd-disk:/mnt/rbd \</span><br><span class="line">quay.io/ceph/ceph:v19.2.3 bash</span><br><span class="line"></span><br><span class="line">#容器内执行</span><br><span class="line"># 替换成mon容器内网ip: docker inspect ceph-mon | grep -A10 &quot;ceph-network&quot;</span><br><span class="line">cat &gt; /etc/ceph/ceph.conf &lt;&lt;EOF</span><br><span class="line">[global]</span><br><span class="line">mon_host = 172.20.0.10:6789</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"># 密钥不变</span><br><span class="line">cat &gt; /etc/ceph/ceph.client.k8s-rbd.keyring &lt;&lt;EOF</span><br><span class="line">[client.k8s-rbd]</span><br><span class="line">	key = AQDK+E1qXt/FNxAAeYTUTqr3guOY2hlETi4fhQ==</span><br><span class="line">EOF</span><br><span class="line">chmod 600 /etc/ceph/ceph.client.k8s-rbd.keyring</span><br><span class="line"></span><br><span class="line">#测试连通集群</span><br><span class="line">ceph -s --id k8s-rbd</span><br><span class="line"></span><br><span class="line"># 再映射镜像，关闭一些特性</span><br><span class="line">rbd feature disable k8s-rbd-pool/test-disk object-map fast-diff deep-flatten  exclusive-lock --id k8s-rbd</span><br><span class="line"></span><br><span class="line">rbd info k8s-rbd-pool/test-disk --id k8s-rbd</span><br><span class="line"></span><br><span class="line">#映射设备</span><br><span class="line">rbd map k8s-rbd-pool/test-disk --id k8s-rbd --options noudev</span><br><span class="line"></span><br><span class="line"># 查看映射设备</span><br><span class="line">rbd showmapped</span><br><span class="line"></span><br><span class="line"># 只会出现一条/dev/rbd0才正常</span><br><span class="line">ls /dev/rbd0</span><br><span class="line"></span><br><span class="line">#格式化 / 挂载读写验证</span><br><span class="line"># 格式化ext4</span><br><span class="line">mkfs.ext4 /dev/rbd0</span><br><span class="line"></span><br><span class="line"># 创建挂载目录并挂载</span><br><span class="line">mkdir -p /mnt/rbd</span><br><span class="line">mount /dev/rbd0 /mnt/rbd</span><br><span class="line"></span><br><span class="line"># 读写测试</span><br><span class="line">echo &quot;ceph rbd test file&quot; &gt; /mnt/rbd/demo.txt</span><br><span class="line">cat /mnt/rbd/demo.txt</span><br><span class="line"></span><br><span class="line"># 查看磁盘容量（你扩容到20G）</span><br><span class="line">df -h /mnt/rbd</span><br><span class="line"></span><br><span class="line">#深入理解 rbd map 到底为什么能把一个 Ceph Image 变成 Linux 的块设备</span><br><span class="line">rbd CLI</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">librbd（用户态）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">librados（与 Ceph 集群通信）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">MON（获取 OSDMap）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">Primary OSD（定位对象）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">Linux Kernel rbd 模块</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">/dev/rbd0（块设备）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">mkfs.ext4</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">mount</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">   使用</span><br></pre></td></tr></table></figure>
 
@@ -359,7 +526,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E9%95%9C%E5%83%8F"><span class="nav-number">1.</span> <span class="nav-text">下载镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E4%B8%93%E7%94%A8%E7%BD%91%E7%BB%9C"><span class="nav-number">2.</span> <span class="nav-text">配置专用网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BAmonitor%E8%8A%82%E7%82%B9"><span class="nav-number">3.</span> <span class="nav-text">搭建monitor节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BAosd%E8%8A%82%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">搭建osd节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BAmgr%E8%8A%82%E7%82%B9%E5%B9%B6%E5%BC%80%E5%90%AFdashboard"><span class="nav-number">5.</span> <span class="nav-text">搭建mgr节点并开启dashboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BArgw%E8%8A%82%E7%82%B9"><span class="nav-number">6.</span> <span class="nav-text">搭建rgw节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ssl%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%AE%BF%E9%97%AE"><span class="nav-number">7.</span> <span class="nav-text">ssl端口转发访问</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%8A%B6%E6%80%81%E6%9F%A5%E7%9C%8B"><span class="nav-number">8.</span> <span class="nav-text">基础状态查看</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9D%97%E5%AD%98%E5%82%A8RBD-%EF%BC%88%E4%BA%91%E4%B8%BB%E6%9C%BA%E7%A1%AC%E7%9B%98%EF%BC%89Demo"><span class="nav-number">9.</span> <span class="nav-text">块存储RBD （云主机硬盘）Demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E6%8C%82%E8%BD%BD%E5%9D%97%E5%AD%98%E5%82%A8"><span class="nav-number">10.</span> <span class="nav-text">容器挂载块存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E5%8D%B8%E8%BD%BD%E6%B5%81%E7%A8%8B%EF%BC%88%E9%81%BF%E5%85%8D%E6%96%87%E4%BB%B6%E6%8D%9F%E5%9D%8F%EF%BC%89"><span class="nav-number">11.</span> <span class="nav-text">标准卸载流程（避免文件损坏）</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">概念解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%9B%86%E7%BE%A4%E6%A0%B8%E5%BF%83%E6%8E%A7%E5%88%B6%E7%BB%84%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">1. 集群核心控制组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%BA%95%E5%B1%82%E5%AD%98%E5%82%A8%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="nav-number">1.2.</span> <span class="nav-text">2. 底层存储核心概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8-RGW-S3-%E4%B8%93%E5%B1%9E%E5%90%8D%E8%AF%8D"><span class="nav-number">1.3.</span> <span class="nav-text">3. 对象存储 RGW &#x2F; S3 专属名词</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%9D%83%E9%99%90-%E8%AE%A4%E8%AF%81%E7%9B%B8%E5%85%B3"><span class="nav-number">1.4.</span> <span class="nav-text">4. 权限&#x2F;认证相关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E9%95%9C%E5%83%8F-%E5%9D%97%E5%AD%98%E5%82%A8%E4%B8%93%E5%B1%9E%E5%90%8D%E8%AF%8D"><span class="nav-number">1.5.</span> <span class="nav-text">5. 镜像&#x2F;块存储专属名词</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">部署步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%85%8D%E7%BD%AE%E4%B8%93%E7%94%A8%E7%BD%91%E7%BB%9C"><span class="nav-number">2.1.</span> <span class="nav-text">1 配置专用网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%B8%8B%E8%BD%BD%E9%95%9C%E5%83%8F"><span class="nav-number">2.2.</span> <span class="nav-text">2 下载镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%90%AD%E5%BB%BAmonitor%E8%8A%82%E7%82%B9"><span class="nav-number">2.3.</span> <span class="nav-text">3 搭建monitor节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%90%AD%E5%BB%BAosd%E8%8A%82%E7%82%B9"><span class="nav-number">2.4.</span> <span class="nav-text">4 搭建osd节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%90%AD%E5%BB%BAmgr%E8%8A%82%E7%82%B9%E5%B9%B6%E5%BC%80%E5%90%AFdashboard"><span class="nav-number">2.5.</span> <span class="nav-text">5 搭建mgr节点并开启dashboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E6%90%AD%E5%BB%BArgw%E8%8A%82%E7%82%B9"><span class="nav-number">2.6.</span> <span class="nav-text">6 搭建rgw节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-ssl%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%AE%BF%E9%97%AE"><span class="nav-number">2.7.</span> <span class="nav-text">7 ssl端口转发访问</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E5%9F%BA%E7%A1%80%E7%8A%B6%E6%80%81%E6%9F%A5%E7%9C%8B"><span class="nav-number">2.8.</span> <span class="nav-text">8 基础状态查看</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RBD%E6%B5%8B%E8%AF%95Demo"><span class="nav-number">3.</span> <span class="nav-text">RBD测试Demo</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9D%97%E5%AD%98%E5%82%A8RBD-%EF%BC%88%E4%BA%91%E4%B8%BB%E6%9C%BA%E7%A1%AC%E7%9B%98%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">块存储RBD （云主机硬盘）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E6%8C%82%E8%BD%BD%E5%9D%97%E5%AD%98%E5%82%A8"><span class="nav-number">3.2.</span> <span class="nav-text">容器挂载块存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E5%8D%B8%E8%BD%BD%E6%B5%81%E7%A8%8B%EF%BC%88%E9%81%BF%E5%85%8D%E6%96%87%E4%BB%B6%E6%8D%9F%E5%9D%8F%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">标准卸载流程（避免文件损坏）</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
