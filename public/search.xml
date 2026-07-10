@@ -21228,6 +21228,65 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li>容器执行卸载<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 1. 退出挂载目录，避免占用</span><br><span class="line">cd /</span><br><span class="line"># 2. 强制安全卸载（ceph-fuse专用）</span><br><span class="line">fusermount -u /mnt/cephfs</span><br><span class="line"></span><br><span class="line"># 若提示设备忙，加 -z 强制卸载（慎用，优先停业务）</span><br><span class="line">fusermount -uz /mnt/cephfs</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
 <li>宿主机执行<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#停止MDS容器</span><br><span class="line">docker compose stop ceph-mds</span><br><span class="line"></span><br><span class="line"># 先标记文件系统不可用，禁止新挂载</span><br><span class="line">docker exec -it ceph-mon ceph fs set mycephfs down true</span><br><span class="line">#开启的命令：</span><br><span class="line">#docker exec -it ceph-mon ceph fs set mycephfs down false</span><br><span class="line"></span><br><span class="line">#删除文件系统实例（解除 meta/data 池绑定）</span><br><span class="line">docker exec -it ceph-mon ceph fs rm mycephfs --yes-i-really-mean-it</span><br><span class="line"></span><br><span class="line">#删除两个 CephFS 专属存储池（所有文件永久丢失）</span><br><span class="line"># 开启删池权限</span><br><span class="line">docker exec -it ceph-mon ceph config set mon mon_allow_pool_delete true</span><br><span class="line"></span><br><span class="line"># 删除元数据池、数据池</span><br><span class="line">docker exec -it ceph-mon ceph osd pool delete cephfs-meta cephfs-meta --yes-i-really-really-mean-it</span><br><span class="line">docker exec -it ceph-mon ceph osd pool delete cephfs-data cephfs-data --yes-i-really-really-mean-it</span><br><span class="line"></span><br><span class="line"># 关闭删池保护</span><br><span class="line">docker exec -it ceph-mon ceph config set mon mon_allow_pool_delete false</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
 </ul>
+<h2 id="RDB-vs-CephFS"><a href="#RDB-vs-CephFS" class="headerlink" title="RDB vs CephFS"></a>RDB vs CephFS</h2><table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>RBD 块存储</th>
+<th>CephFS 文件存储</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>对外形态</td>
+<td>裸磁盘设备 &#x2F;dev&#x2F;rbdX</td>
+<td>直接树形目录，无需格式化</td>
+</tr>
+<tr>
+<td>是否需要格式化</td>
+<td>必须 mkfs.ext4&#x2F;xfs</td>
+<td>不需要，挂载即用</td>
+</tr>
+<tr>
+<td>多客户端共享读写</td>
+<td>不支持，多机挂载损坏数据</td>
+<td>原生支持成千上万客户端并发</td>
+</tr>
+<tr>
+<td>元数据管理方</td>
+<td>本地内核文件系统(ext4)，Ceph无感知</td>
+<td>MDS集群统一管理目录&#x2F;权限&#x2F;inode</td>
+</tr>
+<tr>
+<td>最小操作粒度</td>
+<td>整块镜像（磁盘）</td>
+<td>单个文件&#x2F;子目录</td>
+</tr>
+<tr>
+<td>快照粒度</td>
+<td>仅支持整盘快照</td>
+<td>支持目录级快照</td>
+</tr>
+<tr>
+<td>扩容逻辑</td>
+<td>resize镜像后还要扩容文件系统</td>
+<td>底层池空间自动复用，无需操作</td>
+</tr>
+<tr>
+<td>目录配额</td>
+<td>不支持</td>
+<td>支持单目录空间、文件数限制</td>
+</tr>
+<tr>
+<td>K8s访问模式</td>
+<td>ReadWriteOnce（独占）</td>
+<td>ReadWriteMany（多机共享）</td>
+</tr>
+<tr>
+<td>核心组件依赖</td>
+<td>仅MON+OSD</td>
+<td>MON+OSD+独立MDS元数据服务</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>ceph</tag>
