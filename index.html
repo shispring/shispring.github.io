@@ -469,7 +469,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-15 17:00:33" itemprop="dateModified" datetime="2026-07-15T17:00:33+08:00">2026-07-15</time>
+                <time title="修改时间：2026-07-15 18:07:36" itemprop="dateModified" datetime="2026-07-15T18:07:36+08:00">2026-07-15</time>
               </span>
 
           <br>
@@ -478,7 +478,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
+              <span>1.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -618,6 +618,7 @@
 <td>高（路由算法、专家负载均衡）</td>
 </tr>
 </tbody></table>
+<h3 id="推理加速三板斧"><a href="#推理加速三板斧" class="headerlink" title="推理加速三板斧"></a>推理加速三板斧</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">• KV Cache：解决重复计算，4-10× 加速。Prefill 与 Decode 是两个完全不同的阶段</span><br><span class="line">• PagedAttention：解决显存碎片，2-4× 提升并发能力。借鉴 OS 虚拟内存的智慧</span><br><span class="line">• Continuous Batching：解决静态 batch 的悲剧，5-10× 吞吐提升</span><br><span class="line">• 三者协同 = vLLM 的&quot;魔法&quot;，相比朴素推理 50-150× 加速</span><br><span class="line">• 真正的生产部署还要看 TTFT/TPOT/Throughput/GPU 利用率 四大指标</span><br><span class="line">• Chunked Prefill / Prefix Caching / KV Cache 量化 是当下推荐的进阶配置</span><br></pre></td></tr></table></figure>
 
       
     </div>
