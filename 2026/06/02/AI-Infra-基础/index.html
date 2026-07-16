@@ -28,7 +28,7 @@
 <meta property="og:description" content="AI发展主线1感知机 → 神经网络 → 深度神经网络 → CNN → RNN → LSTM → Transformer → 大语言模型（GPT、Claude等）  概念12梯度 &#x3D; 参数变化对误差的影响程度 Transformen结构Tokenizer12https:&#x2F;&#x2F;tiktokenizer.vercel.app&#x2F;  EmbeddingAttentionCNN vs RNN vs Transf">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-06-02T06:17:06.000Z">
-<meta property="article:modified_time" content="2026-07-16T07:53:16.862Z">
+<meta property="article:modified_time" content="2026-07-16T09:16:51.751Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="ai">
 <meta name="twitter:card" content="summary">
@@ -220,7 +220,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-16 15:53:16" itemprop="dateModified" datetime="2026-07-16T15:53:16+08:00">2026-07-16</time>
+                <time title="修改时间：2026-07-16 17:16:51" itemprop="dateModified" datetime="2026-07-16T17:16:51+08:00">2026-07-16</time>
               </span>
 
           
@@ -236,14 +236,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>3.3k</span>
+              <span>4.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -407,6 +407,39 @@
 <h3 id="部署checklist"><a href="#部署checklist" class="headerlink" title="部署checklist"></a>部署checklist</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">• 在业务真实数据上跑准确率评测</span><br><span class="line">• 在 hold-out 测试集上跑通用 benchmark（看灾难性退化）</span><br><span class="line">• 实测显存占用和峰值</span><br><span class="line">• 实测吞吐和延迟</span><br><span class="line">• 长时间稳定性测试（24 小时不间断跑）</span><br><span class="line">• 对抗性测试（prompt injection / 长输入等边缘场景）</span><br></pre></td></tr></table></figure>
 <h3 id="Flash-Attention"><a href="#Flash-Attention" class="headerlink" title="Flash Attention"></a>Flash Attention</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">• GPU 算力增长比带宽快，IO 是大模型的主要瓶颈</span><br><span class="line">• Flash Attention 用 Tiling + Online Softmax 把 attention IO 量从 O(n²) 降到 O(n)</span><br><span class="line">• v1 / v2 / v3 演进：v1 开创、v2 优化、v3 适配 H100 + FP8</span><br><span class="line">• 使用方式：HuggingFace 加 attn_implementation、PyTorch 用 SDPA、vLLM 默认启用</span><br><span class="line">• 训练比推理收益更大：训练 70B + 8K 上下文，2× 加速 + 47% 显存节省</span><br><span class="line">• Flash Decoding / Ring Attention：Flash 家族在持续演进</span><br></pre></td></tr></table></figure>
 
+<h3 id="多卡部署：TP-PP-数据并行"><a href="#多卡部署：TP-PP-数据并行" class="headerlink" title="多卡部署：TP &#x2F; PP &#x2F; 数据并行"></a>多卡部署：TP &#x2F; PP &#x2F; 数据并行</h3><ul>
+<li>核心原则：TP 用于”装下”模型，DP 用于”扩大”并发，PP 用于跨机部署。<table>
+<thead>
+<tr>
+<th>并行方式</th>
+<th>切分目标</th>
+<th>适用场景</th>
+<th>通信开销</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tensor Parallel (TP)</td>
+<td>单层算子</td>
+<td>单机多卡</td>
+<td>高（要 NVLink）</td>
+</tr>
+<tr>
+<td>Pipeline Parallel (PP)</td>
+<td>模型层</td>
+<td>多机部署</td>
+<td>中（跨机）</td>
+</tr>
+<tr>
+<td>Data Parallel (DP)</td>
+<td>不同请求</td>
+<td>高并发</td>
+<td>低（独立）</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h3 id="vLLM部署"><a href="#vLLM部署" class="headerlink" title="vLLM部署"></a>vLLM部署</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">不推荐 vLLM 的场景:</span><br><span class="line">• 需要复杂控制流 / JSON 严格输出 → SGLang</span><br><span class="line">• 追求极致单卡性能 → TensorRT-LLM</span><br><span class="line">• 嵌入式 / 端侧 → llama.cpp / Ollama</span><br><span class="line">• 轻量本地开发 → Ollama</span><br><span class="line">• HF 生态深度绑定 → TGI</span><br><span class="line"></span><br><span class="line">vllm serve Qwen/Qwen3-32B-Instruct \</span><br><span class="line">    # 张量并行：4张GPU均分模型权重，32B单卡放不下，TP=4分片加载</span><br><span class="line">    --tensor-parallel-size 4 \</span><br><span class="line">    # 最大上下文窗口 131072 tokens（128K超长上下文）</span><br><span class="line">    --max-model-len 131072 \</span><br><span class="line">    # 权重量化 FP8 存储，显存减半，精度损失远小于INT4/INT8</span><br><span class="line">    --quantization fp8 \</span><br><span class="line">    # KV缓存也用FP8存储，进一步压缩KV显存占用（长上下文核心优化）</span><br><span class="line">    --kv-cache-dtype fp8 \</span><br><span class="line">    # 投机解码：小模型EAGLE做草稿预生成</span><br><span class="line">    --speculative-model yuhuili/EAGLE-LLaMA3-8B \</span><br><span class="line">    # 每次投机预生成5个token，主模型校验</span><br><span class="line">    --num-speculative-tokens 5 \</span><br><span class="line">    # RoPE YARN缩放，原生上下文32K → 拉伸4倍至128K，避免位置编码漂移</span><br><span class="line">    --rope-scaling &#x27;&#123;&quot;type&quot;:&quot;yarn&quot;,&quot;factor&quot;:4.0&#125;&#x27; \</span><br><span class="line">    # 前缀缓存：相同prompt共享KV缓存，多用户重复提问大幅省显存、加速prefill</span><br><span class="line">    --enable-prefix-caching \</span><br><span class="line">    # 分块预填充：大输入prompt分片计算，防止单请求瞬间爆显存OOM</span><br><span class="line">    --enable-chunked-prefill \</span><br><span class="line">    # GPU显存占用上限92%，预留8%给系统、碎片、投机模型显存</span><br><span class="line">    --gpu-memory-utilization 0.92 \</span><br><span class="line">    # 并发最大排队序列数256，控制并发压力，防止显存击穿</span><br><span class="line">    --max-num-seqs 256 \</span><br><span class="line">    # API服务端口</span><br><span class="line">    --port 8000</span><br></pre></td></tr></table></figure>
+
     </div>
 
     
@@ -490,7 +523,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AI%E5%8F%91%E5%B1%95%E4%B8%BB%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">AI发展主线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformen%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">Transformen结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tokenizer"><span class="nav-number">4.</span> <span class="nav-text">Tokenizer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Embedding"><span class="nav-number">5.</span> <span class="nav-text">Embedding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention"><span class="nav-number">6.</span> <span class="nav-text">Attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CNN-vs-RNN-vs-Transformer"><span class="nav-number">7.</span> <span class="nav-text">CNN vs RNN vs Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#k8s%E8%B0%83%E5%BA%A6GPU%E8%BF%87%E7%A8%8B"><span class="nav-number">9.</span> <span class="nav-text">k8s调度GPU过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E9%87%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">10.</span> <span class="nav-text">考量事项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dense-vs-MoE"><span class="nav-number">10.1.</span> <span class="nav-text">Dense vs MoE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Prefill-vs-Decode"><span class="nav-number">10.2.</span> <span class="nav-text">Prefill vs Decode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E4%B8%89%E6%9D%BF%E6%96%A7"><span class="nav-number">10.3.</span> <span class="nav-text">推理加速三板斧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8F%E5%8C%96"><span class="nav-number">10.4.</span> <span class="nav-text">量化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2checklist"><span class="nav-number">10.5.</span> <span class="nav-text">部署checklist</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flash-Attention"><span class="nav-number">10.6.</span> <span class="nav-text">Flash Attention</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AI%E5%8F%91%E5%B1%95%E4%B8%BB%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">AI发展主线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformen%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">Transformen结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tokenizer"><span class="nav-number">4.</span> <span class="nav-text">Tokenizer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Embedding"><span class="nav-number">5.</span> <span class="nav-text">Embedding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention"><span class="nav-number">6.</span> <span class="nav-text">Attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CNN-vs-RNN-vs-Transformer"><span class="nav-number">7.</span> <span class="nav-text">CNN vs RNN vs Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#k8s%E8%B0%83%E5%BA%A6GPU%E8%BF%87%E7%A8%8B"><span class="nav-number">9.</span> <span class="nav-text">k8s调度GPU过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E9%87%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">10.</span> <span class="nav-text">考量事项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dense-vs-MoE"><span class="nav-number">10.1.</span> <span class="nav-text">Dense vs MoE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Prefill-vs-Decode"><span class="nav-number">10.2.</span> <span class="nav-text">Prefill vs Decode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E4%B8%89%E6%9D%BF%E6%96%A7"><span class="nav-number">10.3.</span> <span class="nav-text">推理加速三板斧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8F%E5%8C%96"><span class="nav-number">10.4.</span> <span class="nav-text">量化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2checklist"><span class="nav-number">10.5.</span> <span class="nav-text">部署checklist</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flash-Attention"><span class="nav-number">10.6.</span> <span class="nav-text">Flash Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E5%8D%A1%E9%83%A8%E7%BD%B2%EF%BC%9ATP-PP-%E6%95%B0%E6%8D%AE%E5%B9%B6%E8%A1%8C"><span class="nav-number">10.7.</span> <span class="nav-text">多卡部署：TP &#x2F; PP &#x2F; 数据并行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#vLLM%E9%83%A8%E7%BD%B2"><span class="nav-number">10.8.</span> <span class="nav-text">vLLM部署</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
