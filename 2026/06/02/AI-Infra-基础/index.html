@@ -28,7 +28,7 @@
 <meta property="og:description" content="AI发展主线1感知机 → 神经网络 → 深度神经网络 → CNN → RNN → LSTM → Transformer → 大语言模型（GPT、Claude等）  概念12梯度 &#x3D; 参数变化对误差的影响程度 Transformen结构Tokenizer12https:&#x2F;&#x2F;tiktokenizer.vercel.app&#x2F;  EmbeddingAttentionCNN vs RNN vs Transf">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-06-02T06:17:06.000Z">
-<meta property="article:modified_time" content="2026-07-16T09:57:15.768Z">
+<meta property="article:modified_time" content="2026-07-16T10:07:18.977Z">
 <meta property="article:author" content="shispring">
 <meta property="article:tag" content="ai">
 <meta name="twitter:card" content="summary">
@@ -220,7 +220,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-16 17:57:15" itemprop="dateModified" datetime="2026-07-16T17:57:15+08:00">2026-07-16</time>
+                <time title="修改时间：2026-07-16 18:07:18" itemprop="dateModified" datetime="2026-07-16T18:07:18+08:00">2026-07-16</time>
               </span>
 
           
@@ -236,7 +236,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.3k</span>
+              <span>5.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -482,7 +482,7 @@
 </tbody></table>
 <h3 id="Prefill-Decode"><a href="#Prefill-Decode" class="headerlink" title="Prefill&#x2F;Decode"></a>Prefill&#x2F;Decode</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Prefill 集群（compute-bound）：高算力 GPU、少量 KV 存储</span><br><span class="line">Decode 集群（memory-bound）：大显存 GPU、强带宽</span><br><span class="line"></span><br><span class="line">请求流：</span><br><span class="line">  用户 → Prefill 集群（生成 KV） → 传到 Decode 集群（生成 token）</span><br><span class="line"></span><br><span class="line">• 两类负载用不同硬件优化</span><br><span class="line">• 资源利用率从 60% 提升到 90%+</span><br><span class="line"></span><br><span class="line">未来推理集群可能不是同质化的：</span><br><span class="line">• 高端 GPU 跑 prefill</span><br><span class="line">• 低端 GPU 跑 decode</span><br><span class="line">• CPU 处理 embedding</span><br><span class="line">• NPU / TPU 跑特定任务</span><br></pre></td></tr></table></figure>
 
-<h3 id="GPU-选型"><a href="#GPU-选型" class="headerlink" title="GPU 选型"></a>GPU 选型</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="GPU-选型"><a href="#GPU-选型" class="headerlink" title="GPU 选型"></a>GPU 选型</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1. 算力 (TFLOPS)                   </span><br><span class="line">   FP32 / FP16 / BF16 / FP8 / INT8</span><br><span class="line">2. 显存 (GB)                      </span><br><span class="line">   容量 + 带宽 + 类型 (HBM3 / GDDR)</span><br><span class="line">3. 互联 (NVLink / PCIe / IB)   </span><br><span class="line">   带宽决定能否做 TP            </span><br><span class="line">4. 功耗 (W)        </span><br><span class="line">   决定机房和供电要求</span><br><span class="line">5. 价格 + 可获得性   </span><br><span class="line">   单价 + 渠道 + 周期</span><br></pre></td></tr></table></figure>
 
     </div>
 
