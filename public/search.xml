@@ -20534,6 +20534,50 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </li>
 </ul>
 <h3 id="vLLM部署"><a href="#vLLM部署" class="headerlink" title="vLLM部署"></a>vLLM部署</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">不推荐 vLLM 的场景:</span><br><span class="line">• 需要复杂控制流 / JSON 严格输出 → SGLang</span><br><span class="line">• 追求极致单卡性能 → TensorRT-LLM</span><br><span class="line">• 嵌入式 / 端侧 → llama.cpp / Ollama</span><br><span class="line">• 轻量本地开发 → Ollama</span><br><span class="line">• HF 生态深度绑定 → TGI</span><br><span class="line"></span><br><span class="line">vllm serve Qwen/Qwen3-32B-Instruct \</span><br><span class="line">    # 张量并行：4张GPU均分模型权重，32B单卡放不下，TP=4分片加载</span><br><span class="line">    --tensor-parallel-size 4 \</span><br><span class="line">    # 最大上下文窗口 131072 tokens（128K超长上下文）</span><br><span class="line">    --max-model-len 131072 \</span><br><span class="line">    # 权重量化 FP8 存储，显存减半，精度损失远小于INT4/INT8</span><br><span class="line">    --quantization fp8 \</span><br><span class="line">    # KV缓存也用FP8存储，进一步压缩KV显存占用（长上下文核心优化）</span><br><span class="line">    --kv-cache-dtype fp8 \</span><br><span class="line">    # 投机解码：小模型EAGLE做草稿预生成</span><br><span class="line">    --speculative-model yuhuili/EAGLE-LLaMA3-8B \</span><br><span class="line">    # 每次投机预生成5个token，主模型校验</span><br><span class="line">    --num-speculative-tokens 5 \</span><br><span class="line">    # RoPE YARN缩放，原生上下文32K → 拉伸4倍至128K，避免位置编码漂移</span><br><span class="line">    --rope-scaling &#x27;&#123;&quot;type&quot;:&quot;yarn&quot;,&quot;factor&quot;:4.0&#125;&#x27; \</span><br><span class="line">    # 前缀缓存：相同prompt共享KV缓存，多用户重复提问大幅省显存、加速prefill</span><br><span class="line">    --enable-prefix-caching \</span><br><span class="line">    # 分块预填充：大输入prompt分片计算，防止单请求瞬间爆显存OOM</span><br><span class="line">    --enable-chunked-prefill \</span><br><span class="line">    # GPU显存占用上限92%，预留8%给系统、碎片、投机模型显存</span><br><span class="line">    --gpu-memory-utilization 0.92 \</span><br><span class="line">    # 并发最大排队序列数256，控制并发压力，防止显存击穿</span><br><span class="line">    --max-num-seqs 256 \</span><br><span class="line">    # API服务端口</span><br><span class="line">    --port 8000</span><br></pre></td></tr></table></figure>
+
+<h3 id="分布式推理"><a href="#分布式推理" class="headerlink" title="分布式推理"></a>分布式推理</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. 吞吐：多卡分担同一请求 → 单请求快</span><br><span class="line">2. 并发：多副本独立处理 → 总吞吐高</span><br><span class="line">3. 长上下文：单卡 KV Cache 不够 → 跨卡分担</span><br><span class="line">4. MoE 专家：稀疏激活 → 专家分布</span><br><span class="line">5. 跨机网络：高带宽互联 vs 低带宽 → 不同策略</span><br><span class="line"></span><br><span class="line">五大并行策略速览:</span><br><span class="line">DP - Data Parallel        ──  数据并行   ──  切请求</span><br><span class="line">TP - Tensor Parallel      ──  张量并行   ──  切层内算子</span><br><span class="line">PP - Pipeline Parallel    ──  流水并行   ──  切层</span><br><span class="line">EP - Expert Parallel      ──  专家并行   ──  切 MoE 专家</span><br><span class="line">CP - Context Parallel     ──  上下文并行 ──  切序列</span><br><span class="line"></span><br><span class="line">TP 必须用 NVLink 级别的互联，跨机做 TP 是灾难。生产建议：TP 通常 ≤ 8（单节点内 NVLink），跨机要换 PP。</span><br><span class="line"></span><br><span class="line">单一并行策略往往不够：</span><br><span class="line">小模型 (8B-32B)：    TP 即可</span><br><span class="line">大模型 (70B-405B)：  TP + PP</span><br><span class="line">超大 MoE：          TP + PP + EP</span><br><span class="line">长上下文：          TP + PP + CP</span><br><span class="line">全场景：            TP + PP + EP + CP (4D)</span><br><span class="line"></span><br><span class="line">总卡数 = TP × PP × EP × CP × DP</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>互联类型</th>
+<th>带宽</th>
+<th>是否能跑 TP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NVLink<br>（H100）</td>
+<td>900 GB&#x2F;s</td>
+<td>✅ 完美</td>
+</tr>
+<tr>
+<td>NVLink<br>（A100）</td>
+<td>600 GB&#x2F;s</td>
+<td>✅ 好</td>
+</tr>
+<tr>
+<td>PCIe 5.0</td>
+<td>64 GB&#x2F;s</td>
+<td>△ 勉强</td>
+</tr>
+<tr>
+<td>PCIe 4.0</td>
+<td>32 GB&#x2F;s</td>
+<td>❌ 慢</td>
+</tr>
+<tr>
+<td>InfiniBand 400G</td>
+<td>50 GB&#x2F;s</td>
+<td>❌ 跨机太慢</td>
+</tr>
+<tr>
+<td>以太网 100G</td>
+<td>12.5 GB&#x2F;s</td>
+<td>❌ 完全不能</td>
+</tr>
+</tbody></table>
+<h3 id="Prefill-Decode"><a href="#Prefill-Decode" class="headerlink" title="Prefill&#x2F;Decode"></a>Prefill&#x2F;Decode</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Prefill 集群（compute-bound）：高算力 GPU、少量 KV 存储</span><br><span class="line">Decode 集群（memory-bound）：大显存 GPU、强带宽</span><br><span class="line"></span><br><span class="line">请求流：</span><br><span class="line">  用户 → Prefill 集群（生成 KV） → 传到 Decode 集群（生成 token）</span><br><span class="line"></span><br><span class="line">• 两类负载用不同硬件优化</span><br><span class="line">• 资源利用率从 60% 提升到 90%+</span><br><span class="line"></span><br><span class="line">未来推理集群可能不是同质化的：</span><br><span class="line">• 高端 GPU 跑 prefill</span><br><span class="line">• 低端 GPU 跑 decode</span><br><span class="line">• CPU 处理 embedding</span><br><span class="line">• NPU / TPU 跑特定任务</span><br></pre></td></tr></table></figure>
+
+<h3 id="GPU-选型"><a href="#GPU-选型" class="headerlink" title="GPU 选型"></a>GPU 选型</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>ai</tag>
