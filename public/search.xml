@@ -3246,6 +3246,9 @@
 </tr>
 </tbody></table>
 <hr>
+<h2 id="Kubernetes-Controller-runtime-深度解析：manager-到底管理了什么"><a href="#Kubernetes-Controller-runtime-深度解析：manager-到底管理了什么" class="headerlink" title="Kubernetes Controller-runtime 深度解析：manager 到底管理了什么"></a>Kubernetes Controller-runtime 深度解析：manager 到底管理了什么</h2><ul>
+<li><a href="https://mp.weixin.qq.com/s/RGMW_EdCXVLVW6n7-iyTEw">https://mp.weixin.qq.com/s/RGMW_EdCXVLVW6n7-iyTEw</a></li>
+</ul>
 ]]></content>
       <categories>
         <category>k8s</category>
