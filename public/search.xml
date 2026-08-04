@@ -21634,6 +21634,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
 <li><a href="https://mp.weixin.qq.com/s/6HBsj3HIAe4czxgMh86qfg">https://mp.weixin.qq.com/s/6HBsj3HIAe4czxgMh86qfg</a></li>
+<li><a href="https://mp.weixin.qq.com/s/JfQ2NdvENtkwiSfa9Rl4qQ">https://mp.weixin.qq.com/s/JfQ2NdvENtkwiSfa9Rl4qQ</a></li>
 </ul>
 ]]></content>
       <tags>
