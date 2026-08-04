@@ -20466,7 +20466,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </tr>
 </tbody></table>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
-<p><a href="https://github.com/Infrasys-AI/AIInfra">https://github.com/Infrasys-AI/AIInfra</a><br>神经元：<a href="https://alexlenail.me/NN-SVG/">https://alexlenail.me/NN-SVG/</a><br><a href="https://playground.tensorflow.org/">https://playground.tensorflow.org/</a><br><a href="https://www.geogebra.org/">https://www.geogebra.org/</a></p>
+<p><a href="https://github.com/Infrasys-AI/AIInfra">https://github.com/Infrasys-AI/AIInfra</a><br>神经元：<a href="https://alexlenail.me/NN-SVG/">https://alexlenail.me/NN-SVG/</a><br><a href="https://playground.tensorflow.org/">https://playground.tensorflow.org/</a><br><a href="https://www.geogebra.org/">https://www.geogebra.org/</a><br>大模型系列文章合集: <a href="https://mp.weixin.qq.com/s/3UUy2BOCObvUb7EzcGTBSg">https://mp.weixin.qq.com/s/3UUy2BOCObvUb7EzcGTBSg</a></p>
 </blockquote>
 <h2 id="k8s调度GPU过程"><a href="#k8s调度GPU过程" class="headerlink" title="k8s调度GPU过程"></a>k8s调度GPU过程</h2><blockquote>
 <p><a href="https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g">https://mp.weixin.qq.com/s/K_gyC6Fmlb9xquK2x3vH6g</a></p>
