@@ -834,7 +834,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-04-10 11:19:32" itemprop="dateModified" datetime="2026-04-10T11:19:32+08:00">2026-04-10</time>
+                <time title="修改时间：2026-09-04 11:40:31" itemprop="dateModified" datetime="2026-09-04T11:40:31+08:00">2026-09-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -852,14 +852,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.4k</span>
+              <span>6.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>5 分钟</span>
+              <span>6 分钟</span>
             </span>
 
         </div>
@@ -871,11 +871,72 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="1-🛠-环境准备"><a href="#1-🛠-环境准备" class="headerlink" title="1. 🛠 环境准备"></a>1. 🛠 环境准备</h2><h3 id="1-1-加载-OpenStack-凭证"><a href="#1-1-加载-OpenStack-凭证" class="headerlink" title="1.1 加载 OpenStack 凭证"></a>1.1 加载 OpenStack 凭证</h3><p>在使用 CLI 前，需要加载认证环境变量（通常由 <code>openrc</code> 文件提供）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> admin-openrc.sh</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-2-查看当前环境变量"><a href="#1-2-查看当前环境变量" class="headerlink" title="1.2 查看当前环境变量"></a>1.2 查看当前环境变量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">env</span> | grep OS_</span><br></pre></td></tr></table></figure>
-
+          <h2 id="OpenStack-组件职责"><a href="#OpenStack-组件职责" class="headerlink" title="OpenStack 组件职责"></a>OpenStack 组件职责</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>主要职责</th>
+<th>与资源操作的关系</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Keystone</td>
+<td>身份认证、项目、角色、Token、服务目录</td>
+<td>CLI 首先通过它确认“谁”在“哪个项目&#x2F;Region”操作</td>
+</tr>
+<tr>
+<td>Nova</td>
+<td>计算服务，负责虚机生命周期和调度</td>
+<td>创建、启动、停止、重启 Server；通过 Neutron 获得网卡，通过 Glance 获得镜像</td>
+</tr>
+<tr>
+<td>Placement</td>
+<td>记录和分配计算、内存、磁盘等资源库存</td>
+<td>Nova 调度虚机时查询可用资源</td>
+</tr>
+<tr>
+<td>Neutron</td>
+<td>虚拟网络、子网、端口、路由、安全组、FIP</td>
+<td>决定网卡拿到什么 IP、是否能出网或被外部访问</td>
+</tr>
+<tr>
+<td>Glance</td>
+<td>镜像目录和镜像元数据</td>
+<td>为虚机提供启动镜像</td>
+</tr>
+<tr>
+<td>Cinder</td>
+<td>块存储卷和卷快照</td>
+<td>创建数据盘、挂载&#x2F;卸载数据盘；卷通常独立于虚机生命周期</td>
+</tr>
+<tr>
+<td>Horizon</td>
+<td>Web 管理界面</td>
+<td>CLI 的可视化入口，不是独立资源依赖</td>
+</tr>
+<tr>
+<td>Swift（可选）</td>
+<td>对象存储</td>
+<td>保存对象，不等同于 Cinder 块设备</td>
+</tr>
+<tr>
+<td>Heat（可选）</td>
+<td>编排模板</td>
+<td>用模板批量创建上述资源</td>
+</tr>
+</tbody></table>
+<h2 id="资源概念不要混淆"><a href="#资源概念不要混淆" class="headerlink" title="资源概念不要混淆"></a>资源概念不要混淆</h2><ul>
+<li><strong>Network</strong> 是二层网络的逻辑容器；它本身不直接给虚机分配 IP。</li>
+<li><strong>Subnet</strong> 隶属于 Network，定义 CIDR、网关、DHCP 等三层地址范围。</li>
+<li><strong>Port</strong> 是真正连接虚机、路由器或其他设备的虚拟网卡，包含 Fixed IP、MAC、状态、<code>device_id</code> 和安全组。</li>
+<li><strong>Fixed IP</strong> 来自租户网络的 Subnet，通常只能在租户网络或经路由器访问。</li>
+<li><strong>Floating IP（FIP）</strong> 来自外部网络地址池，通过 Neutron 的 NAT 映射到 Port 的 Fixed IP；它不是虚机内部网卡上的第二个普通地址。</li>
+<li><strong>Security Group</strong> 是绑定到 Port 的有状态虚拟防火墙规则集合。创建虚机时指定安全组，最终要检查端口上的实际绑定。</li>
+<li><strong>Router</strong> 连接租户网络和外部网络：内部接口接 Subnet，外部网关接 External Network。</li>
+<li><strong>Volume</strong> 是 Cinder 块设备；镜像用于启动系统盘，Volume 用于持久化数据或从卷启动，二者不是同一类资源。</li>
+</ul>
+<h2 id="1-🛠-环境准备-资源概念不要混淆"><a href="#1-🛠-环境准备-资源概念不要混淆" class="headerlink" title="1. 🛠 环境准备(资源概念不要混淆)"></a>1. 🛠 环境准备(资源概念不要混淆)</h2><h3 id="加载-OpenStack-凭证"><a href="#加载-OpenStack-凭证" class="headerlink" title="加载 OpenStack 凭证"></a>加载 OpenStack 凭证</h3><p>在使用 CLI 前，需要加载认证环境变量（通常由 <code>openrc</code> 文件提供）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加载管理员或项目凭证</span></span><br><span class="line"><span class="built_in">source</span> admin-openrc.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查认证上下文</span></span><br><span class="line"><span class="built_in">env</span> | grep <span class="string">&#x27;^OS_&#x27;</span></span><br><span class="line">openstack token issue</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$OS_REGION_NAME</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询当前 Region 和项目</span></span><br><span class="line">openstack region list</span><br><span class="line">openstack project list</span><br></pre></td></tr></table></figure>
 <p>常见变量说明：</p>
 <table>
 <thead>
@@ -901,11 +962,17 @@
 <td>Region 名称</td>
 </tr>
 </tbody></table>
-<h3 id="1-3-切换-Region"><a href="#1-3-切换-Region" class="headerlink" title="1.3 切换 Region"></a>1.3 切换 Region</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> OS_REGION_NAME=RegionOne</span><br></pre></td></tr></table></figure>
-
+<h3 id="切换-Region"><a href="#切换-Region" class="headerlink" title="切换 Region"></a>切换 Region</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> OS_REGION_NAME=RegionOne</span><br></pre></td></tr></table></figure>
 <p>或在命令中指定：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openstack --os-region-name RegionOne server list</span><br></pre></td></tr></table></figure>
 
+<h3 id="关系速记"><a href="#关系速记" class="headerlink" title="关系速记"></a>关系速记</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Project / Region</span><br><span class="line">  └─ Network</span><br><span class="line">      └─ Subnet</span><br><span class="line">          └─ Port ── Fixed IP ── Server</span><br><span class="line">                ├─ Security Group</span><br><span class="line">                └─ Floating IP ← External Network ← Router</span><br><span class="line"></span><br><span class="line">Server ── attach ── Volume ── Snapshot</span><br><span class="line">Server ── boot from ── Image</span><br></pre></td></tr></table></figure>
+
+<p>记住：<strong>Network 提供二层范围，Subnet 提供地址池，Port 才是连接点，Fixed IP 是内网地址，FIP 是外部映射，Security Group 控制端口流量，Router 提供跨网络转发，Server 消耗计算资源，Volume 提供块存储。</strong></p>
+<h3 id="组件与资源编排流程"><a href="#组件与资源编排流程" class="headerlink" title="组件与资源编排流程"></a>组件与资源编排流程</h3><ul>
+<li><strong>创建链</strong>：认证上下文 → 网络&#x2F;子网 → 安全组和密钥对 → 端口 → 虚机 → 云硬盘。</li>
+<li><strong>访问链</strong>：外部网络 → 路由器 → 浮动 IP → 虚机端口 → Fixed IP → 虚机操作系统服务。</li>
+</ul>
 <hr>
 <h2 id="2-📌-常用-CLI-命令"><a href="#2-📌-常用-CLI-命令" class="headerlink" title="2. 📌 常用 CLI 命令"></a>2. 📌 常用 CLI 命令</h2><h3 id="2-1-Region-与项目"><a href="#2-1-Region-与项目" class="headerlink" title="2.1 Region 与项目"></a>2.1 Region 与项目</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看可用 Region</span></span><br><span class="line">openstack region list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看项目列表</span></span><br><span class="line">openstack project list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看当前 Token 信息</span></span><br><span class="line">openstack token issue</span><br></pre></td></tr></table></figure>
 
@@ -973,7 +1040,7 @@
 <h4 id="关键检查项"><a href="#关键检查项" class="headerlink" title="关键检查项"></a>关键检查项</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看端口状态</span></span><br><span class="line">openstack port show &lt;port-id&gt; -c status -c fixed_ips</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确认端口是否绑定实例</span></span><br><span class="line">openstack port show &lt;port-id&gt; -c device_id</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3 id="4-2-Floating-IP-无法访问"><a href="#4-2-Floating-IP-无法访问" class="headerlink" title="4.2 Floating IP 无法访问"></a>4.2 Floating IP 无法访问</h3><h4 id="排查流程"><a href="#排查流程" class="headerlink" title="排查流程"></a>排查流程</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">外部访问失败</span><br><span class="line">   │</span><br><span class="line">   ├── 是否已绑定 Port？</span><br><span class="line">   ├── 安全组是否放通？</span><br><span class="line">   ├── 实例内部服务是否启动？</span><br><span class="line">   └── 路由是否正确？</span><br></pre></td></tr></table></figure>
+<h3 id="4-2-Floating-IP-无法访问"><a href="#4-2-Floating-IP-无法访问" class="headerlink" title="4.2 Floating IP 无法访问"></a>4.2 Floating IP 无法访问</h3><h4 id="排查流程"><a href="#排查流程" class="headerlink" title="排查流程"></a>排查流程</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">外部访问失败</span><br><span class="line">   │</span><br><span class="line">   ├── 是否已绑定 Port？</span><br><span class="line">   ├── 安全组是否放通？</span><br><span class="line">   ├── 实例内部服务是否启动？</span><br><span class="line">   └── 路由是否正确？</span><br><span class="line"></span><br><span class="line">1. FIP 是否存在、状态是否为 `ACTIVE`、是否绑定了正确的 Port。</span><br><span class="line">2. Port 是否有正确的 Fixed IP，`device_id` 是否指向目标 Server。</span><br><span class="line">3. Port 上是否绑定了正确的 Security Group，规则是否放通目标端口。</span><br><span class="line">4. Router 是否同时连接了内部 Subnet 和 External Network。</span><br><span class="line">5. 虚机内部服务是否监听正确地址和端口，操作系统防火墙是否允许。</span><br><span class="line">6. 外部网络、网络节点和路由代理是否健康。</span><br></pre></td></tr></table></figure>
 
 <h4 id="排查命令"><a href="#排查命令" class="headerlink" title="排查命令"></a>排查命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 Floating IP 是否绑定</span></span><br><span class="line">openstack floating ip show &lt;fip&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看安全组</span></span><br><span class="line">openstack port show &lt;port-id&gt; -c security_group_ids</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试端口连通性</span></span><br><span class="line">nc -zv &lt;floating-ip&gt; 80</span><br></pre></td></tr></table></figure>
 
