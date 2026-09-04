@@ -834,7 +834,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-09-04 14:09:47" itemprop="dateModified" datetime="2026-09-04T14:09:47+08:00">2026-09-04</time>
+                <time title="修改时间：2026-09-04 14:17:27" itemprop="dateModified" datetime="2026-09-04T14:17:27+08:00">2026-09-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -852,14 +852,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>8.2k</span>
+              <span>9.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
+              <span>9 分钟</span>
             </span>
 
         </div>
@@ -983,8 +983,76 @@
 <h4 id="Subnet-操作"><a href="#Subnet-操作" class="headerlink" title="Subnet 操作"></a>Subnet 操作</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看子网列表</span></span><br><span class="line">openstack subnet list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看子网详情</span></span><br><span class="line">openstack subnet show &lt;subnet-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建子网</span></span><br><span class="line">openstack subnet create \</span><br><span class="line">  --network &lt;network-id&gt; \</span><br><span class="line">  --subnet-range 192.168.1.0/24 \</span><br><span class="line">  --gateway 192.168.1.1 \</span><br><span class="line">  &lt;subnet-name&gt;</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3 id="2-3-Port-与-Fixed-IP"><a href="#2-3-Port-与-Fixed-IP" class="headerlink" title="2.3 Port 与 Fixed IP"></a>2.3 Port 与 Fixed IP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看端口列表</span></span><br><span class="line">openstack port list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只看业务虚拟机网卡port</span></span><br><span class="line">openstack port list --device-owner compute:nova --long</span><br><span class="line"><span class="comment"># 只看DHCP服务端口</span></span><br><span class="line">openstack port list --device-owner network:dhcp --long</span><br><span class="line">openstack port list --device-owner network:dhcp -f json</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定列</span></span><br><span class="line">openstack port list -c <span class="built_in">id</span> -c mac_address -c device_owner -c device_id</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看端口详情</span></span><br><span class="line">openstack port show &lt;port-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建端口并指定 Fixed IP</span></span><br><span class="line">openstack port create \</span><br><span class="line">  --network &lt;network-id&gt; \</span><br><span class="line">  --fixed-ip subnet=&lt;subnet-id&gt;,ip-address=192.168.1.10 \</span><br><span class="line">  &lt;port-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为端口绑定安全组</span></span><br><span class="line">openstack port <span class="built_in">set</span> --security-group &lt;sg-id&gt; &lt;port-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除端口</span></span><br><span class="line">openstack port delete &lt;port-id&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-Port-与-Fixed-IP"><a href="#2-3-Port-与-Fixed-IP" class="headerlink" title="2.3 Port 与 Fixed IP"></a>2.3 Port 与 Fixed IP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看端口列表</span></span><br><span class="line">openstack port list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只看业务虚拟机网卡port</span></span><br><span class="line">openstack port list --device-owner compute:nova --long</span><br><span class="line"><span class="comment"># 只看DHCP服务端口</span></span><br><span class="line">openstack port list --device-owner network:dhcp --long</span><br><span class="line">openstack port list --device-owner network:dhcp -f json</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定列</span></span><br><span class="line">openstack port list -c <span class="built_in">id</span> -c mac_address -c device_owner -c device_id</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按device_owner分组查看port，带关键列</span></span><br><span class="line">openstack port list \</span><br><span class="line">-c <span class="built_in">id</span> -c mac_address -c device_owner -c device_id -c fixed_ips</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只看虚机业务网卡</span></span><br><span class="line">openstack port list --device-owner compute:nova</span><br><span class="line"></span><br><span class="line"><span class="comment"># 看DVR浮动ip端口</span></span><br><span class="line">openstack port list --device-owner network:floatingip</span><br><span class="line"></span><br><span class="line"><span class="comment"># 看DVR内网接口</span></span><br><span class="line">openstack port list --device-owner network:router_interface_distributed</span><br><span class="line"></span><br><span class="line"><span class="comment"># 看SNAT集中式端口</span></span><br><span class="line">openstack port list --device-owner network:router_centralized_snat</span><br><span class="line"></span><br><span class="line"><span class="comment"># 看路由器外网网关</span></span><br><span class="line">openstack port list --device-owner network:router_gateway</span><br><span class="line"></span><br><span class="line"><span class="comment"># 看DHCP端口</span></span><br><span class="line">openstack port list --device-owner network:dhcp</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看端口详情</span></span><br><span class="line">openstack port show &lt;port-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建端口并指定 Fixed IP</span></span><br><span class="line">openstack port create \</span><br><span class="line">  --network &lt;network-id&gt; \</span><br><span class="line">  --fixed-ip subnet=&lt;subnet-id&gt;,ip-address=192.168.1.10 \</span><br><span class="line">  &lt;port-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为端口绑定安全组</span></span><br><span class="line">openstack port <span class="built_in">set</span> --security-group &lt;sg-id&gt; &lt;port-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除端口</span></span><br><span class="line">openstack port delete &lt;port-id&gt;</span><br></pre></td></tr></table></figure>
 
+<table>
+<thead>
+<tr>
+<th>device_owner</th>
+<th>名称</th>
+<th>归属对象</th>
+<th>核心作用</th>
+<th>出现场景</th>
+<th>namespace&#x2F;备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>compute:nova</strong></td>
+<td>虚拟机业务端口</td>
+<td>KVM虚拟机(nova‑compute)</td>
+<td><strong>业务VM真实网卡</strong>，虚机的业务流量口，虚拟机内部网卡对应这个port</td>
+<td>创建&#x2F;启动虚拟机attach网卡自动生成</td>
+<td>出现在<code>virsh dumpxml &lt;vm-uuid&gt;</code>；tap设备属于qemu进程；<code>device_id=虚拟机UUID</code></td>
+</tr>
+<tr>
+<td><strong>network:dhcp</strong></td>
+<td>DHCP服务端口</td>
+<td>neutron‑dhcp‑agent</td>
+<td>DHCP应答，给同网络虚拟机分配IP、DNS</td>
+<td>子网开启DHCP时自动创建</td>
+<td><code>qdhcp‑&lt;network‑uuid&gt;</code>命名空间；<strong>不属于任何虚机</strong>，删除子网才会回收</td>
+</tr>
+<tr>
+<td><strong>network:floatingip</strong></td>
+<td>FloatingIP浮动IP端口</td>
+<td>L3‑agent(DVR)</td>
+<td><strong>DVR模式下，计算节点上的浮动IP端口</strong>，实现FIP直接在计算节点做DNAT，流量不走网络节点</td>
+<td>虚机绑定浮动IP(FIP)，DVR开启才会生成</td>
+<td>计算节点上<code>qrouter‑&lt;router‑uuid&gt;</code>；<code>fg‑xxx</code>接口；传统非DVR环境没有这个port</td>
+</tr>
+<tr>
+<td><strong>network:router_gateway</strong></td>
+<td>路由器外网网关端口</td>
+<td>L3‑agent</td>
+<td>路由器连接外部公网网络（external网络），整个路由器的出口</td>
+<td>给路由器设置外网网关时创建</td>
+<td>网络节点<code>qrouter‑xxx</code>；<code>qg‑xxx</code>接口；接外网网桥br‑ex</td>
+</tr>
+<tr>
+<td><strong>network:router_interface_distributed</strong></td>
+<td>DVR路由器内网接口（分布式内网口）</td>
+<td>L3‑agent</td>
+<td>DVR模式：路由器连接租户内网子网，<strong>分布在各个计算节点</strong>，虚拟机网关就在本地计算节点，东西向流量不经过网络节点</td>
+<td>DVR开启，路由器添加内网子网接口自动生成</td>
+<td>计算节点<code>qrouter‑&lt;router‑uuid&gt;</code>；<code>qr‑xxx</code>接口；子网网关IP就在这个port上</td>
+</tr>
+<tr>
+<td><strong>network:router_centralized_snat</strong></td>
+<td>DVR集中式SNAT端口</td>
+<td>L3‑agent</td>
+<td>DVR环境下，<strong>没有绑定FIP的虚拟机访问外网，走网络节点SNAT</strong>；只有网络节点才有这个port</td>
+<td>DVR开启，路由器存在未绑定FIP的VM访问外网；专门做SNAT地址转换</td>
+<td>网络节点 <code>snat‑&lt;router‑uuid&gt;</code>命名空间；做源NAT；只有网络节点存在，计算节点没有</td>
+</tr>
+<tr>
+<td><strong>network:network_vip</strong></td>
+<td>路由器VIP端口(HA&#x2F;DVR)</td>
+<td>L3‑agent</td>
+<td>DVR‑HA、VRRP高可用，路由器的虚拟网关VIP；多L3‑agent节点之间故障转移</td>
+<td>开启L3 HA或者DVR HA；路由器高可用场景</td>
+<td>qrouter命名空间；keepalived&#x2F;VRRP使用；租户子网网关VIP地址就在这个port上</td>
+</tr>
+</tbody></table>
 <hr>
 <h3 id="2-4-Floating-IP（FIP）"><a href="#2-4-Floating-IP（FIP）" class="headerlink" title="2.4 Floating IP（FIP）"></a>2.4 Floating IP（FIP）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 Floating IP 列表</span></span><br><span class="line">openstack floating ip list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 Floating IP</span></span><br><span class="line">openstack floating ip create &lt;external-network&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绑定 Floating IP 到端口</span></span><br><span class="line">openstack floating ip <span class="built_in">set</span> --port &lt;port-id&gt; &lt;floating-ip&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解除绑定</span></span><br><span class="line">openstack floating ip <span class="built_in">unset</span> --port &lt;floating-ip&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Floating IP 详情</span></span><br><span class="line">openstack floating ip show &lt;floating-ip&gt;</span><br></pre></td></tr></table></figure>
 
