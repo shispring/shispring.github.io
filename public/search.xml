@@ -17587,6 +17587,12 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <li><strong>Security Group</strong> 提供基于规则的网络访问控制。</li>
 <li><strong>Ultron</strong> 是公司层面对 OpenStack 的抽象，实现跨 Region 的统一管理。</li>
 </ul>
+<hr>
+<h2 id="虚拟化-容器技术"><a href="#虚拟化-容器技术" class="headerlink" title="虚拟化&amp;容器技术"></a>虚拟化&amp;容器技术</h2><ol>
+<li><strong>QEMU 是用户态 VMM，做设备模拟，KVM 是内核模块做 CPU 内存虚拟化；两者配合实现 KVM 虚拟机。</strong></li>
+<li><strong>runc 不碰 KVM，纯内核 namespace&#x2F;cgroup；</strong></li>
+<li><strong>Kata 对外是容器接口，内部是 KVM 轻量虚拟机。</strong><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 传统 KVM 虚机（OpenStack Nova）</span><br><span class="line">virsh/libvirt （管理工具）</span><br><span class="line">      ↓</span><br><span class="line">QEMU（用户态VMM，设备模拟）</span><br><span class="line">      ↓</span><br><span class="line">KVM内核模块 /dev/kvm</span><br><span class="line">      ↓</span><br><span class="line">CPU硬件虚拟化 VT‑x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># runc 普通容器</span><br><span class="line">docker/containerd</span><br><span class="line">    ↓</span><br><span class="line">runc</span><br><span class="line">    ↓</span><br><span class="line">Linux内核 namespace/cgroup</span><br><span class="line">    ↓</span><br><span class="line">硬件</span><br><span class="line"></span><br><span class="line"># Kata 安全容器</span><br><span class="line">containerd</span><br><span class="line">   ↓</span><br><span class="line">kata‑runtime</span><br><span class="line">   ↓</span><br><span class="line">QEMU + KVM</span><br><span class="line">   ↓</span><br><span class="line">硬件虚拟化</span><br></pre></td></tr></table></figure></li>
+</ol>
 ]]></content>
       <tags>
         <tag>openstack</tag>
