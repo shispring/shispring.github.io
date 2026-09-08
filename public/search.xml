@@ -20917,9 +20917,9 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <ul>
 <li><strong>谁最细致，谁先赢。</strong></li>
 <li><strong>优先级排序：</strong><ol>
-<li>**主机路由 (&#x2F;32)**：最精确。</li>
-<li>**具体网段路由 (&#x2F;24, &#x2F;22 等)**：比较精确。</li>
-<li>**默认路由 (&#x2F;0)**：最笼统（最后被匹配）。</li>
+<li>主机路由 (&#x2F;32)：最精确。</li>
+<li>具体网段路由 (&#x2F;24, &#x2F;22 等)：比较精确。</li>
+<li>默认路由 (&#x2F;0)：最笼统（最后被匹配）。</li>
 </ol>
 </li>
 </ul>
