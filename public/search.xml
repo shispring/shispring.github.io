@@ -21809,4 +21809,470 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>docker</tag>
       </tags>
   </entry>
+  <entry>
+    <title>iptables 常用命令与 Pod 网络命名空间实战</title>
+    <url>/2026/01/08/iptables-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E4%B8%8E-Pod-%E7%BD%91%E7%BB%9C%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<p>本文整理 Linux <code>iptables</code> 的常用操作，并重点解释 Kubernetes 场景下通过 <code>nsenter</code> 进入 Pod 网络命名空间、临时阻断健康检查端口的用法。</p>
+<blockquote>
+<p>适用范围：Linux 主机、Kubernetes 节点、容器网络排障。不同发行版可能使用 <code>iptables-legacy</code> 或 <code>iptables-nft</code>；不同 CNI、kube-proxy 模式和容器运行时会生成不同规则，执行前必须确认当前环境。</p>
+</blockquote>
+<h2 id="1-先理解-iptables"><a href="#1-先理解-iptables" class="headerlink" title="1. 先理解 iptables"></a>1. 先理解 iptables</h2><h3 id="1-1-它解决什么问题"><a href="#1-1-它解决什么问题" class="headerlink" title="1.1 它解决什么问题"></a>1.1 它解决什么问题</h3><p>iptables 是 Linux 内核 Netfilter 框架的用户态配置工具，用来匹配经过网络协议栈的数据包，并执行放行、拒绝、丢弃、记录、地址转换或修改标记等动作。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">数据包</span><br><span class="line">  ↓</span><br><span class="line">iptables 规则匹配</span><br><span class="line">  ↓</span><br><span class="line">ACCEPT / DROP / REJECT / LOG / DNAT / SNAT / MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<p>iptables 本身不是一个常驻防火墙进程。命令执行后，规则写入内核；规则是否持久化，取决于发行版的保存和恢复机制。</p>
+<h3 id="1-2-表、链、规则和目标"><a href="#1-2-表、链、规则和目标" class="headerlink" title="1.2 表、链、规则和目标"></a>1.2 表、链、规则和目标</h3><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>含义</th>
+<th>常见内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Table</td>
+<td>按用途分组的规则集合</td>
+<td><code>filter</code>、<code>nat</code>、<code>mangle</code>、<code>raw</code>、<code>security</code></td>
+</tr>
+<tr>
+<td>Chain</td>
+<td>数据包经过的处理路径</td>
+<td><code>INPUT</code>、<code>OUTPUT</code>、<code>FORWARD</code>、<code>PREROUTING</code>、<code>POSTROUTING</code></td>
+</tr>
+<tr>
+<td>Rule</td>
+<td>一条匹配条件和动作</td>
+<td>来源 IP + 目标端口 + 协议 → ACCEPT</td>
+</tr>
+<tr>
+<td>Match</td>
+<td>匹配条件</td>
+<td><code>-s</code>、<code>-d</code>、<code>-p</code>、<code>--dport</code>、<code>-m conntrack</code></td>
+</tr>
+<tr>
+<td>Target</td>
+<td>命中后的处理动作</td>
+<td><code>ACCEPT</code>、<code>DROP</code>、<code>REJECT</code>、<code>DNAT</code>、<code>SNAT</code></td>
+</tr>
+</tbody></table>
+<h3 id="1-3-常用链的方向"><a href="#1-3-常用链的方向" class="headerlink" title="1.3 常用链的方向"></a>1.3 常用链的方向</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">进入本机、目标是本机服务：       PREROUTING → INPUT → 本地进程</span><br><span class="line">本机进程发出的流量：             OUTPUT → POSTROUTING</span><br><span class="line">经过本机转发到其他网络：         PREROUTING → FORWARD → POSTROUTING</span><br></pre></td></tr></table></figure>
+
+<p>常见判断：</p>
+<ul>
+<li>访问本机 <code>8081</code> 服务：通常检查 <code>INPUT</code>。</li>
+<li>本机进程访问外部服务：通常检查 <code>OUTPUT</code>。</li>
+<li>节点转发 Pod 流量：通常检查 <code>FORWARD</code>，并结合 CNI&#x2F;kube-proxy 生成的自定义链。</li>
+<li>修改目标地址：常见在 <code>nat</code> 表的 <code>PREROUTING</code> 或 <code>OUTPUT</code>。</li>
+<li>修改源地址：常见在 <code>nat</code> 表的 <code>POSTROUTING</code>。</li>
+</ul>
+<h2 id="2-执行前先确认环境"><a href="#2-执行前先确认环境" class="headerlink" title="2. 执行前先确认环境"></a>2. 执行前先确认环境</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 确认命令来源和版本</span></span><br><span class="line"><span class="built_in">command</span> -v iptables</span><br><span class="line">iptables --version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看当前后端，常见结果为 nf_tables 或 legacy</span></span><br><span class="line">iptables --version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看内核模块和 Netfilter 相关能力</span></span><br><span class="line">lsmod | grep -E <span class="string">&#x27;^(ip_tables|iptable_filter|nf_tables|nf_conntrack)&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果系统同时存在 <code>iptables-nft</code> 和 <code>iptables-legacy</code>，不要在没有确认的情况下交替使用。两套命令可能操作不同规则集，看到的结果和实际生效路径会不一致。</p>
+<h2 id="3-查看规则"><a href="#3-查看规则" class="headerlink" title="3. 查看规则"></a>3. 查看规则</h2><h3 id="3-1-查看默认-filter-表"><a href="#3-1-查看默认-filter-表" class="headerlink" title="3.1 查看默认 filter 表"></a>3.1 查看默认 filter 表</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 详细查看，包含计数器和接口</span></span><br><span class="line">iptables -L -n -v --line-numbers</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等价地明确指定 filter 表</span></span><br><span class="line">iptables -t filter -L -n -v --line-numbers</span><br></pre></td></tr></table></figure>
+
+<p>字段含义：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>num</code></td>
+<td>规则编号，可用于删除指定规则</td>
+</tr>
+<tr>
+<td><code>pkts</code></td>
+<td>命中数据包数</td>
+</tr>
+<tr>
+<td><code>bytes</code></td>
+<td>命中字节数</td>
+</tr>
+<tr>
+<td><code>target</code></td>
+<td>命中后的目标动作</td>
+</tr>
+<tr>
+<td><code>prot</code></td>
+<td>协议，例如 tcp&#x2F;udp&#x2F;icmp</td>
+</tr>
+<tr>
+<td><code>source/destination</code></td>
+<td>源&#x2F;目标地址</td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td>其他匹配条件</td>
+</tr>
+</tbody></table>
+<h3 id="3-2-查看所有重要表"><a href="#3-2-查看所有重要表" class="headerlink" title="3.2 查看所有重要表"></a>3.2 查看所有重要表</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -t filter -S</span><br><span class="line">iptables -t nat -S</span><br><span class="line">iptables -t mangle -S</span><br><span class="line">iptables -t raw -S</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以可恢复格式导出完整规则</span></span><br><span class="line">iptables-save</span><br><span class="line">iptables-save -t nat</span><br></pre></td></tr></table></figure>
+
+<p><code>-L</code> 更适合人读，<code>-S</code> 更接近命令格式，<code>iptables-save</code> 适合备份、比较和恢复。</p>
+<h3 id="3-3-查看指定链和命中计数"><a href="#3-3-查看指定链和命中计数" class="headerlink" title="3.3 查看指定链和命中计数"></a>3.3 查看指定链和命中计数</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -L INPUT -n -v --line-numbers</span><br><span class="line">iptables -L FORWARD -n -v --line-numbers</span><br><span class="line">iptables -t nat -L POSTROUTING -n -v --line-numbers</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清零计数器前先保存现场；不要随便对生产规则执行</span></span><br><span class="line">iptables -Z INPUT</span><br></pre></td></tr></table></figure>
+
+<p>命中计数可以帮助判断规则是否真的经过流量，但计数器是内核级统计，不能单独证明应用层请求成功。</p>
+<h2 id="4-链和默认策略"><a href="#4-链和默认策略" class="headerlink" title="4. 链和默认策略"></a>4. 链和默认策略</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看默认策略</span></span><br><span class="line">iptables -L -n | <span class="built_in">head</span> -n 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看已有链</span></span><br><span class="line">iptables -t filter -L</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建自定义链</span></span><br><span class="line">iptables -N MY_TEST</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除空的自定义链</span></span><br><span class="line">iptables -X MY_TEST</span><br></pre></td></tr></table></figure>
+
+<p>常见默认策略：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -P INPUT ACCEPT</span><br><span class="line">iptables -P OUTPUT ACCEPT</span><br><span class="line">iptables -P FORWARD ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p>不要在远程 SSH 会话中直接把策略改成 <code>DROP</code>，除非已经准备好允许 SSH、已建立连接、回环和必要管理流量的规则，并且有控制台或带外登录手段。</p>
+<h2 id="5-增加规则：-A、-I"><a href="#5-增加规则：-A、-I" class="headerlink" title="5. 增加规则：-A、-I"></a>5. 增加规则：<code>-A</code>、<code>-I</code></h2><h3 id="5-1-放行本机-SSH"><a href="#5-1-放行本机-SSH" class="headerlink" title="5.1 放行本机 SSH"></a>5.1 放行本机 SSH</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 追加到 INPUT 链末尾</span></span><br><span class="line">iptables -A INPUT -p tcp --dport 22 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更稳妥的基础规则：允许已建立连接和本地回环</span></span><br><span class="line">iptables -I INPUT 1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line">iptables -I INPUT 2 -i lo -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p><code>-A</code> 是 append，追加到链尾；<code>-I INPUT 1</code> 是 insert，插入到第 1 条。规则是按顺序匹配的，前面的规则可能已经决定了数据包命运。</p>
+<h3 id="5-2-允许或拒绝指定来源"><a href="#5-2-允许或拒绝指定来源" class="headerlink" title="5.2 允许或拒绝指定来源"></a>5.2 允许或拒绝指定来源</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 允许指定网段访问 8081</span></span><br><span class="line">iptables -A INPUT -p tcp -s 10.10.0.0/16 --dport 8081 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢弃来自指定地址的流量，不返回响应</span></span><br><span class="line">iptables -I INPUT 1 -s 192.0.2.10 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拒绝并返回 TCP RST 或 ICMP 错误，便于快速失败</span></span><br><span class="line">iptables -I INPUT 1 -s 192.0.2.10 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p><code>DROP</code> 通常表现为超时，<code>REJECT</code> 通常立即返回失败。安全策略和排障目标不同，不能简单认为其中一个永远更好。</p>
+<h3 id="5-3-按协议和端口匹配"><a href="#5-3-按协议和端口匹配" class="headerlink" title="5.3 按协议和端口匹配"></a>5.3 按协议和端口匹配</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 单个 TCP 端口</span></span><br><span class="line">iptables -A INPUT -p tcp --dport 8081 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># TCP 端口范围</span></span><br><span class="line">iptables -A INPUT -p tcp --dport 8000:8100 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># UDP 端口</span></span><br><span class="line">iptables -A INPUT -p udp --dport 53 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># ICMP</span></span><br><span class="line">iptables -A INPUT -p icmp -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p><code>--dport</code> 通常需要配合 <code>-p tcp</code> 或 <code>-p udp</code>。开放端口前要确认监听进程和访问来源，不要用大范围端口替代精确规则。</p>
+<h2 id="6-删除、替换和临时回滚"><a href="#6-删除、替换和临时回滚" class="headerlink" title="6. 删除、替换和临时回滚"></a>6. 删除、替换和临时回滚</h2><h3 id="6-1-按规则编号删除"><a href="#6-1-按规则编号删除" class="headerlink" title="6.1 按规则编号删除"></a>6.1 按规则编号删除</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -L INPUT -n -v --line-numbers</span><br><span class="line">iptables -D INPUT 3</span><br></pre></td></tr></table></figure>
+
+<p>删除前先重新列一次规则。规则编号会因前面插入&#x2F;删除而变化，不能长期缓存编号。</p>
+<h3 id="6-2-按完整规则删除"><a href="#6-2-按完整规则删除" class="headerlink" title="6.2 按完整规则删除"></a>6.2 按完整规则删除</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>这种方式不依赖规则编号，但参数必须与原规则等价匹配。用 <code>iptables -S INPUT</code> 获取可复制的规则形式更可靠。</p>
+<h3 id="6-3-替换规则"><a href="#6-3-替换规则" class="headerlink" title="6.3 替换规则"></a>6.3 替换规则</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将 INPUT 第 3 条替换为允许 8081</span></span><br><span class="line">iptables -R INPUT 3 -p tcp --dport 8081 -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-4-推荐的临时规则写法"><a href="#6-4-推荐的临时规则写法" class="headerlink" title="6.4 推荐的临时规则写法"></a>6.4 推荐的临时规则写法</h3><p>排障时优先使用自定义链，规则更容易识别和清理：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -N DEBUG_PROBE</span><br><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j DEBUG_PROBE</span><br><span class="line">iptables -A DEBUG_PROBE -j REJECT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 排障结束：先删除跳转，再清空并删除自定义链</span></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j DEBUG_PROBE</span><br><span class="line">iptables -F DEBUG_PROBE</span><br><span class="line">iptables -X DEBUG_PROBE</span><br></pre></td></tr></table></figure>
+
+<p>如果只是临时插入一条规则，至少加上明确注释：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -m comment --comment <span class="string">&#x27;temporary probe test&#x27;</span> -j REJECT</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-重点案例：阻断-8081-健康检查"><a href="#7-重点案例：阻断-8081-健康检查" class="headerlink" title="7. 重点案例：阻断 8081 健康检查"></a>7. 重点案例：阻断 8081 健康检查</h2><p>假设 Go 程序 PID 1 同时监听 <code>11800</code>、<code>6060</code>、<code>8081</code>、<code>11443</code>，不能通过杀进程只关闭 <code>8081</code>。<code>kill -9 1</code> 会让整个容器退出，不能模拟“单端口不可达”。</p>
+<p>在容器自己的网络命名空间中执行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>含义拆解：</p>
+<table>
+<thead>
+<tr>
+<th>片段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>iptables</code></td>
+<td>修改当前网络命名空间中的 Netfilter 规则</td>
+</tr>
+<tr>
+<td><code>-I INPUT 1</code></td>
+<td>把规则插入 INPUT 链第 1 位，优先匹配</td>
+</tr>
+<tr>
+<td><code>-p tcp</code></td>
+<td>只匹配 TCP</td>
+</tr>
+<tr>
+<td><code>--dport 8081</code></td>
+<td>只匹配目标端口 8081</td>
+</tr>
+<tr>
+<td><code>-j REJECT</code></td>
+<td>拒绝数据包，并向对端返回失败</td>
+</tr>
+</tbody></table>
+<p>验证和恢复：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -L INPUT -n -v --line-numbers</span><br><span class="line">curl -v --max-time 3 http://127.0.0.1:8081/healthz</span><br><span class="line"></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>如果配置的是 <code>readinessProbe</code>，失败后通常只会将 Pod 从 Service Endpoint 中摘除；如果配置的是 <code>livenessProbe</code>，连续失败达到 <code>failureThreshold</code> 后 kubelet 才会重启容器。</p>
+<h2 id="8-nsenter：进入-Pod-的网络命名空间"><a href="#8-nsenter：进入-Pod-的网络命名空间" class="headerlink" title="8. nsenter：进入 Pod 的网络命名空间"></a>8. <code>nsenter</code>：进入 Pod 的网络命名空间</h2><h3 id="8-1-为什么要使用-nsenter"><a href="#8-1-为什么要使用-nsenter" class="headerlink" title="8.1 为什么要使用 nsenter"></a>8.1 为什么要使用 <code>nsenter</code></h3><p>容器通常有独立的 Network Namespace。宿主机执行的：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -L</span><br></pre></td></tr></table></figure>
+
+<p>查看的是宿主机网络命名空间规则，不一定是目标 Pod 的规则。<code>nsenter -n</code> 可以让命令进入指定进程的网络命名空间，然后在其中执行 <code>iptables</code>。</p>
+<h3 id="8-2-你给出的命令如何理解"><a href="#8-2-你给出的命令如何理解" class="headerlink" title="8.2 你给出的命令如何理解"></a>8.2 你给出的命令如何理解</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SANDBOX_PID=3911859</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>分解如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">SANDBOX_PID=3911859</span><br><span class="line">  将 Pod sandbox 的进程 ID 保存到变量 SANDBOX_PID</span><br><span class="line"></span><br><span class="line">nsenter -t &quot;$SANDBOX_PID&quot; -n</span><br><span class="line">  进入 PID 3911859 所在的 Network Namespace</span><br><span class="line"></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br><span class="line">  在该 Network Namespace 中删除“拒绝 TCP 8081”的规则</span><br></pre></td></tr></table></figure>
+
+<p>它的适用场景是：之前已经在同一个 Pod 网络命名空间中执行过：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>现在需要恢复端口访问。<code>-D</code> 必须匹配原规则；如果原来用的是 <code>DROP</code>、插入了源地址条件、使用了自定义链，删除命令也必须对应调整。</p>
+<h3 id="8-3-找到正确的-Sandbox-PID"><a href="#8-3-找到正确的-Sandbox-PID" class="headerlink" title="8.3 找到正确的 Sandbox PID"></a>8.3 找到正确的 Sandbox PID</h3><p>先确定 Pod 所在节点和 Pod UID：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; get pod &lt;pod-name&gt; -o wide</span><br><span class="line">kubectl -n &lt;namespace&gt; get pod &lt;pod-name&gt; -o jsonpath=<span class="string">&#x27;&#123;.metadata.uid&#125;&#123;&quot;\n&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>在节点上查询 sandbox：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">crictl pods --name &lt;pod-name&gt;</span><br><span class="line">crictl pods --<span class="built_in">id</span> &lt;sandbox-id&gt;</span><br></pre></td></tr></table></figure>
+
+<p>获取 sandbox PID，具体字段随 <code>crictl</code>&#x2F;containerd 版本变化：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SANDBOX_ID=&lt;sandbox-id&gt;</span><br><span class="line">crictl inspectp <span class="string">&quot;<span class="variable">$SANDBOX_ID</span>&quot;</span> | jq <span class="string">&#x27;.info.pid, .status, .metadata&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>常见输出位置是 <code>.info.pid</code>，但不要假定所有版本都一样，先查看完整 JSON：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">crictl inspectp <span class="string">&quot;<span class="variable">$SANDBOX_ID</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>确认命名空间和网卡：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n ip addr</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n ip route</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -L INPUT -n -v --line-numbers</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-4-完整阻断和恢复示例"><a href="#8-4-完整阻断和恢复示例" class="headerlink" title="8.4 完整阻断和恢复示例"></a>8.4 完整阻断和恢复示例</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SANDBOX_PID=3911859</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 先保存原规则，便于恢复</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables-save &gt; /tmp/pod-iptables-before.rules</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 插入临时阻断规则</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n \</span><br><span class="line">  iptables -I INPUT 1 -p tcp --dport 8081 \</span><br><span class="line">  -m comment --comment <span class="string">&#x27;temporary probe test&#x27;</span> -j REJECT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 验证命中计数和访问结果</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -L INPUT -n -v --line-numbers</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n curl -v --max-time 3 http://127.0.0.1:8081/healthz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 删除临时规则</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n \</span><br><span class="line">  iptables -D INPUT -p tcp --dport 8081 \</span><br><span class="line">  -m comment --comment <span class="string">&#x27;temporary probe test&#x27;</span> -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>注意：<code>curl</code> 必须在 Pod 的网络命名空间中执行，才可以验证 Pod 内部视角。若镜像没有 <code>curl</code>，可以从节点或临时 debug 容器访问 Pod IP，但那验证的是外部路径，不完全等价。</p>
+<h2 id="9-Kubernetes-中需要特别注意的规则"><a href="#9-Kubernetes-中需要特别注意的规则" class="headerlink" title="9. Kubernetes 中需要特别注意的规则"></a>9. Kubernetes 中需要特别注意的规则</h2><p>Kubernetes 节点上的规则可能来自：</p>
+<ul>
+<li>kube-proxy：Service、ClusterIP、NodePort、负载转发规则</li>
+<li>CNI：Pod 网络、SNAT、转发、自定义链</li>
+<li>NetworkPolicy：Calico、Cilium、OVN 等网络策略实现</li>
+<li>宿主机防火墙：firewalld、ufw、云安全组</li>
+<li>运维或安全软件：规则审计、自动恢复、配置管理</li>
+</ul>
+<p>常见自定义链可能包含 <code>KUBE-SERVICES</code>、<code>KUBE-FORWARD</code>、<code>KUBE-POSTROUTING</code>、<code>CNI-*</code> 等。不同 Kubernetes 版本和 kube-proxy 模式会变化，不要依赖固定链名写自动化脚本。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 节点命名空间查看 Kubernetes 相关规则</span></span><br><span class="line">iptables-save | grep -E <span class="string">&#x27;KUBE|CNI|CALICO|CILIUM|OVN&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果使用 nftables 后端，也从 nft 视角确认</span></span><br><span class="line">nft list ruleset</span><br></pre></td></tr></table></figure>
+
+<p>在 Pod 命名空间中手工加的规则只影响该 Network Namespace，不等于修改了 NetworkPolicy；Pod 重建后，临时规则通常会消失。</p>
+<h2 id="10-NAT-常用命令"><a href="#10-NAT-常用命令" class="headerlink" title="10. NAT 常用命令"></a>10. NAT 常用命令</h2><h3 id="10-1-查看-NAT"><a href="#10-1-查看-NAT" class="headerlink" title="10.1 查看 NAT"></a>10.1 查看 NAT</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -t nat -L -n -v --line-numbers</span><br><span class="line">iptables -t nat -S</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-2-SNAT-和-MASQUERADE"><a href="#10-2-SNAT-和-MASQUERADE" class="headerlink" title="10.2 SNAT 和 MASQUERADE"></a>10.2 SNAT 和 MASQUERADE</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 固定公网源地址，适合出口 IP 固定的场景</span></span><br><span class="line">iptables -t nat -A POSTROUTING -s 10.244.0.0/16 \</span><br><span class="line">  -o eth0 -j SNAT --to-source 203.0.113.10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 出口 IP 动态变化时使用接口地址</span></span><br><span class="line">iptables -t nat -A POSTROUTING -s 10.244.0.0/16 \</span><br><span class="line">  -o eth0 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-3-DNAT-和端口转发"><a href="#10-3-DNAT-和端口转发" class="headerlink" title="10.3 DNAT 和端口转发"></a>10.3 DNAT 和端口转发</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 8080 \</span><br><span class="line">  -j DNAT --to-destination 10.0.0.20:8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 允许转发流量通过 filter 表</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 10.0.0.20 --dport 8081 \</span><br><span class="line">  -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p>NAT 只负责地址转换，不自动代表防火墙放行。还要检查 <code>FORWARD</code>、<code>ip_forward</code> 和返回路径：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sysctl net.ipv4.ip_forward</span><br><span class="line">sysctl -w net.ipv4.ip_forward=1</span><br></pre></td></tr></table></figure>
+
+<p>不要在生产环境只为临时测试执行 <code>sysctl -w</code> 而忘记配置持久化和安全评估。</p>
+<h2 id="11-连接跟踪和已有连接"><a href="#11-连接跟踪和已有连接" class="headerlink" title="11. 连接跟踪和已有连接"></a>11. 连接跟踪和已有连接</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看连接跟踪表</span></span><br><span class="line">conntrack -L</span><br><span class="line">conntrack -L -p tcp --dport 8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看连接跟踪数量和上限</span></span><br><span class="line">sysctl net.netfilter.nf_conntrack_count</span><br><span class="line">sysctl net.netfilter.nf_conntrack_max</span><br></pre></td></tr></table></figure>
+
+<p>新规则不一定立即改变已建立连接的行为，尤其是使用 <code>ESTABLISHED,RELATED</code> 放行规则时。排障时区分：</p>
+<ul>
+<li>新建连接是否被规则拦截。</li>
+<li>已有连接是否仍能继续传输。</li>
+<li>NAT&#x2F;连接跟踪状态是否残留。</li>
+</ul>
+<p>不要为了测试随意清空全局 conntrack 表：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">conntrack -F</span><br></pre></td></tr></table></figure>
+
+<p>这会影响节点上的大量连接，可能造成业务中断。若必须清理，应使用精确过滤条件并在维护窗口执行。</p>
+<h2 id="12-持久化、备份和恢复"><a href="#12-持久化、备份和恢复" class="headerlink" title="12. 持久化、备份和恢复"></a>12. 持久化、备份和恢复</h2><h3 id="12-1-备份当前规则"><a href="#12-1-备份当前规则" class="headerlink" title="12.1 备份当前规则"></a>12.1 备份当前规则</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables-save &gt; /root/iptables-$(<span class="built_in">date</span> +%Y%m%d-%H%M%S).rules</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-2-恢复规则"><a href="#12-2-恢复规则" class="headerlink" title="12.2 恢复规则"></a>12.2 恢复规则</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">iptables-restore &lt; /root/iptables-backup.rules</span><br></pre></td></tr></table></figure>
+
+<p>恢复前确认文件来自同一套后端、同一台机器或兼容环境。恢复可能替换现有规则，必须准备控制台&#x2F;带外访问和回滚方案。</p>
+<h3 id="12-3-持久化差异"><a href="#12-3-持久化差异" class="headerlink" title="12.3 持久化差异"></a>12.3 持久化差异</h3><p>不同系统可能使用：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Debian/Ubuntu 常见工具</span></span><br><span class="line">netfilter-persistent save</span><br><span class="line">netfilter-persistent reload</span><br><span class="line"></span><br><span class="line"><span class="comment"># RHEL/CentOS 系列可能使用 iptables-services</span></span><br><span class="line">service iptables save</span><br><span class="line">systemctl restart iptables</span><br></pre></td></tr></table></figure>
+
+<p>现代发行版可能以 firewalld 或 nftables 为主。不要只把规则写入文件就假定重启后一定恢复，应该实际重启服务或在测试机重启验证。</p>
+<h2 id="13-调试和抓包配合"><a href="#13-调试和抓包配合" class="headerlink" title="13. 调试和抓包配合"></a>13. 调试和抓包配合</h2><p>iptables 只能说明规则匹配和动作，不能完整说明应用是否监听、路由是否正确或响应是否返回。建议配合：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 确认监听</span></span><br><span class="line">ss -lntp</span><br><span class="line">ss -lunp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 观察指定端口报文</span></span><br><span class="line">tcpdump -ni any <span class="string">&#x27;tcp port 8081&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从本地或远端测试</span></span><br><span class="line">curl -v --max-time 3 http://127.0.0.1:8081/healthz</span><br><span class="line">nc -vz -w 3 &lt;ip&gt; 8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看路由选择</span></span><br><span class="line">ip route get &lt;destination-ip&gt;</span><br></pre></td></tr></table></figure>
+
+<p>推荐判断顺序：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">是否监听？</span><br><span class="line">  → 路由是否正确？</span><br><span class="line">  → 报文是否到达？</span><br><span class="line">  → 哪条 iptables 规则命中？</span><br><span class="line">  → 对端是否返回？</span><br><span class="line">  → 应用层响应是否正确？</span><br></pre></td></tr></table></figure>
+
+<h2 id="14-最佳实践和风险清单"><a href="#14-最佳实践和风险清单" class="headerlink" title="14. 最佳实践和风险清单"></a>14. 最佳实践和风险清单</h2><ul>
+<li>修改前先执行 <code>iptables-save</code> 备份，并记录变更目的、时间和操作者。</li>
+<li>远程操作优先使用 <code>-I</code> 插入精确规则，不要直接修改默认策略。</li>
+<li>使用源地址、目标地址、协议和端口做最小范围匹配。</li>
+<li>临时规则使用 <code>-m comment --comment</code> 标识，排障结束立即删除。</li>
+<li>删除规则前先用 <code>iptables -L -n -v --line-numbers</code> 确认编号和命中计数。</li>
+<li>使用自定义链隔离业务规则，避免直接改动 kube-proxy&#x2F;CNI 自动生成的链。</li>
+<li>Kubernetes 节点规则可能会被 kube-proxy、CNI 或 firewalld 自动重写，验证时要观察一段时间。</li>
+<li>Pod 重建后网络命名空间和临时规则通常都会消失，不能把临时实验当成永久配置。</li>
+<li><code>DROP</code> 会导致超时，<code>REJECT</code> 会快速失败；按测试目的选择。</li>
+<li>NAT 规则和 filter 规则是两套逻辑，地址转换成功不代表转发被允许。</li>
+<li>同时确认 <code>iptables-nft</code>、<code>iptables-legacy</code>、<code>nft</code> 的后端，避免“查到的不是生效的”。</li>
+<li>不要直接执行 <code>iptables -F</code>、<code>iptables -X</code>、<code>iptables -t nat -F</code> 或 <code>conntrack -F</code>，除非明确了解影响并具备恢复方案。</li>
+<li>生产变更后验证 SSH、DNS、API Server、节点管理、Pod 网络、Service 和监控链路。</li>
+</ul>
+<h2 id="15-常用命令速查"><a href="#15-常用命令速查" class="headerlink" title="15. 常用命令速查"></a>15. 常用命令速查</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看</span></span><br><span class="line">iptables -L -n -v --line-numbers</span><br><span class="line">iptables -t nat -L -n -v --line-numbers</span><br><span class="line">iptables-save</span><br><span class="line">iptables -S</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加</span></span><br><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br><span class="line">iptables -A INPUT -p tcp --dport 22 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除</span></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br><span class="line">iptables -D INPUT &lt;rule-number&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 备份和恢复</span></span><br><span class="line">iptables-save &gt; /root/iptables.rules</span><br><span class="line">iptables-restore &lt; /root/iptables.rules</span><br><span class="line"></span><br><span class="line"><span class="comment"># Pod 网络命名空间</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -L -n -v --line-numbers</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ipvsadm 命令与 Kubernetes IPVS 排障</title>
+    <url>/2026/01/08/ipvsadm-%E5%91%BD%E4%BB%A4%E4%B8%8E-Kubernetes-IPVS-%E6%8E%92%E9%9A%9C/</url>
+    <content><![CDATA[<p>本文解释下面这条命令的含义，并整理 Kubernetes 使用 kube-proxy IPVS 模式时的常用查看和排障方法：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --stats --exact | grep 172.24.0.2</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-这条命令做了什么"><a href="#1-这条命令做了什么" class="headerlink" title="1. 这条命令做了什么"></a>1. 这条命令做了什么</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">ipvsadm -ln --rate --stats --exact | grep 172.24.0.2</span><br><span class="line">          │                         └─ 只保留包含 172.24.0.2 的行</span><br><span class="line">          └─ 查看本机 Linux IPVS 虚拟服务和统计信息</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-l</code> &#x2F; <code>--list</code></td>
+<td>列出当前 IPVS 虚拟服务和后端 Real Server</td>
+</tr>
+<tr>
+<td><code>-n</code> &#x2F; <code>--numeric</code></td>
+<td>直接显示数字 IP 和端口，不做 DNS 反向解析</td>
+</tr>
+<tr>
+<td><code>--rate</code></td>
+<td>显示速率相关统计；具体列和版本有关</td>
+</tr>
+<tr>
+<td><code>--stats</code></td>
+<td>显示连接、包和字节统计</td>
+</tr>
+<tr>
+<td><code>--exact</code></td>
+<td>精确显示计数值，不使用 K&#x2F;M&#x2F;G 等人类可读缩写</td>
+</tr>
+<tr>
+<td><code>grep 172.24.0.2</code></td>
+<td>在命令输出中筛选这个 IP；它不是 ipvsadm 的过滤条件</td>
+</tr>
+</tbody></table>
+<p>这条命令查询的是<strong>当前执行节点的本机 IPVS 表</strong>，不是直接查询 Kubernetes API。只有当该节点使用 kube-proxy 的 IPVS 模式时，才能通过它观察 Kubernetes Service 的本地代理规则。</p>
+<h2 id="2-如何理解你的输出"><a href="#2-如何理解你的输出" class="headerlink" title="2. 如何理解你的输出"></a>2. 如何理解你的输出</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">TCP  172.24.0.2:53       9        55        46       3566        3857</span><br><span class="line">TCP  172.24.0.2:9153     0         0         0          0           0</span><br><span class="line">UDP  172.24.0.2:53  12454197  12736147  12736147 1083310475 2264214688</span><br></pre></td></tr></table></figure>
+
+<p>每一行前两列是 IPVS 虚拟服务：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TCP</code> &#x2F; <code>UDP</code></td>
+<td>虚拟服务使用的传输协议</td>
+</tr>
+<tr>
+<td><code>172.24.0.2:53</code></td>
+<td>Virtual Service 的 VIP 和端口</td>
+</tr>
+<tr>
+<td><code>172.24.0.2:9153</code></td>
+<td>另一个 VIP&#x2F;端口，可能是同一 Service 的其他端口</td>
+</tr>
+</tbody></table>
+<p>在很多 <code>ipvsadm</code> 版本中，单独使用 <code>--stats</code> 时，虚拟服务后面的 5 个数字依次为：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Conns  InPkts  OutPkts  InBytes  OutBytes</span><br></pre></td></tr></table></figure>
+
+<p>因此，如果实际输出确实只有 5 个数字，可以按这个常见格式解释：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">UDP 172.24.0.2:53</span><br><span class="line">     12454197  12736147  12736147  1083310475  2264214688</span><br><span class="line">     Conns     InPkts    OutPkts    InBytes     OutBytes</span><br></pre></td></tr></table></figure>
+
+<p>含义是该节点上这个 UDP 虚拟服务累计观察到大约 1245 万个连接&#x2F;会话计数、1273 万个入包、1273 万个出包，以及对应的入&#x2F;出字节数。具体统计从什么时候开始，取决于 IPVS 服务创建、规则刷新、节点重启和内核计数器状态。</p>
+<p><code>TCP 172.24.0.2:9153</code> 全为 0，表示在当前节点的 IPVS 统计周期内没有观察到该虚拟服务的 TCP 流量，或者该服务目前没有实际请求。它不等于 Kubernetes Service 一定不存在，需要继续检查 Service、EndpointSlice 和后端 Pod。</p>
+<p>需要特别注意：你贴出的每行只有 5 个数字，而命令同时带了 <code>--stats</code> 和 <code>--rate</code>。在支持同时输出两类信息的版本中，通常还会出现类似下面的速率列：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">CPS  InPPS  OutPPS  InBPS  OutBPS</span><br></pre></td></tr></table></figure>
+
+<p>如果命令输出只有 <code>Conns InPkts OutPkts InBytes OutBytes</code>，说明当前版本的输出格式没有把 rate 列展示出来、参数组合被版本处理为一种输出，或者粘贴时省略了表头&#x2F;其他列。不要仅凭位置猜测列含义，必须保留并查看完整表头：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-为什么要以表头为准"><a href="#2-1-为什么要以表头为准" class="headerlink" title="2.1 为什么要以表头为准"></a>2.1 为什么要以表头为准</h3><p><code>--rate</code> 和 <code>--stats</code> 的显示方式、列顺序、是否同时展示，可能随 <code>ipvsadm</code> 版本变化。你使用 <code>grep</code> 后，原始表头被过滤掉了，所以看不出数字到底对应哪一列。<code>--stats</code> 通常是累计值，<code>--rate</code> 才是当前速率值；二者不能混为一谈。</p>
+<p>不要只看这条命令，先执行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --stats --exact</span><br><span class="line">ipvsadm --version</span><br></pre></td></tr></table></figure>
+
+<p>确认原始输出中的表头，再解释数字。尤其不要把累计 <code>InPkts</code>&#x2F;<code>OutPkts</code> 误读成每秒包速率。</p>
+<p>要测量真实速率，应在两个时间点采样并计算差值：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact &gt; /tmp/ipvs.before</span><br><span class="line"><span class="built_in">sleep</span> 10</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact &gt; /tmp/ipvs.after</span><br><span class="line">diff -u /tmp/ipvs.before /tmp/ipvs.after</span><br></pre></td></tr></table></figure>
+
+<p>更适合长期观测的方式是使用 Prometheus&#x2F;node-exporter、kube-proxy metrics 或 CNI 提供的指标，而不是频繁人工解析 <code>ipvsadm</code> 文本。</p>
+<h2 id="3-先确认-172-24-0-2-是什么"><a href="#3-先确认-172-24-0-2-是什么" class="headerlink" title="3. 先确认 172.24.0.2 是什么"></a>3. 先确认 <code>172.24.0.2</code> 是什么</h2><p>不要看到一个 IP 就直接假定它是 CoreDNS。先从 Kubernetes API 查询：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get svc -A -o wide | grep -w <span class="string">&#x27;172.24.0.2&#x27;</span></span><br><span class="line">kubectl get svc -A -o json | jq -r <span class="string">&#x27;</span></span><br><span class="line"><span class="string">  .items[] | select(.spec.clusterIP == &quot;172.24.0.2&quot;) |</span></span><br><span class="line"><span class="string">  [.metadata.namespace, .metadata.name, .spec.clusterIP, (.spec.ports // [])] | @json&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果它是 DNS Service，再查端点：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n kube-system get svc -o wide</span><br><span class="line">kubectl -n kube-system get endpointslice -l kubernetes.io/service-name=&lt;service-name&gt; -o wide</span><br><span class="line">kubectl -n kube-system get pods -l k8s-app=kube-dns -o wide</span><br></pre></td></tr></table></figure>
+
+<p>常见情况是：</p>
+<ul>
+<li><code>172.24.0.2:53/UDP</code>：DNS 查询流量。</li>
+<li><code>172.24.0.2:53/TCP</code>：较大的 DNS 响应、区域传送或 TCP fallback 等流量。</li>
+<li><code>:9153</code>：某些 DNS 组件暴露的 Prometheus metrics 端口，但是否如此必须以 Service 定义为准。</li>
+</ul>
+<h2 id="4-查看完整的-IPVS-关系"><a href="#4-查看完整的-IPVS-关系" class="headerlink" title="4. 查看完整的 IPVS 关系"></a>4. 查看完整的 IPVS 关系</h2><h3 id="4-1-查看虚拟服务和后端"><a href="#4-1-查看虚拟服务和后端" class="headerlink" title="4.1 查看虚拟服务和后端"></a>4.1 查看虚拟服务和后端</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --exact</span><br></pre></td></tr></table></figure>
+
+<p>典型结构：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">TCP  172.24.0.2:53 rr</span><br><span class="line">  -&gt; 10.244.1.20:53        Masq    12    20    0</span><br><span class="line">  -&gt; 10.244.2.31:53        Masq     8    18    0</span><br></pre></td></tr></table></figure>
+
+<p>解释：</p>
+<ul>
+<li>第一行是 Virtual Service，代表访问 VIP:Port。</li>
+<li><code>-&gt;</code> 行是 Real Server，代表后端 Pod IP:Port。</li>
+<li><code>rr</code> 是调度算法示例，可能是 <code>rr</code>、<code>lc</code>、<code>sh</code> 等。</li>
+<li><code>Masq</code> 表示常见的 IPVS NAT 转发模式；实际模式取决于 kube-proxy 配置。</li>
+<li>后端行的末尾计数和状态也需要结合该版本输出表头解释。</li>
+</ul>
+<h3 id="4-2-精确查看某个虚拟服务"><a href="#4-2-精确查看某个虚拟服务" class="headerlink" title="4.2 精确查看某个虚拟服务"></a>4.2 精确查看某个虚拟服务</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># TCP 服务</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -t 172.24.0.2:53 --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># UDP 服务</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -u 172.24.0.2:53 --stats --rate --exact</span><br></pre></td></tr></table></figure>
+
+<p>如果命令因版本不接受 <code>-t</code>&#x2F;<code>-u</code> 与长参数组合，使用完整列表后再用 <code>awk</code> 或 <code>grep</code> 过滤：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact | grep -E <span class="string">&#x27;172\.24\.0\.2:53|^  -&gt;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-查看-IPVS-调度器和内核能力"><a href="#4-3-查看-IPVS-调度器和内核能力" class="headerlink" title="4.3 查看 IPVS 调度器和内核能力"></a>4.3 查看 IPVS 调度器和内核能力</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ipvsadm -l --<span class="built_in">timeout</span></span><br><span class="line">ipvsadm -l --daemon</span><br><span class="line">lsmod | grep -E <span class="string">&#x27;ip_vs|nf_conntrack&#x27;</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs</span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs_stats</span><br></pre></td></tr></table></figure>
+
+<p><code>/proc/net/ip_vs</code> 是内核视角的当前 IPVS 服务列表，适合在 <code>ipvsadm</code> 输出异常时交叉确认。</p>
+<h2 id="5-Kubernetes-kube-proxy-IPVS-排查"><a href="#5-Kubernetes-kube-proxy-IPVS-排查" class="headerlink" title="5. Kubernetes kube-proxy IPVS 排查"></a>5. Kubernetes kube-proxy IPVS 排查</h2><h3 id="5-1-确认-kube-proxy-是否使用-IPVS"><a href="#5-1-确认-kube-proxy-是否使用-IPVS" class="headerlink" title="5.1 确认 kube-proxy 是否使用 IPVS"></a>5.1 确认 kube-proxy 是否使用 IPVS</h3><p>不同版本&#x2F;发行版配置位置可能不同：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n kube-system get ds kube-proxy -o yaml</span><br><span class="line">kubectl -n kube-system get cm kube-proxy -o yaml</span><br><span class="line">kubectl -n kube-system logs ds/kube-proxy --<span class="built_in">tail</span>=200 | grep -i -E <span class="string">&#x27;ipvs|iptables|proxy mode&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置中常见：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">mode:</span> <span class="string">ipvs</span></span><br></pre></td></tr></table></figure>
+
+<p>也可以在节点上检查 kube-proxy 进程参数和日志：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -ef | grep <span class="string">&#x27;[k]ube-proxy&#x27;</span></span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-从-Service-到-IPVS-的对应关系"><a href="#5-2-从-Service-到-IPVS-的对应关系" class="headerlink" title="5.2 从 Service 到 IPVS 的对应关系"></a>5.2 从 Service 到 IPVS 的对应关系</h3><p>建议按这条链排查：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Service clusterIP:port</span><br><span class="line">      ↓</span><br><span class="line">EndpointSlice 中的 ready endpoint</span><br><span class="line">      ↓</span><br><span class="line">kube-proxy 同步规则</span><br><span class="line">      ↓</span><br><span class="line">IPVS Virtual Service</span><br><span class="line">      ↓</span><br><span class="line">IPVS Real Server</span><br><span class="line">      ↓</span><br><span class="line">后端 Pod 监听端口</span><br></pre></td></tr></table></figure>
+
+<p>对应命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; get svc &lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o yaml</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact | grep <span class="string">&#x27;&lt;cluster-ip&gt;&#x27;</span></span><br><span class="line">kubectl -n &lt;namespace&gt; get pods -o wide</span><br><span class="line">ss -lntup</span><br></pre></td></tr></table></figure>
+
+<p>如果 Service 有 ready endpoint，但 IPVS 没有 Virtual Service，优先看 kube-proxy 日志、节点 IPVS 模块和同步错误。如果 Virtual Service 存在但没有 Real Server，优先看 EndpointSlice、selector、Pod readiness 和 kube-proxy 同步状态。</p>
+<h2 id="6-常见异常与判断方法"><a href="#6-常见异常与判断方法" class="headerlink" title="6. 常见异常与判断方法"></a>6. 常见异常与判断方法</h2><h3 id="6-1-Service-存在，但-IPVS-没有对应-VIP"><a href="#6-1-Service-存在，但-IPVS-没有对应-VIP" class="headerlink" title="6.1 Service 存在，但 IPVS 没有对应 VIP"></a>6.1 Service 存在，但 IPVS 没有对应 VIP</h3><p>可能原因：</p>
+<ul>
+<li>当前节点 kube-proxy 没有运行或不在 IPVS 模式。</li>
+<li>kube-proxy 无法 watch API Server。</li>
+<li>IPVS 内核模块未加载，或 <code>ipvsadm</code>&#x2F;内核能力不匹配。</li>
+<li>kube-proxy 配置修改后没有生效。</li>
+<li>你查看的不是实际承载流量的节点。</li>
+<li>Service 使用了不同的 IP family 或 dual-stack 地址。</li>
+</ul>
+<p>命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n kube-system get pod -l k8s-app=kube-proxy -o wide</span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br><span class="line">lsmod | grep ip_vs</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-VIP-存在，但没有后端-Real-Server"><a href="#6-2-VIP-存在，但没有后端-Real-Server" class="headerlink" title="6.2 VIP 存在，但没有后端 Real Server"></a>6.2 VIP 存在，但没有后端 Real Server</h3><p>可能原因：</p>
+<ul>
+<li>Service selector 没有匹配 Pod。</li>
+<li>Pod 没有 Ready，EndpointSlice 中 <code>ready=false</code>。</li>
+<li><code>targetPort</code> 与容器监听端口不一致。</li>
+<li>EndpointSlice 尚未同步到 kube-proxy。</li>
+<li>Service 使用了手工 Endpoints，但地址不可用。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; describe svc &lt;service&gt;</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get pod -l &lt;selector&gt; -o wide</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-IPVS-有后端，但请求失败"><a href="#6-3-IPVS-有后端，但请求失败" class="headerlink" title="6.3 IPVS 有后端，但请求失败"></a>6.3 IPVS 有后端，但请求失败</h3><p>按顺序检查：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 后端 Pod 是否监听目标端口</span></span><br><span class="line">kubectl -n &lt;namespace&gt; <span class="built_in">exec</span> &lt;pod&gt; -- ss -lntup</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从同节点/其他 Pod 测试后端 Pod IP</span></span><br><span class="line">kubectl -n &lt;namespace&gt; <span class="built_in">exec</span> &lt;debug-pod&gt; -- nc -vz &lt;pod-ip&gt; &lt;port&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Service 和 EndpointSlice</span></span><br><span class="line">kubectl -n &lt;namespace&gt; get svc &lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o wide</span><br><span class="line"></span><br><span class="line"><span class="comment"># 节点查看路由和 IPVS 规则</span></span><br><span class="line">ip route</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br></pre></td></tr></table></figure>
+
+<p>还要检查 NetworkPolicy、CNI、节点防火墙、rp_filter、MTU、返回路径和应用自身日志。</p>
+<h3 id="6-4-计数器快速增长"><a href="#6-4-计数器快速增长" class="headerlink" title="6.4 计数器快速增长"></a>6.4 计数器快速增长</h3><p>计数器增长说明匹配到流量，不等于服务健康。还要区分：</p>
+<ul>
+<li>连接&#x2F;包是否有对应的出方向增长。</li>
+<li>后端 Real Server 是否均匀收到流量。</li>
+<li>是否存在大量 UDP 短流量或 DNS 重试。</li>
+<li>是否出现单个后端异常、超时或丢包。</li>
+<li>bytes 与 packets 的平均包大小是否符合预期。</li>
+</ul>
+<p>粗略计算平均包大小：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">平均入包大小 ≈ InBytes / InPkts</span><br><span class="line">平均出包大小 ≈ OutBytes / OutPkts</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-最佳实践"><a href="#7-最佳实践" class="headerlink" title="7. 最佳实践"></a>7. 最佳实践</h2><ul>
+<li>先确认 kube-proxy 模式，再使用 <code>ipvsadm</code>；iptables 模式下主要检查 <code>iptables-save</code>，Cilium eBPF 模式下不能把 IPVS 当作主数据面。</li>
+<li>保留未经过滤的原始输出，避免 <code>grep</code> 把表头过滤掉，导致误解字段。</li>
+<li>用 <code>-n</code> 避免反向 DNS 解析影响排查速度。</li>
+<li>使用 <code>--exact</code> 保留精确计数，做前后差值时不要使用缩写值。</li>
+<li>长期观测使用指标系统，不要用高频 <code>ipvsadm</code> 轮询替代监控。</li>
+<li>一定同时检查 Kubernetes API 中的 Service、EndpointSlice 和 Pod Ready 状态。</li>
+<li>不要直接用 <code>ipvsadm</code> 手动删除或修改 kube-proxy 管理的 Service 规则；kube-proxy 会重新同步，手工修改可能造成短暂抖动和状态不一致。</li>
+<li>不要把 <code>ipvsadm -C</code> 当作“修复命令”。它会清空本机 IPVS 表，可能导致节点所有 Service 流量中断。</li>
+<li>不要仅凭 VIP 有计数判断后端健康；必须检查 Real Server、应用监听和端到端请求。</li>
+<li>修改 kube-proxy、内核模块、IPVS 调度算法或连接超时前，先在单节点&#x2F;测试环境验证。</li>
+<li>UDP 服务需要特别关注超时和 conntrack；DNS 业务同时检查 UDP 53、TCP 53 和应用重试。</li>
+<li>多网卡节点要确认 kube-proxy 使用的 node IP、Pod 路由和返回路径。</li>
+</ul>
+<h2 id="8-常用命令速查"><a href="#8-常用命令速查" class="headerlink" title="8. 常用命令速查"></a>8. 常用命令速查</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 全量查看</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看指定 VIP</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -t 172.24.0.2:53 --stats --rate --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -u 172.24.0.2:53 --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保留表头后再筛选</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact | <span class="built_in">tee</span> /tmp/ipvs.txt</span><br><span class="line">grep -E <span class="string">&#x27;172\.24\.0\.2|^Prot|^  -&gt;&#x27;</span> /tmp/ipvs.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核和计数器</span></span><br><span class="line">lsmod | grep -E <span class="string">&#x27;ip_vs|nf_conntrack&#x27;</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs</span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs_stats</span><br><span class="line"></span><br><span class="line"><span class="comment"># Kubernetes 对照查询</span></span><br><span class="line">kubectl get svc -A -o wide | grep -w <span class="string">&#x27;172.24.0.2&#x27;</span></span><br><span class="line">kubectl -n kube-system get endpointslice -o wide</span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
 </search>

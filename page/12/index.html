@@ -184,6 +184,293 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/04/14/daemonset%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/04/14/daemonset%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7/" class="post-title-link" itemprop="url">daemonset滚动升级</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-04-14 16:03:49 / 修改时间：16:04:16" itemprop="dateCreated datePublished" datetime="2025-04-14T16:03:49+08:00">2025-04-14</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="🚀-DaemonSet-的-updateStrategy-升级策略详解"><a href="#🚀-DaemonSet-的-updateStrategy-升级策略详解" class="headerlink" title="🚀 DaemonSet 的 updateStrategy 升级策略详解"></a>🚀 DaemonSet 的 <code>updateStrategy</code> 升级策略详解</h2><p>DaemonSet 的升级策略定义在 <code>spec.updateStrategy</code> 字段下，用来控制 <strong>Pod 的滚动升级行为</strong>。</p>
+<p>目前支持两种类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RollingUpdate</code></td>
+<td>自动滚动升级，推荐的方式</td>
+</tr>
+<tr>
+<td><code>OnDelete</code></td>
+<td>手动删除后重建，不自动升级</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="🔁-1-type-RollingUpdate-（自动滚动升级）"><a href="#🔁-1-type-RollingUpdate-（自动滚动升级）" class="headerlink" title="🔁 1. type: RollingUpdate （自动滚动升级）"></a>🔁 1. <code>type: RollingUpdate</code> （自动滚动升级）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">RollingUpdate</span></span><br><span class="line">  <span class="attr">rollingUpdate:</span></span><br><span class="line">    <span class="attr">maxUnavailable:</span> <span class="number">30</span><span class="string">%</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="🔸-含义："><a href="#🔸-含义：" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
+<li>自动将老版本的 Pod 一个个替换为新版本，<strong>每次升级部分 Pod</strong>。</li>
+<li>受 <code>maxUnavailable</code> 控制，表示 <strong>在任意时刻最多有多少 Pod 可以不可用</strong>。</li>
+</ul>
+<h4 id="📌-maxUnavailable-参数详解："><a href="#📌-maxUnavailable-参数详解：" class="headerlink" title="📌 maxUnavailable 参数详解："></a>📌 <code>maxUnavailable</code> 参数详解：</h4><ul>
+<li>可以是整数（如 <code>1</code>）或百分比（如 <code>30%</code>）</li>
+<li>表示 <strong>升级期间，允许的最大不可用 Pod 数量</strong></li>
+</ul>
+<h4 id="⛓️-升级过程（示例）："><a href="#⛓️-升级过程（示例）：" class="headerlink" title="⛓️ 升级过程（示例）："></a>⛓️ 升级过程（示例）：</h4><p>假设你在 10 个节点上部署了 DaemonSet，每个节点都有一个 Pod。</p>
+<p>升级步骤：</p>
+<ol>
+<li>允许最多 3 个 Pod（30%）同时被删除并重建。</li>
+<li>控制器会自动删除旧版本的 Pod 并创建新版本。</li>
+<li>等新版本的 Pod 启动成功后，再继续替换下一批。</li>
+</ol>
+<h4 id="✅-优点："><a href="#✅-优点：" class="headerlink" title="✅ 优点："></a>✅ 优点：</h4><ul>
+<li><strong>平滑升级</strong>，对服务影响最小</li>
+<li>推荐用于生产环境</li>
+</ul>
+<hr>
+<h3 id="🧍-2-type-OnDelete-（手动升级）"><a href="#🧍-2-type-OnDelete-（手动升级）" class="headerlink" title="🧍 2. type: OnDelete （手动升级）"></a>🧍 2. <code>type: OnDelete</code> （手动升级）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">updateStrategy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">OnDelete</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="🔸-含义：-1"><a href="#🔸-含义：-1" class="headerlink" title="🔸 含义："></a>🔸 含义：</h4><ul>
+<li>DaemonSet 控制器 <strong>不会主动删除旧版本 Pod</strong></li>
+<li>只有当你手动 <code>kubectl delete pod xxx</code> 删除旧 Pod 时，DaemonSet 才会拉起新版本的 Pod</li>
+</ul>
+<h4 id="⛓️-升级过程："><a href="#⛓️-升级过程：" class="headerlink" title="⛓️ 升级过程："></a>⛓️ 升级过程：</h4><ol>
+<li>你修改了 DaemonSet 的模板（如 image）</li>
+<li>DaemonSet 检测到变更，但 <strong>不会更新任何 Pod</strong></li>
+<li>你需要手动删除 Pod：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod ingress-nginx-controller-xxxxx -n ingress-nginx</span><br></pre></td></tr></table></figure></li>
+<li>控制器自动基于新的模板重新创建 Pod</li>
+</ol>
+<h4 id="✅-适用场景："><a href="#✅-适用场景：" class="headerlink" title="✅ 适用场景："></a>✅ 适用场景：</h4><ul>
+<li>你需要<strong>精确控制每个节点 Pod 的升级时机</strong></li>
+<li>避免自动滚动升级带来的不确定性</li>
+</ul>
+<h4 id="❌-缺点："><a href="#❌-缺点：" class="headerlink" title="❌ 缺点："></a>❌ 缺点：</h4><ul>
+<li>升级需要人工干预</li>
+<li>不适合频繁迭代或高可用性要求场景</li>
+</ul>
+<hr>
+<h3 id="🧠-总结对比"><a href="#🧠-总结对比" class="headerlink" title="🧠 总结对比"></a>🧠 总结对比</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>RollingUpdate</th>
+<th>OnDelete</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>是否自动升级</td>
+<td>✅ 是</td>
+<td>❌ 否，需要手动删除</td>
+</tr>
+<tr>
+<td>可控性</td>
+<td>中等</td>
+<td>高</td>
+</tr>
+<tr>
+<td>服务连续性</td>
+<td>高（通过 <code>maxUnavailable</code> 控制）</td>
+<td>高（完全受控）</td>
+</tr>
+<tr>
+<td>推荐场景</td>
+<td>生产环境通用升级</td>
+<td>手动灰度升级、需精细控制时</td>
+</tr>
+<tr>
+<td>运维复杂度</td>
+<td>低</td>
+<td>中-高</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/03/25/k8s%E8%8A%82%E7%82%B9%E6%89%A9%E7%BC%A9%E7%BB%84%E4%BB%B6autoscaler%E4%B8%8Eexternalgrpc%E6%A8%A1%E5%BC%8F%E7%9A%84grpc%E8%B0%83%E8%AF%95/" class="post-title-link" itemprop="url">k8s节点扩缩组件autoscaler与externalgrpc模式的grpc调试</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-03-25 10:33:13 / 修改时间：12:23:20" itemprop="dateCreated datePublished" datetime="2025-03-25T10:33:13+08:00">2025-03-25</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="externalgrpc-proto文件"><a href="#externalgrpc-proto文件" class="headerlink" title="externalgrpc.proto文件"></a>externalgrpc.proto文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#文件路径</span><br><span class="line">/home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos/externalgrpc.proto</span><br><span class="line"></span><br><span class="line">#涉及到的import</span><br><span class="line">syntax = &quot;proto3&quot;;</span><br><span class="line"></span><br><span class="line">package clusterautoscaler.cloudprovider.v1.externalgrpc;</span><br><span class="line"></span><br><span class="line">import &quot;google/protobuf/descriptor.proto&quot;;</span><br><span class="line">import &quot;google/protobuf/any.proto&quot;;</span><br><span class="line">import &quot;k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto&quot;;</span><br><span class="line"></span><br><span class="line">import &quot;k8s.io/api/core/v1/generated.proto&quot;;</span><br><span class="line">option go_package = &quot;cluster-autoscaler/cloudprovider/externalgrpc/protos&quot;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="grpc拼凑"><a href="#grpc拼凑" class="headerlink" title="grpc拼凑"></a>grpc拼凑</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#cluster-autoscaler-cloud-provider是云厂商提供服务的域名，配置在证书里</span><br><span class="line">#11.31.213.234是cloud provider的服务端地址</span><br><span class="line"></span><br><span class="line">#验证TLS请求(单项请求)</span><br><span class="line">#openssl s_client -connect  11.31.213.234:65535</span><br><span class="line"></span><br><span class="line">#服务端证书名称：ca.cert.pem ，路径为：</span><br><span class="line">BASEDIR=/home/xxx/cloud-config</span><br><span class="line"></span><br><span class="line">#认证可以通过的请求</span><br><span class="line">grpcurl \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    cluster-autoscaler-cloud-provider:65535    \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups  </span><br><span class="line"></span><br><span class="line">#11.31.213.234对应的cluster-autoscaler-cloud-provider服务podIP</span><br><span class="line">grpcurl -insecure \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    11.31.213.234:65535     \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#无法通过的请求：Failed to dial target host &quot;11.31.213.234:65535&quot;: tls: failed to verify certificate: x509: certificate is valid for 127.0.0.1, not 11.31.213.234</span><br><span class="line">grpcurl \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor  \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    11.31.213.234:65535     \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="如果是tls双向认证情况请求"><a href="#如果是tls双向认证情况请求" class="headerlink" title="如果是tls双向认证情况请求"></a>如果是tls双向认证情况请求</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#在路径配置客户端秘钥及证书</span><br><span class="line">grpcurl \</span><br><span class="line">    --cert $BASEDIR/client.cert.pem  \</span><br><span class="line">    --key $BASEDIR/client.key.pem \</span><br><span class="line">    --cacert $BASEDIR/ca.cert.pem  \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/cloudprovider/externalgrpc/protos \</span><br><span class="line">    -import-path /home/xxx/autoscaler/cluster-autoscaler/vendor     \</span><br><span class="line">    -proto externalgrpc.proto     \</span><br><span class="line">    cluster-autoscaler-cloud-provider:65535    \</span><br><span class="line">    clusterautoscaler.cloudprovider.v1.externalgrpc.CloudProvider/NodeGroups</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="openssl请求解析"><a href="#openssl请求解析" class="headerlink" title="openssl请求解析"></a>openssl请求解析</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">openssl s_client -connect cluster-autoscaler-backend:65535 -CAfile /home/xxx/cloud-config/dev-containerd/ca.cert.pem</span><br><span class="line">CONNECTED(00000003)</span><br><span class="line">Can&#x27;t use SSL_get_servername</span><br><span class="line">depth=1 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">verify return:1</span><br><span class="line">depth=0 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">verify return:1</span><br><span class="line">---</span><br><span class="line">Certificate chain</span><br><span class="line"> 0 s:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">   i:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">---</span><br><span class="line">Server certificate</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIICYDCCAgagAwIBAgIUcO+yQm6JNnr+ogeb...</span><br><span class="line">-----END CERTIFICATE-----</span><br><span class="line">subject=C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line"></span><br><span class="line">issuer=C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">No client certificate CA names sent</span><br><span class="line">Peer signing digest: SHA256</span><br><span class="line">Peer signature type: ECDSA</span><br><span class="line">Server Temp Key: X25519, 253 bits</span><br><span class="line">---</span><br><span class="line">SSL handshake has read 916 bytes and written 369 bytes</span><br><span class="line">Verification: OK</span><br><span class="line">---</span><br><span class="line">New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384</span><br><span class="line">Server public key is 256 bit</span><br><span class="line">Secure Renegotiation IS NOT supported</span><br><span class="line">Compression: NONE</span><br><span class="line">Expansion: NONE</span><br><span class="line">No ALPN negotiated</span><br><span class="line">Early data was not sent</span><br><span class="line">Verify return code: 0 (ok)</span><br><span class="line">---</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="📌-关键点解析"><a href="#📌-关键点解析" class="headerlink" title="📌 关键点解析"></a><strong>📌 关键点解析</strong></h2><h3 id="✅-1-TLS-连接成功"><a href="#✅-1-TLS-连接成功" class="headerlink" title="✅ 1. TLS 连接成功"></a><strong>✅ 1. TLS 连接成功</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CONNECTED(00000003)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>你的客户端 <code>openssl</code> 成功连接到了 <code>cluster-autoscaler-cloud-provider:65535</code> 端口，并完成了 TLS 握手。</li>
+</ul>
+<hr>
+<h3 id="✅-2-证书验证通过"><a href="#✅-2-证书验证通过" class="headerlink" title="✅ 2. 证书验证通过"></a><strong>✅ 2. 证书验证通过</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">depth=1 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br><span class="line">verify return:1</span><br><span class="line">depth=0 C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">verify return:1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>你的 CA 证书 <code>/home/xxx/cloud-config/dev-containerd/ca.cert.pem</code> <strong>已经正确地验证了服务器证书</strong>。</li>
+<li><code>verify return:1</code> 表示 <code>openssl</code> 在认证每一级证书时，返回成功。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Verify return code: 0 (ok)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这个 <code>0 (ok)</code> 说明 <strong>TLS 证书链已经正确验证</strong>，你不再遇到 <code>unable to verify the first certificate</code> 之类的错误。</li>
+</ul>
+<p><strong>说明你的 CA 证书是正确的，服务器证书也是可信的。</strong> 🎉</p>
+<hr>
+<h3 id="✅-3-服务器提供的证书链"><a href="#✅-3-服务器提供的证书链" class="headerlink" title="✅ 3. 服务器提供的证书链"></a><strong>✅ 3. 服务器提供的证书链</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Certificate chain</span><br><span class="line"> 0 s:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = cluster-autoscaler-cloud-provider</span><br><span class="line">   i:C = CN, ST = Beijing, L = Chaoyang, O = Qihoo, CN = qihoo.net</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>s:</code> (<strong>subject</strong>) 表示服务器的证书 (<code>cluster-autoscaler-cloud-provider</code>)。</li>
+<li><code>i:</code> (<strong>issuer</strong>) 表示这个证书是由 <code>qihoo.net</code> 这个 CA 颁发的。</li>
+<li>你的 <code>CAfile</code> <strong>包含了 <code>qihoo.net</code> 的 CA 证书</strong>，所以能够正确验证服务器证书。</li>
+</ul>
+<hr>
+<h3 id="✅-4-服务器没有要求客户端证书"><a href="#✅-4-服务器没有要求客户端证书" class="headerlink" title="✅ 4. 服务器没有要求客户端证书"></a><strong>✅ 4. 服务器没有要求客户端证书</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">No client certificate CA names sent</span><br></pre></td></tr></table></figure>
+<ul>
+<li>服务器 <strong>不要求客户端提供证书</strong>，也就是说没有启用 **双向 TLS (mTLS)**。</li>
+<li>如果服务器需要 <strong>mTLS</strong>，你会看到 <code>Acceptable client certificate CA names</code>，并且 <code>openssl</code> 可能会要求 <code>-cert</code> 和 <code>-key</code>。</li>
+</ul>
+<hr>
+<h3 id="✅-5-TLS-版本与加密算法"><a href="#✅-5-TLS-版本与加密算法" class="headerlink" title="✅ 5. TLS 版本与加密算法"></a><strong>✅ 5. TLS 版本与加密算法</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384</span><br><span class="line">Server public key is 256 bit</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>TLS 版本</strong>: <code>TLSv1.3</code>（最新的 TLS 版本，更安全）。</li>
+<li><strong>加密算法</strong>: <code>AES_256_GCM_SHA384</code>（对称加密算法，安全性高）。</li>
+<li><strong>服务器公钥长度</strong>: <code>256 bit</code>，符合现代安全标准。</li>
+</ul>
+<p>你使用的 <code>openssl</code> 版本支持 TLS 1.3，没有出现协议不兼容的问题。</p>
+<hr>
+<h2 id="📌-结论"><a href="#📌-结论" class="headerlink" title="📌 结论"></a><strong>📌 结论</strong></h2><p>✅ <strong>你已经正确配置了 CA 证书</strong>，服务器证书也成功验证。<br>✅ <strong>TLS 连接建立正常</strong>，服务器使用 TLS 1.3，安全性较高。<br>✅ <strong>服务器不要求客户端证书</strong>，所以是 <strong>单向 TLS 认证</strong>。<br>✅ <strong>没有任何 SSL&#x2F;TLS 相关错误</strong>，一切正常！🎉</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/24/k8s%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E6%83%B3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1347,406 +1634,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/03/09/docker%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F%E5%8F%8A%E5%9D%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/03/09/docker%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F%E5%8F%8A%E5%9D%91/" class="post-title-link" itemprop="url">docker网络模式及坑</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-03-09 11:31:36" itemprop="dateCreated datePublished" datetime="2025-03-09T11:31:36+08:00">2025-03-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-08-04 11:36:17" itemprop="dateModified" datetime="2026-08-04T11:36:17+08:00">2026-08-04</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Bridge模式"><a href="#Bridge模式" class="headerlink" title="Bridge模式"></a>Bridge模式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 默认bridge - 容器名不通</span><br><span class="line">docker run -d --name web nginx</span><br><span class="line">docker run -it --rm alpine ping web</span><br><span class="line"># ping: bad address &#x27;web&#x27;  ← 不行</span><br><span class="line"></span><br><span class="line"># 自定义bridge - 容器名可达</span><br><span class="line">docker network create mynet</span><br><span class="line">docker run -d --name web --network mynet nginx</span><br><span class="line">docker run -it --rm --network mynet alpine ping web</span><br><span class="line"># PING web (172.18.0.2): 56 data bytes</span><br><span class="line"># 64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.089 ms  ← 通了</span><br></pre></td></tr></table></figure>
-
-<h3 id="网络设备"><a href="#网络设备" class="headerlink" title="网络设备"></a>网络设备</h3><ul>
-<li><p>常用虚拟设备类型速查表</p>
-<table>
-<thead>
-<tr>
-<th>type</th>
-<th>名称</th>
-<th>用途说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>veth</code></td>
-<td>虚拟以太网对</td>
-<td>成对出现,一端在容器&#x2F;netns、一端在宿主机,容器网络的基础</td>
-</tr>
-<tr>
-<td><code>bridge</code></td>
-<td>网桥</td>
-<td>二层交换,Docker 的 <code>docker0</code>、K8s 常用</td>
-</tr>
-<tr>
-<td><code>bond</code></td>
-<td>链路聚合</td>
-<td>多网卡绑定,做负载均衡&#x2F;冗余</td>
-</tr>
-<tr>
-<td><code>vlan</code></td>
-<td>VLAN 子接口</td>
-<td>802.1Q 划分虚拟局域网,如 <code>eth0.100</code></td>
-</tr>
-<tr>
-<td><code>vxlan</code></td>
-<td>VXLAN 隧道</td>
-<td>大二层 overlay,K8s Flannel&#x2F;Calico 跨节点组网核心</td>
-</tr>
-<tr>
-<td><code>macvlan</code></td>
-<td>MAC 虚拟化</td>
-<td>一块物理网卡虚拟出多个带独立 MAC 的接口</td>
-</tr>
-<tr>
-<td><code>ipvlan</code></td>
-<td>IP 虚拟化</td>
-<td>类似 macvlan,但共享 MAC,按 IP 区分</td>
-</tr>
-<tr>
-<td><code>tun</code> &#x2F; <code>tap</code></td>
-<td>隧道设备</td>
-<td><code>tun</code> 三层(点对点&#x2F;VPN)、<code>tap</code> 二层(虚拟机网卡)</td>
-</tr>
-<tr>
-<td><code>dummy</code></td>
-<td>虚拟空设备</td>
-<td>永远 up 的假接口,常用于绑 IP&#x2F;测试</td>
-</tr>
-<tr>
-<td><code>vrf</code></td>
-<td>虚拟路由转发</td>
-<td>L3 层路由隔离,多租户路由表</td>
-</tr>
-</tbody></table>
-</li>
-<li><p>使用命令</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 查看某一类设备</span><br><span class="line">ip link show type veth</span><br><span class="line">ip link show type bridge</span><br><span class="line">ip link show type vxlan</span><br><span class="line"></span><br><span class="line"># 查看所有设备(不过滤)</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 结合 -d 看详细类型信息</span><br><span class="line">ip -d link show type vxlan</span><br><span class="line"></span><br><span class="line"># 查看当前系统实际存在哪些类型的设备(反查)</span><br><span class="line">ip -d link show | grep -A1 &quot;link/ether&quot; </span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="5中模式对比"><a href="#5中模式对比" class="headerlink" title="5中模式对比"></a>5中模式对比</h2><ul>
-<li>Bridge模式：默认的</li>
-<li>Host模式：直接把容器的网络墙拆了</li>
-<li>None模式：彻底断网</li>
-<li>Overlay模式：跨主机通信的唯一官方解</li>
-<li>Macvlan模式：让容器假装是一台物理机</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>维度</th>
-<th>Bridge</th>
-<th>Host</th>
-<th>None</th>
-<th>Overlay</th>
-<th>Macvlan</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>隔离性</td>
-<td>✅ 好</td>
-<td>❌ 无</td>
-<td>✅ 完全</td>
-<td>✅ 好</td>
-<td>✅ 中等</td>
-</tr>
-<tr>
-<td>性能</td>
-<td>中等</td>
-<td>最好</td>
-<td>N&#x2F;A</td>
-<td>较低</td>
-<td>好</td>
-</tr>
-<tr>
-<td>跨主机</td>
-<td>❌</td>
-<td>❌</td>
-<td>❌</td>
-<td>✅</td>
-<td>❌ (需L3)</td>
-</tr>
-<tr>
-<td>端口映射</td>
-<td>需要</td>
-<td>不需要</td>
-<td>N&#x2F;A</td>
-<td>需要</td>
-<td>不需要</td>
-</tr>
-<tr>
-<td>容器互通</td>
-<td>同bridge可通</td>
-<td>走lo</td>
-<td>不通</td>
-<td>同overlay可通</td>
-<td>同网段可通</td>
-</tr>
-<tr>
-<td>DNS发现</td>
-<td>自定义bridge支持</td>
-<td>不支持</td>
-<td>不支持</td>
-<td>支持</td>
-<td>不支持</td>
-</tr>
-<tr>
-<td>复杂度</td>
-<td>低</td>
-<td>最低</td>
-<td>最低</td>
-<td>高</td>
-<td>中等</td>
-</tr>
-<tr>
-<td>典型场景</td>
-<td>开发&#x2F;中小生产</td>
-<td>高性能服务</td>
-<td>安全隔离</td>
-<td>集群&#x2F;多主机</td>
-<td>接入物理网络</td>
-</tr>
-</tbody></table>
-<h2 id="排障"><a href="#排障" class="headerlink" title="排障"></a>排障</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"># 1. 先确认容器用的什么网络模式</span><br><span class="line">docker inspect &lt;container&gt; --format &#x27;&#123;&#123;.HostConfig.NetworkMode&#125;&#125;&#x27;</span><br><span class="line"></span><br><span class="line"># 2. 看容器的IP和网络配置</span><br><span class="line">docker inspect &lt;container&gt; --format &#x27;&#123;&#123;json .NetworkSettings.Networks&#125;&#125;&#x27; | jq .</span><br><span class="line"></span><br><span class="line"># 3. 看宿主机上的网桥和veth设备</span><br><span class="line">brctl show</span><br><span class="line">ip link show type veth</span><br><span class="line"></span><br><span class="line"># 4. 看iptables规则是否正确（bridge模式下端口映射靠这个）</span><br><span class="line">iptables -t nat -L -n -v | grep &lt;container_ip&gt;</span><br><span class="line"></span><br><span class="line"># 5. 进容器里排查</span><br><span class="line">docker exec -it &lt;container&gt; sh</span><br><span class="line"># 然后: ip addr / ip route / ping / curl / nslookup</span><br><span class="line">ip route get 169.254.20.10 from 11.132.xxx.xxx iif eth1</span><br><span class="line">含义：</span><br><span class="line">- 模拟一条数据包：源 IP=11.132.65.xxx.xxx、入网卡 eth1、目标 IP=169.254.20.10，让内核计算这条包会匹配哪条路由、走哪个出口网卡、下一跳是谁。</span><br><span class="line">- 专门用来调试策略路由 (ip rule + 多路由表) 场景，精准验证多源 IP、多网卡分流逻辑。</span><br><span class="line"></span><br><span class="line">#ip route get 工具逻辑：它是查询 “本机发往外网” 的转发路由，如果命中 lookup local</span><br><span class="line">#内核判定「数据包目的地是本机，不需要转发出口」，route get 工具会直接返回 Network is unreachable。</span><br><span class="line"></span><br><span class="line"># 6. 抓包 - 在宿主机的veth接口上抓容器的流量</span><br><span class="line">tcpdump -i veth3a8f9b2 -nn</span><br><span class="line"></span><br><span class="line"># 7. overlay网络排障 - 检查VXLAN隧道</span><br><span class="line">ip -d link show type vxlan</span><br></pre></td></tr></table></figure>
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">单机开发测试 → bridge（默认的就行，自定义bridge更好）</span><br><span class="line">极致性能 → host（牺牲隔离换性能）</span><br><span class="line">安全隔离 / 纯计算 → none</span><br><span class="line">多主机集群 → overlay</span><br><span class="line">接入物理网络 / 绕NAT → macvlan</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/6HBsj3HIAe4czxgMh86qfg">https://mp.weixin.qq.com/s/6HBsj3HIAe4czxgMh86qfg</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/JfQ2NdvENtkwiSfa9Rl4qQ">https://mp.weixin.qq.com/s/JfQ2NdvENtkwiSfa9Rl4qQ</a></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/02/24/systemctl%E7%9A%84%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/24/systemctl%E7%9A%84%E4%B8%80%E4%BA%9B%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">systemctl的一些用法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-02-24 18:13:00" itemprop="dateCreated datePublished" datetime="2025-02-24T18:13:00+08:00">2025-02-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-06-06 15:52:31" itemprop="dateModified" datetime="2025-06-06T15:52:31+08:00">2025-06-06</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><code>systemctl</code> 是 <strong>Systemd</strong> 系统和服务管理器的控制工具，在现代 Linux 系统中广泛使用。它用于启动、停止、重启、查看服务状态、管理服务单元（unit）等。</p>
-<hr>
-<h3 id="🌟-常用-systemctl-命令"><a href="#🌟-常用-systemctl-命令" class="headerlink" title="🌟 常用 systemctl 命令"></a>🌟 <strong>常用 systemctl 命令</strong></h3><h4 id="1-列出当前所有服务"><a href="#1-列出当前所有服务" class="headerlink" title="1. 列出当前所有服务"></a>1. <strong>列出当前所有服务</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service</span><br><span class="line">systemctl --no-pager list-units --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这个命令列出当前机器上所有正在运行的服务（包含活跃和非活跃的）。如果要查看更多详细信息，可以加上 <code>--all</code>。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --all</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="2-查看服务的状态"><a href="#2-查看服务的状态" class="headerlink" title="2. 查看服务的状态"></a>2. <strong>查看服务的状态</strong></h4><p>查看某个服务（比如 <code>sshd</code>）的状态：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>会显示该服务是否正在运行，启动类型（<code>active</code> 或 <code>inactive</code>），以及日志输出的最新部分。</li>
-</ul>
-<h4 id="3-启动服务"><a href="#3-启动服务" class="headerlink" title="3. 启动服务"></a>3. <strong>启动服务</strong></h4><p>启动某个服务，比如 <code>sshd</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这将立即启动 <code>sshd</code> 服务。</li>
-</ul>
-<h4 id="4-停止服务"><a href="#4-停止服务" class="headerlink" title="4. 停止服务"></a>4. <strong>停止服务</strong></h4><p>停止某个服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>停止 <code>sshd</code> 服务后，你将无法通过 SSH 访问机器，除非本地访问或其他服务仍然活跃。</li>
-</ul>
-<h4 id="5-重启服务"><a href="#5-重启服务" class="headerlink" title="5. 重启服务"></a>5. <strong>重启服务</strong></h4><p>重启某个服务，适用于更新配置等操作：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="6-重新加载服务配置"><a href="#6-重新加载服务配置" class="headerlink" title="6. 重新加载服务配置"></a>6. <strong>重新加载服务配置</strong></h4><p>有时候更改了服务的配置文件（例如 SSH 配置），并希望让服务应用新的配置，而不完全重启服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl reload sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>此命令会让 <code>sshd</code> 服务重新加载配置，但不中断当前的连接。</li>
-</ul>
-<h4 id="7-启用服务开机自启"><a href="#7-启用服务开机自启" class="headerlink" title="7. 启用服务开机自启"></a>7. <strong>启用服务开机自启</strong></h4><p>使服务在系统启动时自动启动：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这会创建一个符号链接，使 <code>sshd</code> 服务在系统启动时自动启动。</li>
-</ul>
-<h4 id="8-禁用服务自启"><a href="#8-禁用服务自启" class="headerlink" title="8. 禁用服务自启"></a>8. <strong>禁用服务自启</strong></h4><p>取消服务的开机自启：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">disable</span> sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="9-查看服务日志"><a href="#9-查看服务日志" class="headerlink" title="9. 查看服务日志"></a>9. <strong>查看服务日志</strong></h4><p>查看 <code>sshd</code> 服务的日志，利用 <code>journalctl</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -u sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>-u</code> 用来指定服务，默认显示最近的日志。如果需要查看更早的日志，可以使用 <code>--since</code> 和 <code>--until</code> 选项。</li>
-</ul>
-<h4 id="10-查看系统日志"><a href="#10-查看系统日志" class="headerlink" title="10. 查看系统日志"></a>10. <strong>查看系统日志</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">journalctl</span><br><span class="line"></span><br><span class="line">journalctl -u docker --no-pager -n 50</span><br></pre></td></tr></table></figure>
-<ul>
-<li>查看所有系统日志。默认会显示所有日志，如果想查看最近的日志，可以使用 <code>-n</code> 参数，查看最新的 100 行：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -n 100</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="11-查看服务的启动类型"><a href="#11-查看服务的启动类型" class="headerlink" title="11. 查看服务的启动类型"></a>11. <strong>查看服务的启动类型</strong></h4><p>查看 <code>sshd</code> 服务的启动类型（是否是自动启动）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl is-enabled sshd</span><br></pre></td></tr></table></figure>
-<ul>
-<li>会显示 <code>enabled</code>（已启用）、<code>disabled</code>（已禁用）或者 <code>static</code>（由其他服务依赖的启动）。</li>
-</ul>
-<h4 id="12-查看服务的依赖"><a href="#12-查看服务的依赖" class="headerlink" title="12. 查看服务的依赖"></a>12. <strong>查看服务的依赖</strong></h4><p>查看服务的所有依赖项和依赖于它的服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-dependencies sshd</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="🔧-对服务的其他操作"><a href="#🔧-对服务的其他操作" class="headerlink" title="🔧 对服务的其他操作"></a>🔧 <strong>对服务的其他操作</strong></h3><h4 id="13-查看服务的启动情况"><a href="#13-查看服务的启动情况" class="headerlink" title="13. 查看服务的启动情况"></a><strong>13. 查看服务的启动情况</strong></h4><p>查看当前系统启动时的所有服务状态：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl list-units --<span class="built_in">type</span>=service --state=running</span><br></pre></td></tr></table></figure>
-<ul>
-<li>这只会显示当前正在运行的服务。</li>
-</ul>
-<h4 id="14-查看是否正在等待某个服务"><a href="#14-查看是否正在等待某个服务" class="headerlink" title="14. 查看是否正在等待某个服务"></a><strong>14. 查看是否正在等待某个服务</strong></h4><p>如果你想查看某个服务（如 <code>sshd</code>）是否正在等待其他服务启动，可以使用：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="15-开机后立即启动服务"><a href="#15-开机后立即启动服务" class="headerlink" title="15. 开机后立即启动服务"></a><strong>15. 开机后立即启动服务</strong></h4><p>如果你想在系统启动时立即启动某个服务（而不是等到下次重启），可以使用：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start sshd</span><br></pre></td></tr></table></figure>
-
-<h4 id="16-管理多个服务"><a href="#16-管理多个服务" class="headerlink" title="16. 管理多个服务"></a><strong>16. 管理多个服务</strong></h4><p>你可以在一个命令中管理多个服务。例如，停止 <code>sshd</code> 和 <code>nginx</code> 服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop sshd nginx</span><br></pre></td></tr></table></figure>
-
-<h4 id="17-显示服务的更多细节"><a href="#17-显示服务的更多细节" class="headerlink" title="17. 显示服务的更多细节"></a><strong>17. 显示服务的更多细节</strong></h4><p>查看某个服务的详细信息（包括环境变量、启动命令等）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show sshd</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="📋-总结"><a href="#📋-总结" class="headerlink" title="📋 总结"></a>📋 <strong>总结</strong></h3><ul>
-<li><strong>启动&#x2F;停止&#x2F;重启</strong>：<code>start</code> &#x2F; <code>stop</code> &#x2F; <code>restart</code></li>
-<li><strong>状态检查</strong>：<code>status</code></li>
-<li><strong>查看日志</strong>：<code>journalctl -u &lt;service&gt;</code></li>
-<li><strong>启用&#x2F;禁用自启</strong>：<code>enable</code> &#x2F; <code>disable</code></li>
-<li><strong>服务依赖</strong>：<code>list-dependencies</code></li>
-<li><strong>开机自启服务控制</strong>：<code>systemctl is-enabled &lt;service&gt;</code></li>
-</ul>
-<hr>
-<h2 id="journalctl用法"><a href="#journalctl用法" class="headerlink" title="journalctl用法"></a>journalctl用法</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/XAEyJ_LMXisHELcZO8jUpw">https://mp.weixin.qq.com/s/XAEyJ_LMXisHELcZO8jUpw</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/FpDcGtKMcyLKFyk3jxnjcg">https://mp.weixin.qq.com/s/FpDcGtKMcyLKFyk3jxnjcg</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#查看所有日志</span><br><span class="line">journalctl</span><br><span class="line"></span><br><span class="line">#查看实时日志</span><br><span class="line">journalctl -f   </span><br><span class="line"></span><br><span class="line">#查看指定服务的日志, -u 即 --unit</span><br><span class="line">journalctl -u nginx   </span><br><span class="line"></span><br><span class="line">#查看指定行数的日志</span><br><span class="line">journalctl -n 5000             # -n 即 --lines</span><br><span class="line"></span><br><span class="line">#查看指定启动会话的日志</span><br><span class="line"># 查看当前启动会话的日志</span><br><span class="line">journalctl -b                  # -b 即 --boot</span><br><span class="line"></span><br><span class="line"># 查看上次启动会话的日志</span><br><span class="line">journalctl -b -1               # 依此类推，-2 ...</span><br><span class="line"></span><br><span class="line">#查看指定时间的日志</span><br><span class="line"># 查看开始于某个时间的日志</span><br><span class="line">journalctl -S &quot;2024-04-14&quot;  # -S 即 --since</span><br><span class="line">journalctl -S &quot;1 hour ago&quot; # 也可以是相对时间</span><br><span class="line"></span><br><span class="line"># 查看截止到某个时间的日志</span><br><span class="line">journalctl -U &quot;2025-04-15&quot; # -U 即 --until</span><br><span class="line">journalctl -U &quot;yesterday&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看指定优先级的日志</span><br><span class="line">journalctl -p 3 # -P 即 --priority</span><br><span class="line">journalctl -p 2..4</span><br><span class="line"></span><br><span class="line"># 查看多个优先级</span><br><span class="line"># O 或 emerg：系统不可用 （Emergency） </span><br><span class="line"># 1 或 alert： 需要立即采取行动 （Alert） </span><br><span class="line"># 2 或 crit：严重情况 （Critical） </span><br><span class="line"># 3 或 err： 错误情况 （Error）</span><br><span class="line"># 4 或 warning：警告情况 （Warning） </span><br><span class="line"># 5 或 notice： 正常但重要的情况 （Notice） </span><br><span class="line"># 6 或 info：一般信息 （Informational） </span><br><span class="line"># 7或 debug：调试信息 （Debug）</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看内核日志</span><br><span class="line">journalctl -k   # -k 即 --dmesg</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#指定日志输出格式</span><br><span class="line">journalctl -o json-pretty # -o 即 --output</span><br><span class="line"># 可选short、short-precise、short-iso、short-iso-precise、short-full、short-monotonic、short-unix、verbose、export、json、json-pretty、json-sse、json-seq、cat、with-unit</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1818,7 +1705,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">214</span>
+          <span class="site-state-item-count">216</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

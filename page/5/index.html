@@ -1481,7 +1481,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/08/%E5%8D%95%E6%9C%BAdocker%E9%83%A8%E7%BD%B2ceph%E5%AE%9E%E8%B7%B5/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/08/iptables-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E4%B8%8E-Pod-%E7%BD%91%E7%BB%9C%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E5%AE%9E%E6%88%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -1495,7 +1495,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2026/01/08/%E5%8D%95%E6%9C%BAdocker%E9%83%A8%E7%BD%B2ceph%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">单机docker部署ceph实践</a>
+            <a href="/2026/01/08/iptables-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E4%B8%8E-Pod-%E7%BD%91%E7%BB%9C%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E5%AE%9E%E6%88%98/" class="post-title-link" itemprop="url">iptables 常用命令与 Pod 网络命名空间实战</a>
         </h2>
 
         <div class="post-meta">
@@ -1505,14 +1505,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2026-01-08 13:54:13" itemprop="dateCreated datePublished" datetime="2026-01-08T13:54:13+08:00">2026-01-08</time>
+              <time title="创建时间：2026-01-08 14:27:17" itemprop="dateCreated datePublished" datetime="2026-01-08T14:27:17+08:00">2026-01-08</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-07-10 15:40:31" itemprop="dateModified" datetime="2026-07-10T15:40:31+08:00">2026-07-10</time>
+                <time title="修改时间：2026-09-08 14:27:49" itemprop="dateModified" datetime="2026-09-08T14:27:49+08:00">2026-09-08</time>
               </span>
 
           <br>
@@ -1521,14 +1521,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>19k</span>
+              <span>9.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>17 分钟</span>
+              <span>9 分钟</span>
             </span>
 
         </div>
@@ -1540,272 +1540,269 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="概念解析"><a href="#概念解析" class="headerlink" title="概念解析"></a>概念解析</h1><h2 id="1-集群核心控制组件"><a href="#1-集群核心控制组件" class="headerlink" title="1. 集群核心控制组件"></a>1. 集群核心控制组件</h2><table>
+          <p>本文整理 Linux <code>iptables</code> 的常用操作，并重点解释 Kubernetes 场景下通过 <code>nsenter</code> 进入 Pod 网络命名空间、临时阻断健康检查端口的用法。</p>
+<blockquote>
+<p>适用范围：Linux 主机、Kubernetes 节点、容器网络排障。不同发行版可能使用 <code>iptables-legacy</code> 或 <code>iptables-nft</code>；不同 CNI、kube-proxy 模式和容器运行时会生成不同规则，执行前必须确认当前环境。</p>
+</blockquote>
+<h2 id="1-先理解-iptables"><a href="#1-先理解-iptables" class="headerlink" title="1. 先理解 iptables"></a>1. 先理解 iptables</h2><h3 id="1-1-它解决什么问题"><a href="#1-1-它解决什么问题" class="headerlink" title="1.1 它解决什么问题"></a>1.1 它解决什么问题</h3><p>iptables 是 Linux 内核 Netfilter 框架的用户态配置工具，用来匹配经过网络协议栈的数据包，并执行放行、拒绝、丢弃、记录、地址转换或修改标记等动作。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">数据包</span><br><span class="line">  ↓</span><br><span class="line">iptables 规则匹配</span><br><span class="line">  ↓</span><br><span class="line">ACCEPT / DROP / REJECT / LOG / DNAT / SNAT / MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<p>iptables 本身不是一个常驻防火墙进程。命令执行后，规则写入内核；规则是否持久化，取决于发行版的保存和恢复机制。</p>
+<h3 id="1-2-表、链、规则和目标"><a href="#1-2-表、链、规则和目标" class="headerlink" title="1.2 表、链、规则和目标"></a>1.2 表、链、规则和目标</h3><table>
 <thead>
 <tr>
-<th>缩写</th>
-<th>完整英文</th>
-<th>中文名称</th>
-<th>核心作用</th>
+<th>概念</th>
+<th>含义</th>
+<th>常见内容</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>MON</td>
-<td>Monitor</td>
-<td>监控节点</td>
-<td>集群总元数据中心，保存集群拓扑、认证、存储池配置，仲裁集群状态，端口6789</td>
+<td>Table</td>
+<td>按用途分组的规则集合</td>
+<td><code>filter</code>、<code>nat</code>、<code>mangle</code>、<code>raw</code>、<code>security</code></td>
 </tr>
 <tr>
-<td>MGR</td>
-<td>Manager</td>
-<td>管理节点</td>
-<td>集群管理、Dashboard、Prometheus监控、调度任务，对外API</td>
+<td>Chain</td>
+<td>数据包经过的处理路径</td>
+<td><code>INPUT</code>、<code>OUTPUT</code>、<code>FORWARD</code>、<code>PREROUTING</code>、<code>POSTROUTING</code></td>
 </tr>
 <tr>
-<td>OSD</td>
-<td>Object Storage Daemon</td>
-<td>对象存储守护进程</td>
-<td>真正承载数据，单块磁盘对应一个OSD，负责数据三副本&#x2F;纠删码、PG数据读写</td>
+<td>Rule</td>
+<td>一条匹配条件和动作</td>
+<td>来源 IP + 目标端口 + 协议 → ACCEPT</td>
 </tr>
 <tr>
-<td>MDS</td>
-<td>Metadata Server</td>
-<td>文件元数据服务</td>
-<td>仅CephFS分布式文件系统使用，管理目录、文件元数据</td>
+<td>Match</td>
+<td>匹配条件</td>
+<td><code>-s</code>、<code>-d</code>、<code>-p</code>、<code>--dport</code>、<code>-m conntrack</code></td>
 </tr>
 <tr>
-<td>RGW</td>
-<td>Rados Gateway</td>
-<td>对象存储网关</td>
-<td>基于底层RADOS封装S3&#x2F;Swift标准HTTP接口，对外提供对象存储服务</td>
+<td>Target</td>
+<td>命中后的处理动作</td>
+<td><code>ACCEPT</code>、<code>DROP</code>、<code>REJECT</code>、<code>DNAT</code>、<code>SNAT</code></td>
 </tr>
 </tbody></table>
-<h2 id="2-底层存储核心概念"><a href="#2-底层存储核心概念" class="headerlink" title="2. 底层存储核心概念"></a>2. 底层存储核心概念</h2><table>
-<thead>
-<tr>
-<th>缩写</th>
-<th>完整英文</th>
-<th>中文</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>RADOS</td>
-<td>Reliable Autonomic Distributed Object Store</td>
-<td>可靠自主分布式对象存储</td>
-<td>Ceph底层内核，所有数据（块&#x2F;文件&#x2F;对象）最终都存在RADOS对象</td>
-</tr>
-<tr>
-<td>PG</td>
-<td>Placement Group</td>
-<td>放置组</td>
-<td>数据分片最小单元，OSD之间数据均衡、副本同步的载体</td>
-</tr>
-<tr>
-<td>Pool</td>
-<td>Storage Pool</td>
-<td>存储池</td>
-<td>逻辑资源隔离分区，RBD&#x2F;CephFS&#x2F;RGW分别使用独立Pool</td>
-</tr>
-<tr>
-<td>RBD</td>
-<td>Rados Block Device</td>
-<td>分布式块设备</td>
-<td>基于RADOS的块存储，等价云硬盘，供虚拟机&#x2F;K8s PVC使用</td>
-</tr>
-<tr>
-<td>CephFS</td>
-<td>Ceph File System</td>
-<td>Ceph分布式文件系统</td>
-<td>POSIX标准共享文件存储，多节点同时挂载读写目录</td>
-</tr>
-</tbody></table>
-<h2 id="3-对象存储-RGW-S3-专属名词"><a href="#3-对象存储-RGW-S3-专属名词" class="headerlink" title="3. 对象存储 RGW &#x2F; S3 专属名词"></a>3. 对象存储 RGW &#x2F; S3 专属名词</h2><table>
-<thead>
-<tr>
-<th>术语</th>
-<th>完整英文</th>
-<th>中文</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Bucket</td>
-<td>Bucket</td>
-<td>存储桶</td>
-</tr>
-<tr>
-<td>Object</td>
-<td>Object</td>
-<td>对象</td>
-</tr>
-<tr>
-<td>AK</td>
-<td>Access Key</td>
-<td>访问密钥ID</td>
-</tr>
-<tr>
-<td>SK</td>
-<td>Secret Key</td>
-<td>私有密钥</td>
-</tr>
-<tr>
-<td>REST API</td>
-<td>Representational State Transfer API</td>
-<td>标准化HTTP接口</td>
-</tr>
-</tbody></table>
-<h2 id="4-权限-认证相关"><a href="#4-权限-认证相关" class="headerlink" title="4. 权限&#x2F;认证相关"></a>4. 权限&#x2F;认证相关</h2><table>
-<thead>
-<tr>
-<th>术语</th>
-<th>全称</th>
-<th>中文</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Keyring</td>
-<td>Keyring</td>
-<td>密钥环</td>
-</tr>
-<tr>
-<td>Client</td>
-<td>Client</td>
-<td>Ceph客户端账号</td>
-</tr>
-<tr>
-<td>CSI</td>
-<td>Container Storage Interface</td>
-<td>容器存储标准接口</td>
-</tr>
-<tr>
-<td>JWT</td>
-<td>JSON Web Token</td>
-<td>加密令牌</td>
-</tr>
-</tbody></table>
-<h2 id="5-镜像-块存储专属名词"><a href="#5-镜像-块存储专属名词" class="headerlink" title="5. 镜像&#x2F;块存储专属名词"></a>5. 镜像&#x2F;块存储专属名词</h2><table>
-<thead>
-<tr>
-<th>术语</th>
-<th>全称</th>
-<th>中文</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Image</td>
-<td>RBD Image</td>
-<td>RBD镜像</td>
-</tr>
-<tr>
-<td>Snapshot</td>
-<td>Snapshot</td>
-<td>快照</td>
-</tr>
-<tr>
-<td>Feature</td>
-<td>Image Feature</td>
-<td>镜像特性</td>
-</tr>
-</tbody></table>
-<h1 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h1><ul>
-<li>网络拓扑<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────── ceph-network (172.20.0.0/16) ───────────────────┐</span><br><span class="line">│                                                                    │</span><br><span class="line">│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │</span><br><span class="line">│  │  OSD-1   │  │  OSD-2   │  │  OSD-3   │  │   RGW    │            │</span><br><span class="line">│  │ .0.11    │  │ .0.12    │  │ .0.13    │  │ .0.15    │            │</span><br><span class="line">│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘            │</span><br><span class="line">│       │             │             │             │                  │</span><br><span class="line">│       └─────────────┴─────────────┴─────────────┘                  │</span><br><span class="line">│                         │                                          │</span><br><span class="line">│                    ┌────┴─────┐         ┌──────────┐               │</span><br><span class="line">│                    │   MON    │◄────────│   MGR    │               │</span><br><span class="line">│                    │  .0.10   │         │  .0.14   │               │</span><br><span class="line">│                    └──────────┘         └──────────┘               │</span><br><span class="line">│                                            │                       │</span><br><span class="line">└────────────────────────────────────────────┼───────────────────────┘</span><br><span class="line">                                             │</span><br><span class="line">                                    ┌────────▼─────────┐</span><br><span class="line">                                    │   Dashboard UI   │</span><br><span class="line">                                    │  宿主机:18080    │</span><br><span class="line">                                    └──────────────────┘</span><br></pre></td></tr></table></figure></li>
+<h3 id="1-3-常用链的方向"><a href="#1-3-常用链的方向" class="headerlink" title="1.3 常用链的方向"></a>1.3 常用链的方向</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">进入本机、目标是本机服务：       PREROUTING → INPUT → 本地进程</span><br><span class="line">本机进程发出的流量：             OUTPUT → POSTROUTING</span><br><span class="line">经过本机转发到其他网络：         PREROUTING → FORWARD → POSTROUTING</span><br></pre></td></tr></table></figure>
+
+<p>常见判断：</p>
+<ul>
+<li>访问本机 <code>8081</code> 服务：通常检查 <code>INPUT</code>。</li>
+<li>本机进程访问外部服务：通常检查 <code>OUTPUT</code>。</li>
+<li>节点转发 Pod 流量：通常检查 <code>FORWARD</code>，并结合 CNI&#x2F;kube-proxy 生成的自定义链。</li>
+<li>修改目标地址：常见在 <code>nat</code> 表的 <code>PREROUTING</code> 或 <code>OUTPUT</code>。</li>
+<li>修改源地址：常见在 <code>nat</code> 表的 <code>POSTROUTING</code>。</li>
 </ul>
-<h2 id="1-配置专用网络"><a href="#1-配置专用网络" class="headerlink" title="1 配置专用网络"></a>1 配置专用网络</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker network create --driver bridge --subnet 172.20.0.0/16 ceph-network</span><br><span class="line"></span><br><span class="line">docker network inspect ceph-network</span><br></pre></td></tr></table></figure>
+<h2 id="2-执行前先确认环境"><a href="#2-执行前先确认环境" class="headerlink" title="2. 执行前先确认环境"></a>2. 执行前先确认环境</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 确认命令来源和版本</span></span><br><span class="line"><span class="built_in">command</span> -v iptables</span><br><span class="line">iptables --version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看当前后端，常见结果为 nf_tables 或 legacy</span></span><br><span class="line">iptables --version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看内核模块和 Netfilter 相关能力</span></span><br><span class="line">lsmod | grep -E <span class="string">&#x27;^(ip_tables|iptable_filter|nf_tables|nf_conntrack)&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="2-下载镜像"><a href="#2-下载镜像" class="headerlink" title="2 下载镜像"></a>2 下载镜像</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ceph/daemon:latest-nautilus</span><br><span class="line">docker tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ceph/daemon:latest-nautilus  docker.io/ceph/daemon:latest-nautilus</span><br></pre></td></tr></table></figure>
+<p>如果系统同时存在 <code>iptables-nft</code> 和 <code>iptables-legacy</code>，不要在没有确认的情况下交替使用。两套命令可能操作不同规则集，看到的结果和实际生效路径会不一致。</p>
+<h2 id="3-查看规则"><a href="#3-查看规则" class="headerlink" title="3. 查看规则"></a>3. 查看规则</h2><h3 id="3-1-查看默认-filter-表"><a href="#3-1-查看默认-filter-表" class="headerlink" title="3.1 查看默认 filter 表"></a>3.1 查看默认 filter 表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 详细查看，包含计数器和接口</span></span><br><span class="line">iptables -L -n -v --line-numbers</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等价地明确指定 filter 表</span></span><br><span class="line">iptables -t filter -L -n -v --line-numbers</span><br></pre></td></tr></table></figure>
 
-<h2 id="3-搭建monitor节点"><a href="#3-搭建monitor节点" class="headerlink" title="3 搭建monitor节点"></a>3 搭建monitor节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name ceph-mon --network ceph-network --ip 172.20.0.10 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_IP=172.20.0.10 -e MON_NAME=ceph-mon -e CEPH_PUBLIC_NETWORK=172.20.0.0/16 -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/log/ceph/:/var/log/ceph/ ceph/daemon:latest-nautilus mon</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="4-搭建osd节点"><a href="#4-搭建osd节点" class="headerlink" title="4 搭建osd节点"></a>4 搭建osd节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker exec ceph-mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-1 --network ceph-network --ip 172.20.0.11 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/1:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-2 --network ceph-network --ip 172.20.0.12 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/2:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-osd-3 --network ceph-network --ip 172.20.0.13 -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=ceph-mon -e MON_IP=172.20.0.10 -e OSD_TYPE=directory -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /var/lib/ceph/osd/3:/var/lib/ceph/osd -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus osd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="5-搭建mgr节点并开启dashboard"><a href="#5-搭建mgr节点并开启dashboard" class="headerlink" title="5 搭建mgr节点并开启dashboard"></a>5 搭建mgr节点并开启dashboard</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --privileged=true --name ceph-mgr --network ceph-network --ip 172.20.0.14 -e CLUSTER=ceph -p 18080:18080 --pid=container:ceph-mon -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ ceph/daemon:latest-nautilus mgr</span><br><span class="line"></span><br><span class="line">#设置监听所有地址，端口，关闭ssl</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_addr 0.0.0.0</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/ssl false</span><br><span class="line">#暴漏18080端口，宿主机可访问</span><br><span class="line">docker exec -it ceph-mgr ceph config set mgr mgr/dashboard/server_port 18080</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr ceph mgr module disable dashboard</span><br><span class="line">docker exec -it ceph-mgr ceph mgr module enable dashboard</span><br><span class="line"></span><br><span class="line">docker exec -it ceph-mgr sh -c &#x27;echo &quot;Admin@123456&quot; &gt; /tmp/pass &amp;&amp; ceph dashboard ac-user-create admin administrator -i /tmp/pass &amp;&amp; rm -f /tmp/pass&#x27;</span><br><span class="line">docker exec -it ceph-mgr ceph mgr services</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="6-搭建rgw节点"><a href="#6-搭建rgw节点" class="headerlink" title="6 搭建rgw节点"></a>6 搭建rgw节点</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker exec ceph-mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring</span><br><span class="line"></span><br><span class="line">docker run -d --privileged=true --name ceph-rgw --network ceph-network --ip 172.20.0.15 -e CLUSTER=ceph -e RGW_NAME=ceph-rgw -p 7480:7480 -v /var/lib/ceph/:/var/lib/ceph/ -v /etc/ceph:/etc/ceph -v /etc/localtime:/etc/localtime:ro ceph/daemon:latest-nautilus rgw</span><br><span class="line"></span><br><span class="line">#检查ceph状态</span><br><span class="line">docker exec ceph-mon ceph -s</span><br><span class="line">docker exec ceph-mon ceph config show mgr.f748b86751d5</span><br><span class="line"></span><br><span class="line">#测试添加rgw用户，生成access_key和secret_key用于访问</span><br><span class="line">docker exec ceph-rgw radosgw-admin user create --uid=&quot;test&quot; --display-name=&quot;test user&quot;</span><br></pre></td></tr></table></figure>
-<h2 id="7-ssl端口转发访问"><a href="#7-ssl端口转发访问" class="headerlink" title="7 ssl端口转发访问"></a>7 ssl端口转发访问</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ssh -N -L 0.0.0.0:18080:10.147.100.100:18080 xxx@10.16.100.100</span><br><span class="line">#浏览器访问</span><br><span class="line">http://10.16.100.100:18080</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#获取api token认证</span><br><span class="line">curl -s -X POST &quot;http://10.147.100.100:18080/api/auth&quot; -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/vnd.ceph.api.v1.0+json&quot; -d &#x27;&#123;&quot;username&quot;:&quot;admin&quot;,&quot;password&quot;:&quot;Admin@123456&quot;&#125;&#x27; | jq</span><br></pre></td></tr></table></figure>
-
-<h2 id="8-基础状态查看"><a href="#8-基础状态查看" class="headerlink" title="8 基础状态查看"></a>8 基础状态查看</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 1. 查看集群整体健康状态</span><br><span class="line">docker exec -it ceph-mon ceph -s</span><br><span class="line"></span><br><span class="line"># 2. 查看集群详细健康告警</span><br><span class="line">docker exec -it ceph-mon ceph health detail</span><br><span class="line"></span><br><span class="line"># 3. 查看OSd磁盘、在线状态</span><br><span class="line">docker exec -it ceph-mon ceph osd tree</span><br><span class="line"></span><br><span class="line"># 4. 查看存储池列表</span><br><span class="line">docker exec -it ceph-mon ceph osd pool ls</span><br></pre></td></tr></table></figure>
-
-<h1 id="RBD测试Demo"><a href="#RBD测试Demo" class="headerlink" title="RBD测试Demo"></a>RBD测试Demo</h1><h2 id="块存储RBD-（云主机硬盘）"><a href="#块存储RBD-（云主机硬盘）" class="headerlink" title="块存储RBD （云主机硬盘）"></a>块存储RBD （云主机硬盘）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># 1 创建名为 k8s-rbd-pool 的 RBD 存储池,PG 数量设置为 64（根据实际 OSD 数量调整），副本数2</span><br><span class="line">docker exec -it ceph-mon ceph osd pool create k8s-rbd-pool 64 64</span><br><span class="line"># 2 初始化 RBD 存储池</span><br><span class="line">docker exec -it ceph-mon rbd pool init k8s-rbd-pool</span><br><span class="line"></span><br><span class="line"># 3 创建 10GB 的块设备 test-disk</span><br><span class="line">docker exec -it ceph-mon rbd create test-disk --pool k8s-rbd-pool --size 10G</span><br><span class="line"># 4  查看 RBD 设备列表</span><br><span class="line">docker exec -it ceph-mon rbd ls k8s-rbd-pool</span><br><span class="line"># 5 调整 RBD 设备大小,镜像扩容到20G</span><br><span class="line">docker exec -it ceph-mon rbd resize test-disk --pool k8s-rbd-pool --size 20G</span><br><span class="line"></span><br><span class="line"># 6 创建 RBD 客户端授权，赋予pool读写权限</span><br><span class="line">docker exec -it ceph-mon ceph auth get-or-create client.k8s-rbd mon &#x27;allow r&#x27; osd &#x27;allow rwx pool=k8s-rbd-pool&#x27;</span><br><span class="line"># 7 获取客户端密钥（用于挂载）</span><br><span class="line">docker exec -it ceph-mon ceph auth get-key client.k8s-rbd</span><br><span class="line"></span><br><span class="line">#查看 RBD 详细信息</span><br><span class="line">docker exec ceph-mon rbd info k8s-rbd-pool/test-disk</span><br><span class="line"># 查看块设备实际使用情况</span><br><span class="line">docker exec ceph-mon rbd du k8s-rbd-pool/test-disk</span><br></pre></td></tr></table></figure>
-
-<h2 id="容器挂载块存储"><a href="#容器挂载块存储" class="headerlink" title="容器挂载块存储"></a>容器挂载块存储</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">docker pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/quay.io/ceph/ceph:v19.2.3</span><br><span class="line">docker tag  swr.cn-north-4.myhuaweicloud.com/ddn-k8s/quay.io/ceph/ceph:v19.2.3  quay.io/ceph/ceph:v19.2.3</span><br><span class="line"></span><br><span class="line">mkdir -p /data/rbd-disk</span><br><span class="line"></span><br><span class="line">docker run -it --rm \</span><br><span class="line">--privileged \</span><br><span class="line">--network=ceph-network \</span><br><span class="line">-v /dev:/dev \</span><br><span class="line">-v /data/rbd-disk:/mnt/rbd \</span><br><span class="line">quay.io/ceph/ceph:v19.2.3 bash</span><br><span class="line"></span><br><span class="line">#容器内执行</span><br><span class="line"># 替换成mon容器内网ip: docker inspect ceph-mon | grep -A10 &quot;ceph-network&quot;</span><br><span class="line">cat &gt; /etc/ceph/ceph.conf &lt;&lt;EOF</span><br><span class="line">[global]</span><br><span class="line">mon_host = 172.20.0.10:6789</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"># 密钥不变</span><br><span class="line">cat &gt; /etc/ceph/ceph.client.k8s-rbd.keyring &lt;&lt;EOF</span><br><span class="line">[client.k8s-rbd]</span><br><span class="line">	key = AQDK+E1qXt/FNxAAeYTUTqr3guOY2hlETi4fhQ==</span><br><span class="line">EOF</span><br><span class="line">chmod 600 /etc/ceph/ceph.client.k8s-rbd.keyring</span><br><span class="line"></span><br><span class="line">#测试连通集群</span><br><span class="line">ceph -s --id k8s-rbd</span><br><span class="line"></span><br><span class="line"># 再映射镜像，关闭一些特性</span><br><span class="line">rbd feature disable k8s-rbd-pool/test-disk object-map fast-diff deep-flatten  exclusive-lock --id k8s-rbd</span><br><span class="line"></span><br><span class="line">rbd info k8s-rbd-pool/test-disk --id k8s-rbd</span><br><span class="line"></span><br><span class="line">#映射设备</span><br><span class="line">rbd map k8s-rbd-pool/test-disk --id k8s-rbd --options noudev</span><br><span class="line"></span><br><span class="line"># 查看映射设备</span><br><span class="line">rbd showmapped</span><br><span class="line"></span><br><span class="line"># 只会出现一条/dev/rbd0才正常</span><br><span class="line">ls /dev/rbd0</span><br><span class="line"></span><br><span class="line">#格式化 / 挂载读写验证</span><br><span class="line"># 格式化ext4</span><br><span class="line">mkfs.ext4 /dev/rbd0</span><br><span class="line"></span><br><span class="line"># 创建挂载目录并挂载</span><br><span class="line">mkdir -p /mnt/rbd</span><br><span class="line">mount /dev/rbd0 /mnt/rbd</span><br><span class="line"></span><br><span class="line"># 读写测试</span><br><span class="line">echo &quot;ceph rbd test file&quot; &gt; /mnt/rbd/demo.txt</span><br><span class="line">cat /mnt/rbd/demo.txt</span><br><span class="line"></span><br><span class="line"># 查看磁盘容量</span><br><span class="line">df -h /mnt/rbd</span><br><span class="line"></span><br><span class="line"># 性能测试（可选）</span><br><span class="line">dd if=/dev/zero of=/mnt/rbd/testfile bs=1M count=1024</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="整体流程分析"><a href="#整体流程分析" class="headerlink" title="整体流程分析"></a>整体流程分析</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#深入理解 rbd map 到底为什么能把一个 Ceph Image 变成 Linux 的块设备</span><br><span class="line">rbd CLI</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">librbd（用户态）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">librados（与 Ceph 集群通信）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">MON（获取 OSDMap）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">Primary OSD（定位对象）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">Linux Kernel rbd 模块</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">/dev/rbd0（块设备）</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">mkfs.ext4</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">mount</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">   使用</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="标准卸载流程（避免文件损坏）"><a href="#标准卸载流程（避免文件损坏）" class="headerlink" title="标准卸载流程（避免文件损坏）"></a>标准卸载流程（避免文件损坏）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">容器内执行</span><br><span class="line"># 先卸载挂载点</span><br><span class="line">umount /mnt/rbd</span><br><span class="line"></span><br><span class="line"># 取消映射</span><br><span class="line">rbd unmap /dev/rbd0 --options noudev</span><br><span class="line"></span><br><span class="line"># 确认无映射</span><br><span class="line">rbd showmapped</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">宿主机上执行</span><br><span class="line"># 删除镜像</span><br><span class="line">docker exec -it ceph-mon rbd rm test-disk --pool k8s-rbd-pool</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#完整执行步骤（容器内 ceph-mon 执行,删除池不可逆，池内所有镜像、快照、数据永久丢失）</span><br><span class="line">1. 全局开启 mon 允许删池</span><br><span class="line">docker exec -it ceph-mon ceph config set mon mon_allow_pool_delete true</span><br><span class="line"></span><br><span class="line">2.检查存储池是否开启 nodelete 锁（双重保护）</span><br><span class="line">docker exec -it ceph-mon ceph osd pool get k8s-rbd-pool nodelete</span><br><span class="line">如果输出 nodelete: true，执行关闭锁：</span><br><span class="line">docker exec -it ceph-mon ceph osd pool set k8s-rbd-pool nodelete false</span><br><span class="line"></span><br><span class="line">3.执行删除存储池（二次池名 + 确认参数）</span><br><span class="line">docker exec -it ceph-mon ceph osd pool delete k8s-rbd-pool k8s-rbd-pool --yes-i-really-really-mean-it</span><br><span class="line"></span><br><span class="line">4. 验证池已删除</span><br><span class="line">docker exec -it ceph-mon ceph osd pool ls</span><br><span class="line"></span><br><span class="line">5.测试完成后，关闭删池权限：</span><br><span class="line">docker exec -it ceph-mon ceph config set mon mon_allow_pool_delete false</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#最终清理容器</span><br><span class="line">docker stop ceph-mon ceph-osd-1 ceph-osd-2 ceph-osd-3 ceph-mgr ceph-rgw </span><br><span class="line">docker rm ceph-mon ceph-osd-1 ceph-osd-2 ceph-osd-3 ceph-mgr ceph-rgw </span><br><span class="line"></span><br><span class="line">#清理宿主机数据</span><br><span class="line"># ⚠️ 警告：此操作将永久删除所有 Ceph 数据，不可恢复！</span><br><span class="line">sudo rm -rf /etc/ceph</span><br><span class="line">sudo rm -rf /var/lib/ceph</span><br><span class="line">sudo rm -rf /var/log/ceph</span><br><span class="line">sudo rm -rf /data/rbd-disk</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="Ceph数据流向"><a href="#Ceph数据流向" class="headerlink" title="Ceph数据流向"></a>Ceph数据流向</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">写请求 → Object → PG → CRUSH → Primary OSD → Replica OSD → BlueStore → 磁盘 → ACK 返回</span><br><span class="line"></span><br><span class="line">① 用户说：</span><br><span class="line">   我要写4MB数据。</span><br><span class="line"></span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line"></span><br><span class="line">② Client 去问 MON</span><br><span class="line"></span><br><span class="line">&quot;我该写到哪几个OSD？&quot;</span><br><span class="line"></span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line"></span><br><span class="line">③ MON 回答</span><br><span class="line"></span><br><span class="line">&quot;这是最新Cluster Map，</span><br><span class="line">你自己算一下。&quot;</span><br><span class="line"></span><br><span class="line">（MON 不参与数据传输）</span><br><span class="line"></span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line"></span><br><span class="line">④ Client 自己运行 CRUSH</span><br><span class="line"></span><br><span class="line">算出来：</span><br><span class="line"></span><br><span class="line">Primary：</span><br><span class="line">OSD3</span><br><span class="line"></span><br><span class="line">Replica：</span><br><span class="line">OSD8</span><br><span class="line">OSD11</span><br><span class="line"></span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line"></span><br><span class="line">⑤ Client 把数据发给 Primary OSD</span><br><span class="line"></span><br><span class="line">Client</span><br><span class="line">   │</span><br><span class="line">   ▼</span><br><span class="line">Primary OSD</span><br><span class="line"></span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line"></span><br><span class="line">⑥ Primary 一边写自己，</span><br><span class="line">   一边通知另外两个OSD复制。</span><br><span class="line"></span><br><span class="line">          OSD3</span><br><span class="line">         /    \</span><br><span class="line">        ▼      ▼</span><br><span class="line">     OSD8    OSD11</span><br><span class="line"></span><br><span class="line">全部写成功</span><br><span class="line"></span><br><span class="line">↓</span><br><span class="line"></span><br><span class="line">返回 ACK</span><br><span class="line"></span><br><span class="line">↓</span><br><span class="line"></span><br><span class="line">用户收到：</span><br><span class="line">&quot;写入成功。&quot;</span><br></pre></td></tr></table></figure>
-
-<h2 id="docker-compose-配置"><a href="#docker-compose-配置" class="headerlink" title="docker-compose 配置"></a>docker-compose 配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br></pre></td><td class="code"><pre><span class="line"># =============================================================================</span><br><span class="line"># 单机 Docker Compose 部署 Ceph 集群</span><br><span class="line"># 版本: Nautilus (latest-nautilus)</span><br><span class="line"># 镜像来源: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/ceph/daemon</span><br><span class="line"># =============================================================================</span><br><span class="line">#</span><br><span class="line"># 【拓扑说明】</span><br><span class="line">#   - 网络: ceph-network (172.20.0.0/16)</span><br><span class="line">#   - MON  : 172.20.0.10  (集群元数据管理 / 入口)</span><br><span class="line">#   - OSD-1: 172.20.0.11  (数据存储节点 1)</span><br><span class="line">#   - OSD-2: 172.20.0.12  (数据存储节点 2)</span><br><span class="line">#   - OSD-3: 172.20.0.13  (数据存储节点 3)</span><br><span class="line">#   - MGR  : 172.20.0.14  (Dashboard / Metrics, 端口 7000 &amp; 18080)</span><br><span class="line">#   - RGW  : 172.20.0.15  (对象存储网关, 端口 7480)</span><br><span class="line">#</span><br><span class="line"># 【数据目录(宿主机)】</span><br><span class="line">#   /etc/ceph            — Ceph 配置文件及 keyring</span><br><span class="line">#   /var/lib/ceph/       — Ceph 数据根目录</span><br><span class="line">#   /var/lib/ceph/osd/1  — OSD-1 数据</span><br><span class="line">#   /var/lib/ceph/osd/2  — OSD-2 数据</span><br><span class="line">#   /var/lib/ceph/osd/3  — OSD-3 数据</span><br><span class="line">#   /var/log/ceph/       — 日志目录</span><br><span class="line">#</span><br><span class="line"># 【启动顺序】</span><br><span class="line">#   1. ceph-mon  (其他服务均依赖 MON 完成初始化)</span><br><span class="line">#   2. ceph-osd-1/2/3  (需要 MON keyring 就绪后启动)</span><br><span class="line">#   3. ceph-mgr  (共享 MON 的 PID namespace 以获取集群状态)</span><br><span class="line">#   4. ceph-rgw  (依赖 MGR &amp; OSD 就绪)</span><br><span class="line"># =============================================================================</span><br><span class="line"></span><br><span class="line"># ---------------------------------------------------------------------------</span><br><span class="line"># 自定义网络: bridge 模式，固定子网 172.20.0.0/16</span><br><span class="line"># 各容器使用静态 IP，便于 MON_IP 等环境变量引用</span><br><span class="line"># ---------------------------------------------------------------------------</span><br><span class="line">networks:</span><br><span class="line">  ceph-network:</span><br><span class="line">    driver: bridge</span><br><span class="line">    ipam:</span><br><span class="line">      config:</span><br><span class="line">        - subnet: 172.20.0.0/16</span><br><span class="line"></span><br><span class="line">services:</span><br><span class="line"></span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  # Monitor (MON)</span><br><span class="line">  # 职责: 维护集群映射(cluster map)，是所有组件的协调中心</span><br><span class="line">  # 必须第一个启动，其他组件均依赖 MON 生成的 keyring</span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  ceph-mon:</span><br><span class="line">    image: ceph/daemon:latest-nautilus</span><br><span class="line">    container_name: ceph-mon</span><br><span class="line">    command: mon</span><br><span class="line">    environment:</span><br><span class="line">      CLUSTER: ceph # 集群名称</span><br><span class="line">      WEIGHT: &quot;1.0&quot; # OSD 权重基准</span><br><span class="line">      MON_IP: 172.20.0.10 # MON 监听 IP（需与下方 ipv4_address 一致）</span><br><span class="line">      MON_NAME: ceph-mon # MON 节点名称</span><br><span class="line">      CEPH_PUBLIC_NETWORK: 172.20.0.0/16 # 公共网络 CIDR，客户端通过此网络访问</span><br><span class="line">    volumes:</span><br><span class="line">      - /etc/ceph:/etc/ceph # 配置文件 &amp; keyring 持久化</span><br><span class="line">      - /var/lib/ceph/:/var/lib/ceph/ # 数据目录持久化</span><br><span class="line">      - /var/log/ceph/:/var/log/ceph/ # 日志目录持久化</span><br><span class="line">    networks:</span><br><span class="line">      ceph-network:</span><br><span class="line">        ipv4_address: 172.20.0.10</span><br><span class="line">    restart: unless-stopped</span><br><span class="line"></span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  # OSD 节点 1</span><br><span class="line">  # 职责: 实际存储数据，每个 OSD 对应一个独立的存储目录</span><br><span class="line">  # OSD_TYPE=directory: 使用目录模拟磁盘（测试/单机场景适用）</span><br><span class="line">  # 生产环境建议使用 OSD_TYPE=disk 并挂载真实块设备</span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  ceph-osd-1:</span><br><span class="line">    image: ceph/daemon:latest-nautilus</span><br><span class="line">    container_name: ceph-osd-1</span><br><span class="line">    command: osd</span><br><span class="line">    privileged: true # OSD 需要访问块设备及内核模块</span><br><span class="line">    environment:</span><br><span class="line">      CLUSTER: ceph</span><br><span class="line">      WEIGHT: &quot;1.0&quot;</span><br><span class="line">      MON_NAME: ceph-mon</span><br><span class="line">      MON_IP: 172.20.0.10</span><br><span class="line">      OSD_TYPE: directory # 目录类型 OSD（非生产用途）</span><br><span class="line">    volumes:</span><br><span class="line">      - /etc/ceph:/etc/ceph</span><br><span class="line">      - /var/lib/ceph/:/var/lib/ceph/</span><br><span class="line">      - /var/lib/ceph/osd/1:/var/lib/ceph/osd # OSD-1 独立数据目录</span><br><span class="line">      - /etc/localtime:/etc/localtime:ro # 同步宿主机时区</span><br><span class="line">    networks:</span><br><span class="line">      ceph-network:</span><br><span class="line">        ipv4_address: 172.20.0.11</span><br><span class="line">    depends_on:</span><br><span class="line">      - ceph-mon</span><br><span class="line">    restart: unless-stopped</span><br><span class="line"></span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  # OSD 节点 2</span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  ceph-osd-2:</span><br><span class="line">    image: ceph/daemon:latest-nautilus</span><br><span class="line">    container_name: ceph-osd-2</span><br><span class="line">    command: osd</span><br><span class="line">    privileged: true</span><br><span class="line">    environment:</span><br><span class="line">      CLUSTER: ceph</span><br><span class="line">      WEIGHT: &quot;1.0&quot;</span><br><span class="line">      MON_NAME: ceph-mon</span><br><span class="line">      MON_IP: 172.20.0.10</span><br><span class="line">      OSD_TYPE: directory</span><br><span class="line">    volumes:</span><br><span class="line">      - /etc/ceph:/etc/ceph</span><br><span class="line">      - /var/lib/ceph/:/var/lib/ceph/</span><br><span class="line">      - /var/lib/ceph/osd/2:/var/lib/ceph/osd # OSD-2 独立数据目录</span><br><span class="line">      - /etc/localtime:/etc/localtime:ro</span><br><span class="line">    networks:</span><br><span class="line">      ceph-network:</span><br><span class="line">        ipv4_address: 172.20.0.12</span><br><span class="line">    depends_on:</span><br><span class="line">      - ceph-mon</span><br><span class="line">    restart: unless-stopped</span><br><span class="line"></span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  # OSD 节点 3</span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  ceph-osd-3:</span><br><span class="line">    image: ceph/daemon:latest-nautilus</span><br><span class="line">    container_name: ceph-osd-3</span><br><span class="line">    command: osd</span><br><span class="line">    privileged: true</span><br><span class="line">    environment:</span><br><span class="line">      CLUSTER: ceph</span><br><span class="line">      WEIGHT: &quot;1.0&quot;</span><br><span class="line">      MON_NAME: ceph-mon</span><br><span class="line">      MON_IP: 172.20.0.10</span><br><span class="line">      OSD_TYPE: directory</span><br><span class="line">    volumes:</span><br><span class="line">      - /etc/ceph:/etc/ceph</span><br><span class="line">      - /var/lib/ceph/:/var/lib/ceph/</span><br><span class="line">      - /var/lib/ceph/osd/3:/var/lib/ceph/osd # OSD-3 独立数据目录</span><br><span class="line">      - /etc/localtime:/etc/localtime:ro</span><br><span class="line">    networks:</span><br><span class="line">      ceph-network:</span><br><span class="line">        ipv4_address: 172.20.0.13</span><br><span class="line">    depends_on:</span><br><span class="line">      - ceph-mon</span><br><span class="line">    restart: unless-stopped</span><br><span class="line"></span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  # Manager (MGR)</span><br><span class="line">  # 职责: 集群管理、指标收集、Dashboard 模块承载</span><br><span class="line">  # 端口:</span><br><span class="line">  #   7000  — MGR 默认管理端口</span><br><span class="line">  #   18080 — Dashboard HTTP 端口（SSL 关闭后使用）</span><br><span class="line">  # pid: service:ceph-mon — 共享 MON 的 PID namespace，MGR 可直接读取 MON 进程信息</span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  ceph-mgr:</span><br><span class="line">    image: ceph/daemon:latest-nautilus</span><br><span class="line">    container_name: ceph-mgr</span><br><span class="line">    command: mgr</span><br><span class="line">    privileged: true</span><br><span class="line">    pid: &quot;service:ceph-mon&quot; # 共享 MON PID namespace</span><br><span class="line">    ports:</span><br><span class="line">      # 注: MGR 容器内实际监听端口为 6800/6801（集群内通信）和 18080（Dashboard HTTP）</span><br><span class="line">      - &quot;18080:18080&quot; # Dashboard HTTP 端口（对外暴露，需先通过 ceph config 配置）</span><br><span class="line">      # 如需 Prometheus metrics，启用 prometheus 模块后映射 9283</span><br><span class="line">      # - &quot;9283:9283&quot;</span><br><span class="line">    environment:</span><br><span class="line">      CLUSTER: ceph</span><br><span class="line">    volumes:</span><br><span class="line">      - /etc/ceph:/etc/ceph</span><br><span class="line">      - /var/lib/ceph/:/var/lib/ceph/</span><br><span class="line">    networks:</span><br><span class="line">      ceph-network:</span><br><span class="line">        ipv4_address: 172.20.0.14</span><br><span class="line">    depends_on:</span><br><span class="line">      - ceph-mon</span><br><span class="line">      - ceph-osd-1</span><br><span class="line">      - ceph-osd-2</span><br><span class="line">      - ceph-osd-3</span><br><span class="line">    restart: unless-stopped</span><br><span class="line"></span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  # RADOS Gateway (RGW)</span><br><span class="line">  # 职责: 提供兼容 S3/Swift 的对象存储接口</span><br><span class="line">  # 端口: 7480 — RGW HTTP 端口</span><br><span class="line">  # 启动前需预先生成 bootstrap-rgw keyring（见 README 初始化步骤）</span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  ceph-rgw:</span><br><span class="line">    image: ceph/daemon:latest-nautilus</span><br><span class="line">    container_name: ceph-rgw</span><br><span class="line">    command: rgw</span><br><span class="line">    privileged: true</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;7480:7480&quot; # RGW 对象存储端口（对外暴露）</span><br><span class="line">    environment:</span><br><span class="line">      CLUSTER: ceph</span><br><span class="line">      RGW_NAME: ceph-rgw # RGW 实例名称</span><br><span class="line">    volumes:</span><br><span class="line">      - /var/lib/ceph/:/var/lib/ceph/</span><br><span class="line">      - /etc/ceph:/etc/ceph</span><br><span class="line">      - /etc/localtime:/etc/localtime:ro</span><br><span class="line">    networks:</span><br><span class="line">      ceph-network:</span><br><span class="line">        ipv4_address: 172.20.0.15</span><br><span class="line">    depends_on:</span><br><span class="line">      - ceph-mgr</span><br><span class="line">    restart: unless-stopped</span><br><span class="line"></span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  # Metadata Server (MDS)</span><br><span class="line">  # 职责:</span><br><span class="line">  #   CephFS 元数据管理</span><br><span class="line">  #</span><br><span class="line">  # 注意：</span><br><span class="line">  #   RBD 不需要 MDS</span><br><span class="line">  #   CephFS 必须启动至少一个 MDS</span><br><span class="line">  # --------------------------------------------------------------------------</span><br><span class="line">  ceph-mds:</span><br><span class="line">    image: ceph/daemon:latest-nautilus</span><br><span class="line">    container_name: ceph-mds</span><br><span class="line">    command: mds</span><br><span class="line">    privileged: true</span><br><span class="line"></span><br><span class="line">    environment:</span><br><span class="line">      CLUSTER: ceph</span><br><span class="line">      MDS_NAME: ceph-mds</span><br><span class="line"></span><br><span class="line">    volumes:</span><br><span class="line">      - /etc/ceph:/etc/ceph</span><br><span class="line">      - /var/lib/ceph/:/var/lib/ceph/</span><br><span class="line">      - /var/log/ceph/:/var/log/ceph/</span><br><span class="line">      - /etc/localtime:/etc/localtime:ro</span><br><span class="line"></span><br><span class="line">    networks:</span><br><span class="line">      ceph-network:</span><br><span class="line">        ipv4_address: 172.20.0.16</span><br><span class="line"></span><br><span class="line">    depends_on:</span><br><span class="line">      - ceph-mon</span><br><span class="line">      - ceph-mgr</span><br><span class="line">      - ceph-osd-1</span><br><span class="line">      - ceph-osd-2</span><br><span class="line">      - ceph-osd-3</span><br><span class="line"></span><br><span class="line">    restart: unless-stopped</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="FileSystem"><a href="#FileSystem" class="headerlink" title="FileSystem"></a>FileSystem</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">#配置 MDS 服务（不用整体重启服务）</span><br><span class="line">docker compose up -d ceph-mds</span><br><span class="line"></span><br><span class="line">docker exec ceph-mon ceph mds stat</span><br><span class="line">docker exec ceph-mon ceph -s</span><br><span class="line"></span><br><span class="line">#创建FileSystem步骤</span><br><span class="line">docker exec ceph-mon ceph osd pool create cephfs-meta 8</span><br><span class="line">docker exec ceph-mon ceph osd pool create cephfs-data 16</span><br><span class="line">docker exec ceph-mon ceph mgr module ls | grep enabled_modules -A 20</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">docker exec ceph-mon ceph mgr module enable pg_autoscaler</span><br><span class="line"></span><br><span class="line">docker exec ceph-mon ceph mgr module ls</span><br><span class="line"></span><br><span class="line">docker exec ceph-mon ceph osd pool autoscale-status</span><br><span class="line"></span><br><span class="line">docker exec ceph-mon ceph osd pool ls</span><br><span class="line"></span><br><span class="line">#指定Pool用途</span><br><span class="line">docker exec ceph-mon ceph osd pool application enable cephfs-meta cephfs</span><br><span class="line">docker exec ceph-mon ceph osd pool application enable cephfs-data cephfs</span><br><span class="line"></span><br><span class="line">#验证</span><br><span class="line">docker exec ceph-mon ceph osd pool ls detail</span><br><span class="line"></span><br><span class="line">#创建Filesystem</span><br><span class="line">docker exec ceph-mon ceph fs new mycephfs cephfs-meta cephfs-data</span><br><span class="line"></span><br><span class="line">#查看Filesystem状态</span><br><span class="line">docker exec ceph-mon ceph fs ls</span><br><span class="line">docker exec ceph-mon ceph fs status</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">docker exec ceph-mon ceph auth get-key client.admin</span><br></pre></td></tr></table></figure>
-<h3 id="集群校验"><a href="#集群校验" class="headerlink" title="集群校验"></a>集群校验</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># 1. 查看所有文件系统</span><br><span class="line">docker exec -it ceph-mon ceph fs ls</span><br><span class="line"></span><br><span class="line"># 2. 文件系统详细状态（MDS 在线、池绑定、副本、配额等）</span><br><span class="line">docker exec -it ceph-mon ceph fs status mycephfs</span><br><span class="line"></span><br><span class="line"># 3. MDS 运行状态（必须 up:active）</span><br><span class="line">docker exec -it ceph-mon ceph mds stat</span><br><span class="line"></span><br><span class="line"># 4. 校验两个CephFS存储池副本配置</span><br><span class="line">docker exec -it ceph-mon ceph osd pool get cephfs-meta size</span><br><span class="line">docker exec -it ceph-mon ceph osd pool get cephfs-data size</span><br><span class="line"></span><br><span class="line"># 5. 查看集群整体健康（无WARN/ERR才算稳定）</span><br><span class="line">docker exec -it ceph-mon ceph -s</span><br></pre></td></tr></table></figure>
-
-<h3 id="客户端测试"><a href="#客户端测试" class="headerlink" title="客户端测试"></a>客户端测试</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it ceph-rbd-mount-demo bash</span><br><span class="line"></span><br><span class="line">mkdir -p /mnt/cephfs</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/ceph/ceph.client.admin.keyring &lt;&lt;EOF</span><br><span class="line">[client.admin]</span><br><span class="line">	key = AQDOzE1q1FY+ERAAQ4ZkKp/dunff+LW0OSA+2A==</span><br><span class="line">	caps mds = &quot;allow *&quot;</span><br><span class="line">	caps mgr = &quot;allow *&quot;</span><br><span class="line">	caps mon = &quot;allow *&quot;</span><br><span class="line">	caps osd = &quot;allow *&quot;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">#挂载：</span><br><span class="line">ceph-fuse -m 172.20.0.10:6789 -n client.admin \</span><br><span class="line">-k /etc/ceph/ceph.client.admin.keyring \</span><br><span class="line">/mnt/cephfs</span><br><span class="line"></span><br><span class="line"># 查看挂载列表，确认 ceph-fuse 挂载存在</span><br><span class="line">mount | grep ceph-fuse</span><br><span class="line"></span><br><span class="line"># 查看挂载点磁盘容量、使用率（CephFS聚合容量）</span><br><span class="line">df -h /mnt/cephfs</span><br><span class="line"></span><br><span class="line"># 查看文件/目录权限、inode</span><br><span class="line">ls -l /mnt/cephfs</span><br><span class="line">stat /mnt/cephfs/test.txt</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="深度-IO-读写测试（验证读写、追加、删除、目录创建）"><a href="#深度-IO-读写测试（验证读写、追加、删除、目录创建）" class="headerlink" title="深度 IO 读写测试（验证读写、追加、删除、目录创建）"></a>深度 IO 读写测试（验证读写、追加、删除、目录创建）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># 1. 追加写入</span><br><span class="line">echo &quot;append content&quot; &gt;&gt; /mnt/cephfs/test.txt</span><br><span class="line">cat /mnt/cephfs/test.txt</span><br><span class="line"></span><br><span class="line"># 2. 创建多级目录</span><br><span class="line">mkdir -p /mnt/cephfs/a/b/c</span><br><span class="line">touch /mnt/cephfs/a/b/c/demo.log</span><br><span class="line"></span><br><span class="line"># 3. 大文件写入测速（简单吞吐测试）</span><br><span class="line">dd if=/dev/zero of=/mnt/cephfs/big.test bs=1M count=100 oflag=direct</span><br><span class="line"></span><br><span class="line"># 4. 读取测速</span><br><span class="line">dd if=/mnt/cephfs/big.test of=/dev/null bs=1M iflag=direct</span><br><span class="line"></span><br><span class="line"># 5. 删除文件，校验集群回收对象</span><br><span class="line">rm -f /mnt/cephfs/big.test</span><br><span class="line">rm -rf /mnt/cephfs/a</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="清理FileSystem"><a href="#清理FileSystem" class="headerlink" title="清理FileSystem"></a>清理FileSystem</h3><ul>
-<li>容器执行卸载<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 1. 退出挂载目录，避免占用</span><br><span class="line">cd /</span><br><span class="line"># 2. 强制安全卸载（ceph-fuse专用）</span><br><span class="line">fusermount -u /mnt/cephfs</span><br><span class="line"></span><br><span class="line"># 若提示设备忙，加 -z 强制卸载（慎用，优先停业务）</span><br><span class="line">fusermount -uz /mnt/cephfs</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-<li>宿主机执行<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">#停止MDS容器</span><br><span class="line">docker compose stop ceph-mds</span><br><span class="line"></span><br><span class="line"># 先标记文件系统不可用，禁止新挂载</span><br><span class="line">docker exec -it ceph-mon ceph fs set mycephfs down true</span><br><span class="line">#开启的命令：</span><br><span class="line">#docker exec -it ceph-mon ceph fs set mycephfs down false</span><br><span class="line"></span><br><span class="line">#删除文件系统实例（解除 meta/data 池绑定）</span><br><span class="line">docker exec -it ceph-mon ceph fs rm mycephfs --yes-i-really-mean-it</span><br><span class="line"></span><br><span class="line">#删除两个 CephFS 专属存储池（所有文件永久丢失）</span><br><span class="line"># 开启删池权限</span><br><span class="line">docker exec -it ceph-mon ceph config set mon mon_allow_pool_delete true</span><br><span class="line"></span><br><span class="line"># 删除元数据池、数据池</span><br><span class="line">docker exec -it ceph-mon ceph osd pool delete cephfs-meta cephfs-meta --yes-i-really-really-mean-it</span><br><span class="line">docker exec -it ceph-mon ceph osd pool delete cephfs-data cephfs-data --yes-i-really-really-mean-it</span><br><span class="line"></span><br><span class="line"># 关闭删池保护</span><br><span class="line">docker exec -it ceph-mon ceph config set mon mon_allow_pool_delete false</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="RDB-vs-CephFS"><a href="#RDB-vs-CephFS" class="headerlink" title="RDB vs CephFS"></a>RDB vs CephFS</h2><table>
+<p>字段含义：</p>
+<table>
 <thead>
 <tr>
-<th>对比维度</th>
-<th>RBD 块存储</th>
-<th>CephFS 文件存储</th>
+<th>字段</th>
+<th>含义</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>对外形态</td>
-<td>裸磁盘设备 &#x2F;dev&#x2F;rbdX</td>
-<td>直接树形目录，无需格式化</td>
+<td><code>num</code></td>
+<td>规则编号，可用于删除指定规则</td>
 </tr>
 <tr>
-<td>是否需要格式化</td>
-<td>必须 mkfs.ext4&#x2F;xfs</td>
-<td>不需要，挂载即用</td>
+<td><code>pkts</code></td>
+<td>命中数据包数</td>
 </tr>
 <tr>
-<td>多客户端共享读写</td>
-<td>不支持，多机挂载损坏数据</td>
-<td>原生支持成千上万客户端并发</td>
+<td><code>bytes</code></td>
+<td>命中字节数</td>
 </tr>
 <tr>
-<td>元数据管理方</td>
-<td>本地内核文件系统(ext4)，Ceph无感知</td>
-<td>MDS集群统一管理目录&#x2F;权限&#x2F;inode</td>
+<td><code>target</code></td>
+<td>命中后的目标动作</td>
 </tr>
 <tr>
-<td>最小操作粒度</td>
-<td>整块镜像（磁盘）</td>
-<td>单个文件&#x2F;子目录</td>
+<td><code>prot</code></td>
+<td>协议，例如 tcp&#x2F;udp&#x2F;icmp</td>
 </tr>
 <tr>
-<td>快照粒度</td>
-<td>仅支持整盘快照</td>
-<td>支持目录级快照</td>
+<td><code>source/destination</code></td>
+<td>源&#x2F;目标地址</td>
 </tr>
 <tr>
-<td>扩容逻辑</td>
-<td>resize镜像后还要扩容文件系统</td>
-<td>底层池空间自动复用，无需操作</td>
-</tr>
-<tr>
-<td>目录配额</td>
-<td>不支持</td>
-<td>支持单目录空间、文件数限制</td>
-</tr>
-<tr>
-<td>K8s访问模式</td>
-<td>ReadWriteOnce（独占）</td>
-<td>ReadWriteMany（多机共享）</td>
-</tr>
-<tr>
-<td>核心组件依赖</td>
-<td>仅MON+OSD</td>
-<td>MON+OSD+独立MDS元数据服务</td>
+<td><code>options</code></td>
+<td>其他匹配条件</td>
 </tr>
 </tbody></table>
+<h3 id="3-2-查看所有重要表"><a href="#3-2-查看所有重要表" class="headerlink" title="3.2 查看所有重要表"></a>3.2 查看所有重要表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">iptables -t filter -S</span><br><span class="line">iptables -t nat -S</span><br><span class="line">iptables -t mangle -S</span><br><span class="line">iptables -t raw -S</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以可恢复格式导出完整规则</span></span><br><span class="line">iptables-save</span><br><span class="line">iptables-save -t nat</span><br></pre></td></tr></table></figure>
+
+<p><code>-L</code> 更适合人读，<code>-S</code> 更接近命令格式，<code>iptables-save</code> 适合备份、比较和恢复。</p>
+<h3 id="3-3-查看指定链和命中计数"><a href="#3-3-查看指定链和命中计数" class="headerlink" title="3.3 查看指定链和命中计数"></a>3.3 查看指定链和命中计数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">iptables -L INPUT -n -v --line-numbers</span><br><span class="line">iptables -L FORWARD -n -v --line-numbers</span><br><span class="line">iptables -t nat -L POSTROUTING -n -v --line-numbers</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清零计数器前先保存现场；不要随便对生产规则执行</span></span><br><span class="line">iptables -Z INPUT</span><br></pre></td></tr></table></figure>
+
+<p>命中计数可以帮助判断规则是否真的经过流量，但计数器是内核级统计，不能单独证明应用层请求成功。</p>
+<h2 id="4-链和默认策略"><a href="#4-链和默认策略" class="headerlink" title="4. 链和默认策略"></a>4. 链和默认策略</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看默认策略</span></span><br><span class="line">iptables -L -n | <span class="built_in">head</span> -n 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看已有链</span></span><br><span class="line">iptables -t filter -L</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建自定义链</span></span><br><span class="line">iptables -N MY_TEST</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除空的自定义链</span></span><br><span class="line">iptables -X MY_TEST</span><br></pre></td></tr></table></figure>
+
+<p>常见默认策略：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">iptables -P INPUT ACCEPT</span><br><span class="line">iptables -P OUTPUT ACCEPT</span><br><span class="line">iptables -P FORWARD ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p>不要在远程 SSH 会话中直接把策略改成 <code>DROP</code>，除非已经准备好允许 SSH、已建立连接、回环和必要管理流量的规则，并且有控制台或带外登录手段。</p>
+<h2 id="5-增加规则：-A、-I"><a href="#5-增加规则：-A、-I" class="headerlink" title="5. 增加规则：-A、-I"></a>5. 增加规则：<code>-A</code>、<code>-I</code></h2><h3 id="5-1-放行本机-SSH"><a href="#5-1-放行本机-SSH" class="headerlink" title="5.1 放行本机 SSH"></a>5.1 放行本机 SSH</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 追加到 INPUT 链末尾</span></span><br><span class="line">iptables -A INPUT -p tcp --dport 22 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更稳妥的基础规则：允许已建立连接和本地回环</span></span><br><span class="line">iptables -I INPUT 1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line">iptables -I INPUT 2 -i lo -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p><code>-A</code> 是 append，追加到链尾；<code>-I INPUT 1</code> 是 insert，插入到第 1 条。规则是按顺序匹配的，前面的规则可能已经决定了数据包命运。</p>
+<h3 id="5-2-允许或拒绝指定来源"><a href="#5-2-允许或拒绝指定来源" class="headerlink" title="5.2 允许或拒绝指定来源"></a>5.2 允许或拒绝指定来源</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 允许指定网段访问 8081</span></span><br><span class="line">iptables -A INPUT -p tcp -s 10.10.0.0/16 --dport 8081 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 丢弃来自指定地址的流量，不返回响应</span></span><br><span class="line">iptables -I INPUT 1 -s 192.0.2.10 -j DROP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拒绝并返回 TCP RST 或 ICMP 错误，便于快速失败</span></span><br><span class="line">iptables -I INPUT 1 -s 192.0.2.10 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p><code>DROP</code> 通常表现为超时，<code>REJECT</code> 通常立即返回失败。安全策略和排障目标不同，不能简单认为其中一个永远更好。</p>
+<h3 id="5-3-按协议和端口匹配"><a href="#5-3-按协议和端口匹配" class="headerlink" title="5.3 按协议和端口匹配"></a>5.3 按协议和端口匹配</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 单个 TCP 端口</span></span><br><span class="line">iptables -A INPUT -p tcp --dport 8081 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># TCP 端口范围</span></span><br><span class="line">iptables -A INPUT -p tcp --dport 8000:8100 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># UDP 端口</span></span><br><span class="line">iptables -A INPUT -p udp --dport 53 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># ICMP</span></span><br><span class="line">iptables -A INPUT -p icmp -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p><code>--dport</code> 通常需要配合 <code>-p tcp</code> 或 <code>-p udp</code>。开放端口前要确认监听进程和访问来源，不要用大范围端口替代精确规则。</p>
+<h2 id="6-删除、替换和临时回滚"><a href="#6-删除、替换和临时回滚" class="headerlink" title="6. 删除、替换和临时回滚"></a>6. 删除、替换和临时回滚</h2><h3 id="6-1-按规则编号删除"><a href="#6-1-按规则编号删除" class="headerlink" title="6.1 按规则编号删除"></a>6.1 按规则编号删除</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -L INPUT -n -v --line-numbers</span><br><span class="line">iptables -D INPUT 3</span><br></pre></td></tr></table></figure>
+
+<p>删除前先重新列一次规则。规则编号会因前面插入&#x2F;删除而变化，不能长期缓存编号。</p>
+<h3 id="6-2-按完整规则删除"><a href="#6-2-按完整规则删除" class="headerlink" title="6.2 按完整规则删除"></a>6.2 按完整规则删除</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>这种方式不依赖规则编号，但参数必须与原规则等价匹配。用 <code>iptables -S INPUT</code> 获取可复制的规则形式更可靠。</p>
+<h3 id="6-3-替换规则"><a href="#6-3-替换规则" class="headerlink" title="6.3 替换规则"></a>6.3 替换规则</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将 INPUT 第 3 条替换为允许 8081</span></span><br><span class="line">iptables -R INPUT 3 -p tcp --dport 8081 -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-4-推荐的临时规则写法"><a href="#6-4-推荐的临时规则写法" class="headerlink" title="6.4 推荐的临时规则写法"></a>6.4 推荐的临时规则写法</h3><p>排障时优先使用自定义链，规则更容易识别和清理：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">iptables -N DEBUG_PROBE</span><br><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j DEBUG_PROBE</span><br><span class="line">iptables -A DEBUG_PROBE -j REJECT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 排障结束：先删除跳转，再清空并删除自定义链</span></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j DEBUG_PROBE</span><br><span class="line">iptables -F DEBUG_PROBE</span><br><span class="line">iptables -X DEBUG_PROBE</span><br></pre></td></tr></table></figure>
+
+<p>如果只是临时插入一条规则，至少加上明确注释：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -m comment --comment <span class="string">&#x27;temporary probe test&#x27;</span> -j REJECT</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-重点案例：阻断-8081-健康检查"><a href="#7-重点案例：阻断-8081-健康检查" class="headerlink" title="7. 重点案例：阻断 8081 健康检查"></a>7. 重点案例：阻断 8081 健康检查</h2><p>假设 Go 程序 PID 1 同时监听 <code>11800</code>、<code>6060</code>、<code>8081</code>、<code>11443</code>，不能通过杀进程只关闭 <code>8081</code>。<code>kill -9 1</code> 会让整个容器退出，不能模拟“单端口不可达”。</p>
+<p>在容器自己的网络命名空间中执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>含义拆解：</p>
+<table>
+<thead>
+<tr>
+<th>片段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>iptables</code></td>
+<td>修改当前网络命名空间中的 Netfilter 规则</td>
+</tr>
+<tr>
+<td><code>-I INPUT 1</code></td>
+<td>把规则插入 INPUT 链第 1 位，优先匹配</td>
+</tr>
+<tr>
+<td><code>-p tcp</code></td>
+<td>只匹配 TCP</td>
+</tr>
+<tr>
+<td><code>--dport 8081</code></td>
+<td>只匹配目标端口 8081</td>
+</tr>
+<tr>
+<td><code>-j REJECT</code></td>
+<td>拒绝数据包，并向对端返回失败</td>
+</tr>
+</tbody></table>
+<p>验证和恢复：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">iptables -L INPUT -n -v --line-numbers</span><br><span class="line">curl -v --max-time 3 http://127.0.0.1:8081/healthz</span><br><span class="line"></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>如果配置的是 <code>readinessProbe</code>，失败后通常只会将 Pod 从 Service Endpoint 中摘除；如果配置的是 <code>livenessProbe</code>，连续失败达到 <code>failureThreshold</code> 后 kubelet 才会重启容器。</p>
+<h2 id="8-nsenter：进入-Pod-的网络命名空间"><a href="#8-nsenter：进入-Pod-的网络命名空间" class="headerlink" title="8. nsenter：进入 Pod 的网络命名空间"></a>8. <code>nsenter</code>：进入 Pod 的网络命名空间</h2><h3 id="8-1-为什么要使用-nsenter"><a href="#8-1-为什么要使用-nsenter" class="headerlink" title="8.1 为什么要使用 nsenter"></a>8.1 为什么要使用 <code>nsenter</code></h3><p>容器通常有独立的 Network Namespace。宿主机执行的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -L</span><br></pre></td></tr></table></figure>
+
+<p>查看的是宿主机网络命名空间规则，不一定是目标 Pod 的规则。<code>nsenter -n</code> 可以让命令进入指定进程的网络命名空间，然后在其中执行 <code>iptables</code>。</p>
+<h3 id="8-2-你给出的命令如何理解"><a href="#8-2-你给出的命令如何理解" class="headerlink" title="8.2 你给出的命令如何理解"></a>8.2 你给出的命令如何理解</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SANDBOX_PID=3911859</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>分解如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SANDBOX_PID=3911859</span><br><span class="line">  将 Pod sandbox 的进程 ID 保存到变量 SANDBOX_PID</span><br><span class="line"></span><br><span class="line">nsenter -t &quot;$SANDBOX_PID&quot; -n</span><br><span class="line">  进入 PID 3911859 所在的 Network Namespace</span><br><span class="line"></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br><span class="line">  在该 Network Namespace 中删除“拒绝 TCP 8081”的规则</span><br></pre></td></tr></table></figure>
+
+<p>它的适用场景是：之前已经在同一个 Pod 网络命名空间中执行过：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>现在需要恢复端口访问。<code>-D</code> 必须匹配原规则；如果原来用的是 <code>DROP</code>、插入了源地址条件、使用了自定义链，删除命令也必须对应调整。</p>
+<h3 id="8-3-找到正确的-Sandbox-PID"><a href="#8-3-找到正确的-Sandbox-PID" class="headerlink" title="8.3 找到正确的 Sandbox PID"></a>8.3 找到正确的 Sandbox PID</h3><p>先确定 Pod 所在节点和 Pod UID：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; get pod &lt;pod-name&gt; -o wide</span><br><span class="line">kubectl -n &lt;namespace&gt; get pod &lt;pod-name&gt; -o jsonpath=<span class="string">&#x27;&#123;.metadata.uid&#125;&#123;&quot;\n&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>在节点上查询 sandbox：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">crictl pods --name &lt;pod-name&gt;</span><br><span class="line">crictl pods --<span class="built_in">id</span> &lt;sandbox-id&gt;</span><br></pre></td></tr></table></figure>
+
+<p>获取 sandbox PID，具体字段随 <code>crictl</code>&#x2F;containerd 版本变化：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SANDBOX_ID=&lt;sandbox-id&gt;</span><br><span class="line">crictl inspectp <span class="string">&quot;<span class="variable">$SANDBOX_ID</span>&quot;</span> | jq <span class="string">&#x27;.info.pid, .status, .metadata&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>常见输出位置是 <code>.info.pid</code>，但不要假定所有版本都一样，先查看完整 JSON：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crictl inspectp <span class="string">&quot;<span class="variable">$SANDBOX_ID</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>确认命名空间和网卡：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n ip addr</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n ip route</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -L INPUT -n -v --line-numbers</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-4-完整阻断和恢复示例"><a href="#8-4-完整阻断和恢复示例" class="headerlink" title="8.4 完整阻断和恢复示例"></a>8.4 完整阻断和恢复示例</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">SANDBOX_PID=3911859</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 先保存原规则，便于恢复</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables-save &gt; /tmp/pod-iptables-before.rules</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 插入临时阻断规则</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n \</span><br><span class="line">  iptables -I INPUT 1 -p tcp --dport 8081 \</span><br><span class="line">  -m comment --comment <span class="string">&#x27;temporary probe test&#x27;</span> -j REJECT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 验证命中计数和访问结果</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -L INPUT -n -v --line-numbers</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n curl -v --max-time 3 http://127.0.0.1:8081/healthz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 删除临时规则</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n \</span><br><span class="line">  iptables -D INPUT -p tcp --dport 8081 \</span><br><span class="line">  -m comment --comment <span class="string">&#x27;temporary probe test&#x27;</span> -j REJECT</span><br></pre></td></tr></table></figure>
+
+<p>注意：<code>curl</code> 必须在 Pod 的网络命名空间中执行，才可以验证 Pod 内部视角。若镜像没有 <code>curl</code>，可以从节点或临时 debug 容器访问 Pod IP，但那验证的是外部路径，不完全等价。</p>
+<h2 id="9-Kubernetes-中需要特别注意的规则"><a href="#9-Kubernetes-中需要特别注意的规则" class="headerlink" title="9. Kubernetes 中需要特别注意的规则"></a>9. Kubernetes 中需要特别注意的规则</h2><p>Kubernetes 节点上的规则可能来自：</p>
+<ul>
+<li>kube-proxy：Service、ClusterIP、NodePort、负载转发规则</li>
+<li>CNI：Pod 网络、SNAT、转发、自定义链</li>
+<li>NetworkPolicy：Calico、Cilium、OVN 等网络策略实现</li>
+<li>宿主机防火墙：firewalld、ufw、云安全组</li>
+<li>运维或安全软件：规则审计、自动恢复、配置管理</li>
+</ul>
+<p>常见自定义链可能包含 <code>KUBE-SERVICES</code>、<code>KUBE-FORWARD</code>、<code>KUBE-POSTROUTING</code>、<code>CNI-*</code> 等。不同 Kubernetes 版本和 kube-proxy 模式会变化，不要依赖固定链名写自动化脚本。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 节点命名空间查看 Kubernetes 相关规则</span></span><br><span class="line">iptables-save | grep -E <span class="string">&#x27;KUBE|CNI|CALICO|CILIUM|OVN&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果使用 nftables 后端，也从 nft 视角确认</span></span><br><span class="line">nft list ruleset</span><br></pre></td></tr></table></figure>
+
+<p>在 Pod 命名空间中手工加的规则只影响该 Network Namespace，不等于修改了 NetworkPolicy；Pod 重建后，临时规则通常会消失。</p>
+<h2 id="10-NAT-常用命令"><a href="#10-NAT-常用命令" class="headerlink" title="10. NAT 常用命令"></a>10. NAT 常用命令</h2><h3 id="10-1-查看-NAT"><a href="#10-1-查看-NAT" class="headerlink" title="10.1 查看 NAT"></a>10.1 查看 NAT</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -L -n -v --line-numbers</span><br><span class="line">iptables -t nat -S</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-2-SNAT-和-MASQUERADE"><a href="#10-2-SNAT-和-MASQUERADE" class="headerlink" title="10.2 SNAT 和 MASQUERADE"></a>10.2 SNAT 和 MASQUERADE</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 固定公网源地址，适合出口 IP 固定的场景</span></span><br><span class="line">iptables -t nat -A POSTROUTING -s 10.244.0.0/16 \</span><br><span class="line">  -o eth0 -j SNAT --to-source 203.0.113.10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 出口 IP 动态变化时使用接口地址</span></span><br><span class="line">iptables -t nat -A POSTROUTING -s 10.244.0.0/16 \</span><br><span class="line">  -o eth0 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-3-DNAT-和端口转发"><a href="#10-3-DNAT-和端口转发" class="headerlink" title="10.3 DNAT 和端口转发"></a>10.3 DNAT 和端口转发</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 8080 \</span><br><span class="line">  -j DNAT --to-destination 10.0.0.20:8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 允许转发流量通过 filter 表</span></span><br><span class="line">iptables -A FORWARD -p tcp -d 10.0.0.20 --dport 8081 \</span><br><span class="line">  -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p>NAT 只负责地址转换，不自动代表防火墙放行。还要检查 <code>FORWARD</code>、<code>ip_forward</code> 和返回路径：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sysctl net.ipv4.ip_forward</span><br><span class="line">sysctl -w net.ipv4.ip_forward=1</span><br></pre></td></tr></table></figure>
+
+<p>不要在生产环境只为临时测试执行 <code>sysctl -w</code> 而忘记配置持久化和安全评估。</p>
+<h2 id="11-连接跟踪和已有连接"><a href="#11-连接跟踪和已有连接" class="headerlink" title="11. 连接跟踪和已有连接"></a>11. 连接跟踪和已有连接</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看连接跟踪表</span></span><br><span class="line">conntrack -L</span><br><span class="line">conntrack -L -p tcp --dport 8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看连接跟踪数量和上限</span></span><br><span class="line">sysctl net.netfilter.nf_conntrack_count</span><br><span class="line">sysctl net.netfilter.nf_conntrack_max</span><br></pre></td></tr></table></figure>
+
+<p>新规则不一定立即改变已建立连接的行为，尤其是使用 <code>ESTABLISHED,RELATED</code> 放行规则时。排障时区分：</p>
+<ul>
+<li>新建连接是否被规则拦截。</li>
+<li>已有连接是否仍能继续传输。</li>
+<li>NAT&#x2F;连接跟踪状态是否残留。</li>
+</ul>
+<p>不要为了测试随意清空全局 conntrack 表：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conntrack -F</span><br></pre></td></tr></table></figure>
+
+<p>这会影响节点上的大量连接，可能造成业务中断。若必须清理，应使用精确过滤条件并在维护窗口执行。</p>
+<h2 id="12-持久化、备份和恢复"><a href="#12-持久化、备份和恢复" class="headerlink" title="12. 持久化、备份和恢复"></a>12. 持久化、备份和恢复</h2><h3 id="12-1-备份当前规则"><a href="#12-1-备份当前规则" class="headerlink" title="12.1 备份当前规则"></a>12.1 备份当前规则</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables-save &gt; /root/iptables-$(<span class="built_in">date</span> +%Y%m%d-%H%M%S).rules</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-2-恢复规则"><a href="#12-2-恢复规则" class="headerlink" title="12.2 恢复规则"></a>12.2 恢复规则</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables-restore &lt; /root/iptables-backup.rules</span><br></pre></td></tr></table></figure>
+
+<p>恢复前确认文件来自同一套后端、同一台机器或兼容环境。恢复可能替换现有规则，必须准备控制台&#x2F;带外访问和回滚方案。</p>
+<h3 id="12-3-持久化差异"><a href="#12-3-持久化差异" class="headerlink" title="12.3 持久化差异"></a>12.3 持久化差异</h3><p>不同系统可能使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Debian/Ubuntu 常见工具</span></span><br><span class="line">netfilter-persistent save</span><br><span class="line">netfilter-persistent reload</span><br><span class="line"></span><br><span class="line"><span class="comment"># RHEL/CentOS 系列可能使用 iptables-services</span></span><br><span class="line">service iptables save</span><br><span class="line">systemctl restart iptables</span><br></pre></td></tr></table></figure>
+
+<p>现代发行版可能以 firewalld 或 nftables 为主。不要只把规则写入文件就假定重启后一定恢复，应该实际重启服务或在测试机重启验证。</p>
+<h2 id="13-调试和抓包配合"><a href="#13-调试和抓包配合" class="headerlink" title="13. 调试和抓包配合"></a>13. 调试和抓包配合</h2><p>iptables 只能说明规则匹配和动作，不能完整说明应用是否监听、路由是否正确或响应是否返回。建议配合：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 确认监听</span></span><br><span class="line">ss -lntp</span><br><span class="line">ss -lunp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 观察指定端口报文</span></span><br><span class="line">tcpdump -ni any <span class="string">&#x27;tcp port 8081&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从本地或远端测试</span></span><br><span class="line">curl -v --max-time 3 http://127.0.0.1:8081/healthz</span><br><span class="line">nc -vz -w 3 &lt;ip&gt; 8081</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看路由选择</span></span><br><span class="line">ip route get &lt;destination-ip&gt;</span><br></pre></td></tr></table></figure>
+
+<p>推荐判断顺序：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">是否监听？</span><br><span class="line">  → 路由是否正确？</span><br><span class="line">  → 报文是否到达？</span><br><span class="line">  → 哪条 iptables 规则命中？</span><br><span class="line">  → 对端是否返回？</span><br><span class="line">  → 应用层响应是否正确？</span><br></pre></td></tr></table></figure>
+
+<h2 id="14-最佳实践和风险清单"><a href="#14-最佳实践和风险清单" class="headerlink" title="14. 最佳实践和风险清单"></a>14. 最佳实践和风险清单</h2><ul>
+<li>修改前先执行 <code>iptables-save</code> 备份，并记录变更目的、时间和操作者。</li>
+<li>远程操作优先使用 <code>-I</code> 插入精确规则，不要直接修改默认策略。</li>
+<li>使用源地址、目标地址、协议和端口做最小范围匹配。</li>
+<li>临时规则使用 <code>-m comment --comment</code> 标识，排障结束立即删除。</li>
+<li>删除规则前先用 <code>iptables -L -n -v --line-numbers</code> 确认编号和命中计数。</li>
+<li>使用自定义链隔离业务规则，避免直接改动 kube-proxy&#x2F;CNI 自动生成的链。</li>
+<li>Kubernetes 节点规则可能会被 kube-proxy、CNI 或 firewalld 自动重写，验证时要观察一段时间。</li>
+<li>Pod 重建后网络命名空间和临时规则通常都会消失，不能把临时实验当成永久配置。</li>
+<li><code>DROP</code> 会导致超时，<code>REJECT</code> 会快速失败；按测试目的选择。</li>
+<li>NAT 规则和 filter 规则是两套逻辑，地址转换成功不代表转发被允许。</li>
+<li>同时确认 <code>iptables-nft</code>、<code>iptables-legacy</code>、<code>nft</code> 的后端，避免“查到的不是生效的”。</li>
+<li>不要直接执行 <code>iptables -F</code>、<code>iptables -X</code>、<code>iptables -t nat -F</code> 或 <code>conntrack -F</code>，除非明确了解影响并具备恢复方案。</li>
+<li>生产变更后验证 SSH、DNS、API Server、节点管理、Pod 网络、Service 和监控链路。</li>
+</ul>
+<h2 id="15-常用命令速查"><a href="#15-常用命令速查" class="headerlink" title="15. 常用命令速查"></a>15. 常用命令速查</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看</span></span><br><span class="line">iptables -L -n -v --line-numbers</span><br><span class="line">iptables -t nat -L -n -v --line-numbers</span><br><span class="line">iptables-save</span><br><span class="line">iptables -S</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加</span></span><br><span class="line">iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br><span class="line">iptables -A INPUT -p tcp --dport 22 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除</span></span><br><span class="line">iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br><span class="line">iptables -D INPUT &lt;rule-number&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 备份和恢复</span></span><br><span class="line">iptables-save &gt; /root/iptables.rules</span><br><span class="line">iptables-restore &lt; /root/iptables.rules</span><br><span class="line"></span><br><span class="line"><span class="comment"># Pod 网络命名空间</span></span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -L -n -v --line-numbers</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -I INPUT 1 -p tcp --dport 8081 -j REJECT</span><br><span class="line">nsenter -t <span class="string">&quot;<span class="variable">$SANDBOX_PID</span>&quot;</span> -n iptables -D INPUT -p tcp --dport 8081 -j REJECT</span><br></pre></td></tr></table></figure>
+
 
       
     </div>
@@ -1825,7 +1822,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/12/30/perf%E8%BF%9B%E9%98%B6/">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/08/ipvsadm-%E5%91%BD%E4%BB%A4%E4%B8%8E-Kubernetes-IPVS-%E6%8E%92%E9%9A%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -1839,7 +1836,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/12/30/perf%E8%BF%9B%E9%98%B6/" class="post-title-link" itemprop="url">perf进阶</a>
+            <a href="/2026/01/08/ipvsadm-%E5%91%BD%E4%BB%A4%E4%B8%8E-Kubernetes-IPVS-%E6%8E%92%E9%9A%9C/" class="post-title-link" itemprop="url">ipvsadm 命令与 Kubernetes IPVS 排障</a>
         </h2>
 
         <div class="post-meta">
@@ -1848,10 +1845,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-12-30 11:01:15 / 修改时间：11:01:33" itemprop="dateCreated datePublished" datetime="2025-12-30T11:01:15+08:00">2025-12-30</time>
+              <time title="创建时间：2026-01-08 14:25:39" itemprop="dateCreated datePublished" datetime="2026-01-08T14:25:39+08:00">2026-01-08</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-09-08 14:26:44" itemprop="dateModified" datetime="2026-09-08T14:26:44+08:00">2026-09-08</time>
+              </span>
 
           <br>
             <span class="post-meta-item" title="本文字数">
@@ -1859,14 +1862,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
+              <span>6.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
+              <span>6 分钟</span>
             </span>
 
         </div>
@@ -1878,97 +1881,193 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="Perf-进阶路线图：从入门到专家级"><a href="#Perf-进阶路线图：从入门到专家级" class="headerlink" title="Perf 进阶路线图：从入门到专家级"></a>Perf 进阶路线图：从入门到专家级</h1><h2 id="📚-学习路线概览"><a href="#📚-学习路线概览" class="headerlink" title="📚 学习路线概览"></a>📚 学习路线概览</h2><h3 id="Level-1-入门级-基础概念和常用命令"><a href="#Level-1-入门级-基础概念和常用命令" class="headerlink" title="Level 1: 入门级 (基础概念和常用命令)"></a>Level 1: 入门级 (基础概念和常用命令)</h3><h3 id="Level-2-进阶级-性能分析和优化"><a href="#Level-2-进阶级-性能分析和优化" class="headerlink" title="Level 2: 进阶级 (性能分析和优化)"></a>Level 2: 进阶级 (性能分析和优化)</h3><h3 id="Level-3-高级级-深入系统分析"><a href="#Level-3-高级级-深入系统分析" class="headerlink" title="Level 3: 高级级 (深入系统分析)"></a>Level 3: 高级级 (深入系统分析)</h3><h3 id="Level-4-专家级-内核级分析和定制"><a href="#Level-4-专家级-内核级分析和定制" class="headerlink" title="Level 4: 专家级 (内核级分析和定制)"></a>Level 4: 专家级 (内核级分析和定制)</h3><hr>
-<h2 id="🚀-Level-1-入门级"><a href="#🚀-Level-1-入门级" class="headerlink" title="🚀 Level 1: 入门级"></a>🚀 Level 1: 入门级</h2><h3 id="基础概念理解"><a href="#基础概念理解" class="headerlink" title="基础概念理解"></a>基础概念理解</h3><ul>
-<li>硬件计数器 (Hardware Counters)</li>
-<li>采样 vs 计数</li>
-<li>事件类型：硬件事件、软件事件、跟踪点</li>
+          <p>本文解释下面这条命令的含义，并整理 Kubernetes 使用 kube-proxy IPVS 模式时的常用查看和排障方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --stats --exact | grep 172.24.0.2</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-这条命令做了什么"><a href="#1-这条命令做了什么" class="headerlink" title="1. 这条命令做了什么"></a>1. 这条命令做了什么</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -ln --rate --stats --exact | grep 172.24.0.2</span><br><span class="line">          │                         └─ 只保留包含 172.24.0.2 的行</span><br><span class="line">          └─ 查看本机 Linux IPVS 虚拟服务和统计信息</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-l</code> &#x2F; <code>--list</code></td>
+<td>列出当前 IPVS 虚拟服务和后端 Real Server</td>
+</tr>
+<tr>
+<td><code>-n</code> &#x2F; <code>--numeric</code></td>
+<td>直接显示数字 IP 和端口，不做 DNS 反向解析</td>
+</tr>
+<tr>
+<td><code>--rate</code></td>
+<td>显示速率相关统计；具体列和版本有关</td>
+</tr>
+<tr>
+<td><code>--stats</code></td>
+<td>显示连接、包和字节统计</td>
+</tr>
+<tr>
+<td><code>--exact</code></td>
+<td>精确显示计数值，不使用 K&#x2F;M&#x2F;G 等人类可读缩写</td>
+</tr>
+<tr>
+<td><code>grep 172.24.0.2</code></td>
+<td>在命令输出中筛选这个 IP；它不是 ipvsadm 的过滤条件</td>
+</tr>
+</tbody></table>
+<p>这条命令查询的是<strong>当前执行节点的本机 IPVS 表</strong>，不是直接查询 Kubernetes API。只有当该节点使用 kube-proxy 的 IPVS 模式时，才能通过它观察 Kubernetes Service 的本地代理规则。</p>
+<h2 id="2-如何理解你的输出"><a href="#2-如何理解你的输出" class="headerlink" title="2. 如何理解你的输出"></a>2. 如何理解你的输出</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TCP  172.24.0.2:53       9        55        46       3566        3857</span><br><span class="line">TCP  172.24.0.2:9153     0         0         0          0           0</span><br><span class="line">UDP  172.24.0.2:53  12454197  12736147  12736147 1083310475 2264214688</span><br></pre></td></tr></table></figure>
+
+<p>每一行前两列是 IPVS 虚拟服务：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TCP</code> &#x2F; <code>UDP</code></td>
+<td>虚拟服务使用的传输协议</td>
+</tr>
+<tr>
+<td><code>172.24.0.2:53</code></td>
+<td>Virtual Service 的 VIP 和端口</td>
+</tr>
+<tr>
+<td><code>172.24.0.2:9153</code></td>
+<td>另一个 VIP&#x2F;端口，可能是同一 Service 的其他端口</td>
+</tr>
+</tbody></table>
+<p>在很多 <code>ipvsadm</code> 版本中，单独使用 <code>--stats</code> 时，虚拟服务后面的 5 个数字依次为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Conns  InPkts  OutPkts  InBytes  OutBytes</span><br></pre></td></tr></table></figure>
+
+<p>因此，如果实际输出确实只有 5 个数字，可以按这个常见格式解释：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UDP 172.24.0.2:53</span><br><span class="line">     12454197  12736147  12736147  1083310475  2264214688</span><br><span class="line">     Conns     InPkts    OutPkts    InBytes     OutBytes</span><br></pre></td></tr></table></figure>
+
+<p>含义是该节点上这个 UDP 虚拟服务累计观察到大约 1245 万个连接&#x2F;会话计数、1273 万个入包、1273 万个出包，以及对应的入&#x2F;出字节数。具体统计从什么时候开始，取决于 IPVS 服务创建、规则刷新、节点重启和内核计数器状态。</p>
+<p><code>TCP 172.24.0.2:9153</code> 全为 0，表示在当前节点的 IPVS 统计周期内没有观察到该虚拟服务的 TCP 流量，或者该服务目前没有实际请求。它不等于 Kubernetes Service 一定不存在，需要继续检查 Service、EndpointSlice 和后端 Pod。</p>
+<p>需要特别注意：你贴出的每行只有 5 个数字，而命令同时带了 <code>--stats</code> 和 <code>--rate</code>。在支持同时输出两类信息的版本中，通常还会出现类似下面的速率列：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CPS  InPPS  OutPPS  InBPS  OutBPS</span><br></pre></td></tr></table></figure>
+
+<p>如果命令输出只有 <code>Conns InPkts OutPkts InBytes OutBytes</code>，说明当前版本的输出格式没有把 rate 列展示出来、参数组合被版本处理为一种输出，或者粘贴时省略了表头&#x2F;其他列。不要仅凭位置猜测列含义，必须保留并查看完整表头：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-为什么要以表头为准"><a href="#2-1-为什么要以表头为准" class="headerlink" title="2.1 为什么要以表头为准"></a>2.1 为什么要以表头为准</h3><p><code>--rate</code> 和 <code>--stats</code> 的显示方式、列顺序、是否同时展示，可能随 <code>ipvsadm</code> 版本变化。你使用 <code>grep</code> 后，原始表头被过滤掉了，所以看不出数字到底对应哪一列。<code>--stats</code> 通常是累计值，<code>--rate</code> 才是当前速率值；二者不能混为一谈。</p>
+<p>不要只看这条命令，先执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --stats --exact</span><br><span class="line">ipvsadm --version</span><br></pre></td></tr></table></figure>
+
+<p>确认原始输出中的表头，再解释数字。尤其不要把累计 <code>InPkts</code>&#x2F;<code>OutPkts</code> 误读成每秒包速率。</p>
+<p>要测量真实速率，应在两个时间点采样并计算差值：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact &gt; /tmp/ipvs.before</span><br><span class="line"><span class="built_in">sleep</span> 10</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact &gt; /tmp/ipvs.after</span><br><span class="line">diff -u /tmp/ipvs.before /tmp/ipvs.after</span><br></pre></td></tr></table></figure>
+
+<p>更适合长期观测的方式是使用 Prometheus&#x2F;node-exporter、kube-proxy metrics 或 CNI 提供的指标，而不是频繁人工解析 <code>ipvsadm</code> 文本。</p>
+<h2 id="3-先确认-172-24-0-2-是什么"><a href="#3-先确认-172-24-0-2-是什么" class="headerlink" title="3. 先确认 172.24.0.2 是什么"></a>3. 先确认 <code>172.24.0.2</code> 是什么</h2><p>不要看到一个 IP 就直接假定它是 CoreDNS。先从 Kubernetes API 查询：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc -A -o wide | grep -w <span class="string">&#x27;172.24.0.2&#x27;</span></span><br><span class="line">kubectl get svc -A -o json | jq -r <span class="string">&#x27;</span></span><br><span class="line"><span class="string">  .items[] | select(.spec.clusterIP == &quot;172.24.0.2&quot;) |</span></span><br><span class="line"><span class="string">  [.metadata.namespace, .metadata.name, .spec.clusterIP, (.spec.ports // [])] | @json&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果它是 DNS Service，再查端点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n kube-system get svc -o wide</span><br><span class="line">kubectl -n kube-system get endpointslice -l kubernetes.io/service-name=&lt;service-name&gt; -o wide</span><br><span class="line">kubectl -n kube-system get pods -l k8s-app=kube-dns -o wide</span><br></pre></td></tr></table></figure>
+
+<p>常见情况是：</p>
+<ul>
+<li><code>172.24.0.2:53/UDP</code>：DNS 查询流量。</li>
+<li><code>172.24.0.2:53/TCP</code>：较大的 DNS 响应、区域传送或 TCP fallback 等流量。</li>
+<li><code>:9153</code>：某些 DNS 组件暴露的 Prometheus metrics 端口，但是否如此必须以 Service 定义为准。</li>
 </ul>
-<h3 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 系统整体性能概览</span></span><br><span class="line">perf top                          <span class="comment"># 实时查看系统热点</span></span><br><span class="line">perf top -p &lt;PID&gt;                 <span class="comment"># 查看特定进程热点</span></span><br><span class="line">perf <span class="built_in">stat</span> &lt;<span class="built_in">command</span>&gt;               <span class="comment"># 统计命令执行期间的性能计数器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础性能统计</span></span><br><span class="line">perf <span class="built_in">stat</span> -e cycles,instructions,cache-references,cache-misses &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf <span class="built_in">stat</span> -d &lt;<span class="built_in">command</span>&gt;            <span class="comment"># 详细统计信息</span></span><br></pre></td></tr></table></figure>
+<h2 id="4-查看完整的-IPVS-关系"><a href="#4-查看完整的-IPVS-关系" class="headerlink" title="4. 查看完整的 IPVS 关系"></a>4. 查看完整的 IPVS 关系</h2><h3 id="4-1-查看虚拟服务和后端"><a href="#4-1-查看虚拟服务和后端" class="headerlink" title="4.1 查看虚拟服务和后端"></a>4.1 查看虚拟服务和后端</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --exact</span><br></pre></td></tr></table></figure>
 
-<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li><strong>系统负载监控</strong>: 快速定位CPU使用率高的进程</li>
-<li><strong>应用性能评估</strong>: 评估程序的基本性能指标</li>
-<li><strong>初步问题定位</strong>: 发现明显的性能瓶颈</li>
+<p>典型结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TCP  172.24.0.2:53 rr</span><br><span class="line">  -&gt; 10.244.1.20:53        Masq    12    20    0</span><br><span class="line">  -&gt; 10.244.2.31:53        Masq     8    18    0</span><br></pre></td></tr></table></figure>
+
+<p>解释：</p>
+<ul>
+<li>第一行是 Virtual Service，代表访问 VIP:Port。</li>
+<li><code>-&gt;</code> 行是 Real Server，代表后端 Pod IP:Port。</li>
+<li><code>rr</code> 是调度算法示例，可能是 <code>rr</code>、<code>lc</code>、<code>sh</code> 等。</li>
+<li><code>Masq</code> 表示常见的 IPVS NAT 转发模式；实际模式取决于 kube-proxy 配置。</li>
+<li>后端行的末尾计数和状态也需要结合该版本输出表头解释。</li>
 </ul>
-<hr>
-<h2 id="⚡-Level-2-进阶级"><a href="#⚡-Level-2-进阶级" class="headerlink" title="⚡ Level 2: 进阶级"></a>⚡ Level 2: 进阶级</h2><h3 id="性能数据记录和分析"><a href="#性能数据记录和分析" class="headerlink" title="性能数据记录和分析"></a>性能数据记录和分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录性能数据</span></span><br><span class="line">perf record -g &lt;<span class="built_in">command</span>&gt;          <span class="comment"># 记录调用图</span></span><br><span class="line">perf record -F 99 -g &lt;<span class="built_in">command</span>&gt;    <span class="comment"># 指定采样频率</span></span><br><span class="line">perf record -e cpu-clock -g &lt;<span class="built_in">command</span>&gt;  <span class="comment"># 记录CPU时钟事件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析记录的数据</span></span><br><span class="line">perf report                       <span class="comment"># 查看性能报告</span></span><br><span class="line">perf report --stdio               <span class="comment"># 文本格式报告</span></span><br><span class="line">perf report -g graph              <span class="comment"># 调用图格式</span></span><br><span class="line">perf report --<span class="built_in">sort</span>=<span class="built_in">comm</span>,symbol    <span class="comment"># 按进程和符号排序</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-2-精确查看某个虚拟服务"><a href="#4-2-精确查看某个虚拟服务" class="headerlink" title="4.2 精确查看某个虚拟服务"></a>4.2 精确查看某个虚拟服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># TCP 服务</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -t 172.24.0.2:53 --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># UDP 服务</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -u 172.24.0.2:53 --stats --rate --exact</span><br></pre></td></tr></table></figure>
 
-<h3 id="进程和线程分析"><a href="#进程和线程分析" class="headerlink" title="进程和线程分析"></a>进程和线程分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 特定进程分析</span></span><br><span class="line">perf record -p &lt;PID&gt; -g          <span class="comment"># 记录特定进程</span></span><br><span class="line">perf record -t &lt;TID&gt; -g          <span class="comment"># 记录特定线程</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 多进程分析</span></span><br><span class="line">perf record -a -g                <span class="comment"># 记录整个系统</span></span><br><span class="line">perf record --call-graph dwarf   <span class="comment"># 使用DWARF调用图</span></span><br></pre></td></tr></table></figure>
+<p>如果命令因版本不接受 <code>-t</code>&#x2F;<code>-u</code> 与长参数组合，使用完整列表后再用 <code>awk</code> 或 <code>grep</code> 过滤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact | grep -E <span class="string">&#x27;172\.24\.0\.2:53|^  -&gt;&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<h3 id="CPU-热点分析"><a href="#CPU-热点分析" class="headerlink" title="CPU 热点分析"></a>CPU 热点分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 函数级热点分析</span></span><br><span class="line">perf record -e cycles -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf report -g <span class="string">&#x27;graph,0.5,caller&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 源码级分析</span></span><br><span class="line">perf record --call-graph dwarf &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf annotate                     <span class="comment"># 查看汇编级别的热点</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-3-查看-IPVS-调度器和内核能力"><a href="#4-3-查看-IPVS-调度器和内核能力" class="headerlink" title="4.3 查看 IPVS 调度器和内核能力"></a>4.3 查看 IPVS 调度器和内核能力</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -l --<span class="built_in">timeout</span></span><br><span class="line">ipvsadm -l --daemon</span><br><span class="line">lsmod | grep -E <span class="string">&#x27;ip_vs|nf_conntrack&#x27;</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs</span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs_stats</span><br></pre></td></tr></table></figure>
 
-<h3 id="使用场景-1"><a href="#使用场景-1" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li><strong>应用性能优化</strong>: 识别程序中的热点函数</li>
-<li><strong>CPU 使用分析</strong>: 分析CPU时间分布</li>
-<li><strong>调用关系分析</strong>: 理解程序的执行路径</li>
+<p><code>/proc/net/ip_vs</code> 是内核视角的当前 IPVS 服务列表，适合在 <code>ipvsadm</code> 输出异常时交叉确认。</p>
+<h2 id="5-Kubernetes-kube-proxy-IPVS-排查"><a href="#5-Kubernetes-kube-proxy-IPVS-排查" class="headerlink" title="5. Kubernetes kube-proxy IPVS 排查"></a>5. Kubernetes kube-proxy IPVS 排查</h2><h3 id="5-1-确认-kube-proxy-是否使用-IPVS"><a href="#5-1-确认-kube-proxy-是否使用-IPVS" class="headerlink" title="5.1 确认 kube-proxy 是否使用 IPVS"></a>5.1 确认 kube-proxy 是否使用 IPVS</h3><p>不同版本&#x2F;发行版配置位置可能不同：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n kube-system get ds kube-proxy -o yaml</span><br><span class="line">kubectl -n kube-system get cm kube-proxy -o yaml</span><br><span class="line">kubectl -n kube-system logs ds/kube-proxy --<span class="built_in">tail</span>=200 | grep -i -E <span class="string">&#x27;ipvs|iptables|proxy mode&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置中常见：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">mode:</span> <span class="string">ipvs</span></span><br></pre></td></tr></table></figure>
+
+<p>也可以在节点上检查 kube-proxy 进程参数和日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ps -ef | grep <span class="string">&#x27;[k]ube-proxy&#x27;</span></span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-从-Service-到-IPVS-的对应关系"><a href="#5-2-从-Service-到-IPVS-的对应关系" class="headerlink" title="5.2 从 Service 到 IPVS 的对应关系"></a>5.2 从 Service 到 IPVS 的对应关系</h3><p>建议按这条链排查：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Service clusterIP:port</span><br><span class="line">      ↓</span><br><span class="line">EndpointSlice 中的 ready endpoint</span><br><span class="line">      ↓</span><br><span class="line">kube-proxy 同步规则</span><br><span class="line">      ↓</span><br><span class="line">IPVS Virtual Service</span><br><span class="line">      ↓</span><br><span class="line">IPVS Real Server</span><br><span class="line">      ↓</span><br><span class="line">后端 Pod 监听端口</span><br></pre></td></tr></table></figure>
+
+<p>对应命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; get svc &lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o yaml</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact | grep <span class="string">&#x27;&lt;cluster-ip&gt;&#x27;</span></span><br><span class="line">kubectl -n &lt;namespace&gt; get pods -o wide</span><br><span class="line">ss -lntup</span><br></pre></td></tr></table></figure>
+
+<p>如果 Service 有 ready endpoint，但 IPVS 没有 Virtual Service，优先看 kube-proxy 日志、节点 IPVS 模块和同步错误。如果 Virtual Service 存在但没有 Real Server，优先看 EndpointSlice、selector、Pod readiness 和 kube-proxy 同步状态。</p>
+<h2 id="6-常见异常与判断方法"><a href="#6-常见异常与判断方法" class="headerlink" title="6. 常见异常与判断方法"></a>6. 常见异常与判断方法</h2><h3 id="6-1-Service-存在，但-IPVS-没有对应-VIP"><a href="#6-1-Service-存在，但-IPVS-没有对应-VIP" class="headerlink" title="6.1 Service 存在，但 IPVS 没有对应 VIP"></a>6.1 Service 存在，但 IPVS 没有对应 VIP</h3><p>可能原因：</p>
+<ul>
+<li>当前节点 kube-proxy 没有运行或不在 IPVS 模式。</li>
+<li>kube-proxy 无法 watch API Server。</li>
+<li>IPVS 内核模块未加载，或 <code>ipvsadm</code>&#x2F;内核能力不匹配。</li>
+<li>kube-proxy 配置修改后没有生效。</li>
+<li>你查看的不是实际承载流量的节点。</li>
+<li>Service 使用了不同的 IP family 或 dual-stack 地址。</li>
 </ul>
-<hr>
-<h2 id="🔧-Level-3-高级级"><a href="#🔧-Level-3-高级级" class="headerlink" title="🔧 Level 3: 高级级"></a>🔧 Level 3: 高级级</h2><h3 id="内存性能分析"><a href="#内存性能分析" class="headerlink" title="内存性能分析"></a>内存性能分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 缓存性能分析</span></span><br><span class="line">perf record -e cache-misses,cache-references -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf <span class="built_in">stat</span> -e L1-dcache-load-misses,L1-dcache-loads &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf <span class="built_in">stat</span> -e LLC-load-misses,LLC-loads &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内存带宽分析</span></span><br><span class="line">perf record -e cpu/mem-loads,ldlat=30/ -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line">perf record -e cpu/mem-stores/ -g &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内存访问模式分析</span></span><br><span class="line">perf mem record -a                <span class="comment"># 记录内存访问</span></span><br><span class="line">perf mem report --<span class="built_in">sort</span>=mem        <span class="comment"># 按内存访问模式排序</span></span><br></pre></td></tr></table></figure>
+<p>命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n kube-system get pod -l k8s-app=kube-proxy -o wide</span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br><span class="line">lsmod | grep ip_vs</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br></pre></td></tr></table></figure>
 
-<h3 id="网络性能分析"><a href="#网络性能分析" class="headerlink" title="网络性能分析"></a>网络性能分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络中断分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a -g</span><br><span class="line">perf record -e irq:softirq_entry -a -g</span><br><span class="line">perf record -e napi:napi_poll -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络栈分析</span></span><br><span class="line">perf record -e net:netif_receive_skb -a -g</span><br><span class="line">perf record -e net:net_dev_queue -a -g</span><br><span class="line">perf record -e tcp:tcp_probe -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络延迟分析</span></span><br><span class="line">perf trace -e <span class="string">&#x27;net:*&#x27;</span> &lt;network_command&gt;</span><br><span class="line">perf record -e syscalls:sys_enter_sendto,syscalls:sys_exit_sendto -a</span><br></pre></td></tr></table></figure>
-
-<h3 id="调度器分析"><a href="#调度器分析" class="headerlink" title="调度器分析"></a>调度器分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进程调度分析</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_switch -a -g</span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_wakeup -a -g</span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_migrate_task -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU 使用率分析</span></span><br><span class="line">perf <span class="built_in">sched</span> record -- <span class="built_in">sleep</span> 10     <span class="comment"># 记录调度活动</span></span><br><span class="line">perf <span class="built_in">sched</span> latency                 <span class="comment"># 调度延迟分析</span></span><br><span class="line">perf <span class="built_in">sched</span> map                     <span class="comment"># 调度映射图</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 负载均衡分析</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_stick_numa -a</span><br><span class="line">perf record -e migrate:mm_migrate_pages -a</span><br></pre></td></tr></table></figure>
-
-<h3 id="中断处理分析"><a href="#中断处理分析" class="headerlink" title="中断处理分析"></a>中断处理分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 硬中断分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf script | grep irq_handler_entry</span><br><span class="line"></span><br><span class="line"><span class="comment"># 软中断分析</span></span><br><span class="line">perf record -e irq:softirq_entry -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf record -e irq:softirq_exit -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 特定中断源分析</span></span><br><span class="line">perf record -e irq:* -a -g        <span class="comment"># 所有中断事件</span></span><br><span class="line">perf script -f time,cpu,<span class="built_in">comm</span>,event,trace</span><br></pre></td></tr></table></figure>
-
-<h3 id="使用场景-2"><a href="#使用场景-2" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li><strong>内存优化</strong>: 识别缓存未命中热点，优化内存访问模式</li>
-<li><strong>网络性能调优</strong>: 分析网络栈瓶颈，优化中断处理</li>
-<li><strong>多核扩展性</strong>: 分析调度器行为，优化进程亲和性</li>
+<h3 id="6-2-VIP-存在，但没有后端-Real-Server"><a href="#6-2-VIP-存在，但没有后端-Real-Server" class="headerlink" title="6.2 VIP 存在，但没有后端 Real Server"></a>6.2 VIP 存在，但没有后端 Real Server</h3><p>可能原因：</p>
+<ul>
+<li>Service selector 没有匹配 Pod。</li>
+<li>Pod 没有 Ready，EndpointSlice 中 <code>ready=false</code>。</li>
+<li><code>targetPort</code> 与容器监听端口不一致。</li>
+<li>EndpointSlice 尚未同步到 kube-proxy。</li>
+<li>Service 使用了手工 Endpoints，但地址不可用。</li>
 </ul>
-<hr>
-<h2 id="🎯-Level-4-专家级"><a href="#🎯-Level-4-专家级" class="headerlink" title="🎯 Level 4: 专家级"></a>🎯 Level 4: 专家级</h2><h3 id="定制化事件分析"><a href="#定制化事件分析" class="headerlink" title="定制化事件分析"></a>定制化事件分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义硬件事件</span></span><br><span class="line">perf list                         <span class="comment"># 查看所有可用事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e r81d0 &lt;<span class="built_in">command</span>&gt;      <span class="comment"># 使用原始硬件事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e cpu/event=0xd0,<span class="built_in">umask</span>=0x81/ &lt;<span class="built_in">command</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># PMU 特定事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e uncore_imc/cas_count_read/ &lt;<span class="built_in">command</span>&gt;  <span class="comment"># 内存控制器事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e intel_cqm/llc_occupancy/ &lt;<span class="built_in">command</span>&gt;    <span class="comment"># LLC占用率</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; describe svc &lt;service&gt;</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get pod -l &lt;selector&gt; -o wide</span><br></pre></td></tr></table></figure>
 
-<h3 id="内核级性能分析"><a href="#内核级性能分析" class="headerlink" title="内核级性能分析"></a>内核级性能分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 内核函数分析</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;tcp_sendmsg&#x27;</span>    <span class="comment"># 添加内核探测点</span></span><br><span class="line">perf record -e probe:tcp_sendmsg -a -g</span><br><span class="line">perf probe --del=<span class="string">&#x27;*&#x27;</span>              <span class="comment"># 删除所有探测点</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核调用栈分析</span></span><br><span class="line">perf record --call-graph dwarf -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf script --header -F +pid,+tid,+cpu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核锁竞争分析</span></span><br><span class="line">perf record -e lock:* -a -g</span><br><span class="line">perf lock record -- &lt;<span class="built_in">command</span>&gt;     <span class="comment"># 记录锁事件</span></span><br><span class="line">perf lock report                   <span class="comment"># 锁竞争报告</span></span><br></pre></td></tr></table></figure>
+<h3 id="6-3-IPVS-有后端，但请求失败"><a href="#6-3-IPVS-有后端，但请求失败" class="headerlink" title="6.3 IPVS 有后端，但请求失败"></a>6.3 IPVS 有后端，但请求失败</h3><p>按顺序检查：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 后端 Pod 是否监听目标端口</span></span><br><span class="line">kubectl -n &lt;namespace&gt; <span class="built_in">exec</span> &lt;pod&gt; -- ss -lntup</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从同节点/其他 Pod 测试后端 Pod IP</span></span><br><span class="line">kubectl -n &lt;namespace&gt; <span class="built_in">exec</span> &lt;debug-pod&gt; -- nc -vz &lt;pod-ip&gt; &lt;port&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Service 和 EndpointSlice</span></span><br><span class="line">kubectl -n &lt;namespace&gt; get svc &lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o wide</span><br><span class="line"></span><br><span class="line"><span class="comment"># 节点查看路由和 IPVS 规则</span></span><br><span class="line">ip route</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br></pre></td></tr></table></figure>
 
-<h3 id="系统级综合分析"><a href="#系统级综合分析" class="headerlink" title="系统级综合分析"></a>系统级综合分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全系统性能快照</span></span><br><span class="line">perf record -a -g --call-graph dwarf -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf archive                       <span class="comment"># 打包分析数据</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 多维度性能分析</span></span><br><span class="line">perf record -e cycles,cache-misses,branch-misses,page-faults -a -g</span><br><span class="line">perf diff perf1.data perf2.data    <span class="comment"># 对比两个性能数据文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 火焰图生成</span></span><br><span class="line">perf record -F 99 -a -g -- <span class="built_in">sleep</span> 60</span><br><span class="line">perf script | stackcollapse-perf.pl | flamegraph.pl &gt; flamegraph.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="NUMA-和拓扑分析"><a href="#NUMA-和拓扑分析" class="headerlink" title="NUMA 和拓扑分析"></a>NUMA 和拓扑分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># NUMA 性能分析</span></span><br><span class="line">perf c2c record &lt;<span class="built_in">command</span>&gt;          <span class="comment"># Cache-to-Cache 分析</span></span><br><span class="line">perf c2c report                    <span class="comment"># NUMA 访问热点</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU 拓扑感知分析</span></span><br><span class="line">perf <span class="built_in">stat</span> -a -A -e cycles,instructions  <span class="comment"># 按CPU分别统计</span></span><br><span class="line">perf record -a -g -C 0-3           <span class="comment"># 仅监控特定CPU核心</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="高级脚本化分析"><a href="#高级脚本化分析" class="headerlink" title="高级脚本化分析"></a>高级脚本化分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自动化性能分析脚本</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 综合性能分析脚本示例</span></span><br><span class="line">perf record -a -g -e cycles,cache-misses,branch-misses -- <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">perf report --<span class="built_in">sort</span>=<span class="built_in">comm</span>,dso,symbol --stdio &gt; perf_report.txt</span><br><span class="line">perf script | stackcollapse-perf.pl | flamegraph.pl &gt; flamegraph.svg</span><br><span class="line"></span><br><span class="line"><span class="comment"># 性能回归测试</span></span><br><span class="line"><span class="function"><span class="title">perf_compare</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> baseline=<span class="variable">$1</span></span><br><span class="line">    <span class="built_in">local</span> current=<span class="variable">$2</span></span><br><span class="line">    perf diff <span class="string">&quot;<span class="variable">$baseline</span>&quot;</span> <span class="string">&quot;<span class="variable">$current</span>&quot;</span> --formula=<span class="string">&quot;(new-baseline)/baseline*100&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🎨-分类专题分析"><a href="#🎨-分类专题分析" class="headerlink" title="🎨 分类专题分析"></a>🎨 分类专题分析</h2><h3 id="网络性能专题"><a href="#网络性能专题" class="headerlink" title="网络性能专题"></a>网络性能专题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 网络包处理路径分析</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;__netif_receive_skb_core&#x27;</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;ip_rcv&#x27;</span></span><br><span class="line">perf probe --add=<span class="string">&#x27;tcp_v4_rcv&#x27;</span></span><br><span class="line">perf record -e probe:* -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络中断亲和性分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a --call-graph dwarf</span><br><span class="line">perf script | grep -E <span class="string">&quot;(eth|ens)&quot;</span> | <span class="built_in">head</span> -20</span><br><span class="line"></span><br><span class="line"><span class="comment"># RPS/XPS 效果分析</span></span><br><span class="line">perf record -e net:netif_receive_skb -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line">perf script -f cpu,<span class="built_in">comm</span>,event | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
-
-<h3 id="CPU-调度专题"><a href="#CPU-调度专题" class="headerlink" title="CPU 调度专题"></a>CPU 调度专题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 调度延迟热点分析</span></span><br><span class="line">perf <span class="built_in">sched</span> record -a -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf <span class="built_in">sched</span> latency --<span class="built_in">sort</span>=max     <span class="comment"># 按最大延迟排序</span></span><br><span class="line">perf <span class="built_in">sched</span> timehist              <span class="comment"># 调度时间历史</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU 亲和性效果分析</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_migrate_task -a -g</span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_switch -a -g</span><br><span class="line">perf script -f time,cpu,pid,<span class="built_in">comm</span>,event</span><br></pre></td></tr></table></figure>
-
-<h3 id="中断处理专题"><a href="#中断处理专题" class="headerlink" title="中断处理专题"></a>中断处理专题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 中断负载均衡分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry -a --call-graph dwarf -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf script -f cpu,<span class="built_in">comm</span>,event | awk <span class="string">&#x27;&#123;print $1&#125;&#x27;</span> | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断延迟分析</span></span><br><span class="line">perf record -e irq:irq_handler_entry,irq:irq_handler_exit -a</span><br><span class="line">perf script | awk <span class="string">&#x27;BEGIN&#123;OFS=&quot;\t&quot;&#125; &#123;print $1, $2, $3, $4, $5&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="💡-实战应用场景"><a href="#💡-实战应用场景" class="headerlink" title="💡 实战应用场景"></a>💡 实战应用场景</h2><h3 id="场景1-Web服务器性能优化"><a href="#场景1-Web服务器性能优化" class="headerlink" title="场景1: Web服务器性能优化"></a>场景1: Web服务器性能优化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 整体热点分析</span></span><br><span class="line">perf record -a -g -F 99 -- <span class="built_in">sleep</span> 60</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 网络处理分析</span></span><br><span class="line">perf record -e net:netif_receive_skb,syscalls:sys_enter_sendto -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 内存使用分析</span></span><br><span class="line">perf record -e cache-misses,page-faults -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 生成火焰图</span></span><br><span class="line">perf script | stackcollapse-perf.pl | flamegraph.pl &gt; web_flamegraph.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="场景2-数据库性能调优"><a href="#场景2-数据库性能调优" class="headerlink" title="场景2: 数据库性能调优"></a>场景2: 数据库性能调优</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. I/O 性能分析</span></span><br><span class="line">perf record -e syscalls:sys_enter_read,syscalls:sys_enter_write -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 锁竞争分析</span></span><br><span class="line">perf lock record -a -- <span class="built_in">sleep</span> 30</span><br><span class="line">perf lock report --<span class="built_in">sort</span>=acquired</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 缓存性能分析</span></span><br><span class="line">perf <span class="built_in">stat</span> -e LLC-loads,LLC-load-misses,L1-dcache-loads,L1-dcache-load-misses</span><br></pre></td></tr></table></figure>
-
-<h3 id="场景3-高频交易系统优化"><a href="#场景3-高频交易系统优化" class="headerlink" title="场景3: 高频交易系统优化"></a>场景3: 高频交易系统优化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 延迟分析</span></span><br><span class="line">perf record -e cycles:pp -a -g --call-graph dwarf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 中断影响分析</span></span><br><span class="line">perf record -e irq:* -a -g -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. NUMA 优化分析</span></span><br><span class="line">perf c2c record &lt;trading_app&gt;</span><br><span class="line">perf c2c report</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🛠-专家级工具组合"><a href="#🛠-专家级工具组合" class="headerlink" title="🛠 专家级工具组合"></a>🛠 专家级工具组合</h2><h3 id="性能分析工具链"><a href="#性能分析工具链" class="headerlink" title="性能分析工具链"></a>性能分析工具链</h3><ol>
-<li><strong>perf + FlameGraph</strong>: 可视化性能热点</li>
-<li><strong>perf + Intel VTune</strong>: 硬件级深度分析</li>
-<li><strong>perf + BPF&#x2F;eBPF</strong>: 定制化内核跟踪</li>
-<li><strong>perf + SystemTap</strong>: 动态内核插桩</li>
-</ol>
-<h3 id="自动化分析脚本"><a href="#自动化分析脚本" class="headerlink" title="自动化分析脚本"></a>自动化分析脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 专家级性能自动化分析脚本</span></span><br><span class="line"><span class="function"><span class="title">analyze_performance</span></span>() &#123;</span><br><span class="line">    <span class="built_in">local</span> app=<span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">    <span class="built_in">local</span> duration=<span class="string">&quot;<span class="variable">$&#123;2:-30&#125;</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;开始综合性能分析...&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># CPU 热点分析</span></span><br><span class="line">    perf record -o cpu_hotspot.data -a -g -F 99 -- <span class="string">&quot;<span class="variable">$app</span>&quot;</span> &amp;</span><br><span class="line">    <span class="built_in">local</span> perf_pid=$!</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 网络性能分析</span></span><br><span class="line">    perf record -o network.data -e net:*,irq:* -a -g -- <span class="built_in">sleep</span> <span class="string">&quot;<span class="variable">$duration</span>&quot;</span> &amp;</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 调度分析</span></span><br><span class="line">    perf <span class="built_in">sched</span> record -o sched.data -a -- <span class="built_in">sleep</span> <span class="string">&quot;<span class="variable">$duration</span>&quot;</span> &amp;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">wait</span> <span class="string">&quot;<span class="variable">$perf_pid</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 生成报告</span></span><br><span class="line">    generate_comprehensive_report</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="📊-进阶学习建议"><a href="#📊-进阶学习建议" class="headerlink" title="📊 进阶学习建议"></a>📊 进阶学习建议</h2><h3 id="阶段性目标"><a href="#阶段性目标" class="headerlink" title="阶段性目标"></a>阶段性目标</h3><ol>
-<li><strong>入门阶段</strong>: 熟练使用基础命令，理解性能指标</li>
-<li><strong>进阶阶段</strong>: 掌握调用图分析，能独立进行性能优化</li>
-<li><strong>高级阶段</strong>: 深入理解系统原理，能分析复杂性能问题</li>
-<li><strong>专家阶段</strong>: 定制化分析工具，解决内核级性能问题</li>
-</ol>
-<h3 id="实践项目建议"><a href="#实践项目建议" class="headerlink" title="实践项目建议"></a>实践项目建议</h3><ul>
-<li><strong>Web服务优化</strong>: 优化Nginx&#x2F;Apache性能</li>
-<li><strong>数据库调优</strong>: 优化MySQL&#x2F;PostgreSQL</li>
-<li><strong>高性能计算</strong>: 优化科学计算应用</li>
-<li><strong>实时系统</strong>: 优化延迟敏感应用</li>
+<p>还要检查 NetworkPolicy、CNI、节点防火墙、rp_filter、MTU、返回路径和应用自身日志。</p>
+<h3 id="6-4-计数器快速增长"><a href="#6-4-计数器快速增长" class="headerlink" title="6.4 计数器快速增长"></a>6.4 计数器快速增长</h3><p>计数器增长说明匹配到流量，不等于服务健康。还要区分：</p>
+<ul>
+<li>连接&#x2F;包是否有对应的出方向增长。</li>
+<li>后端 Real Server 是否均匀收到流量。</li>
+<li>是否存在大量 UDP 短流量或 DNS 重试。</li>
+<li>是否出现单个后端异常、超时或丢包。</li>
+<li>bytes 与 packets 的平均包大小是否符合预期。</li>
 </ul>
-<h3 id="延伸学习资源"><a href="#延伸学习资源" class="headerlink" title="延伸学习资源"></a>延伸学习资源</h3><ul>
-<li>Intel 软件优化手册</li>
-<li>Brendan Gregg 的性能工具书籍</li>
-<li>Linux 内核源码分析</li>
+<p>粗略计算平均包大小：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">平均入包大小 ≈ InBytes / InPkts</span><br><span class="line">平均出包大小 ≈ OutBytes / OutPkts</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-最佳实践"><a href="#7-最佳实践" class="headerlink" title="7. 最佳实践"></a>7. 最佳实践</h2><ul>
+<li>先确认 kube-proxy 模式，再使用 <code>ipvsadm</code>；iptables 模式下主要检查 <code>iptables-save</code>，Cilium eBPF 模式下不能把 IPVS 当作主数据面。</li>
+<li>保留未经过滤的原始输出，避免 <code>grep</code> 把表头过滤掉，导致误解字段。</li>
+<li>用 <code>-n</code> 避免反向 DNS 解析影响排查速度。</li>
+<li>使用 <code>--exact</code> 保留精确计数，做前后差值时不要使用缩写值。</li>
+<li>长期观测使用指标系统，不要用高频 <code>ipvsadm</code> 轮询替代监控。</li>
+<li>一定同时检查 Kubernetes API 中的 Service、EndpointSlice 和 Pod Ready 状态。</li>
+<li>不要直接用 <code>ipvsadm</code> 手动删除或修改 kube-proxy 管理的 Service 规则；kube-proxy 会重新同步，手工修改可能造成短暂抖动和状态不一致。</li>
+<li>不要把 <code>ipvsadm -C</code> 当作“修复命令”。它会清空本机 IPVS 表，可能导致节点所有 Service 流量中断。</li>
+<li>不要仅凭 VIP 有计数判断后端健康；必须检查 Real Server、应用监听和端到端请求。</li>
+<li>修改 kube-proxy、内核模块、IPVS 调度算法或连接超时前，先在单节点&#x2F;测试环境验证。</li>
+<li>UDP 服务需要特别关注超时和 conntrack；DNS 业务同时检查 UDP 53、TCP 53 和应用重试。</li>
+<li>多网卡节点要确认 kube-proxy 使用的 node IP、Pod 路由和返回路径。</li>
 </ul>
+<h2 id="8-常用命令速查"><a href="#8-常用命令速查" class="headerlink" title="8. 常用命令速查"></a>8. 常用命令速查</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全量查看</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看指定 VIP</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -t 172.24.0.2:53 --stats --rate --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -u 172.24.0.2:53 --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保留表头后再筛选</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact | <span class="built_in">tee</span> /tmp/ipvs.txt</span><br><span class="line">grep -E <span class="string">&#x27;172\.24\.0\.2|^Prot|^  -&gt;&#x27;</span> /tmp/ipvs.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核和计数器</span></span><br><span class="line">lsmod | grep -E <span class="string">&#x27;ip_vs|nf_conntrack&#x27;</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs</span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs_stats</span><br><span class="line"></span><br><span class="line"><span class="comment"># Kubernetes 对照查询</span></span><br><span class="line">kubectl get svc -A -o wide | grep -w <span class="string">&#x27;172.24.0.2&#x27;</span></span><br><span class="line">kubectl -n kube-system get endpointslice -o wide</span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br></pre></td></tr></table></figure>
+
 
       
     </div>
@@ -2055,7 +2154,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">214</span>
+          <span class="site-state-item-count">216</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
