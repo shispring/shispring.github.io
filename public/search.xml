@@ -13320,7 +13320,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 </ul>
 </blockquote>
 <hr>
-<h3 id="🧪-5-4-指定每线程速率（核绑定验证）"><a href="#🧪-5-4-指定每线程速率（核绑定验证）" class="headerlink" title="🧪 5.4 指定每线程速率（核绑定验证）"></a>🧪 5.4 指定每线程速率（核绑定验证）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">taskset -c 0-7 dnsperf -s 10.16.13.14 -d queries.txt -t 8 -T 5000 -l 30</span><br></pre></td></tr></table></figure>
+<h3 id="🧪-5-4-指定每线程速率（核绑定验证）"><a href="#🧪-5-4-指定每线程速率（核绑定验证）" class="headerlink" title="🧪 5.4 指定每线程速率（核绑定验证）"></a>🧪 5.4 指定每线程速率（核绑定验证）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">taskset -c 0-7 dnsperf -s 10.16.13.14 -d queries.txt -t 8 -T 5000 -l 30</span><br><span class="line"></span><br><span class="line"><span class="comment">#线程绑定CPU</span></span><br><span class="line"><span class="keyword">for</span> tid <span class="keyword">in</span> $(ps -T -p 942984 | awk <span class="string">&#x27;NR&gt;1 &#123;print $2&#125;&#x27;</span>); <span class="keyword">do</span></span><br><span class="line">  taskset -<span class="built_in">cp</span> 0-$(<span class="built_in">nproc</span> --all | awk <span class="string">&#x27;&#123;print $1-1&#125;&#x27;</span>) <span class="variable">$tid</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p><strong>说明：</strong></p>
