@@ -184,6 +184,271 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/08/ipvsadm-%E5%91%BD%E4%BB%A4%E4%B8%8E-Kubernetes-IPVS-%E6%8E%92%E9%9A%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/08/ipvsadm-%E5%91%BD%E4%BB%A4%E4%B8%8E-Kubernetes-IPVS-%E6%8E%92%E9%9A%9C/" class="post-title-link" itemprop="url">ipvsadm 命令与 Kubernetes IPVS 排障</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-01-08 14:25:39" itemprop="dateCreated datePublished" datetime="2026-01-08T14:25:39+08:00">2026-01-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-09-08 14:26:44" itemprop="dateModified" datetime="2026-09-08T14:26:44+08:00">2026-09-08</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本文解释下面这条命令的含义，并整理 Kubernetes 使用 kube-proxy IPVS 模式时的常用查看和排障方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --stats --exact | grep 172.24.0.2</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-这条命令做了什么"><a href="#1-这条命令做了什么" class="headerlink" title="1. 这条命令做了什么"></a>1. 这条命令做了什么</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -ln --rate --stats --exact | grep 172.24.0.2</span><br><span class="line">          │                         └─ 只保留包含 172.24.0.2 的行</span><br><span class="line">          └─ 查看本机 Linux IPVS 虚拟服务和统计信息</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-l</code> &#x2F; <code>--list</code></td>
+<td>列出当前 IPVS 虚拟服务和后端 Real Server</td>
+</tr>
+<tr>
+<td><code>-n</code> &#x2F; <code>--numeric</code></td>
+<td>直接显示数字 IP 和端口，不做 DNS 反向解析</td>
+</tr>
+<tr>
+<td><code>--rate</code></td>
+<td>显示速率相关统计；具体列和版本有关</td>
+</tr>
+<tr>
+<td><code>--stats</code></td>
+<td>显示连接、包和字节统计</td>
+</tr>
+<tr>
+<td><code>--exact</code></td>
+<td>精确显示计数值，不使用 K&#x2F;M&#x2F;G 等人类可读缩写</td>
+</tr>
+<tr>
+<td><code>grep 172.24.0.2</code></td>
+<td>在命令输出中筛选这个 IP；它不是 ipvsadm 的过滤条件</td>
+</tr>
+</tbody></table>
+<p>这条命令查询的是<strong>当前执行节点的本机 IPVS 表</strong>，不是直接查询 Kubernetes API。只有当该节点使用 kube-proxy 的 IPVS 模式时，才能通过它观察 Kubernetes Service 的本地代理规则。</p>
+<h2 id="2-如何理解你的输出"><a href="#2-如何理解你的输出" class="headerlink" title="2. 如何理解你的输出"></a>2. 如何理解你的输出</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TCP  172.24.0.2:53       9        55        46       3566        3857</span><br><span class="line">TCP  172.24.0.2:9153     0         0         0          0           0</span><br><span class="line">UDP  172.24.0.2:53  12454197  12736147  12736147 1083310475 2264214688</span><br></pre></td></tr></table></figure>
+
+<p>每一行前两列是 IPVS 虚拟服务：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TCP</code> &#x2F; <code>UDP</code></td>
+<td>虚拟服务使用的传输协议</td>
+</tr>
+<tr>
+<td><code>172.24.0.2:53</code></td>
+<td>Virtual Service 的 VIP 和端口</td>
+</tr>
+<tr>
+<td><code>172.24.0.2:9153</code></td>
+<td>另一个 VIP&#x2F;端口，可能是同一 Service 的其他端口</td>
+</tr>
+</tbody></table>
+<p>在很多 <code>ipvsadm</code> 版本中，单独使用 <code>--stats</code> 时，虚拟服务后面的 5 个数字依次为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Conns  InPkts  OutPkts  InBytes  OutBytes</span><br></pre></td></tr></table></figure>
+
+<p>因此，如果实际输出确实只有 5 个数字，可以按这个常见格式解释：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UDP 172.24.0.2:53</span><br><span class="line">     12454197  12736147  12736147  1083310475  2264214688</span><br><span class="line">     Conns     InPkts    OutPkts    InBytes     OutBytes</span><br></pre></td></tr></table></figure>
+
+<p>含义是该节点上这个 UDP 虚拟服务累计观察到大约 1245 万个连接&#x2F;会话计数、1273 万个入包、1273 万个出包，以及对应的入&#x2F;出字节数。具体统计从什么时候开始，取决于 IPVS 服务创建、规则刷新、节点重启和内核计数器状态。</p>
+<p><code>TCP 172.24.0.2:9153</code> 全为 0，表示在当前节点的 IPVS 统计周期内没有观察到该虚拟服务的 TCP 流量，或者该服务目前没有实际请求。它不等于 Kubernetes Service 一定不存在，需要继续检查 Service、EndpointSlice 和后端 Pod。</p>
+<p>需要特别注意：你贴出的每行只有 5 个数字，而命令同时带了 <code>--stats</code> 和 <code>--rate</code>。在支持同时输出两类信息的版本中，通常还会出现类似下面的速率列：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CPS  InPPS  OutPPS  InBPS  OutBPS</span><br></pre></td></tr></table></figure>
+
+<p>如果命令输出只有 <code>Conns InPkts OutPkts InBytes OutBytes</code>，说明当前版本的输出格式没有把 rate 列展示出来、参数组合被版本处理为一种输出，或者粘贴时省略了表头&#x2F;其他列。不要仅凭位置猜测列含义，必须保留并查看完整表头：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-为什么要以表头为准"><a href="#2-1-为什么要以表头为准" class="headerlink" title="2.1 为什么要以表头为准"></a>2.1 为什么要以表头为准</h3><p><code>--rate</code> 和 <code>--stats</code> 的显示方式、列顺序、是否同时展示，可能随 <code>ipvsadm</code> 版本变化。你使用 <code>grep</code> 后，原始表头被过滤掉了，所以看不出数字到底对应哪一列。<code>--stats</code> 通常是累计值，<code>--rate</code> 才是当前速率值；二者不能混为一谈。</p>
+<p>不要只看这条命令，先执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --stats --exact</span><br><span class="line">ipvsadm --version</span><br></pre></td></tr></table></figure>
+
+<p>确认原始输出中的表头，再解释数字。尤其不要把累计 <code>InPkts</code>&#x2F;<code>OutPkts</code> 误读成每秒包速率。</p>
+<p>要测量真实速率，应在两个时间点采样并计算差值：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact &gt; /tmp/ipvs.before</span><br><span class="line"><span class="built_in">sleep</span> 10</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact &gt; /tmp/ipvs.after</span><br><span class="line">diff -u /tmp/ipvs.before /tmp/ipvs.after</span><br></pre></td></tr></table></figure>
+
+<p>更适合长期观测的方式是使用 Prometheus&#x2F;node-exporter、kube-proxy metrics 或 CNI 提供的指标，而不是频繁人工解析 <code>ipvsadm</code> 文本。</p>
+<h2 id="3-先确认-172-24-0-2-是什么"><a href="#3-先确认-172-24-0-2-是什么" class="headerlink" title="3. 先确认 172.24.0.2 是什么"></a>3. 先确认 <code>172.24.0.2</code> 是什么</h2><p>不要看到一个 IP 就直接假定它是 CoreDNS。先从 Kubernetes API 查询：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc -A -o wide | grep -w <span class="string">&#x27;172.24.0.2&#x27;</span></span><br><span class="line">kubectl get svc -A -o json | jq -r <span class="string">&#x27;</span></span><br><span class="line"><span class="string">  .items[] | select(.spec.clusterIP == &quot;172.24.0.2&quot;) |</span></span><br><span class="line"><span class="string">  [.metadata.namespace, .metadata.name, .spec.clusterIP, (.spec.ports // [])] | @json&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果它是 DNS Service，再查端点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n kube-system get svc -o wide</span><br><span class="line">kubectl -n kube-system get endpointslice -l kubernetes.io/service-name=&lt;service-name&gt; -o wide</span><br><span class="line">kubectl -n kube-system get pods -l k8s-app=kube-dns -o wide</span><br></pre></td></tr></table></figure>
+
+<p>常见情况是：</p>
+<ul>
+<li><code>172.24.0.2:53/UDP</code>：DNS 查询流量。</li>
+<li><code>172.24.0.2:53/TCP</code>：较大的 DNS 响应、区域传送或 TCP fallback 等流量。</li>
+<li><code>:9153</code>：某些 DNS 组件暴露的 Prometheus metrics 端口，但是否如此必须以 Service 定义为准。</li>
+</ul>
+<h2 id="4-查看完整的-IPVS-关系"><a href="#4-查看完整的-IPVS-关系" class="headerlink" title="4. 查看完整的 IPVS 关系"></a>4. 查看完整的 IPVS 关系</h2><h3 id="4-1-查看虚拟服务和后端"><a href="#4-1-查看虚拟服务和后端" class="headerlink" title="4.1 查看虚拟服务和后端"></a>4.1 查看虚拟服务和后端</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --rate --exact</span><br></pre></td></tr></table></figure>
+
+<p>典型结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TCP  172.24.0.2:53 rr</span><br><span class="line">  -&gt; 10.244.1.20:53        Masq    12    20    0</span><br><span class="line">  -&gt; 10.244.2.31:53        Masq     8    18    0</span><br></pre></td></tr></table></figure>
+
+<p>解释：</p>
+<ul>
+<li>第一行是 Virtual Service，代表访问 VIP:Port。</li>
+<li><code>-&gt;</code> 行是 Real Server，代表后端 Pod IP:Port。</li>
+<li><code>rr</code> 是调度算法示例，可能是 <code>rr</code>、<code>lc</code>、<code>sh</code> 等。</li>
+<li><code>Masq</code> 表示常见的 IPVS NAT 转发模式；实际模式取决于 kube-proxy 配置。</li>
+<li>后端行的末尾计数和状态也需要结合该版本输出表头解释。</li>
+</ul>
+<h3 id="4-2-精确查看某个虚拟服务"><a href="#4-2-精确查看某个虚拟服务" class="headerlink" title="4.2 精确查看某个虚拟服务"></a>4.2 精确查看某个虚拟服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># TCP 服务</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -t 172.24.0.2:53 --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># UDP 服务</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -u 172.24.0.2:53 --stats --rate --exact</span><br></pre></td></tr></table></figure>
+
+<p>如果命令因版本不接受 <code>-t</code>&#x2F;<code>-u</code> 与长参数组合，使用完整列表后再用 <code>awk</code> 或 <code>grep</code> 过滤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact | grep -E <span class="string">&#x27;172\.24\.0\.2:53|^  -&gt;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-查看-IPVS-调度器和内核能力"><a href="#4-3-查看-IPVS-调度器和内核能力" class="headerlink" title="4.3 查看 IPVS 调度器和内核能力"></a>4.3 查看 IPVS 调度器和内核能力</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -l --<span class="built_in">timeout</span></span><br><span class="line">ipvsadm -l --daemon</span><br><span class="line">lsmod | grep -E <span class="string">&#x27;ip_vs|nf_conntrack&#x27;</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs</span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs_stats</span><br></pre></td></tr></table></figure>
+
+<p><code>/proc/net/ip_vs</code> 是内核视角的当前 IPVS 服务列表，适合在 <code>ipvsadm</code> 输出异常时交叉确认。</p>
+<h2 id="5-Kubernetes-kube-proxy-IPVS-排查"><a href="#5-Kubernetes-kube-proxy-IPVS-排查" class="headerlink" title="5. Kubernetes kube-proxy IPVS 排查"></a>5. Kubernetes kube-proxy IPVS 排查</h2><h3 id="5-1-确认-kube-proxy-是否使用-IPVS"><a href="#5-1-确认-kube-proxy-是否使用-IPVS" class="headerlink" title="5.1 确认 kube-proxy 是否使用 IPVS"></a>5.1 确认 kube-proxy 是否使用 IPVS</h3><p>不同版本&#x2F;发行版配置位置可能不同：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n kube-system get ds kube-proxy -o yaml</span><br><span class="line">kubectl -n kube-system get cm kube-proxy -o yaml</span><br><span class="line">kubectl -n kube-system logs ds/kube-proxy --<span class="built_in">tail</span>=200 | grep -i -E <span class="string">&#x27;ipvs|iptables|proxy mode&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置中常见：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">mode:</span> <span class="string">ipvs</span></span><br></pre></td></tr></table></figure>
+
+<p>也可以在节点上检查 kube-proxy 进程参数和日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ps -ef | grep <span class="string">&#x27;[k]ube-proxy&#x27;</span></span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-从-Service-到-IPVS-的对应关系"><a href="#5-2-从-Service-到-IPVS-的对应关系" class="headerlink" title="5.2 从 Service 到 IPVS 的对应关系"></a>5.2 从 Service 到 IPVS 的对应关系</h3><p>建议按这条链排查：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Service clusterIP:port</span><br><span class="line">      ↓</span><br><span class="line">EndpointSlice 中的 ready endpoint</span><br><span class="line">      ↓</span><br><span class="line">kube-proxy 同步规则</span><br><span class="line">      ↓</span><br><span class="line">IPVS Virtual Service</span><br><span class="line">      ↓</span><br><span class="line">IPVS Real Server</span><br><span class="line">      ↓</span><br><span class="line">后端 Pod 监听端口</span><br></pre></td></tr></table></figure>
+
+<p>对应命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; get svc &lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o yaml</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact | grep <span class="string">&#x27;&lt;cluster-ip&gt;&#x27;</span></span><br><span class="line">kubectl -n &lt;namespace&gt; get pods -o wide</span><br><span class="line">ss -lntup</span><br></pre></td></tr></table></figure>
+
+<p>如果 Service 有 ready endpoint，但 IPVS 没有 Virtual Service，优先看 kube-proxy 日志、节点 IPVS 模块和同步错误。如果 Virtual Service 存在但没有 Real Server，优先看 EndpointSlice、selector、Pod readiness 和 kube-proxy 同步状态。</p>
+<h2 id="6-常见异常与判断方法"><a href="#6-常见异常与判断方法" class="headerlink" title="6. 常见异常与判断方法"></a>6. 常见异常与判断方法</h2><h3 id="6-1-Service-存在，但-IPVS-没有对应-VIP"><a href="#6-1-Service-存在，但-IPVS-没有对应-VIP" class="headerlink" title="6.1 Service 存在，但 IPVS 没有对应 VIP"></a>6.1 Service 存在，但 IPVS 没有对应 VIP</h3><p>可能原因：</p>
+<ul>
+<li>当前节点 kube-proxy 没有运行或不在 IPVS 模式。</li>
+<li>kube-proxy 无法 watch API Server。</li>
+<li>IPVS 内核模块未加载，或 <code>ipvsadm</code>&#x2F;内核能力不匹配。</li>
+<li>kube-proxy 配置修改后没有生效。</li>
+<li>你查看的不是实际承载流量的节点。</li>
+<li>Service 使用了不同的 IP family 或 dual-stack 地址。</li>
+</ul>
+<p>命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n kube-system get pod -l k8s-app=kube-proxy -o wide</span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br><span class="line">lsmod | grep ip_vs</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-VIP-存在，但没有后端-Real-Server"><a href="#6-2-VIP-存在，但没有后端-Real-Server" class="headerlink" title="6.2 VIP 存在，但没有后端 Real Server"></a>6.2 VIP 存在，但没有后端 Real Server</h3><p>可能原因：</p>
+<ul>
+<li>Service selector 没有匹配 Pod。</li>
+<li>Pod 没有 Ready，EndpointSlice 中 <code>ready=false</code>。</li>
+<li><code>targetPort</code> 与容器监听端口不一致。</li>
+<li>EndpointSlice 尚未同步到 kube-proxy。</li>
+<li>Service 使用了手工 Endpoints，但地址不可用。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n &lt;namespace&gt; describe svc &lt;service&gt;</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get pod -l &lt;selector&gt; -o wide</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-IPVS-有后端，但请求失败"><a href="#6-3-IPVS-有后端，但请求失败" class="headerlink" title="6.3 IPVS 有后端，但请求失败"></a>6.3 IPVS 有后端，但请求失败</h3><p>按顺序检查：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 后端 Pod 是否监听目标端口</span></span><br><span class="line">kubectl -n &lt;namespace&gt; <span class="built_in">exec</span> &lt;pod&gt; -- ss -lntup</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从同节点/其他 Pod 测试后端 Pod IP</span></span><br><span class="line">kubectl -n &lt;namespace&gt; <span class="built_in">exec</span> &lt;debug-pod&gt; -- nc -vz &lt;pod-ip&gt; &lt;port&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Service 和 EndpointSlice</span></span><br><span class="line">kubectl -n &lt;namespace&gt; get svc &lt;service&gt; -o yaml</span><br><span class="line">kubectl -n &lt;namespace&gt; get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o wide</span><br><span class="line"></span><br><span class="line"><span class="comment"># 节点查看路由和 IPVS 规则</span></span><br><span class="line">ip route</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br></pre></td></tr></table></figure>
+
+<p>还要检查 NetworkPolicy、CNI、节点防火墙、rp_filter、MTU、返回路径和应用自身日志。</p>
+<h3 id="6-4-计数器快速增长"><a href="#6-4-计数器快速增长" class="headerlink" title="6.4 计数器快速增长"></a>6.4 计数器快速增长</h3><p>计数器增长说明匹配到流量，不等于服务健康。还要区分：</p>
+<ul>
+<li>连接&#x2F;包是否有对应的出方向增长。</li>
+<li>后端 Real Server 是否均匀收到流量。</li>
+<li>是否存在大量 UDP 短流量或 DNS 重试。</li>
+<li>是否出现单个后端异常、超时或丢包。</li>
+<li>bytes 与 packets 的平均包大小是否符合预期。</li>
+</ul>
+<p>粗略计算平均包大小：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">平均入包大小 ≈ InBytes / InPkts</span><br><span class="line">平均出包大小 ≈ OutBytes / OutPkts</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-最佳实践"><a href="#7-最佳实践" class="headerlink" title="7. 最佳实践"></a>7. 最佳实践</h2><ul>
+<li>先确认 kube-proxy 模式，再使用 <code>ipvsadm</code>；iptables 模式下主要检查 <code>iptables-save</code>，Cilium eBPF 模式下不能把 IPVS 当作主数据面。</li>
+<li>保留未经过滤的原始输出，避免 <code>grep</code> 把表头过滤掉，导致误解字段。</li>
+<li>用 <code>-n</code> 避免反向 DNS 解析影响排查速度。</li>
+<li>使用 <code>--exact</code> 保留精确计数，做前后差值时不要使用缩写值。</li>
+<li>长期观测使用指标系统，不要用高频 <code>ipvsadm</code> 轮询替代监控。</li>
+<li>一定同时检查 Kubernetes API 中的 Service、EndpointSlice 和 Pod Ready 状态。</li>
+<li>不要直接用 <code>ipvsadm</code> 手动删除或修改 kube-proxy 管理的 Service 规则；kube-proxy 会重新同步，手工修改可能造成短暂抖动和状态不一致。</li>
+<li>不要把 <code>ipvsadm -C</code> 当作“修复命令”。它会清空本机 IPVS 表，可能导致节点所有 Service 流量中断。</li>
+<li>不要仅凭 VIP 有计数判断后端健康；必须检查 Real Server、应用监听和端到端请求。</li>
+<li>修改 kube-proxy、内核模块、IPVS 调度算法或连接超时前，先在单节点&#x2F;测试环境验证。</li>
+<li>UDP 服务需要特别关注超时和 conntrack；DNS 业务同时检查 UDP 53、TCP 53 和应用重试。</li>
+<li>多网卡节点要确认 kube-proxy 使用的 node IP、Pod 路由和返回路径。</li>
+</ul>
+<h2 id="8-常用命令速查"><a href="#8-常用命令速查" class="headerlink" title="8. 常用命令速查"></a>8. 常用命令速查</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全量查看</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看指定 VIP</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -t 172.24.0.2:53 --stats --rate --exact</span><br><span class="line">ipvsadm -<span class="built_in">ln</span> -u 172.24.0.2:53 --stats --rate --exact</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保留表头后再筛选</span></span><br><span class="line">ipvsadm -<span class="built_in">ln</span> --stats --rate --exact | <span class="built_in">tee</span> /tmp/ipvs.txt</span><br><span class="line">grep -E <span class="string">&#x27;172\.24\.0\.2|^Prot|^  -&gt;&#x27;</span> /tmp/ipvs.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核和计数器</span></span><br><span class="line">lsmod | grep -E <span class="string">&#x27;ip_vs|nf_conntrack&#x27;</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs</span><br><span class="line"><span class="built_in">cat</span> /proc/net/ip_vs_stats</span><br><span class="line"></span><br><span class="line"><span class="comment"># Kubernetes 对照查询</span></span><br><span class="line">kubectl get svc -A -o wide | grep -w <span class="string">&#x27;172.24.0.2&#x27;</span></span><br><span class="line">kubectl -n kube-system get endpointslice -o wide</span><br><span class="line">kubectl -n kube-system logs &lt;kube-proxy-pod&gt; --since=30m</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/08/%E5%8D%95%E6%9C%BAdocker%E9%83%A8%E7%BD%B2ceph%E5%AE%9E%E8%B7%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2128,232 +2393,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/07/%E4%B8%AD%E6%96%AD%E6%95%85%E4%BA%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/07/%E4%B8%AD%E6%96%AD%E6%95%85%E4%BA%8B/" class="post-title-link" itemprop="url">中断故事</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-11-07 22:15:24 / 修改时间：22:17:26" itemprop="dateCreated datePublished" datetime="2025-11-07T22:15:24+08:00">2025-11-07</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="NAPI机制详解与快递站的故事-📦"><a href="#NAPI机制详解与快递站的故事-📦" class="headerlink" title="NAPI机制详解与快递站的故事 📦"></a>NAPI机制详解与快递站的故事 📦</h1><h2 id="一、NAPI在系统中的存在形式"><a href="#一、NAPI在系统中的存在形式" class="headerlink" title="一、NAPI在系统中的存在形式"></a>一、NAPI在系统中的存在形式</h2><h3 id="❓-NAPI是进程吗？"><a href="#❓-NAPI是进程吗？" class="headerlink" title="❓ NAPI是进程吗？"></a>❓ NAPI是进程吗？</h3><p><strong>不是独立进程！</strong> NAPI是Linux内核网络子系统的一个<strong>机制&#x2F;框架</strong>，而不是一个可见的进程。</p>
-<h3 id="🔍-在系统中如何体现？"><a href="#🔍-在系统中如何体现？" class="headerlink" title="🔍 在系统中如何体现？"></a>🔍 在系统中如何体现？</h3><h4 id="1-软中断上下文中运行"><a href="#1-软中断上下文中运行" class="headerlink" title="1. 软中断上下文中运行"></a>1. <strong>软中断上下文中运行</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看软中断处理线程（每个CPU一个）</span></span><br><span class="line">ps aux | grep ksoftirqd</span><br></pre></td></tr></table></figure>
-<p>输出示例：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root         12  0.0  0.0      0     0 ?        S    10:00   0:00 [ksoftirqd/0]</span><br><span class="line">root         18  0.0  0.0      0     0 ?        S    10:00   0:00 [ksoftirqd/1]</span><br><span class="line">root         24  0.0  0.0      0     0 ?        S    10:00   0:00 [ksoftirqd/2]</span><br></pre></td></tr></table></figure>
-
-<p><strong>NAPI就运行在这些 <code>ksoftirqd</code> 线程中！</strong></p>
-<h4 id="2-每个网卡有自己的NAPI结构"><a href="#2-每个网卡有自己的NAPI结构" class="headerlink" title="2. 每个网卡有自己的NAPI结构"></a>2. <strong>每个网卡有自己的NAPI结构</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看网卡的NAPI统计</span></span><br><span class="line"><span class="built_in">cat</span> /proc/net/softnet_stat</span><br></pre></td></tr></table></figure>
-
-<h4 id="3-可以通过内核参数调整"><a href="#3-可以通过内核参数调整" class="headerlink" title="3. 可以通过内核参数调整"></a>3. <strong>可以通过内核参数调整</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看NAPI相关参数</span></span><br><span class="line">sysctl -a | grep net.core</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="二、NAPI工作原理详解"><a href="#二、NAPI工作原理详解" class="headerlink" title="二、NAPI工作原理详解"></a>二、NAPI工作原理详解</h2><h3 id="🎯-核心思想：智能切换"><a href="#🎯-核心思想：智能切换" class="headerlink" title="🎯 核心思想：智能切换"></a>🎯 核心思想：智能切换</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">低负载（包少） ──→ 中断模式（来一个处理一个）</span><br><span class="line">                     ↓</span><br><span class="line">                  负载上升</span><br><span class="line">                     ↓</span><br><span class="line">高负载（包多） ──→ 轮询模式（定时批量处理）</span><br></pre></td></tr></table></figure>
-
-<h3 id="📊-工作流程图"><a href="#📊-工作流程图" class="headerlink" title="📊 工作流程图"></a>📊 工作流程图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">包到达 → 硬中断 → 触发NAPI → 开启轮询 → 批量处理</span><br><span class="line">                      ↓</span><br><span class="line">                  处理完毕</span><br><span class="line">                      ↓</span><br><span class="line">                队列空了 → 关闭轮询 → 等待下次中断</span><br></pre></td></tr></table></figure>
-
-<h3 id="💡-为什么这样设计？"><a href="#💡-为什么这样设计？" class="headerlink" title="💡 为什么这样设计？"></a>💡 为什么这样设计？</h3><h4 id="问题1：纯中断模式的问题"><a href="#问题1：纯中断模式的问题" class="headerlink" title="问题1：纯中断模式的问题"></a><strong>问题1：纯中断模式的问题</strong></h4><ul>
-<li>每来1个包就中断1次</li>
-<li>高负载时（每秒100万个包）&#x3D; 100万次中断</li>
-<li>CPU被中断打断，来回切换开销巨大</li>
-</ul>
-<h4 id="问题2：纯轮询模式的问题"><a href="#问题2：纯轮询模式的问题" class="headerlink" title="问题2：纯轮询模式的问题"></a><strong>问题2：纯轮询模式的问题</strong></h4><ul>
-<li>没包也要不停查看，浪费CPU</li>
-<li>低负载时响应延迟高</li>
-</ul>
-<h4 id="NAPI的解决方案：混合模式"><a href="#NAPI的解决方案：混合模式" class="headerlink" title="NAPI的解决方案：混合模式"></a><strong>NAPI的解决方案：混合模式</strong></h4><ul>
-<li><strong>低负载</strong>：用中断（响应快）</li>
-<li><strong>高负载</strong>：用轮询（效率高）</li>
-<li><strong>动态切换</strong>：自动适应</li>
-</ul>
-<h3 id="🔧-NAPI的实现细节"><a href="#🔧-NAPI的实现细节" class="headerlink" title="🔧 NAPI的实现细节"></a>🔧 NAPI的实现细节</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 伪代码示例</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">napi_struct</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">poll_list</span>;</span>  <span class="comment">// 轮询列表</span></span><br><span class="line">    <span class="type">int</span> (*poll)(<span class="keyword">struct</span> napi_struct *, <span class="type">int</span>);  <span class="comment">// 轮询函数</span></span><br><span class="line">    <span class="type">int</span> weight;  <span class="comment">// 每次轮询处理的最大包数</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 网卡驱动注册NAPI</span></span><br><span class="line">netif_napi_add(dev, &amp;priv-&gt;napi, my_poll_function, <span class="number">64</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 中断处理函数</span></span><br><span class="line">irq_handler() &#123;</span><br><span class="line">    disable_irq();  <span class="comment">// 关闭网卡中断</span></span><br><span class="line">    napi_schedule(&amp;priv-&gt;napi);  <span class="comment">// 启动NAPI轮询</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NAPI轮询函数</span></span><br><span class="line">my_poll_function(<span class="keyword">struct</span> napi_struct *napi, <span class="type">int</span> budget) &#123;</span><br><span class="line">    <span class="type">int</span> work_done = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (work_done &lt; budget) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!more_packets())</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        process_packet();</span><br><span class="line">        work_done++;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (work_done &lt; budget) &#123;</span><br><span class="line">        napi_complete(napi);  <span class="comment">// 处理完了，关闭轮询</span></span><br><span class="line">        enable_irq();  <span class="comment">// 重新开启中断</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> work_done;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="三、快递站的完整故事-📮"><a href="#三、快递站的完整故事-📮" class="headerlink" title="三、快递站的完整故事 📮"></a>三、快递站的完整故事 📮</h2><h3 id="🏢-故事背景设定"><a href="#🏢-故事背景设定" class="headerlink" title="🏢 故事背景设定"></a>🏢 故事背景设定</h3><p><strong>人物角色：</strong></p>
-<ul>
-<li><strong>网线</strong> &#x3D; 高速公路</li>
-<li><strong>网卡（NIC1）</strong> &#x3D; 小区快递接收点</li>
-<li><strong>门卫</strong> &#x3D; 硬件中断</li>
-<li><strong>DMA搬运工</strong> &#x3D; 自动传送带机器人</li>
-<li><strong>Ring Buffer</strong> &#x3D; 环形旋转仓库（8个格子）</li>
-<li><strong>NAPI巡检员</strong> &#x3D; 智能快递管理员</li>
-<li><strong>软中断处理员</strong> &#x3D; 后台分拣中心</li>
-<li><strong>协议栈</strong> &#x3D; 快递最后一公里投递员</li>
-<li><strong>应用程序</strong> &#x3D; 收件人</li>
-</ul>
-<hr>
-<h3 id="📖-故事正文"><a href="#📖-故事正文" class="headerlink" title="📖 故事正文"></a>📖 故事正文</h3><h4 id="第一幕：平静的早晨（低负载）"><a href="#第一幕：平静的早晨（低负载）" class="headerlink" title="第一幕：平静的早晨（低负载）"></a><strong>第一幕：平静的早晨（低负载）</strong></h4><p>早上8点，阳光明媚。小区快递接收点很安静，偶尔有一两个快递到达。</p>
-<p><strong>门卫老王（硬件中断）</strong> 坐在门口，悠闲地喝着茶。</p>
-<p><em>叮咚！</em> 一个快递包裹从高速公路（网线）送到了接收点（网卡NIC1）。</p>
-<p><strong>老王（硬件中断）：</strong> “哎呀，有快递了！” 他立刻按响门铃（触发中断），通知楼上的管理中心。</p>
-<p><strong>DMA机器人（自动搬运工）</strong> 听到信号后，立刻启动，不需要任何人工操作，直接把包裹从接收点搬到了<strong>环形旋转仓库</strong>（Ring Buffer）的1号格子里。</p>
-<p><strong>老王快速登记：</strong> “1号包裹已入库！” 然后继续回去喝茶。</p>
-<p><strong>NAPI巡检员小李（轮询机制）</strong> 听到通知后过来查看：</p>
-<ul>
-<li>看了看仓库，只有1个包裹</li>
-<li>拿起包裹，交给<strong>后台分拣中心</strong>（软中断处理）</li>
-<li>分拣员快速处理，贴上标签，送给<strong>快递员</strong>（协议栈）</li>
-<li>快递员查看地址（IP层），确认楼号和房间号（TCP&#x2F;UDP层），最后敲门交给<strong>收件人</strong>（应用程序）</li>
-</ul>
-<p>小李处理完后说：**”仓库空了，我继续等老王通知吧。”** （关闭轮询，回到中断模式）</p>
-<hr>
-<h4 id="第二幕：双11爆仓（高负载）"><a href="#第二幕：双11爆仓（高负载）" class="headerlink" title="第二幕：双11爆仓（高负载）"></a><strong>第二幕：双11爆仓（高负载）</strong></h4><p>中午12点，双11促销开始了！快递像雪片一样飞来！</p>
-<p><em>叮咚！叮咚！叮咚！叮咚！</em> 每秒钟有<strong>成百上千个</strong>包裹到达！</p>
-<p><strong>老王（硬件中断）</strong> 急得满头大汗：</p>
-<ul>
-<li>“1号包裹到了！”（按门铃）</li>
-<li>“2号包裹到了！”（按门铃）</li>
-<li>“3号包裹到了！”（按门铃）</li>
-<li>…</li>
-</ul>
-<p>他发现自己<strong>光按门铃就按不过来</strong>了，手都快抽筋了！而且楼上的人也被频繁的门铃吵得工作效率下降！</p>
-<p><strong>这时，NAPI巡检员小李（智能管理员）发现了问题：</strong></p>
-<p><strong>小李：</strong> “老王，你别按了！我看这架势，包裹会源源不断来。你就专心让DMA机器人往仓库里放吧，我<strong>自己定时过来批量取</strong>就行了！”</p>
-<p><strong>老王：</strong> “好！那我就不按门铃了！” （<strong>关闭中断</strong>）</p>
-<p>于是，新的工作模式开始了：</p>
-<ol>
-<li><p><strong>DMA机器人</strong> 疯狂工作，不停地把包裹放入<strong>环形仓库</strong>的1→2→3→4→5→6→7→8→1→2…（循环使用）</p>
-</li>
-<li><p><strong>小李（NAPI轮询）</strong> 每隔一小段时间（比如几微秒）就来仓库看一眼：</p>
-<ul>
-<li>“哦，有64个包裹！” （budget&#x3D;64）</li>
-<li>一次性拿走64个，交给<strong>后台分拣中心</strong>（软中断）</li>
-<li>分拣中心开始批量处理：<ul>
-<li>贴标签（添加协议信息）</li>
-<li>分类（IP路由）</li>
-<li>装车（送入协议栈）</li>
-</ul>
-</li>
-<li><strong>快递员们</strong>（协议栈）批量投递到各家各户（应用程序）</li>
-</ul>
-</li>
-<li><p><strong>关键优化：</strong></p>
-<ul>
-<li>老王不用频繁按门铃了（减少中断开销）</li>
-<li>小李批量处理，效率高（一次拿64个）</li>
-<li>仓库满了也不怕，DMA会覆盖旧数据（Ring Buffer特性）</li>
-</ul>
-</li>
-</ol>
-<hr>
-<h4 id="第三幕：夜深人静（恢复低负载）"><a href="#第三幕：夜深人静（恢复低负载）" class="headerlink" title="第三幕：夜深人静（恢复低负载）"></a><strong>第三幕：夜深人静（恢复低负载）</strong></h4><p>晚上11点，双11活动结束，快递量骤减。</p>
-<p><strong>小李（NAPI）</strong> 又来巡检了：</p>
-<ul>
-<li>第1次：拿了20个包裹</li>
-<li>第2次：拿了5个包裹</li>
-<li>第3次：拿了1个包裹</li>
-<li>第4次：<strong>仓库空了！</strong></li>
-</ul>
-<p><strong>小李：</strong> “看来又恢复平静了。老王，你继续按门铃模式吧，我去休息了。”（<strong>关闭轮询，重新开启中断</strong>）</p>
-<p><strong>老王：</strong> “好嘞！” （<strong>恢复中断模式</strong>）</p>
-<p>系统又回到了开始的状态：有包裹就按门铃，NAPI按需响应。</p>
-<hr>
-<h2 id="四、关键知识点总结"><a href="#四、关键知识点总结" class="headerlink" title="四、关键知识点总结"></a>四、关键知识点总结</h2><h3 id="🎯-NAPI的精髓"><a href="#🎯-NAPI的精髓" class="headerlink" title="🎯 NAPI的精髓"></a>🎯 NAPI的精髓</h3><table>
-<thead>
-<tr>
-<th>场景</th>
-<th>模式</th>
-<th>原因</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>低负载</strong></td>
-<td>中断驱动</td>
-<td>响应快，不浪费CPU</td>
-</tr>
-<tr>
-<td><strong>高负载</strong></td>
-<td>轮询驱动</td>
-<td>减少中断，批量处理</td>
-</tr>
-<tr>
-<td><strong>切换时机</strong></td>
-<td>自动检测</td>
-<td>队列满→开轮询；队列空→关轮询</td>
-</tr>
-</tbody></table>
-<h3 id="🔑-记忆口诀"><a href="#🔑-记忆口诀" class="headerlink" title="🔑 记忆口诀"></a>🔑 记忆口诀</h3><p><strong>“包少按门铃，包多我自取”</strong></p>
-<ul>
-<li>包少（低负载）&#x3D; 中断模式（按门铃通知）</li>
-<li>包多（高负载）&#x3D; 轮询模式（主动批量取）</li>
-</ul>
-<h3 id="📊-性能对比"><a href="#📊-性能对比" class="headerlink" title="📊 性能对比"></a>📊 性能对比</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">纯中断模式：</span><br><span class="line">  1,000,000 包/秒 × 1 中断/包 = 1,000,000 次中断 😱</span><br><span class="line"></span><br><span class="line">NAPI混合模式：</span><br><span class="line">  1,000,000 包/秒 ÷ 64 包/批 = 15,625 次轮询 😊</span><br><span class="line">  </span><br><span class="line">性能提升：约 60 倍！</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="五、实战查看"><a href="#五、实战查看" class="headerlink" title="五、实战查看"></a>五、实战查看</h2><h3 id="查看NAPI统计"><a href="#查看NAPI统计" class="headerlink" title="查看NAPI统计"></a>查看NAPI统计</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看软中断统计</span></span><br><span class="line"><span class="built_in">cat</span> /proc/softirqs</span><br></pre></td></tr></table></figure>
-
-<h3 id="调整NAPI参数"><a href="#调整NAPI参数" class="headerlink" title="调整NAPI参数"></a>调整NAPI参数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每次轮询最多处理的包数（budget）</span></span><br><span class="line">sysctl net.core.netdev_budget=300</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每次轮询最长时间（微秒）</span></span><br><span class="line">sysctl net.core.netdev_budget_usecs=2000</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="🎓-总结"><a href="#🎓-总结" class="headerlink" title="🎓 总结"></a>🎓 总结</h2><ul>
-<li><strong>NAPI不是进程</strong>，是运行在<code>ksoftirqd</code>内核线程中的机制</li>
-<li><strong>核心是智能切换</strong>：低负载用中断，高负载用轮询</li>
-<li><strong>快递站故事</strong>：老王（中断）和小李（轮询）配合，应对不同流量</li>
-<li><strong>性能提升</strong>：减少中断次数，提高批量处理效率</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2425,7 +2464,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">216</span>
+          <span class="site-state-item-count">217</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2438,7 +2477,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

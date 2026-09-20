@@ -22284,4 +22284,25 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>SDLC最佳实践</title>
+    <url>/2026/09/20/SDLC%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<h2 id="长程任务-防止AI走神"><a href="#长程任务-防止AI走神" class="headerlink" title="长程任务-防止AI走神"></a>长程任务-防止AI走神</h2><ul>
+<li><p>第一道机关：先列清单，再动手</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&quot;动手前先列 5-8 条待办清单，每条写清楚&#x27;做完算啥样&#x27;。每完成一条勾掉，全部勾完才算任务结束。没列清单不许动手。&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第二道机关：让它记住你是谁</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&quot;开工前先读【背景卡】：我是谁、这活为了啥、历史口径和红线有哪些。每次都先读再干，别从零开始。&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第三道机关：大活切小段，每段交个东西</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&quot;把大活拆成 3 段，每段结束必须产出一份具体交付物（文档/表/结论），交不出不许进下一段。&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>长程任务实践</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、先列待办清单（5-8 条，每条写清完成标准），干完勾掉，全勾完才算结束；</span><br><span class="line">2、开工前读【背景卡】（我是谁/目标/历史口径/红线），别从零认识我；</span><br><span class="line">3、大活拆 3 段，每段结束交一份具体交付物，交不出不进下一段；</span><br><span class="line">4、每周固定时间主动汇报进度+风险，不等问题爆发才说。</span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>sdlc</tag>
+      </tags>
+  </entry>
 </search>
