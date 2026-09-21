@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"shispring.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"./public/search.xml"};
+  </script>
+
+  <meta name="description" content="稳定性保障12345678910                  稳定性保障                       │     ┌─────────────────┼─────────────────┐     │                 │                 │  事前预防           事中响应           事后改进     │">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SRE视角护网保障">
+<meta property="og:url" content="https://shispring.github.io/2025/09/21/%E8%BF%90%E7%BB%B4%E4%BF%9D%E9%9A%9C/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="稳定性保障12345678910                  稳定性保障                       │     ┌─────────────────┼─────────────────┐     │                 │                 │  事前预防           事中响应           事后改进     │">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-21T02:17:30.000Z">
+<meta property="article:modified_time" content="2026-09-21T02:41:29.495Z">
+<meta property="article:author" content="shispring">
+<meta property="article:tag" content="SRE">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://shispring.github.io/2025/09/21/%E8%BF%90%E7%BB%B4%E4%BF%9D%E9%9A%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SRE视角护网保障 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources" rel="section"><i class="fa fa-download fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/21/%E8%BF%90%E7%BB%B4%E4%BF%9D%E9%9A%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SRE视角护网保障
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-21 10:17:30" itemprop="dateCreated datePublished" datetime="2025-09-21T10:17:30+08:00">2025-09-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-09-21 10:41:29" itemprop="dateModified" datetime="2026-09-21T10:41:29+08:00">2026-09-21</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="稳定性保障"><a href="#稳定性保障" class="headerlink" title="稳定性保障"></a>稳定性保障</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">                  稳定性保障</span><br><span class="line">                       │</span><br><span class="line">     ┌─────────────────┼─────────────────┐</span><br><span class="line">     │                 │                 │</span><br><span class="line">  事前预防           事中响应           事后改进</span><br><span class="line">     │                 │                 │</span><br><span class="line">服务巡检/容量       7×24值守          保障复盘</span><br><span class="line">隐患排查            告警响应           故障复盘</span><br><span class="line">故障清零            事件升级           风险转问题</span><br><span class="line">变更冻结            应急响应           持续跟踪</span><br></pre></td></tr></table></figure>
+
+<h3 id="主要关注点"><a href="#主要关注点" class="headerlink" title="主要关注点"></a>主要关注点</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">* 服务是否正常</span><br><span class="line">* 容量是否足够</span><br><span class="line">* 是否存在历史遗留故障</span><br><span class="line">* 是否存在高风险告警</span><br><span class="line">* 是否存在单点</span><br><span class="line">* 是否存在资源瓶颈</span><br><span class="line">* 是否存在网络、存储、数据库等基础设施风险</span><br><span class="line">* 是否存在近期变更遗留问题</span><br><span class="line">* 是否存在无法快速恢复的故障</span><br></pre></td></tr></table></figure>
+
+<h3 id="风险识别与治理"><a href="#风险识别与治理" class="headerlink" title="风险识别与治理"></a>风险识别与治理</h3><ul>
+<li>服务巡检: Pre-Check &#x2F; Health Check</li>
+</ul>
+<h3 id="容量保障"><a href="#容量保障" class="headerlink" title="容量保障"></a>容量保障</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>检查内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>计算</td>
+<td>CPU、Memory、Pod 数量</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>磁盘、inode、PVC、Ceph</td>
+</tr>
+<tr>
+<td>网络</td>
+<td>带宽、连接数、TIME_WAIT、SYN backlog</td>
+</tr>
+<tr>
+<td>LB</td>
+<td>VIP、连接数、后端实例数</td>
+</tr>
+<tr>
+<td>K8s</td>
+<td>Node、Pod、IP、资源配额</td>
+</tr>
+<tr>
+<td>数据库</td>
+<td>Connection、QPS、慢查询、磁盘</td>
+</tr>
+<tr>
+<td>MQ</td>
+<td>Topic、Partition、Consumer Lag</td>
+</tr>
+<tr>
+<td>etcd</td>
+<td>DB Size、磁盘、延迟、Leader</td>
+</tr>
+<tr>
+<td>DNS</td>
+<td>QPS、缓存、异常率</td>
+</tr>
+<tr>
+<td>日志</td>
+<td>磁盘、日志量、采集链路</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">流量预测</span><br><span class="line">   ↓</span><br><span class="line">峰值 QPS</span><br><span class="line">   ↓</span><br><span class="line">连接数</span><br><span class="line">   ↓</span><br><span class="line">LB容量</span><br><span class="line">   ↓</span><br><span class="line">Ingress容量</span><br><span class="line">   ↓</span><br><span class="line">Pod容量</span><br><span class="line">   ↓</span><br><span class="line">Node容量</span><br><span class="line">   ↓</span><br><span class="line">数据库/MQ容量</span><br></pre></td></tr></table></figure>
+<h3 id="隐患治理"><a href="#隐患治理" class="headerlink" title="隐患治理"></a>隐患治理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">发现问题</span><br><span class="line">   ↓</span><br><span class="line">风险评估</span><br><span class="line">   ↓</span><br><span class="line">P0/P1/P2</span><br><span class="line">   ↓</span><br><span class="line">P0 → 必须解决</span><br><span class="line">P1 → 尽量解决</span><br><span class="line">P2 → 后续跟踪</span><br></pre></td></tr></table></figure>
+<ul>
+<li>P0：必须解决<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">* 核心服务异常</span><br><span class="line">* 单点故障</span><br><span class="line">* 容量不足</span><br><span class="line">* 核心链路异常</span><br><span class="line">* 高概率故障</span><br><span class="line">* 高风险配置</span><br><span class="line">* 安全问题</span><br></pre></td></tr></table></figure></li>
+<li>P1：尽量解决<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">* 高风险告警</span><br><span class="line">* 性能异常</span><br><span class="line">* 非核心服务隐患</span><br><span class="line">* 资源长期不足</span><br></pre></td></tr></table></figure></li>
+<li>P2：可暂缓处理<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">* 优化项</span><br><span class="line">* 技术债</span><br><span class="line">* 非关键性能优化</span><br><span class="line">* 监控完善</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="变更管控"><a href="#变更管控" class="headerlink" title="变更管控"></a>变更管控</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">发现问题</span><br><span class="line"> ↓</span><br><span class="line">判断是否必须变更</span><br><span class="line"> ↓</span><br><span class="line">值班负责人确认</span><br><span class="line"> ↓</span><br><span class="line">风险评估</span><br><span class="line"> ↓</span><br><span class="line">执行</span><br><span class="line"> ↓</span><br><span class="line">验证</span><br><span class="line"> ↓</span><br><span class="line">记录</span><br></pre></td></tr></table></figure>
+<ul>
+<li>变更原因</li>
+<li>不变更的风险</li>
+<li>变更方案</li>
+<li>回滚方案</li>
+<li>影响范围</li>
+<li>执行人</li>
+<li>审批人</li>
+<li>验证结果</li>
+</ul>
+<h3 id="明确的-RACI"><a href="#明确的-RACI" class="headerlink" title="明确的 RACI"></a>明确的 RACI</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">业务/服务</span><br><span class="line">   │</span><br><span class="line">   ├── 一级值班人</span><br><span class="line">   ├── 二级负责人</span><br><span class="line">   ├── 技术Owner</span><br><span class="line">   └── 总值班人</span><br></pre></td></tr></table></figure>
+<h3 id="告警响应：xxx-分钟机制"><a href="#告警响应：xxx-分钟机制" class="headerlink" title="告警响应：xxx 分钟机制"></a>告警响应：xxx 分钟机制</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MTTA</td>
+<td>多久有人接手</td>
+</tr>
+<tr>
+<td>MTTD</td>
+<td>多久发现</td>
+</tr>
+<tr>
+<td>MTTR</td>
+<td>多久恢复</td>
+</tr>
+<tr>
+<td>MTTI</td>
+<td>多久开始处理</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">eg: 10分钟响应 ≠ 10分钟解决</span><br><span class="line">10:00 业务报警</span><br><span class="line"> ↓</span><br><span class="line">10:03 值班人员收到</span><br><span class="line"> ↓</span><br><span class="line">10:05 确认问题</span><br><span class="line"> ↓</span><br><span class="line">10:08 拉起相关团队</span><br><span class="line"> ↓</span><br><span class="line">10:20 定位</span><br><span class="line"> ↓</span><br><span class="line">10:35 恢复</span><br></pre></td></tr></table></figure>
+
+<h3 id="故障升级机制"><a href="#故障升级机制" class="headerlink" title="故障升级机制"></a>故障升级机制</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">      告警/报障</span><br><span class="line">          │</span><br><span class="line">          ↓</span><br><span class="line">      一线值班</span><br><span class="line">          │</span><br><span class="line">   ┌──────┴──────┐</span><br><span class="line">   │             │</span><br><span class="line"> 已定位          未定位</span><br><span class="line">   │             │</span><br><span class="line">   ↓             ↓</span><br><span class="line">正常处理       二线/Owner</span><br><span class="line">                 │</span><br><span class="line">          ┌──────┴──────┐</span><br><span class="line">          │             │</span><br><span class="line">        定位           未定位</span><br><span class="line">          │             │</span><br><span class="line">          ↓             ↓</span><br><span class="line">        修复         总值班人</span><br><span class="line">                        │</span><br><span class="line">                        ↓</span><br><span class="line">                   应急响应</span><br></pre></td></tr></table></figure>
+
+<h3 id="重大事件：从“故障处理”升级为“应急响应”"><a href="#重大事件：从“故障处理”升级为“应急响应”" class="headerlink" title="重大事件：从“故障处理”升级为“应急响应”"></a>重大事件：从“故障处理”升级为“应急响应”</h3><ul>
+<li>排障人员负责技术问题，事件负责人负责整体协调。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">            Incident Commander</span><br><span class="line">                    │</span><br><span class="line">   ┌────────────────┼────────────────┐</span><br><span class="line">   ↓                ↓                ↓</span><br><span class="line">技术排障           业务沟通          信息同步</span><br><span class="line">   │                │                │</span><br><span class="line"> K8s/LB            产品/业务          管理层</span><br><span class="line"> DB/MQ             客户               NOC</span><br><span class="line"> Network</span><br></pre></td></tr></table></figure>
+不要让最懂技术的人同时承担：</li>
+</ul>
+<ul>
+<li>技术排障</li>
+<li>群里同步</li>
+<li>拉人</li>
+<li>记录时间线</li>
+<li>对接业务</li>
+<li>汇报领导</li>
+</ul>
+<h3 id="及时通报-稳定性日报-复盘：形成闭环"><a href="#及时通报-稳定性日报-复盘：形成闭环" class="headerlink" title="及时通报 &amp;&amp; 稳定性日报 &amp;&amp; 复盘：形成闭环"></a>及时通报 &amp;&amp; 稳定性日报 &amp;&amp; 复盘：形成闭环</h3><h2 id="护网流程"><a href="#护网流程" class="headerlink" title="护网流程"></a>护网流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">          ┌───────────────┐</span><br><span class="line">          │  假期保障目标 │</span><br><span class="line">          └───────┬───────┘</span><br><span class="line">                  ↓</span><br><span class="line">           【节前风险治理】</span><br><span class="line">                  │</span><br><span class="line">   ┌──────────────┼──────────────┐</span><br><span class="line">   ↓              ↓              ↓</span><br><span class="line">服务巡检        容量评估        隐患排查</span><br><span class="line">   │              │              │</span><br><span class="line">   └──────────────┼──────────────┘</span><br><span class="line">                  ↓</span><br><span class="line">             风险分级</span><br><span class="line">                  ↓</span><br><span class="line">         ┌────────┴────────┐</span><br><span class="line">         ↓                 ↓</span><br><span class="line">      必须解决           可延期</span><br><span class="line">         ↓                 ↓</span><br><span class="line">      故障清零          问题登记</span><br><span class="line">         │                 │</span><br><span class="line">         └────────┬────────┘</span><br><span class="line">                  ↓</span><br><span class="line">             Change Freeze</span><br><span class="line">                  ↓</span><br><span class="line">           【假期7×24值守】</span><br><span class="line">                  │</span><br><span class="line">      ┌───────────┼───────────┐</span><br><span class="line">      ↓           ↓           ↓</span><br><span class="line">    监控告警     用户报障     业务事件</span><br><span class="line">      │           │           │</span><br><span class="line">      └───────────┼───────────┘</span><br><span class="line">                  ↓</span><br><span class="line">              10分钟响应</span><br><span class="line">                  ↓</span><br><span class="line">              故障定位</span><br><span class="line">                  ↓</span><br><span class="line">         ┌────────┴────────┐</span><br><span class="line">         ↓                 ↓</span><br><span class="line">       已定位            未定位</span><br><span class="line">         ↓                 ↓</span><br><span class="line">      自行处理          升级机制</span><br><span class="line">         │                 │</span><br><span class="line">         └────────┬────────┘</span><br><span class="line">                  ↓</span><br><span class="line">              重大事件？</span><br><span class="line">              /      \</span><br><span class="line">            否        是</span><br><span class="line">            ↓          ↓</span><br><span class="line">          恢复       应急响应</span><br><span class="line">            │          │</span><br><span class="line">            └────┬─────┘</span><br><span class="line">                 ↓</span><br><span class="line">             稳定性日报</span><br><span class="line">                 ↓</span><br><span class="line">           【节后复盘】</span><br><span class="line">                 ↓</span><br><span class="line">           RCA / 根因分析</span><br><span class="line">                 ↓</span><br><span class="line">             Action Item</span><br><span class="line">                 ↓</span><br><span class="line">           Owner + Deadline</span><br><span class="line">                 ↓</span><br><span class="line">             持续跟踪</span><br></pre></td></tr></table></figure>
+<h2 id="SRE-视角：SRE-Incident-Management-Change-Management-Capacity-Management"><a href="#SRE-视角：SRE-Incident-Management-Change-Management-Capacity-Management" class="headerlink" title="SRE 视角：SRE Incident Management + Change Management + Capacity Management"></a>SRE 视角：SRE Incident Management + Change Management + Capacity Management</h2><table>
+<thead>
+<tr>
+<th>通知内容</th>
+<th>SRE&#x2F;运维体系</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>节前巡检</td>
+<td>Health Check</td>
+</tr>
+<tr>
+<td>容量摸排</td>
+<td>Capacity Planning</td>
+</tr>
+<tr>
+<td>风险清零</td>
+<td>Risk Management</td>
+</tr>
+<tr>
+<td>故障复盘</td>
+<td>RCA</td>
+</tr>
+<tr>
+<td>生产冻结</td>
+<td>Change Freeze</td>
+</tr>
+<tr>
+<td>紧急变更</td>
+<td>Emergency Change</td>
+</tr>
+<tr>
+<td>7×24值守</td>
+<td>On-call</td>
+</tr>
+<tr>
+<td>10分钟响应</td>
+<td>MTTA</td>
+</tr>
+<tr>
+<td>升级机制</td>
+<td>Escalation</td>
+</tr>
+<tr>
+<td>重大事件</td>
+<td>Incident Management</td>
+</tr>
+<tr>
+<td>稳定性日报</td>
+<td>Operational Reporting</td>
+</tr>
+<tr>
+<td>节后复盘</td>
+<td>Postmortem</td>
+</tr>
+<tr>
+<td>遗留风险</td>
+<td>Action Item</td>
+</tr>
+<tr>
+<td>Owner + Deadline</td>
+<td>Accountability</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/SRE/" rel="tag"><i class="fa fa-tag"></i> SRE</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/19/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD/" rel="prev" title="容器文件系统挂载">
+      <i class="fa fa-chevron-left"></i> 容器文件系统挂载
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/09/23/bash-profile%E9%85%8D%E7%BD%AE/" rel="next" title="bash_profile配置">
+      bash_profile配置 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E6%80%A7%E4%BF%9D%E9%9A%9C"><span class="nav-number">1.</span> <span class="nav-text">稳定性保障</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E5%85%B3%E6%B3%A8%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">主要关注点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A3%8E%E9%99%A9%E8%AF%86%E5%88%AB%E4%B8%8E%E6%B2%BB%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">风险识别与治理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E9%87%8F%E4%BF%9D%E9%9A%9C"><span class="nav-number">1.3.</span> <span class="nav-text">容量保障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E6%82%A3%E6%B2%BB%E7%90%86"><span class="nav-number">1.4.</span> <span class="nav-text">隐患治理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E6%9B%B4%E7%AE%A1%E6%8E%A7"><span class="nav-number">1.5.</span> <span class="nav-text">变更管控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%8E%E7%A1%AE%E7%9A%84-RACI"><span class="nav-number">1.6.</span> <span class="nav-text">明确的 RACI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%8A%E8%AD%A6%E5%93%8D%E5%BA%94%EF%BC%9Axxx-%E5%88%86%E9%92%9F%E6%9C%BA%E5%88%B6"><span class="nav-number">1.7.</span> <span class="nav-text">告警响应：xxx 分钟机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%8D%87%E7%BA%A7%E6%9C%BA%E5%88%B6"><span class="nav-number">1.8.</span> <span class="nav-text">故障升级机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%A4%A7%E4%BA%8B%E4%BB%B6%EF%BC%9A%E4%BB%8E%E2%80%9C%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E2%80%9D%E5%8D%87%E7%BA%A7%E4%B8%BA%E2%80%9C%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E2%80%9D"><span class="nav-number">1.9.</span> <span class="nav-text">重大事件：从“故障处理”升级为“应急响应”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8A%E6%97%B6%E9%80%9A%E6%8A%A5-%E7%A8%B3%E5%AE%9A%E6%80%A7%E6%97%A5%E6%8A%A5-%E5%A4%8D%E7%9B%98%EF%BC%9A%E5%BD%A2%E6%88%90%E9%97%AD%E7%8E%AF"><span class="nav-number">1.10.</span> <span class="nav-text">及时通报 &amp;&amp; 稳定性日报 &amp;&amp; 复盘：形成闭环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%A4%E7%BD%91%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">护网流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SRE-%E8%A7%86%E8%A7%92%EF%BC%9ASRE-Incident-Management-Change-Management-Capacity-Management"><span class="nav-number">3.</span> <span class="nav-text">SRE 视角：SRE Incident Management + Change Management + Capacity Management</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="shispring"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">shispring</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">218</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shispring</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">NaNm</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">NaN:aN</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
