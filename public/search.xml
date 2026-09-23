@@ -22494,4 +22494,61 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>SRE</tag>
       </tags>
   </entry>
+  <entry>
+    <title>流量监控指标</title>
+    <url>/2025/09/23/%E6%B5%81%E9%87%8F%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87/</url>
+    <content><![CDATA[<h2 id="Linux-网络指标体系"><a href="#Linux-网络指标体系" class="headerlink" title="Linux 网络指标体系"></a>Linux 网络指标体系</h2><table>
+<thead>
+<tr>
+<th>图表</th>
+<th>指标</th>
+<th align="right">单位</th>
+<th>本质</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>每秒带宽使用</td>
+<td>RX&#x2F;TX Byte Rate</td>
+<td align="right">MiB&#x2F;s</td>
+<td>网卡实际传输了多少数据</td>
+</tr>
+<tr>
+<td>每秒网卡流量</td>
+<td>RX&#x2F;TX Traffic</td>
+<td align="right">MiB&#x2F;s</td>
+<td>网卡入&#x2F;出方向流量</td>
+</tr>
+<tr>
+<td>每秒网卡收发包数量</td>
+<td>RX&#x2F;TX PPS</td>
+<td align="right">kpps</td>
+<td>每秒处理多少网络包</td>
+</tr>
+<tr>
+<td>网络 socket 连接信息</td>
+<td>CLOSED&#x2F;TIME_WAIT&#x2F;ESTABLISHED</td>
+<td align="right">个</td>
+<td>TCP Socket 状态</td>
+</tr>
+<tr>
+<td>网卡流量包错误数</td>
+<td>RX&#x2F;TX errors</td>
+<td align="right">个&#x2F;s 或累计</td>
+<td>网卡收发错误</td>
+</tr>
+<tr>
+<td>网卡丢包数</td>
+<td>RX&#x2F;TX drops</td>
+<td align="right">个&#x2F;s 或累计</td>
+<td>网卡&#x2F;内核丢弃的数据包</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">                   Linux Network</span><br><span class="line">                        │</span><br><span class="line">       ┌────────────────┼────────────────┐</span><br><span class="line">       │                │                │</span><br><span class="line">       ▼                ▼                ▼</span><br><span class="line">     流量             TCP              网卡</span><br><span class="line">       │                │                │</span><br><span class="line">  ┌────┴────┐      ┌────┴────┐      ┌────┴────┐</span><br><span class="line">  │         │      │         │      │         │</span><br><span class="line"> Bytes     PPS    ESTAB    TIME_WAIT Errors   Drops</span><br><span class="line">  │         │      │         │      │         │</span><br><span class="line">  │         │      │         │      │         │</span><br><span class="line">rx/tx     rx/tx   并发连接   短连接    异常     丢包</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">             网络压力</span><br><span class="line">                │</span><br><span class="line">      ┌─────────┴─────────┐</span><br><span class="line">      ↓                   ↓</span><br><span class="line">  Bandwidth             PPS</span><br><span class="line">  MB/s、Gb/s            kpps</span><br><span class="line">      │                   │</span><br><span class="line">      │             小包压力/CPU压力</span><br><span class="line">      ↓                   ↓</span><br><span class="line">    网卡              SoftIRQ/NIC</span><br><span class="line">      │                 </span><br><span class="line">      └────── TCP Connections</span><br><span class="line">                   │</span><br><span class="line">         ┌─────────┼─────────┐</span><br><span class="line">         ↓         ↓         ↓</span><br><span class="line">      ESTABLISHED TIME_WAIT  CLOSED</span><br><span class="line">         │         │</span><br><span class="line">         ↓         ↓</span><br><span class="line">      并发连接    短连接压力</span><br><span class="line"></span><br><span class="line">                   +</span><br><span class="line">             Errors / Drops</span><br><span class="line">                   ↓</span><br><span class="line">            是否发生异常</span><br></pre></td></tr></table></figure>
+
+<h3 id="linux-指令"><a href="#linux-指令" class="headerlink" title="linux 指令"></a>linux 指令</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># ① 带宽 / PPS</span><br><span class="line">sar -n DEV 1</span><br><span class="line">ip -s link</span><br><span class="line"></span><br><span class="line"># ② TCP连接</span><br><span class="line">ss -s</span><br><span class="line">ss -tan</span><br><span class="line"></span><br><span class="line"># ③ TCP协议栈</span><br><span class="line">nstat -az</span><br><span class="line">netstat -s</span><br><span class="line"></span><br><span class="line"># ④ 网卡/驱动</span><br><span class="line">ethtool -S eth0</span><br><span class="line"></span><br><span class="line"># ⑤ 原始统计</span><br><span class="line">cat /proc/net/dev</span><br><span class="line">cat /sys/class/net/eth0/statistics/*</span><br><span class="line"></span><br><span class="line">watch -n 1 &#x27;ip -s link show eth0&#x27;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>network</tag>
+      </tags>
+  </entry>
 </search>
