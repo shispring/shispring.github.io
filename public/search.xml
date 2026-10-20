@@ -4208,7 +4208,7 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick input.jpg -bordercolor red -border 5x5 output.jpg</span><br></pre></td></tr></table></figure>
 
 <h3 id="9-PDF转图像"><a href="#9-PDF转图像" class="headerlink" title="9. PDF转图像"></a>9. PDF转图像</h3><p>将 PDF 页面转换为 PNG 格式，指定分辨率（如 300 dpi）。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#ImageMagick 在处理 PDF 文件时依赖于 Ghostscript (gs) 来进行 PDF 的渲染和转换</span></span><br><span class="line"><span class="comment">#brew install ghostscript</span></span><br><span class="line"></span><br><span class="line">magick -density 300 -quality 100 original.pdf output_%03d.jpg</span><br><span class="line">参数说明：</span><br><span class="line">• -density 300：设定渲染 DPI（分辨率），300 是高清常用值；</span><br><span class="line">• -quality 100：设定 JPEG 编码质量，范围 1–100，100 为无压缩；</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#ImageMagick 在处理 PDF 文件时依赖于 Ghostscript (gs) 来进行 PDF 的渲染和转换</span></span><br><span class="line"><span class="comment">#brew install ghostscript</span></span><br><span class="line"></span><br><span class="line">magick -density 300 -quality 100 original.pdf output_%03d.jpg</span><br><span class="line">参数说明：</span><br><span class="line">• -density 300：设定渲染 DPI（分辨率），300 是高清常用值；</span><br><span class="line">• -quality 100：设定 JPEG 编码质量，范围 1–100，100 为无压缩；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">使用 Poppler 提供的 pdftoppm，以 220 DPI 把每一页渲染成 PNG:</span><br><span class="line">pdftoppm \</span><br><span class="line">  -png \</span><br><span class="line">  -r 220 \</span><br><span class="line">  output.pdf \</span><br><span class="line">  /tmp/output-pdf-ocr/page</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">中文语言模型:对每一页执行 OCR</span><br><span class="line">brew install tesseract-lang</span><br><span class="line"></span><br><span class="line">使用 Tesseract 识别：</span><br><span class="line">tesseract page-01.png stdout \</span><br><span class="line">  -l chi_sim+eng \</span><br><span class="line">  --psm 6</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>如果需要将 PDF 中的每一页保存为单独的 PNG 图像，可以使用如下命令：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -density 300 input.pdf page_%03d.png</span><br></pre></td></tr></table></figure>
 
@@ -4244,8 +4244,64 @@
 <h3 id="19-将-PDF-分解成多张-PNG（每页一张）"><a href="#19-将-PDF-分解成多张-PNG（每页一张）" class="headerlink" title="19. 将 PDF 分解成多张 PNG（每页一张）"></a>19. 将 PDF 分解成多张 PNG（每页一张）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">magick -density 300 input.pdf output_page_%03d.png</span><br></pre></td></tr></table></figure>
 
 <h3 id="20-从视频中提取帧并生成-GIF"><a href="#20-从视频中提取帧并生成-GIF" class="headerlink" title="20. 从视频中提取帧并生成 GIF"></a>20. 从视频中提取帧并生成 GIF</h3><p>将视频中的帧生成 GIF 动画。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -i input.mp4 -r 10 <span class="string">&#x27;frame_%03d.png&#x27;</span>  <span class="comment"># 使用 FFmpeg 提取帧</span></span><br><span class="line">magick -delay 10 frame_*.png output.gif      <span class="comment"># 使用提取帧生成 GIF</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#将 MP4 视频按照每秒 10 帧的频率提取成 PNG 图片序列</span></span><br><span class="line">ffmpeg -i input.mp4 -r 10 <span class="string">&#x27;frame_%03d.png&#x27;</span>  <span class="comment"># 使用 FFmpeg 提取帧</span></span><br><span class="line">magick -delay 10 frame_*.png output.gif      <span class="comment"># 使用提取帧生成 GIF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看视频的帧率：</span></span><br><span class="line">ffprobe -v error \</span><br><span class="line">  -select_streams v:0 \</span><br><span class="line">  -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames,duration \</span><br><span class="line">  -of default=noprint_wrappers=1 \</span><br><span class="line">  bilibili.mp4</span><br><span class="line"></span><br><span class="line"><span class="comment">#如果你要逐帧分析视频、制作数据集或者对视频进行视觉分析，优先使用这条命令。</span></span><br><span class="line">ffmpeg -i bilibili.mp4 \</span><br><span class="line">  -map 0:v:0 \</span><br><span class="line">  -fps_mode passthrough \</span><br><span class="line">  frames/frame_%06d.png</span><br></pre></td></tr></table></figure>
 
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>提取全部视频帧</td>
+<td><code>ffmpeg -i input.mp4 -fps_mode passthrough frame_%06d.png</code></td>
+</tr>
+<tr>
+<td>每秒提取 1 帧</td>
+<td><code>ffmpeg -i input.mp4 -vf &quot;fps=1&quot; frame_%04d.jpg</code></td>
+</tr>
+<tr>
+<td>每 5 秒提取 1 帧</td>
+<td><code>ffmpeg -i input.mp4 -vf &quot;fps=1/5&quot; frame_%04d.jpg</code></td>
+</tr>
+<tr>
+<td>每秒提取 10 帧</td>
+<td><code>ffmpeg -i input.mp4 -vf &quot;fps=10&quot; frame_%06d.jpg</code></td>
+</tr>
+<tr>
+<td>提取第 30 秒画面</td>
+<td><code>ffmpeg -ss 30 -i input.mp4 -frames:v 1 frame.png</code></td>
+</tr>
+<tr>
+<td>提取前 10 秒全部帧</td>
+<td><code>ffmpeg -i input.mp4 -t 10 -fps_mode passthrough frame_%06d.png</code></td>
+</tr>
+<tr>
+<td>提取第 30～40 秒</td>
+<td><code>ffmpeg -ss 30 -i input.mp4 -t 10 -fps_mode passthrough frame_%06d.png</code></td>
+</tr>
+<tr>
+<td>提取 I 帧</td>
+<td><code>ffmpeg -i input.mp4 -vf &quot;select=&#39;eq(pict_type\,I)&#39;&quot; -fps_mode vfr frame_%04d.jpg</code></td>
+</tr>
+<tr>
+<td>检测场景切换</td>
+<td><code>ffmpeg -i input.mp4 -vf &quot;select=&#39;gt(scene,0.4)&#39;&quot; -fps_mode vfr frame_%04d.jpg</code></td>
+</tr>
+<tr>
+<td>输出高质量 JPG</td>
+<td><code>ffmpeg -i input.mp4 -q:v 2 -fps_mode passthrough frame_%06d.jpg</code></td>
+</tr>
+<tr>
+<td>调整图片尺寸后提取</td>
+<td><code>ffmpeg -i input.mp4 -vf &quot;scale=1280:-1&quot; -fps_mode passthrough frame_%06d.jpg</code></td>
+</tr>
+<tr>
+<td>提取视频前 5 秒，每秒 1 帧</td>
+<td><code>ffmpeg -i input.mp4 -t 5 -vf &quot;fps=1&quot; frame_%04d.jpg</code></td>
+</tr>
+</tbody></table>
 <p>这些 <code>magick</code> 用法可以满足大多数日常图片和PDF转换的需求。更多高级用法可以查阅 <a href="https://imagemagick.org/index.php">ImageMagick 官方文档</a> 或 <code>magick</code> 的帮助页面：<code>magick -help</code>。</p>
 ]]></content>
       <categories>
