@@ -22608,4 +22608,142 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>rke2及rancher部署</title>
+    <url>/2026/11/16/rke2%E5%8F%8Arancher%E9%83%A8%E7%BD%B2/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>RKE2 是 Rancher Kubernetes Engine 2，设计上更接近标准发行版 Kubernetes。</p>
+<p>核心特点：</p>
+<ul>
+<li>单个 rke2 二进制。</li>
+<li>systemd 管理 RKE2 服务。</li>
+<li>自带 containerd，不依赖 Docker。</li>
+<li>自带 Kubernetes 组件。</li>
+<li>默认使用静态 Pod 和 RKE2 内置控制逻辑。</li>
+<li>Server 节点默认运行控制面和 embedded etcd。</li>
+<li>Agent 节点只运行 worker 相关组件。</li>
+<li>通过配置文件和 token 加入集群。</li>
+<li>使用 <code>/etc/rancher/rke2/config.yaml</code> 配置。</li>
+<li>使用 <code>/etc/rancher/rke2/registries.yaml</code> 配置镜像仓库。</li>
+<li>使用 kubeconfig 和标准 kubectl 管理集群。</li>
+</ul>
+<h3 id="RKE2-典型架构"><a href="#RKE2-典型架构" class="headerlink" title="RKE2 典型架构"></a>RKE2 典型架构</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">systemd</span><br><span class="line">   |</span><br><span class="line">   v</span><br><span class="line">rke2 server</span><br><span class="line">   |</span><br><span class="line">   +-- kube-apiserver</span><br><span class="line">   +-- kube-controller-manager</span><br><span class="line">   +-- kube-scheduler</span><br><span class="line">   +-- kubelet</span><br><span class="line">   +-- containerd</span><br><span class="line">   +-- embedded etcd</span><br><span class="line">   +-- supervisor :9345</span><br><span class="line">   +-- Helm Controller</span><br><span class="line">   +-- CNI / CoreDNS / Ingress</span><br></pre></td></tr></table></figure>
+
+<h3 id="RKE2-Server-加入关系"><a href="#RKE2-Server-加入关系" class="headerlink" title="RKE2 Server 加入关系"></a>RKE2 Server 加入关系</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Server 1 :9345</span><br><span class="line">    ^</span><br><span class="line">    |</span><br><span class="line">    | token</span><br><span class="line">    |</span><br><span class="line">Server 2</span><br><span class="line">    |</span><br><span class="line">    +-- 加入 embedded etcd</span><br><span class="line">    +-- 加入 Kubernetes control plane</span><br></pre></td></tr></table></figure>
+
+<h3 id="由-Rancher-创建和管理-RKE2"><a href="#由-Rancher-创建和管理-RKE2" class="headerlink" title="由 Rancher 创建和管理 RKE2"></a>由 Rancher 创建和管理 RKE2</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Rancher UI</span><br><span class="line">    |</span><br><span class="line">    | 创建 RKE2 集群</span><br><span class="line">    |</span><br><span class="line">    | 生成节点注册命令</span><br><span class="line">    v</span><br><span class="line">在目标机器执行注册命令</span><br><span class="line">    |</span><br><span class="line">    v</span><br><span class="line">节点自动加入 RKE2 集群</span><br></pre></td></tr></table></figure>
+
+<p>Rancher 负责：</p>
+<ul>
+<li>生成节点注册命令。</li>
+<li>指定 Server、Agent 角色。</li>
+<li>下发 RKE2 安装参数。</li>
+<li>管理节点注册信息。</li>
+<li>记录集群和节点状态。</li>
+<li>执行部分升级和生命周期管理。</li>
+</ul>
+<p>适合多集群、需要 UI 管理节点、需要统一权限&#x2F;监控&#x2F;日志，且不希望手工维护每个节点配置文件的场景。</p>
+<h2 id="一、节点配置"><a href="#一、节点配置" class="headerlink" title="一、节点配置"></a>一、节点配置</h2><ul>
+<li>配置：8C、16G、500G。</li>
+<li>RKE2 版本：<code>v1.36.6+rke2r1</code>。</li>
+<li>该版本要求使用 cgroup v2。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>主机</th>
+<th>IP</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>p2032214v.test.net</td>
+<td>11.121.224.100</td>
+<td>server</td>
+</tr>
+<tr>
+<td>p2032215v.test.net</td>
+<td>11.121.224.101</td>
+<td>server</td>
+</tr>
+<tr>
+<td>p2032216v.test.net</td>
+<td>11.121.224.102</td>
+<td>server</td>
+</tr>
+</tbody></table>
+<h3 id="检查机器配置"><a href="#检查机器配置" class="headerlink" title="检查机器配置"></a>检查机器配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/os-release</span><br><span class="line"><span class="built_in">uname</span> -a</span><br><span class="line">hostnamectl</span><br><span class="line">findmnt -t cgroup,cgroup2</span><br><span class="line"><span class="built_in">cat</span> /proc/cmdline</span><br></pre></td></tr></table></figure>
+
+<h3 id="变更-cgroup"><a href="#变更-cgroup" class="headerlink" title="变更 cgroup"></a>变更 cgroup</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">grubby --update-kernel=ALL \</span><br><span class="line">  --remove-args=<span class="string">&#x27;cgwb_v1&#x27;</span> \</span><br><span class="line">  --args=<span class="string">&#x27;systemd.unified_cgroup_hierarchy=1 cgroup_no_v1=all&#x27;</span></span><br><span class="line"></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dnf install -y \</span><br><span class="line">  curl \</span><br><span class="line">  tar \</span><br><span class="line">  gzip \</span><br><span class="line">  unzip \</span><br><span class="line">  nc \</span><br><span class="line">  socat \</span><br><span class="line">  conntrack-tools \</span><br><span class="line">  iproute \</span><br><span class="line">  iptables \</span><br><span class="line">  iptables-services \</span><br><span class="line">  ethtool \</span><br><span class="line">  policycoreutils \</span><br><span class="line">  policycoreutils-python-utils \</span><br><span class="line">  selinux-policy-targeted \</span><br><span class="line">  container-selinux</span><br></pre></td></tr></table></figure>
+
+<h3 id="加载内核模块"><a href="#加载内核模块" class="headerlink" title="加载内核模块"></a>加载内核模块</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt;/etc/modules-load.d/rke2.conf &lt;&lt;<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">overlay</span><br><span class="line">br_netfilter</span><br><span class="line">nf_conntrack</span><br><span class="line">iptable_nat</span><br><span class="line">iptable_filter</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">systemctl restart systemd-modules-load.service</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> module <span class="keyword">in</span> overlay br_netfilter nf_conntrack iptable_nat iptable_filter; <span class="keyword">do</span></span><br><span class="line">  modprobe <span class="string">&quot;<span class="variable">$module</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line">lsmod | grep -E <span class="string">&#x27;overlay|br_netfilter|nf_conntrack|iptable_nat|iptable_filter&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置镜像代理"><a href="#配置镜像代理" class="headerlink" title="配置镜像代理"></a>配置镜像代理</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">install -d -m 700 /etc/rancher/rke2</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> &gt;/etc/rancher/rke2/registries.yaml &lt;&lt;<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">mirrors:</span><br><span class="line">  docker.io:</span><br><span class="line">    endpoint:</span><br><span class="line">      - <span class="string">&quot;https://docker.m.daocloud.io&quot;</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="built_in">chmod</span> 600 /etc/rancher/rke2/registries.yaml</span><br><span class="line">curl -4 -I -k -m 15 https://docker.m.daocloud.io/v2/</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、安装第一个-Server（root-用户）"><a href="#二、安装第一个-Server（root-用户）" class="headerlink" title="二、安装第一个 Server（root 用户）"></a>二、安装第一个 Server（root 用户）</h2><h3 id="指定固定版本并安装"><a href="#指定固定版本并安装" class="headerlink" title="指定固定版本并安装"></a>指定固定版本并安装</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">export</span> RKE2_VERSION=<span class="string">&#x27;v1.36.6+rke2r1&#x27;</span></span><br><span class="line"></span><br><span class="line">curl -sfL https://rancher-mirror.rancher.cn/rke2/install.sh \</span><br><span class="line">  | INSTALL_RKE2_VERSION=<span class="string">&quot;<span class="variable">$RKE2_VERSION</span>&quot;</span> INSTALL_RKE2_MIRROR=cn sh -</span><br><span class="line"></span><br><span class="line">rke2 --version</span><br><span class="line"></span><br><span class="line">systemctl <span class="built_in">enable</span> rke2-server.service</span><br><span class="line">systemctl start rke2-server.service</span><br><span class="line">systemctl status rke2-server.service</span><br><span class="line">journalctl -u rke2-server -f</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证集群"><a href="#验证集群" class="headerlink" title="验证集群"></a>验证集群</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">export</span> KUBECONFIG=/etc/rancher/rke2/rke2.yaml</span><br><span class="line">/var/lib/rancher/rke2/bin/kubectl get nodes -o wide</span><br><span class="line">/var/lib/rancher/rke2/bin/kubectl get pods -A</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看-Server-token"><a href="#查看-Server-token" class="headerlink" title="查看 Server token"></a>查看 Server token</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /var/lib/rancher/rke2/server/token</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Token 不应写入文档、聊天或脚本仓库；应通过安全凭据传递。</p>
+</blockquote>
+<h2 id="三、加入其他-Server-节点"><a href="#三、加入其他-Server-节点" class="headerlink" title="三、加入其他 Server 节点"></a>三、加入其他 Server 节点</h2><h3 id="复制-token"><a href="#复制-token" class="headerlink" title="复制 token"></a>复制 token</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">scp /var/lib/rancher/rke2/server/token root@&lt;第二个节点IP&gt;:/root/rke2-server-token</span><br><span class="line"><span class="built_in">chmod</span> 600 /root/rke2-server-token</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装并创建配置"><a href="#安装并创建配置" class="headerlink" title="安装并创建配置"></a>安装并创建配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">export</span> RKE2_VERSION=<span class="string">&#x27;v1.36.6+rke2r1&#x27;</span></span><br><span class="line"></span><br><span class="line">curl -sfL https://rancher-mirror.rancher.cn/rke2/install.sh \</span><br><span class="line">  | INSTALL_RKE2_VERSION=<span class="string">&quot;<span class="variable">$RKE2_VERSION</span>&quot;</span> INSTALL_RKE2_MIRROR=cn sh -</span><br><span class="line"></span><br><span class="line">rke2 --version</span><br><span class="line"></span><br><span class="line">install -d -m 700 /etc/rancher/rke2</span><br><span class="line">RKE2_TOKEN=<span class="string">&quot;<span class="subst">$(cat /root/rke2-server-token)</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> &gt;/etc/rancher/rke2/config.yaml &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">server: https://11.121.224.100:9345</span></span><br><span class="line"><span class="string">token: $&#123;RKE2_TOKEN&#125;</span></span><br><span class="line"><span class="string">node-name: &lt;当前节点主机名&gt;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">chmod</span> 600 /etc/rancher/rke2/config.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="校验端口"><a href="#校验端口" class="headerlink" title="校验端口"></a>校验端口</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nc -vz 11.121.224.100 9345</span><br><span class="line">nc -vz 11.121.224.100 6443</span><br><span class="line">nc -vz 11.121.224.100 2379</span><br><span class="line">nc -vz 11.121.224.100 2380</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动-Server"><a href="#启动-Server" class="headerlink" title="启动 Server"></a>启动 Server</h3><p>首次启动会拉取镜像、生成证书并加入 etcd，可能需要几分钟。<code>activating</code> 不能单独作为成功或失败依据。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> rke2-server.service</span><br><span class="line">systemctl start rke2-server.service</span><br><span class="line">systemctl status rke2-server.service --no-pager -l</span><br><span class="line">journalctl -u rke2-server.service -f</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、确认新-Server-加入"><a href="#四、确认新-Server-加入" class="headerlink" title="四、确认新 Server 加入"></a>四、确认新 Server 加入</h2><p>在第一个 Server 上执行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">export</span> KUBECONFIG=/etc/rancher/rke2/rke2.yaml</span><br><span class="line">/var/lib/rancher/rke2/bin/kubectl get nodes -o wide</span><br><span class="line">/var/lib/rancher/rke2/bin/kubectl -n kube-system get pods -l component=etcd -o wide</span><br><span class="line">journalctl -u rke2-server.service -n 200 --no-pager</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、其他配置"><a href="#五、其他配置" class="headerlink" title="五、其他配置"></a>五、其他配置</h2><h3 id="crictl"><a href="#crictl" class="headerlink" title="crictl"></a>crictl</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 临时指定运行时</span></span><br><span class="line">crictl \</span><br><span class="line">  --runtime-endpoint=unix:///run/k3s/containerd/containerd.sock \</span><br><span class="line">  ps</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置默认运行时</span></span><br><span class="line"><span class="built_in">cat</span> &gt;/etc/crictl.yaml &lt;&lt;<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">runtime-endpoint: unix:///run/k3s/containerd/containerd.sock</span><br><span class="line">image-endpoint: unix:///run/k3s/containerd/containerd.sock</span><br><span class="line"><span class="built_in">timeout</span>: 10</span><br><span class="line">debug: <span class="literal">false</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="built_in">chmod</span> 644 /etc/crictl.yaml</span><br><span class="line">crictl ps</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：原文使用的是 <code>/run/k3s/containerd/containerd.sock</code>，RKE2 实际路径应以目标版本和安装结果为准，部署前必须检查并验证。</p>
+</blockquote>
+<h3 id="Helm"><a href="#Helm" class="headerlink" title="Helm"></a>Helm</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget https://get.helm.sh/helm-v4.3.1-linux-amd64.tar.gz</span><br><span class="line">tar zxvf helm-v4.3.1-linux-amd64.tar.gz</span><br><span class="line"><span class="built_in">mv</span> linux-amd64/helm /usr/local/bin/</span><br><span class="line">helm version</span><br></pre></td></tr></table></figure>
+
+<h3 id="cert-manager"><a href="#cert-manager" class="headerlink" title="cert-manager"></a>cert-manager</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">helm repo add jetstack https://charts.jetstack.io</span><br><span class="line">helm repo update</span><br><span class="line"></span><br><span class="line">helm install \</span><br><span class="line">  cert-manager oci://quay.io/jetstack/charts/cert-manager \</span><br><span class="line">  --namespace cert-manager \</span><br><span class="line">  --create-namespace \</span><br><span class="line">  --version v1.21.3 \</span><br><span class="line">  --<span class="built_in">set</span> crds.enabled=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Rancher"><a href="#Rancher" class="headerlink" title="Rancher"></a>Rancher</h3><p>示例 VIP：<code>11.121.100.100</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">helm repo add rancher-stable https://releases.rancher.com/server-charts/stable</span><br><span class="line">kubectl create namespace cattle-system</span><br><span class="line"></span><br><span class="line">getent hosts rancher-test.k8s.net</span><br><span class="line"></span><br><span class="line">helm install rancher rancher-stable/rancher \</span><br><span class="line">    --namespace cattle-system \</span><br><span class="line">    --<span class="built_in">set</span> hostname=rancher-test.k8s.net \</span><br><span class="line">    <span class="comment"># 初始密码请通过 Secret 管理并在部署时安全注入，不要写入命令行或文档。</span></span><br><span class="line">    --version 2.15.3</span><br><span class="line"></span><br><span class="line">helm status rancher -n cattle-system</span><br><span class="line">kubectl get ingress rancher -n cattle-system</span><br><span class="line">kubectl get pods -n cattle-system</span><br></pre></td></tr></table></figure>
+
+<h3 id="确认-Rancher-域名"><a href="#确认-Rancher-域名" class="headerlink" title="确认 Rancher 域名"></a>确认 Rancher 域名</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get ingress rancher \</span><br><span class="line">  -n cattle-system \</span><br><span class="line">  -o jsonpath=<span class="string">&#x27;&#123;.spec.rules[*].host&#125;&#123;&quot;\\n&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="测试连接"><a href="#测试连接" class="headerlink" title="测试连接"></a>测试连接</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -vk \</span><br><span class="line">  --resolve rancher-test.k8s.net:443:11.121.100.100 \</span><br><span class="line">  https://rancher-test.k8s.net/ping</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取初始化链接"><a href="#获取初始化链接" class="headerlink" title="获取初始化链接"></a>获取初始化链接</h3><p>原文通过 <code>bootstrap-secret</code> 获取初始化信息。请使用安全方式读取和传递，不要将密码写入 Markdown、聊天或代码仓库。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;https://rancher-test.qihoo.net/dashboard/?setup=&lt;从 Secret 安全获取&gt;&#x27;</span></span><br><span class="line"></span><br><span class="line">kubectl get secret --namespace cattle-system bootstrap-secret \</span><br><span class="line">  -o go-template=<span class="string">&#x27;&#123;&#123;.data.bootstrapPassword|base64decode&#125;&#125;&#123;&#123; &quot;\\n&quot; &#125;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Rancher-证书查看"><a href="#Rancher-证书查看" class="headerlink" title="Rancher 证书查看"></a>Rancher 证书查看</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> | openssl s_client \</span><br><span class="line">  -connect rancher-test.k8s.net:443 \</span><br><span class="line">  -servername rancher-test.k8s.net \</span><br><span class="line">  2&gt;/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName</span><br></pre></td></tr></table></figure>
+
+<h3 id="更新-Rancher"><a href="#更新-Rancher" class="headerlink" title="更新 Rancher"></a>更新 Rancher</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">helm upgrade rancher rancher-stable/rancher \</span><br><span class="line">  --namespace cattle-system \</span><br><span class="line">  --reuse-values \</span><br><span class="line">  --set-string hostname=rancher-test.k8s.net \</span><br><span class="line">  --version 2.15.3 \</span><br><span class="line">  --<span class="built_in">wait</span> \</span><br><span class="line">  --<span class="built_in">timeout</span> 10m</span><br></pre></td></tr></table></figure>
+
+<h3 id="常用排查命令"><a href="#常用排查命令" class="headerlink" title="常用排查命令"></a>常用排查命令</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pods -A | grep <span class="string">&quot;Error&quot;</span></span><br><span class="line">helm list -A | grep -i traefik</span><br><span class="line">kubectl get svc -A | grep -i traefik</span><br><span class="line"></span><br><span class="line">kubectl get ingress rancher \</span><br><span class="line">  -n cattle-system \</span><br><span class="line">  -o wide</span><br></pre></td></tr></table></figure>
+
+<h3 id="工作区跳跃开发区访问IDC"><a href="#工作区跳跃开发区访问IDC" class="headerlink" title="工作区跳跃开发区访问IDC"></a>工作区跳跃开发区访问IDC</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -N \</span><br><span class="line">  -o ExitOnForwardFailure=yes \</span><br><span class="line">  -o ServerAliveInterval=30 \</span><br><span class="line">  -o ServerAliveCountMax=3 \</span><br><span class="line">  -L 8443:11.121.100.100:443 \</span><br><span class="line">  user@10.16.100.100</span><br><span class="line"></span><br><span class="line">#编辑/etc/hosts</span><br><span class="line">127.0.0.1 rancher-test.k8s.net</span><br><span class="line"></span><br><span class="line">#浏览器访问</span><br><span class="line">https://rancher-test.k8s.net:8443/  </span><br></pre></td></tr></table></figure>
+
+<h2 id="部署前风险检查"><a href="#部署前风险检查" class="headerlink" title="部署前风险检查"></a>部署前风险检查</h2><ol>
+<li><strong>版本真实性</strong>：确认目标 RKE2、Helm、cert-manager、Rancher 版本在目标环境可获取且相互兼容。</li>
+<li><strong>cgroup v2</strong>：修改内核启动参数前确认操作系统、grubby 行为和回滚方式；重启属于高风险操作。</li>
+<li><strong>镜像源</strong>：镜像代理可用性、证书和内容一致性需要验证。</li>
+<li><strong>RKE2 端口</strong>：确认 9345、6443、2379、2380 及其他实际所需端口的网络策略。</li>
+<li><strong>etcd 高可用</strong>：Server 数量应为奇数，并验证 etcd 成员健康、时钟同步和磁盘性能。</li>
+<li><strong>敏感信息</strong>：token、bootstrap password、配置文件中的凭据不得进入 Markdown 或聊天记录。</li>
+<li><strong>crictl 路径</strong>：RKE2 与 K3s 的运行时 socket 路径可能不同，不能直接照抄。</li>
+<li><strong>Rancher 初始密码</strong>：不要使用命令行明文参数或文档明文记录，应使用 Secret 管理。</li>
+<li><strong>回滚方案</strong>：对内核参数、RKE2 服务、Rancher Helm release 和 CRD 分别准备回滚步骤。</li>
+<li><strong>验证标准</strong>：不能只看 systemd <code>active/activating</code>，还要结合节点 Ready、Pod 状态、etcd 健康、API 可用性和 Rancher <code>/ping</code> 验证。</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>k8s</tag>
+      </tags>
+  </entry>
 </search>

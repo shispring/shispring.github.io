@@ -184,6 +184,350 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/04/10/%E6%B5%81%E9%87%8F%E5%8A%AB%E6%8C%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/04/10/%E6%B5%81%E9%87%8F%E5%8A%AB%E6%8C%81/" class="post-title-link" itemprop="url">流量劫持</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-04-10 11:22:44 / 修改时间：11:23:33" itemprop="dateCreated datePublished" datetime="2026-04-10T11:22:44+08:00">2026-04-10</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、什么是流量劫持（Traffic-Hijacking）"><a href="#一、什么是流量劫持（Traffic-Hijacking）" class="headerlink" title="一、什么是流量劫持（Traffic Hijacking）"></a>一、什么是流量劫持（Traffic Hijacking）</h2><h3 id="1-定义"><a href="#1-定义" class="headerlink" title="1. 定义"></a>1. 定义</h3><p><strong>流量劫持</strong>是指在数据从客户端到目标服务器的传输过程中，被第三方（合法或非法）<strong>拦截、篡改或重定向</strong>的行为，使得流量偏离原本的目的地。</p>
+<h3 id="2-常见目的"><a href="#2-常见目的" class="headerlink" title="2. 常见目的"></a>2. 常见目的</h3><table>
+<thead>
+<tr>
+<th>目的</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>恶意攻击</td>
+<td>窃取敏感信息、植入恶意代码</td>
+</tr>
+<tr>
+<td>广告注入</td>
+<td>在网页中插入广告</td>
+</tr>
+<tr>
+<td>流量引导</td>
+<td>将用户引导至指定服务器</td>
+</tr>
+<tr>
+<td>安全防护</td>
+<td>企业安全审计或防御（合法场景）</td>
+</tr>
+<tr>
+<td>灰度发布</td>
+<td>在运维中进行流量切换或迁移</td>
+</tr>
+</tbody></table>
+<h3 id="3-常见的流量劫持方式"><a href="#3-常见的流量劫持方式" class="headerlink" title="3. 常见的流量劫持方式"></a>3. 常见的流量劫持方式</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>所在层</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DNS 劫持</td>
+<td>应用层</td>
+<td>修改域名解析结果</td>
+</tr>
+<tr>
+<td>ARP 欺骗</td>
+<td>数据链路层</td>
+<td>伪造网关 MAC 地址</td>
+</tr>
+<tr>
+<td>BGP 劫持</td>
+<td>网络层</td>
+<td>篡改路由传播</td>
+</tr>
+<tr>
+<td>HTTP 劫持</td>
+<td>应用层</td>
+<td>注入或篡改 HTTP 内容</td>
+</tr>
+<tr>
+<td>代理&#x2F;网关劫持</td>
+<td>应用层</td>
+<td>通过代理服务器转发流量</td>
+</tr>
+<tr>
+<td>Hosts 劫持</td>
+<td>操作系统</td>
+<td>修改本地 hosts 文件</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、DNS-解析能被劫持吗？"><a href="#二、DNS-解析能被劫持吗？" class="headerlink" title="二、DNS 解析能被劫持吗？"></a>二、DNS 解析能被劫持吗？</h2><h3 id="✅-答案：可以，而且是最常见的流量劫持方式之一。"><a href="#✅-答案：可以，而且是最常见的流量劫持方式之一。" class="headerlink" title="✅ 答案：可以，而且是最常见的流量劫持方式之一。"></a>✅ 答案：<strong>可以，而且是最常见的流量劫持方式之一。</strong></h3><h3 id="1-DNS-劫持的原理"><a href="#1-DNS-劫持的原理" class="headerlink" title="1. DNS 劫持的原理"></a>1. DNS 劫持的原理</h3><p>DNS 的作用是将域名解析为 IP 地址。如果攻击者能够控制或篡改 DNS 解析过程，就可以将用户的请求引导到错误的服务器。</p>
+<h3 id="2-DNS-劫持的常见方式"><a href="#2-DNS-劫持的常见方式" class="headerlink" title="2. DNS 劫持的常见方式"></a>2. DNS 劫持的常见方式</h3><table>
+<thead>
+<tr>
+<th>劫持方式</th>
+<th>原理</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>本地 Hosts 劫持</td>
+<td>修改 <code>/etc/hosts</code></td>
+<td><code>example.com → 1.2.3.4</code></td>
+</tr>
+<tr>
+<td>路由器 DNS 劫持</td>
+<td>修改家庭或企业网关 DNS</td>
+<td>恶意 DNS 服务器</td>
+</tr>
+<tr>
+<td>ISP 劫持</td>
+<td>运营商篡改 DNS 响应</td>
+<td>广告注入</td>
+</tr>
+<tr>
+<td>DNS 缓存投毒</td>
+<td>伪造 DNS 响应并缓存</td>
+<td>Kaminsky 攻击</td>
+</tr>
+<tr>
+<td>中间人攻击</td>
+<td>拦截并修改 DNS 数据包</td>
+<td>ARP 欺骗</td>
+</tr>
+<tr>
+<td>恶意 DNS 服务器</td>
+<td>返回伪造解析结果</td>
+<td>钓鱼网站</td>
+</tr>
+</tbody></table>
+<h3 id="3-DNS-劫持的影响"><a href="#3-DNS-劫持的影响" class="headerlink" title="3. DNS 劫持的影响"></a>3. DNS 劫持的影响</h3><ul>
+<li>用户访问到伪造网站（钓鱼攻击）</li>
+<li>流量被重定向到指定服务器</li>
+<li>数据泄露或被篡改</li>
+<li>服务不可用</li>
+</ul>
+<hr>
+<h2 id="三、什么是-LocalDNS-劫持？"><a href="#三、什么是-LocalDNS-劫持？" class="headerlink" title="三、什么是 LocalDNS 劫持？"></a>三、什么是 LocalDNS 劫持？</h2><h3 id="1-LocalDNS-的定义"><a href="#1-LocalDNS-的定义" class="headerlink" title="1. LocalDNS 的定义"></a>1. LocalDNS 的定义</h3><p><strong>LocalDNS</strong> 通常指部署在用户本地网络或主机上的 DNS 解析服务，例如：</p>
+<ul>
+<li>操作系统自带的 DNS 缓存（如 <code>systemd-resolved</code>）</li>
+<li>企业内网 DNS</li>
+<li>Kubernetes 中的 <code>CoreDNS</code></li>
+<li>边缘节点的本地 DNS 缓存服务</li>
+</ul>
+<h3 id="2-LocalDNS-劫持的核心思想"><a href="#2-LocalDNS-劫持的核心思想" class="headerlink" title="2. LocalDNS 劫持的核心思想"></a>2. LocalDNS 劫持的核心思想</h3><blockquote>
+<p><strong>通过控制本地 DNS 解析结果，将特定域名解析到指定的 IP 地址，从而实现流量的重定向。</strong></p>
+</blockquote>
+<p>这种方式通常用于<strong>合法的运维场景</strong>，如流量迁移、灰度发布、灾备切换等。</p>
+<hr>
+<h2 id="四、LocalDNS-劫持的实现原理"><a href="#四、LocalDNS-劫持的实现原理" class="headerlink" title="四、LocalDNS 劫持的实现原理"></a>四、LocalDNS 劫持的实现原理</h2><h3 id="1-解析流程"><a href="#1-解析流程" class="headerlink" title="1. 解析流程"></a>1. 解析流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">用户请求域名</span><br><span class="line">      │</span><br><span class="line">      ▼</span><br><span class="line">本地 DNS（LocalDNS）</span><br><span class="line">      │</span><br><span class="line"> ┌────┴────┐</span><br><span class="line"> │         │</span><br><span class="line">命中规则   未命中</span><br><span class="line"> │         │</span><br><span class="line">返回指定IP  转发至上游DNS</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-实现方式"><a href="#2-实现方式" class="headerlink" title="2. 实现方式"></a>2. 实现方式</h3><h4 id="✅-方式一：Hosts-文件劫持"><a href="#✅-方式一：Hosts-文件劫持" class="headerlink" title="✅ 方式一：Hosts 文件劫持"></a>✅ 方式一：Hosts 文件劫持</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/hosts</span></span><br><span class="line">10.220.193.123  example.com</span><br></pre></td></tr></table></figure>
+
+<p><strong>特点</strong>：简单直接，但不适用于大规模环境。</p>
+<hr>
+<h4 id="✅-方式二：本地-DNS-服务（如-dnsmasq）"><a href="#✅-方式二：本地-DNS-服务（如-dnsmasq）" class="headerlink" title="✅ 方式二：本地 DNS 服务（如 dnsmasq）"></a>✅ 方式二：本地 DNS 服务（如 dnsmasq）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dnsmasq.conf</span></span><br><span class="line">address=/example.com/10.220.193.123</span><br></pre></td></tr></table></figure>
+
+<p><strong>特点</strong>：</p>
+<ul>
+<li>支持通配符</li>
+<li>可集中管理</li>
+<li>适合企业或边缘节点</li>
+</ul>
+<hr>
+<h4 id="✅-方式三：Kubernetes-CoreDNS-劫持"><a href="#✅-方式三：Kubernetes-CoreDNS-劫持" class="headerlink" title="✅ 方式三：Kubernetes CoreDNS 劫持"></a>✅ 方式三：Kubernetes CoreDNS 劫持</h4><p>在 Kubernetes 中，可以通过修改 <code>CoreDNS</code> 的 <code>ConfigMap</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">coredns</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">Corefile:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    .:53 &#123;</span></span><br><span class="line"><span class="string">        hosts &#123;</span></span><br><span class="line"><span class="string">            10.220.193.123 example.com</span></span><br><span class="line"><span class="string">            fallthrough</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        forward . /etc/resolv.conf</span></span><br><span class="line"><span class="string">        cache 30</span></span><br><span class="line"><span class="string">    &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>更新后生效：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout restart deployment coredns -n kube-system</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="✅-方式四：iptables-重定向（透明-DNS-劫持）"><a href="#✅-方式四：iptables-重定向（透明-DNS-劫持）" class="headerlink" title="✅ 方式四：iptables 重定向（透明 DNS 劫持）"></a>✅ 方式四：iptables 重定向（透明 DNS 劫持）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 10.220.193.123:53</span><br></pre></td></tr></table></figure>
+
+<p><strong>作用</strong>：强制所有 DNS 请求通过指定的 DNS 服务器。</p>
+<hr>
+<h2 id="五、LocalDNS-劫持的典型应用场景"><a href="#五、LocalDNS-劫持的典型应用场景" class="headerlink" title="五、LocalDNS 劫持的典型应用场景"></a>五、LocalDNS 劫持的典型应用场景</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>流量迁移</td>
+<td>将域名指向新的 VIP</td>
+</tr>
+<tr>
+<td>灰度发布</td>
+<td>部分用户访问新版本</td>
+</tr>
+<tr>
+<td>灾备切换</td>
+<td>主站故障时切换到备站</td>
+</tr>
+<tr>
+<td>内网加速</td>
+<td>将公网域名解析到内网 IP</td>
+</tr>
+<tr>
+<td>安全防护</td>
+<td>屏蔽恶意域名</td>
+</tr>
+<tr>
+<td>Kubernetes 服务治理</td>
+<td>将外部域名指向集群内部服务</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="六、DNS-劫持-vs-LocalDNS-劫持"><a href="#六、DNS-劫持-vs-LocalDNS-劫持" class="headerlink" title="六、DNS 劫持 vs LocalDNS 劫持"></a>六、DNS 劫持 vs LocalDNS 劫持</h2><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>DNS 劫持（广义）</th>
+<th>LocalDNS 劫持</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>控制范围</td>
+<td>可能是恶意或全网</td>
+<td>本地或可控范围</td>
+</tr>
+<tr>
+<td>是否合法</td>
+<td>可能非法</td>
+<td>通常合法</td>
+</tr>
+<tr>
+<td>实现位置</td>
+<td>ISP &#x2F; 路由 &#x2F; 中间人</td>
+<td>本地 DNS</td>
+</tr>
+<tr>
+<td>应用场景</td>
+<td>攻击或广告</td>
+<td>运维与流量治理</td>
+</tr>
+<tr>
+<td>可控性</td>
+<td>低</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、如何防范-DNS-劫持？"><a href="#七、如何防范-DNS-劫持？" class="headerlink" title="七、如何防范 DNS 劫持？"></a>七、如何防范 DNS 劫持？</h2><table>
+<thead>
+<tr>
+<th>防护措施</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用 HTTPS</td>
+<td>防止内容被篡改</td>
+</tr>
+<tr>
+<td>DNSSEC</td>
+<td>校验 DNS 数据完整性</td>
+</tr>
+<tr>
+<td>DoH &#x2F; DoT</td>
+<td>加密 DNS 查询</td>
+</tr>
+<tr>
+<td>固定可信 DNS</td>
+<td>如 8.8.8.8、1.1.1.1</td>
+</tr>
+<tr>
+<td>监控解析结果</td>
+<td>定期校验域名解析</td>
+</tr>
+<tr>
+<td>证书校验</td>
+<td>防止钓鱼网站</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="八、总结"><a href="#八、总结" class="headerlink" title="八、总结"></a>八、总结</h2><h3 id="🔑-核心要点"><a href="#🔑-核心要点" class="headerlink" title="🔑 核心要点"></a>🔑 核心要点</h3><ol>
+<li><p><strong>流量劫持</strong>：指网络流量被拦截、篡改或重定向的行为。</p>
+</li>
+<li><p><strong>DNS 解析可以被劫持</strong>：这是最常见的流量劫持方式之一。</p>
+</li>
+<li><p><strong>LocalDNS 劫持</strong>：</p>
+<ul>
+<li>通过控制本地 DNS 解析结果，将域名指向指定 IP。</li>
+<li>常用于流量迁移、灰度发布和灾备切换等合法场景。</li>
+</ul>
+</li>
+<li><p><strong>实现方式</strong>：Hosts、dnsmasq、CoreDNS、iptables 等。</p>
+</li>
+<li><p><strong>安全防护</strong>：DNSSEC、DoH&#x2F;DoT、HTTPS 等技术可有效降低风险。</p>
+</li>
+</ol>
+<hr>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/04/10/openstack%E9%83%A8%E5%88%86%E6%A6%82%E5%BF%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1930,203 +2274,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/02/25/volcano%E5%AE%9E%E8%B7%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/02/25/volcano%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">volcano实践</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-02-25 10:36:25" itemprop="dateCreated datePublished" datetime="2026-02-25T10:36:25+08:00">2026-02-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-06-25 16:52:09" itemprop="dateModified" datetime="2026-06-25T16:52:09+08:00">2026-06-25</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="调度对比"><a href="#调度对比" class="headerlink" title="调度对比"></a>调度对比</h2><p><img src="https://raw.githubusercontent.com/shispring/picgo/master/volcano_arch.png" alt="对比"></p>
-<h2 id="volcano部署"><a href="#volcano部署" class="headerlink" title="volcano部署"></a>volcano部署</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/GMEhCee6CdAmb1SGC7mweQ">https://mp.weixin.qq.com/s/GMEhCee6CdAmb1SGC7mweQ</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">helm install volcano volcano-sh/volcano \</span><br><span class="line">  -n volcano-system --create-namespace \</span><br><span class="line">  --set basic.image_registry=&quot;mirror.k8s.xxx.net/docker.io&quot; \</span><br><span class="line">  --set basic.image_tag_version=v1.14.1</span><br></pre></td></tr></table></figure>
-
-<h2 id="模拟-Gang-Scheduling（批作业必须全部调度才启动）"><a href="#模拟-Gang-Scheduling（批作业必须全部调度才启动）" class="headerlink" title="模拟 Gang Scheduling（批作业必须全部调度才启动）"></a>模拟 Gang Scheduling（批作业必须全部调度才启动）</h2><ul>
-<li>场景：MPI&#x2F;分布式训练中，worker 必须凑齐才能开始，缺一不可。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: batch.volcano.sh/v1alpha1</span><br><span class="line">kind: Job</span><br><span class="line">metadata:</span><br><span class="line">  name: gang-demo</span><br><span class="line">spec:</span><br><span class="line">  minAvailable: 3       # 至少 3 个 Pod 就绪才放行</span><br><span class="line">  schedulerName: volcano</span><br><span class="line">  tasks:</span><br><span class="line">  - replicas: 5</span><br><span class="line">    name: worker</span><br><span class="line">    minAvailable: 3     # task 级别约束</span><br><span class="line">    template:</span><br><span class="line">      spec:</span><br><span class="line">        containers:</span><br><span class="line">        - name: worker</span><br><span class="line">          image: busybox</span><br><span class="line">          command: [&quot;/bin/sh&quot;, &quot;-c&quot;, &quot;sleep 300&quot;]</span><br><span class="line">          resources:</span><br><span class="line">            requests:</span><br><span class="line">              cpu: &quot;100m&quot;</span><br><span class="line">              memory: &quot;64Mi&quot;</span><br><span class="line">        restartPolicy: Never</span><br></pre></td></tr></table></figure></li>
-<li>获取方式：kubectl get vcjob</li>
-</ul>
-<h2 id="Queue-资源配额-公平调度"><a href="#Queue-资源配额-公平调度" class="headerlink" title="Queue 资源配额 + 公平调度"></a>Queue 资源配额 + 公平调度</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># 先建两个 Queue，设置权重</span><br><span class="line">apiVersion: scheduling.volcano.sh/v1beta1</span><br><span class="line">kind: Queue</span><br><span class="line">metadata:</span><br><span class="line">  name: high-priority</span><br><span class="line">spec:</span><br><span class="line">  weight: 10</span><br><span class="line">  capability:</span><br><span class="line">    cpu: &quot;4&quot;</span><br><span class="line">---</span><br><span class="line">apiVersion: scheduling.volcano.sh/v1beta1</span><br><span class="line">kind: Queue</span><br><span class="line">metadata:</span><br><span class="line">  name: low-priority</span><br><span class="line">spec:</span><br><span class="line">  weight: 1</span><br><span class="line">  capability:</span><br><span class="line">    cpu: &quot;2&quot;</span><br></pre></td></tr></table></figure>
-
-<h2 id="case记录"><a href="#case记录" class="headerlink" title="case记录"></a>case记录</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Case 1：模拟 Gang Scheduling（批作业必须全部调度才启动）</span><br><span class="line">Case 2：Queue 资源配额 + 公平调度</span><br><span class="line">Case 3：模拟 GPU（用扩展资源伪造）</span><br><span class="line"># 给节点打上假 GPU 资源</span><br><span class="line">kubectl patch node &lt;node-name&gt; --subresource=status --type=merge \</span><br><span class="line">  -p &#x27;&#123;&quot;status&quot;:&#123;&quot;capacity&quot;:&#123;&quot;nvidia.com/gpu&quot;:&quot;4&quot;&#125;&#125;&#125;&#x27;</span><br><span class="line">Case 4：PodGroup 直接测 Gang（不用 vcjob）</span><br><span class="line">Case 5：抢占 + 优先级</span><br><span class="line">抢占不是立刻让目标 pod 调度上去，是先删 victims（被驱逐候选），等它们真正消失后下一轮调度。</span><br></pre></td></tr></table></figure>
-
-<h2 id="调度注意"><a href="#调度注意" class="headerlink" title="调度注意"></a>调度注意</h2><h3 id="k8s-原生调度器架构"><a href="#k8s-原生调度器架构" class="headerlink" title="k8s 原生调度器架构"></a>k8s 原生调度器架构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">APIServer → Informer → Queue → Scheduling Cycle → Binding Cycle</span><br><span class="line">                               ↑</span><br><span class="line">                    Filter → Score → Reserve → Permit → Bind</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>Scheduling Cycle</code> 是串行的，<code>Binding Cycle</code> 是并行的</li>
-<li>Filter 失败 → FeasibleNodes 为空 → 怎么处理</li>
-<li>Score 打分 → <code>NormalizeScore</code> → 选最高分节点</li>
-</ul>
-<h3 id="Scheduler-Framework-扩展点"><a href="#Scheduler-Framework-扩展点" class="headerlink" title="Scheduler Framework 扩展点"></a>Scheduler Framework 扩展点</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PreFilter → Filter → PostFilter → PreScore → Score → Reserve → Permit → PreBind → Bind → PostBind</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>Filter</code>：过滤不可调度节点（资源不足、亲和性、污点等）</li>
-<li><code>Score</code>：对通过 Filter 的节点打分（LeastAllocated &#x2F; MostAllocated &#x2F; ImageLocality…）</li>
-<li><code>Permit</code>：<strong>可以 Wait</strong>，这是 Gang Scheduling 的关键 hook（Volcano&#x2F;Coscheduling 都挂这里）</li>
-<li><code>Reserve</code>：乐观占位，失败回滚</li>
-<li><code>Bind</code>：写 <code>pod.spec.nodeName</code></li>
-</ul>
-<h3 id="Volcano-核心概念"><a href="#Volcano-核心概念" class="headerlink" title="Volcano 核心概念"></a>Volcano 核心概念</h3><table>
-<thead>
-<tr>
-<th>概念</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>Queue</code></td>
-<td>资源配额隔离 + 公平调度单元</td>
-</tr>
-<tr>
-<td><code>PodGroup</code></td>
-<td>Gang 的最小单元，替代原生 Pod 粒度</td>
-</tr>
-<tr>
-<td><code>vcjob</code></td>
-<td>高层封装，自动创建 PodGroup</td>
-</tr>
-<tr>
-<td><code>Action</code></td>
-<td>Allocate &#x2F; Preempt &#x2F; Reclaim &#x2F; Backfill（Volcano 调度循环）</td>
-</tr>
-<tr>
-<td><code>Plugin</code></td>
-<td>Gang &#x2F; Priority &#x2F; DRF &#x2F; Proportion（策略实现）</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th>核心调度插件</th>
-<th>核心作用（精准释义）</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Gang Scheduling（组队调度）</strong></td>
-<td>采用「全有或全无」调度机制，训练任务所有 Pod（PS&#x2F;Worker）资源全部满足后才统一启动，杜绝部分 Pod 就绪、部分 Pending 的卡死死锁问题，完美适配分布式训练场景。</td>
-</tr>
-<tr>
-<td><strong>Queue（队列优先级调度）</strong></td>
-<td>基于自定义队列划分资源池，支持权重、资源配额、抢占保护配置，高优先级业务优先调度，可抢占低优先级空闲任务资源，保障核心AI训练任务优先运行。</td>
-</tr>
-<tr>
-<td><strong>Fair-Share &#x2F; DRF（公平资源调度）</strong></td>
-<td>多团队&#x2F;多队列共享GPU集群时，按队列权重动态分配空闲资源，基于DRF主导资源公平算法均衡资源占比，避免单业务、单团队独占集群GPU&#x2F;CPU资源，实现资源合理均分。</td>
-</tr>
-<tr>
-<td><strong>Bin Packing &#x2F; Spread（节点排布调度）</strong></td>
-<td>双策略灵活适配场景：Bin Packing 紧凑打包调度，填满节点资源、减少资源碎片，提升集群资源利用率；Spread 分散打散调度，将Pod分布在不同节点，规避单点故障，提升任务容错性。</td>
-</tr>
-<tr>
-<td><strong>Topology Aware（拓扑感知调度）</strong></td>
-<td>硬件层级感知集群拓扑，自动识别NVLink、RDMA、网卡、机架等网络层级，优先将通信频繁的训练Pod调度至近距离节点，大幅降低多卡&#x2F;多机分布式训练的通信延迟。</td>
-</tr>
-</tbody></table>
-<h3 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h3><ul>
-<li><strong>DRF（Dominant Resource Fairness）</strong>：多维资源公平，必须会推导</li>
-<li><strong>Bin-Packing vs Spread</strong>：GPU 场景偏 bin-packing（节省碎片），在线服务偏 spread（高可用）</li>
-<li><strong>Backfill</strong>：用小作业填空隙，提高利用率</li>
-<li><strong>Preemption vs Reclaim</strong>：preempt 抢跨 Queue 的低优先级；reclaim 拿回本 Queue 被借出的资源</li>
-</ul>
-<h3 id="调度架构"><a href="#调度架构" class="headerlink" title="调度架构"></a>调度架构</h3><table>
-<thead>
-<tr>
-<th>维度</th>
-<th>PS-Worker（Volcano两类task）</th>
-<th>AllReduce 架构（无PS）</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>节点角色</td>
-<td>PS（存参数）+ Worker（算梯度）</td>
-<td>全部都是Worker，无独立参数节点</td>
-</tr>
-<tr>
-<td>梯度聚合</td>
-<td>PS单点汇总所有梯度</td>
-<td>Worker之间互相AllReduce交换梯度</td>
-</tr>
-<tr>
-<td>Volcano定义</td>
-<td>tasks分ps、worker两套模板</td>
-<td>只定义单一worker task</td>
-</tr>
-<tr>
-<td>适用场景</td>
-<td>超大参数量模型、参数分片</td>
-<td>中小模型、多卡多机高速互联</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2198,7 +2345,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">219</span>
+          <span class="site-state-item-count">220</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
