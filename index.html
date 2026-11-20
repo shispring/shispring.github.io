@@ -386,6 +386,472 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/10/20/Pod-VM-OVS-%E8%A3%B8%E9%87%91%E5%B1%9E%E7%BD%91%E7%BB%9C%E6%8E%92%E6%9F%A5%E5%91%BD%E4%BB%A4%E6%89%8B%E5%86%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/10/20/Pod-VM-OVS-%E8%A3%B8%E9%87%91%E5%B1%9E%E7%BD%91%E7%BB%9C%E6%8E%92%E6%9F%A5%E5%91%BD%E4%BB%A4%E6%89%8B%E5%86%8C/" class="post-title-link" itemprop="url">Pod -> VM -> OVS -> 裸金属网络排查命令手册</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-20 14:18:50" itemprop="dateCreated datePublished" datetime="2026-10-20T14:18:50+08:00">2026-10-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-11-20 14:20:01" itemprop="dateModified" datetime="2026-11-20T14:20:01+08:00">2026-11-20</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>沿着下面的路径定位网络和流量：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Pod network namespace</span><br><span class="line">  -&gt; Pod eth0</span><br><span class="line">  -&gt; VM ipvlan parent</span><br><span class="line">  -&gt; VM ethX</span><br><span class="line">  -&gt; libvirt vhost-user / vhu</span><br><span class="line">  -&gt; OVS br-int</span><br><span class="line">  -&gt; patch-tun / patch-int</span><br><span class="line">  -&gt; OVS br-tun</span><br><span class="line">  -&gt; VXLAN VNI / tun_id</span><br><span class="line">  -&gt; DPDK / PCI 物理网卡</span><br><span class="line">  -&gt; 物理网络 / 远端节点</span><br></pre></td></tr></table></figure>
+
+<p>本文重点实例：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">目标 Pod：11.52.1.100</span><br><span class="line">目标 VM：p92333v.hulk.net</span><br><span class="line">目标裸金属：openstack188.cloud.net</span><br><span class="line">libvirt：instance-00014694</span><br><span class="line">目标 Pod namespace PID：367646</span><br><span class="line"></span><br><span class="line">源 Pod：11.52.2.100</span><br><span class="line">源 VM：p93227v.hulk.net</span><br><span class="line">源裸金属：openstack085.cloud.net</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="1-先记住三个-VLAN-概念"><a href="#1-先记住三个-VLAN-概念" class="headerlink" title="1. 先记住三个 VLAN 概念"></a>1. 先记住三个 VLAN 概念</h2><p>排查时最容易混淆的是下面三种 ID：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th align="right">示例</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OVS Port <code>tag</code></td>
+<td align="right"><code>2</code>、<code>3</code>、<code>17</code></td>
+<td>某个计算节点本地 <code>br-int</code> 使用的 VLAN ID</td>
+</tr>
+<tr>
+<td>VXLAN <code>segmentation_id</code> &#x2F; VNI</td>
+<td align="right"><code>1699236</code></td>
+<td>跨节点逻辑网络标识</td>
+</tr>
+<tr>
+<td>OpenFlow <code>tun_id</code></td>
+<td align="right"><code>0x19eda4</code></td>
+<td>流表中表示 VXLAN VNI 的十六进制值</td>
+</tr>
+</tbody></table>
+<p>例如目标 Pod <code>11.52.1.100</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">本地 OVS tag：2</span><br><span class="line">VXLAN segmentation_id：1699236</span><br><span class="line">VXLAN/OpenFlow tun_id：0x19eda4</span><br></pre></td></tr></table></figure>
+
+<p>源 Pod <code>11.52.2.100</code> 所在节点的本地 tag 是 <code>17</code>。两端本地 tag 不同并不矛盾，跨节点时通过同一个 VXLAN VNI 承载。</p>
+<hr>
+<h2 id="2-Pod-层命令"><a href="#2-Pod-层命令" class="headerlink" title="2. Pod 层命令"></a>2. Pod 层命令</h2><h3 id="2-1-查看-Pod-IP、接口和路由"><a href="#2-1-查看-Pod-IP、接口和路由" class="headerlink" title="2.1 查看 Pod IP、接口和路由"></a>2.1 查看 Pod IP、接口和路由</h3><p>在 Pod 内执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip -br addr</span><br><span class="line">ip route</span><br><span class="line">ip neigh</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip -br addr  查看接口、IP、状态和 MAC</span><br><span class="line">ip route    查看默认网关及目标网段走哪个接口</span><br><span class="line">ip neigh    查看邻居 IP 与 MAC</span><br></pre></td></tr></table></figure>
+
+<p>目标 Pod 已知输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Pod IP：11.52.1.100/22</span><br><span class="line">接口：eth0</span><br><span class="line">网关：11.52.0.1</span><br><span class="line">默认路由：default via 11.52.0.1 dev eth0 onlink</span><br></pre></td></tr></table></figure>
+
+<p>目标 Pod 路由为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">11.52.0.0/22 dev eth0 scope link src 11.52.1.100</span><br><span class="line">169.254.0.0/16 via 11.52.9.185 dev eth0</span><br><span class="line">172.24.0.0/16 via 11.52.9.185 dev eth0</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-从宿主机进入-Pod-namespace"><a href="#2-2-从宿主机进入-Pod-namespace" class="headerlink" title="2.2 从宿主机进入 Pod namespace"></a>2.2 从宿主机进入 Pod namespace</h3><p>已知 Pod PID 为 <code>367646</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nsenter -t 367646 -n -u -m -- /bin/sh</span><br></pre></td></tr></table></figure>
+
+<p>参数含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-t 367646  进入指定进程的 namespace</span><br><span class="line">-n         network namespace</span><br><span class="line">-u         UTS namespace，可查看 hostname</span><br><span class="line">-m         mount namespace</span><br></pre></td></tr></table></figure>
+
+<p>进入后执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip -o <span class="built_in">link</span> show eth0</span><br><span class="line">ip -o -4 addr show dev eth0</span><br><span class="line">ip route</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-批量发现-VM-内所有-Pod"><a href="#2-3-批量发现-VM-内所有-Pod" class="headerlink" title="2.3 批量发现 VM 内所有 Pod"></a>2.3 批量发现 VM 内所有 Pod</h3><p>在 VM 内执行，推荐先输出所有容器，不要一开始按 MAC 过滤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> cid <span class="keyword">in</span> $(crictl --debug=<span class="literal">false</span> ps -q); <span class="keyword">do</span></span><br><span class="line">    info=$(crictl --debug=<span class="literal">false</span> inspect <span class="string">&quot;<span class="variable">$cid</span>&quot;</span> 2&gt;/dev/null) || <span class="built_in">continue</span></span><br><span class="line">    pid=$(<span class="built_in">printf</span> <span class="string">&#x27;%s\n&#x27;</span> <span class="string">&quot;<span class="variable">$info</span>&quot;</span> | jq -r <span class="string">&#x27;.info.pid // empty&#x27;</span>)</span><br><span class="line">    [ -z <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> ] || [ <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> = <span class="string">&quot;0&quot;</span> ] &amp;&amp; <span class="built_in">continue</span></span><br><span class="line"></span><br><span class="line">    mac=$(nsenter -t <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> -n ip -o <span class="built_in">link</span> show eth0 2&gt;/dev/null |</span><br><span class="line">        awk <span class="string">&#x27;&#123;for (i=1; i&lt;=NF; i++) if ($i==&quot;link/ether&quot;) &#123;print tolower($(i+1)); exit&#125;&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    ip=$(nsenter -t <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> -n ip -o -4 addr show dev eth0 2&gt;/dev/null |</span><br><span class="line">        awk <span class="string">&#x27;&#123;for (i=1; i&lt;=NF; i++) if ($i==&quot;inet&quot;) &#123;print $(i+1); exit&#125;&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    pod=$(<span class="built_in">printf</span> <span class="string">&#x27;%s\n&#x27;</span> <span class="string">&quot;<span class="variable">$info</span>&quot;</span> |</span><br><span class="line">        jq -r <span class="string">&#x27;.status.labels[&quot;io.kubernetes.pod.name&quot;] // &quot;-&quot;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    ns=$(<span class="built_in">printf</span> <span class="string">&#x27;%s\n&#x27;</span> <span class="string">&quot;<span class="variable">$info</span>&quot;</span> |</span><br><span class="line">        jq -r <span class="string">&#x27;.status.labels[&quot;io.kubernetes.pod.namespace&quot;] // &quot;-&quot;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span> <span class="string">&#x27;pod=%s namespace=%s ip=%s mac=%s pid=%s cid=%s\n&#x27;</span> \</span><br><span class="line">        <span class="string">&quot;<span class="variable">$pod</span>&quot;</span> <span class="string">&quot;<span class="variable">$ns</span>&quot;</span> <span class="string">&quot;<span class="variable">$&#123;ip:--&#125;</span>&quot;</span> <span class="string">&quot;<span class="variable">$&#123;mac:--&#125;</span>&quot;</span> <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> <span class="string">&quot;<span class="variable">$cid</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>关键点：不要使用固定字段 <code>$17</code> 提取 MAC。<code>ip -o link</code> 的列数可能变化，应搜索 <code>link/ether</code>。</p>
+<p>只查目标 Pod：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> cid <span class="keyword">in</span> $(crictl --debug=<span class="literal">false</span> ps -q); <span class="keyword">do</span></span><br><span class="line">    info=$(crictl --debug=<span class="literal">false</span> inspect <span class="string">&quot;<span class="variable">$cid</span>&quot;</span> 2&gt;/dev/null) || <span class="built_in">continue</span></span><br><span class="line">    pid=$(<span class="built_in">printf</span> <span class="string">&#x27;%s\n&#x27;</span> <span class="string">&quot;<span class="variable">$info</span>&quot;</span> | jq -r <span class="string">&#x27;.info.pid // empty&#x27;</span>)</span><br><span class="line">    [ -z <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> ] || [ <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> = <span class="string">&quot;0&quot;</span> ] &amp;&amp; <span class="built_in">continue</span></span><br><span class="line"></span><br><span class="line">    ip=$(nsenter -t <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> -n ip -o -4 addr show dev eth0 2&gt;/dev/null |</span><br><span class="line">        awk <span class="string">&#x27;&#123;for (i=1; i&lt;=NF; i++) if ($i==&quot;inet&quot;) &#123;print $(i+1); exit&#125;&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;<span class="variable">$ip</span>&quot;</span> <span class="keyword">in</span></span><br><span class="line">        11.52.1.100/*)</span><br><span class="line">            mac=$(nsenter -t <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> -n ip -o <span class="built_in">link</span> show eth0 2&gt;/dev/null |</span><br><span class="line">                awk <span class="string">&#x27;&#123;for (i=1; i&lt;=NF; i++) if ($i==&quot;link/ether&quot;) &#123;print tolower($(i+1)); exit&#125;&#125;&#x27;</span>)</span><br><span class="line">            pod=$(<span class="built_in">printf</span> <span class="string">&#x27;%s\n&#x27;</span> <span class="string">&quot;<span class="variable">$info</span>&quot;</span> |</span><br><span class="line">                jq -r <span class="string">&#x27;.status.labels[&quot;io.kubernetes.pod.name&quot;] // &quot;-&quot;&#x27;</span>)</span><br><span class="line">            ns=$(<span class="built_in">printf</span> <span class="string">&#x27;%s\n&#x27;</span> <span class="string">&quot;<span class="variable">$info</span>&quot;</span> |</span><br><span class="line">                jq -r <span class="string">&#x27;.status.labels[&quot;io.kubernetes.pod.namespace&quot;] // &quot;-&quot;&#x27;</span>)</span><br><span class="line">            <span class="built_in">printf</span> <span class="string">&#x27;pod=%s namespace=%s ip=%s mac=%s pid=%s cid=%s\n&#x27;</span> \</span><br><span class="line">                <span class="string">&quot;<span class="variable">$pod</span>&quot;</span> <span class="string">&quot;<span class="variable">$ns</span>&quot;</span> <span class="string">&quot;<span class="variable">$ip</span>&quot;</span> <span class="string">&quot;<span class="variable">$&#123;mac:--&#125;</span>&quot;</span> <span class="string">&quot;<span class="variable">$pid</span>&quot;</span> <span class="string">&quot;<span class="variable">$cid</span>&quot;</span></span><br><span class="line">            ;;</span><br><span class="line">    <span class="keyword">esac</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-VM-层命令"><a href="#3-VM-层命令" class="headerlink" title="3. VM 层命令"></a>3. VM 层命令</h2><h3 id="3-1-查看-VM-内所有网卡"><a href="#3-1-查看-VM-内所有网卡" class="headerlink" title="3.1 查看 VM 内所有网卡"></a>3.1 查看 VM 内所有网卡</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip -br <span class="built_in">link</span></span><br><span class="line">ip -br addr</span><br><span class="line">ip -d <span class="built_in">link</span> show</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip -br link   快速查看所有接口、MAC、状态</span><br><span class="line">ip -br addr   快速查看所有接口地址</span><br><span class="line">ip -d link    查看接口类型、父接口和详细属性</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-定位-ipvlan-parent"><a href="#3-2-定位-ipvlan-parent" class="headerlink" title="3.2 定位 ipvlan parent"></a>3.2 定位 ipvlan parent</h3><p>目标 Pod <code>11.52.1.100</code> 已知在 VM 内：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">11.52.1.100 dev hulk14 scope link</span><br></pre></td></tr></table></figure>
+
+<p>执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip -d <span class="built_in">link</span> show hulk14</span><br><span class="line">ip -o <span class="built_in">link</span> show hulk14</span><br></pre></td></tr></table></figure>
+
+<p>重点看：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hulk14@ethX</span><br><span class="line">ipvlan mode l2</span><br></pre></td></tr></table></figure>
+
+<p>如果输出 <code>hulk14@eth2</code>，则表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Pod eth0@if14 -&gt; VM hulk14 -&gt; VM eth2</span><br></pre></td></tr></table></figure>
+
+<p>查看 parent 网卡 MAC：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="built_in">link</span> show eth2</span><br></pre></td></tr></table></figure>
+
+<p>然后将 MAC 与 libvirt 的 vhu MAC 对照。</p>
+<h3 id="3-3-查看-VM-路由选择"><a href="#3-3-查看-VM-路由选择" class="headerlink" title="3.3 查看 VM 路由选择"></a>3.3 查看 VM 路由选择</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip route get 11.52.1.100</span><br><span class="line">ip route get 11.52.2.100</span><br></pre></td></tr></table></figure>
+
+<p>含义：查看 Linux 内核实际选择的出接口、源地址和下一跳。</p>
+<hr>
+<h2 id="4-libvirt-vhost-user-层命令"><a href="#4-libvirt-vhost-user-层命令" class="headerlink" title="4. libvirt &#x2F; vhost-user 层命令"></a>4. libvirt &#x2F; vhost-user 层命令</h2><h3 id="4-1-查看-VM-网卡"><a href="#4-1-查看-VM-网卡" class="headerlink" title="4.1 查看 VM 网卡"></a>4.1 查看 VM 网卡</h3><p>在裸金属上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root nova_libvirt virsh domiflist instance-00014694</span><br></pre></td></tr></table></figure>
+
+<p>不要使用当前可能存在的别名：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh is aliased to <span class="string">&#x27;docker exec -it -u root nova_libvirt virsh&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>-it</code> 会给输出加入回车符，也可能导致管道读取异常。</p>
+<p>目标 VM 网卡：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vhu89c33be7-4a   fa:16:3e:13:9d:8a</span><br><span class="line">vhu9a129617-9d   fa:16:3e:d7:5c:c3</span><br><span class="line">vhu95ff5394-15   fa:16:3e:54:b3:7d</span><br><span class="line">vhu3fb34195-0b   fa:16:3e:49:36:ab</span><br></pre></td></tr></table></figure>
+
+<p>源 VM 网卡示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root nova_libvirt virsh domiflist instance-00015f7a</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-查看-VM-XML"><a href="#4-2-查看-VM-XML" class="headerlink" title="4.2 查看 VM XML"></a>4.2 查看 VM XML</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root nova_libvirt virsh dumpxml instance-00014694</span><br></pre></td></tr></table></figure>
+
+<p>提取接口信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root nova_libvirt virsh dumpxml instance-00014694 |</span><br><span class="line">egrep <span class="string">&#x27;interface type|mac address|source path|target dev|nova:name&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nova:name    OpenStack 可读实例名</span><br><span class="line">mac address  VM 网卡 MAC</span><br><span class="line">source path  vhost-user socket 路径</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-查看-VM-hostname"><a href="#4-3-查看-VM-hostname" class="headerlink" title="4.3 查看 VM hostname"></a>4.3 查看 VM hostname</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root nova_libvirt virsh domhostname instance-00014694</span><br></pre></td></tr></table></figure>
+
+<p>该命令依赖 QEMU Guest Agent。QGA 未连接时不能使用它作为唯一证据。</p>
+<hr>
+<h2 id="5-OVS-bridge-和-Port-层命令"><a href="#5-OVS-bridge-和-Port-层命令" class="headerlink" title="5. OVS bridge 和 Port 层命令"></a>5. OVS bridge 和 Port 层命令</h2><h3 id="5-1-查看-OVS-总拓扑"><a href="#5-1-查看-OVS-总拓扑" class="headerlink" title="5.1 查看 OVS 总拓扑"></a>5.1 查看 OVS 总拓扑</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show</span><br></pre></td></tr></table></figure>
+
+<p>查看 bridge：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl list-br</span><br></pre></td></tr></table></figure>
+
+<p>查看每个 bridge 的端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> br <span class="keyword">in</span> $(ovs-vsctl list-br); <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;========== <span class="variable">$br</span> ==========&quot;</span></span><br><span class="line">    ovs-vsctl list-ports <span class="string">&quot;<span class="variable">$br</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>OVS 常见 bridge：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">br-ex      外部网络 bridge</span><br><span class="line">br-int     OpenStack 内部 integration bridge</span><br><span class="line">br-tun     VXLAN tunnel bridge</span><br><span class="line">br-mirror  镜像/观测用途 bridge</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-查询-vhu-属于哪个-bridge"><a href="#5-2-查询-vhu-属于哪个-bridge" class="headerlink" title="5.2 查询 vhu 属于哪个 bridge"></a>5.2 查询 vhu 属于哪个 bridge</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> \</span><br><span class="line">vhu89c33be7-4a \</span><br><span class="line">vhu9a129617-9d \</span><br><span class="line">vhu95ff5394-15 \</span><br><span class="line">vhu3fb34195-0b; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">printf</span> <span class="string">&#x27;%-22s bridge=&#x27;</span> <span class="string">&quot;<span class="variable">$i</span>&quot;</span></span><br><span class="line">    ovs-vsctl iface-to-br <span class="string">&quot;<span class="variable">$i</span>&quot;</span> 2&gt;/dev/null</span><br><span class="line">    <span class="built_in">printf</span> <span class="string">&#x27; type=&#x27;</span></span><br><span class="line">    ovs-vsctl get Interface <span class="string">&quot;<span class="variable">$i</span>&quot;</span> <span class="built_in">type</span> 2&gt;/dev/null</span><br><span class="line">    <span class="built_in">printf</span> <span class="string">&#x27; ofport=&#x27;</span></span><br><span class="line">    ovs-vsctl get Interface <span class="string">&quot;<span class="variable">$i</span>&quot;</span> ofport 2&gt;/dev/null</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>目标端实际结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vhu89c33be7-4a   br-int   ofport 107</span><br><span class="line">vhu9a129617-9d   br-int   ofport 109</span><br><span class="line">vhu95ff5394-15   br-int   ofport 113</span><br><span class="line">vhu3fb34195-0b   br-int   ofport 114</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-查看-vhu-详细属性"><a href="#5-3-查看-vhu-详细属性" class="headerlink" title="5.3 查看 vhu 详细属性"></a>5.3 查看 vhu 详细属性</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl list Interface vhu95ff5394-15 | egrep \</span><br><span class="line">    <span class="string">&#x27;name|type|ofport|attached-mac|iface-id|vm-uuid|link_state|options|status&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>重点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">attached-mac  OVS 记录的 VM 网卡 MAC</span><br><span class="line">vm-uuid       对应 VM UUID</span><br><span class="line">ofport        OpenFlow 端口号</span><br><span class="line">type          通常是 dpdkvhostuserclient</span><br><span class="line">status        socket 是否 connected</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-4-查看-OVS-Port-的-VLAN-和逻辑网络"><a href="#5-4-查看-OVS-Port-的-VLAN-和逻辑网络" class="headerlink" title="5.4 查看 OVS Port 的 VLAN 和逻辑网络"></a>5.4 查看 OVS Port 的 VLAN 和逻辑网络</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl list Port vhu95ff5394-15 | egrep \</span><br><span class="line">    <span class="string">&#x27;name|tag|other_config&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>本例目标端：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tag=2</span><br><span class="line">network_type=vxlan</span><br><span class="line">segmentation_id=1699236</span><br><span class="line">net_uuid=84b80486-627c-4c81-8d92-d5b5f7f7e7ee</span><br></pre></td></tr></table></figure>
+
+<p>只取 VLAN tag：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl get Port vhu95ff5394-15 tag</span><br></pre></td></tr></table></figure>
+
+<p>只取逻辑网络信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl get Port vhu95ff5394-15 other_config</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-5-查看-OVS-FDB"><a href="#5-5-查看-OVS-FDB" class="headerlink" title="5.5 查看 OVS FDB"></a>5.5 查看 OVS FDB</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-appctl fdb/show br-int</span><br></pre></td></tr></table></figure>
+
+<p>按目标 MAC 查询：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-appctl fdb/show br-int | grep -i <span class="string">&#x27;fa:16:3e:54:b3:7d&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>典型输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">113  2  fa:16:3e:54:b3:7d  55</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ofport=113</span><br><span class="line">local VLAN=2</span><br><span class="line">MAC=fa:16:3e:54:b3:7d</span><br><span class="line">Age=55</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="6-patch-端口和-bridge-连接"><a href="#6-patch-端口和-bridge-连接" class="headerlink" title="6. patch 端口和 bridge 连接"></a>6. patch 端口和 bridge 连接</h2><h3 id="6-1-查看-br-int-br-tun"><a href="#6-1-查看-br-int-br-tun" class="headerlink" title="6.1 查看 br-int &lt;-&gt; br-tun"></a>6.1 查看 br-int &lt;-&gt; br-tun</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl get Interface patch-tun options</span><br><span class="line">ovs-vsctl get Interface patch-int options</span><br><span class="line">ovs-vsctl iface-to-br patch-tun</span><br><span class="line">ovs-vsctl iface-to-br patch-int</span><br></pre></td></tr></table></figure>
+
+<p>目标端实际关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">patch-tun: peer=patch-int, bridge=br-int</span><br><span class="line">patch-int: peer=patch-tun, bridge=br-tun</span><br></pre></td></tr></table></figure>
+
+<p>逻辑路径：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">br-int -&gt; patch-tun || patch-int -&gt; br-tun</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-查看-br-int-br-ex"><a href="#6-2-查看-br-int-br-ex" class="headerlink" title="6.2 查看 br-int &lt;-&gt; br-ex"></a>6.2 查看 br-int &lt;-&gt; br-ex</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl get Interface int-br-ex options</span><br><span class="line">ovs-vsctl get Interface phy-br-ex options</span><br><span class="line">ovs-vsctl iface-to-br int-br-ex</span><br><span class="line">ovs-vsctl iface-to-br phy-br-ex</span><br></pre></td></tr></table></figure>
+
+<p>逻辑路径：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">br-int -&gt; int-br-ex || phy-br-ex -&gt; br-ex -&gt; dpdk0</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-br-int-流表命令"><a href="#7-br-int-流表命令" class="headerlink" title="7. br-int 流表命令"></a>7. br-int 流表命令</h2><h3 id="7-1-查看所有-br-int-流表"><a href="#7-1-查看所有-br-int-流表" class="headerlink" title="7.1 查看所有 br-int 流表"></a>7.1 查看所有 br-int 流表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-按目标-Pod-IP-查询"><a href="#7-2-按目标-Pod-IP-查询" class="headerlink" title="7.2 按目标 Pod IP 查询"></a>7.2 按目标 Pod IP 查询</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int | \</span><br><span class="line">grep -E <span class="string">&#x27;11\.52\.1\.48|fa:16:3e:54:b3:7d|output:113&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>本例关键结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">table 0:</span><br><span class="line">  in_port=2, dl_vlan=2, nw_dst=11.52.1.100</span><br><span class="line">    -&gt; set eth_dst=fa:16:3e:54:b3:7d</span><br><span class="line">    -&gt; resubmit(,60)</span><br><span class="line"></span><br><span class="line">table 60:</span><br><span class="line">  dl_vlan=2, dl_dst=fa:16:3e:54:b3:7d</span><br><span class="line">    -&gt; pop_vlan</span><br><span class="line">    -&gt; output:113</span><br></pre></td></tr></table></figure>
+
+<p>含义：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">报文目标 IP 是 11.52.1.100</span><br><span class="line">  -&gt; 修改目标 MAC 为 fa:16:3e:54:b3:7d</span><br><span class="line">  -&gt; 根据 VLAN 2 和 MAC 查找目标端口</span><br><span class="line">  -&gt; 发送到 ofport 113</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-按-vhu-ofport-查询"><a href="#7-3-按-vhu-ofport-查询" class="headerlink" title="7.3 按 vhu ofport 查询"></a>7.3 按 vhu ofport 查询</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">OFPORT=$(ovs-vsctl get Interface vhu95ff5394-15 ofport)</span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int | grep <span class="string">&quot;in_port=<span class="variable">$&#123;OFPORT&#125;</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-4-查看流量计数"><a href="#7-4-查看流量计数" class="headerlink" title="7.4 查看流量计数"></a>7.4 查看流量计数</h3><p>每条规则中的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">n_packets</span><br><span class="line">n_bytes</span><br></pre></td></tr></table></figure>
+
+<p>分别表示规则命中的报文数和字节数。</p>
+<p>不要只看到规则存在就判断流量经过。应在发起一次固定请求前后比较计数是否增长。</p>
+<hr>
+<h2 id="8-br-tun、VLAN、VNI-和-VXLAN"><a href="#8-br-tun、VLAN、VNI-和-VXLAN" class="headerlink" title="8. br-tun、VLAN、VNI 和 VXLAN"></a>8. br-tun、VLAN、VNI 和 VXLAN</h2><h3 id="8-1-查看-br-tun-所有流表"><a href="#8-1-查看-br-tun-所有流表" class="headerlink" title="8.1 查看 br-tun 所有流表"></a>8.1 查看 br-tun 所有流表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-2-目标网络查询"><a href="#8-2-目标网络查询" class="headerlink" title="8.2 目标网络查询"></a>8.2 目标网络查询</h3><p>目标端的本地 VLAN 是 <code>2</code>，VNI&#x2F;segmentation_id 是 <code>1699236</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span> <span class="string">&#x27;0x%x\n&#x27;</span> 1699236</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x19eda4</span><br></pre></td></tr></table></figure>
+
+<p>分开查询，不建议只使用一个宽泛 grep：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun | grep <span class="string">&#x27;dl_vlan=2&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun | grep <span class="string">&#x27;tun_id=0x19eda4&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun | \</span><br><span class="line">grep -E <span class="string">&#x27;tun_dst|output:&quot;vxlan|set_field:0x19eda4&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>原命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun | \</span><br><span class="line">grep -Ei <span class="string">&#x27;dl_vlan=17|tun_id=0x19eda4|tun_dst|vxlan&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>含义是打印包含任意关键字的行：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tun_id=0x19eda4     VXLAN VNI 1699236</span><br><span class="line">tun_dst             远端 VTEP 地址</span><br><span class="line">vxlan               VXLAN 接口或动作</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-3-OpenFlow-VLAN-值换算"><a href="#8-3-OpenFlow-VLAN-值换算" class="headerlink" title="8.3 OpenFlow VLAN 值换算"></a>8.3 OpenFlow VLAN 值换算</h3><p>如果流表中看到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vlan_vid=4098</span><br></pre></td></tr></table></figure>
+
+<p>它包含 VLAN_PRESENT 标志，实际 VLAN ID 为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span> <span class="string">&#x27;%d\n&#x27;</span> $((<span class="number">4098</span> &amp; <span class="number">4095</span>))</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2</span><br></pre></td></tr></table></figure>
+
+<p>常见换算：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">VLAN 2  -&gt; vlan_vid 4098</span><br><span class="line">VLAN 17 -&gt; vlan_vid 4113</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-4-查看-VXLAN-接口"><a href="#8-4-查看-VXLAN-接口" class="headerlink" title="8.4 查看 VXLAN 接口"></a>8.4 查看 VXLAN 接口</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl --columns=name,<span class="built_in">type</span>,ofport,options \</span><br><span class="line">    list Interface | awk <span class="string">&#x27;</span></span><br><span class="line"><span class="string">    /name[ \t]*: vxlan/ &#123;show=1&#125;</span></span><br><span class="line"><span class="string">    show &#123;print&#125;</span></span><br><span class="line"><span class="string">    show &amp;&amp; /options/ &#123;show=0; print &quot;&quot;&#125;</span></span><br><span class="line"><span class="string">    &#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>重点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">local_ip   本机 VTEP</span><br><span class="line">remote_ip  静态远端 VTEP，或 flow</span><br><span class="line">ofport     VXLAN 接口的 OpenFlow 端口</span><br></pre></td></tr></table></figure>
+
+<p>目标端本机 VTEP：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10.224.128.54</span><br></pre></td></tr></table></figure>
+
+<p>如果看到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">remote_ip=flow</span><br></pre></td></tr></table></figure>
+
+<p>表示远端地址由流表 action 中的 <code>tun_dst</code> 动态决定，不能只看 Interface 的 <code>remote_ip</code>。</p>
+<h3 id="8-5-BFD-状态"><a href="#8-5-BFD-状态" class="headerlink" title="8.5 BFD 状态"></a>8.5 BFD 状态</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl list Interface vxlan-xxxx</span><br></pre></td></tr></table></figure>
+
+<p>查看：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bfd_status</span><br><span class="line">forwarding</span><br><span class="line">remote_state</span><br></pre></td></tr></table></figure>
+
+<p><code>forwarding=true</code> 表示该 VXLAN 邻居当前允许转发；<code>forwarding=false</code> 或 <code>state=down</code> 表示不应作为当前有效路径依据。</p>
+<hr>
+<h2 id="9-裸金属、DPDK-和物理网卡"><a href="#9-裸金属、DPDK-和物理网卡" class="headerlink" title="9. 裸金属、DPDK 和物理网卡"></a>9. 裸金属、DPDK 和物理网卡</h2><h3 id="9-1-查看物理网络接口"><a href="#9-1-查看物理网络接口" class="headerlink" title="9.1 查看物理网络接口"></a>9.1 查看物理网络接口</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip -br <span class="built_in">link</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="9-2-查看-OVS-DPDK-物理端口"><a href="#9-2-查看-OVS-DPDK-物理端口" class="headerlink" title="9.2 查看 OVS-DPDK 物理端口"></a>9.2 查看 OVS-DPDK 物理端口</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl list Interface dpdk0</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show | grep -A10 -B3 <span class="string">&#x27;dpdk&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-查看-PCI-网卡"><a href="#9-3-查看-PCI-网卡" class="headerlink" title="9.3 查看 PCI 网卡"></a>9.3 查看 PCI 网卡</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lspci -nn | grep -Ei <span class="string">&#x27;ethernet|network&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>根据 OVS 配置中的 PCI 地址继续查看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lspci -s 0000:af:00.0 -vv</span><br></pre></td></tr></table></figure>
+
+<p>目标节点 <code>openstack188</code> 已知：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dpdk0 -&gt; PCI 0000:af:00.0</span><br></pre></td></tr></table></figure>
+
+<p>源节点之前已知：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dpdk0 -&gt; PCI 0000:5e:00.0</span><br></pre></td></tr></table></figure>
+
+<p>注意：OVS-DPDK 使用 PCI 设备时，Linux 中不一定存在可直接抓包的普通网卡接口。应优先结合 OVS 流表、端口统计和物理交换机侧信息。</p>
+<h3 id="9-4-物理-VLAN-的边界"><a href="#9-4-物理-VLAN-的边界" class="headerlink" title="9.4 物理 VLAN 的边界"></a>9.4 物理 VLAN 的边界</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip -d <span class="built_in">link</span> show <span class="built_in">type</span> vlan</span><br><span class="line">bridge vlan show</span><br></pre></td></tr></table></figure>
+
+<p>这些命令查看 Linux VLAN 子接口或 Linux bridge VLAN。对于 OVS-DPDK 环境，VM 的 <code>tag=2</code>&#x2F;<code>tag=17</code> 是 OVS 本地逻辑 VLAN，不一定对应物理交换机的 VLAN。</p>
+<p>物理交换机侧的 access&#x2F;trunk VLAN 必须到交换机端口查看。</p>
+<hr>
+<h2 id="10-抓包和流量验证"><a href="#10-抓包和流量验证" class="headerlink" title="10. 抓包和流量验证"></a>10. 抓包和流量验证</h2><h3 id="10-1-Pod-内抓包"><a href="#10-1-Pod-内抓包" class="headerlink" title="10.1 Pod 内抓包"></a>10.1 Pod 内抓包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nsenter -t 367646 -n tcpdump -ni eth0 host 11.52.2.100</span><br></pre></td></tr></table></figure>
+
+<p>验证目标 Pod 是否收到源 Pod 的报文。</p>
+<h3 id="10-2-VM-内抓包"><a href="#10-2-VM-内抓包" class="headerlink" title="10.2 VM 内抓包"></a>10.2 VM 内抓包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -ni ethX host 11.52.2.100</span><br></pre></td></tr></table></figure>
+
+<p>观察 VM parent 网卡是否收到对应报文。</p>
+<h3 id="10-3-VXLAN-外层抓包"><a href="#10-3-VXLAN-外层抓包" class="headerlink" title="10.3 VXLAN 外层抓包"></a>10.3 VXLAN 外层抓包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -ni any <span class="string">&#x27;udp port 4789&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>看到类似以下信息，说明存在 VXLAN 外层报文：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10.224.129.210 -&gt; 10.224.128.54 UDP 4789</span><br></pre></td></tr></table></figure>
+
+<p>但必须结合时间、源&#x2F;目标 VTEP、VNI 和流表计数判断是否是目标业务流量。</p>
+<h3 id="10-4-固定请求验证"><a href="#10-4-固定请求验证" class="headerlink" title="10.4 固定请求验证"></a>10.4 固定请求验证</h3><p>源 Pod 中执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping -c 5 11.52.1.100</span><br></pre></td></tr></table></figure>
+
+<p>同时观察：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 源节点</span></span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int | grep <span class="string">&#x27;in_port=155&#x27;</span></span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun | grep <span class="string">&#x27;0x19eda4&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 目标节点</span></span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int | \</span><br><span class="line">grep -E <span class="string">&#x27;11\.52\.1\.48|fa:16:3e:54:b3:7d|output:113&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 物理/隧道侧</span></span><br><span class="line">tcpdump -ni any <span class="string">&#x27;udp port 4789&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="11-最终排查顺序"><a href="#11-最终排查顺序" class="headerlink" title="11. 最终排查顺序"></a>11. 最终排查顺序</h2><h3 id="11-1-目标端"><a href="#11-1-目标端" class="headerlink" title="11.1 目标端"></a>11.1 目标端</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1. Pod IP 11.52.1.100</span><br><span class="line">2. Pod eth0@if14</span><br><span class="line">3. VM hulk14</span><br><span class="line">4. hulk14 的 parent ethX</span><br><span class="line">5. parent MAC fa:16:3e:54:b3:7d</span><br><span class="line">6. vhu95ff5394-15</span><br><span class="line">7. br-int ofport 113</span><br><span class="line">8. local VLAN tag 2</span><br><span class="line">9. network UUID / segmentation_id</span><br><span class="line">10. br-tun VNI/tun_id</span><br><span class="line">11. 目标 VTEP和 VXLAN接口</span><br><span class="line">12. dpdk0 / PCI 物理网卡</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-2-源端"><a href="#11-2-源端" class="headerlink" title="11.2 源端"></a>11.2 源端</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1. Pod IP 11.52.2.100</span><br><span class="line">2. 源 Pod eth0</span><br><span class="line">3. VM ipvlan parent</span><br><span class="line">4. 源 vhu vhuc94a5e9e-74</span><br><span class="line">5. br-int ofport 155</span><br><span class="line">6. local VLAN tag 17</span><br><span class="line">7. br-tun</span><br><span class="line">8. VNI/tun_id 1699236/0x19eda4</span><br><span class="line">9. tun_dst 是否为目标 VTEP</span><br><span class="line">10. VXLAN UDP 4789</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-3-流量闭环判断"><a href="#11-3-流量闭环判断" class="headerlink" title="11.3 流量闭环判断"></a>11.3 流量闭环判断</h3><p>满足以下条件，基本可以确认跨节点 VXLAN 路径：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Pod 源端有报文</span><br><span class="line">+ 源 br-int ofport 155 计数增长</span><br><span class="line">+ 源 br-tun VNI 0x19eda4 计数增长</span><br><span class="line">+ 物理网络出现 UDP 4789</span><br><span class="line">+ 目标 br-tun VNI 0x19eda4 计数增长</span><br><span class="line">+ 目标 br-int 目标 IP/MAC 规则计数增长</span><br><span class="line">+ 目标 ofport 113 计数增长</span><br><span class="line">+ 目标 Pod eth0 收到报文</span><br></pre></td></tr></table></figure>
+
+<p>如果只看到 VXLAN 接口存在，不能证明某条业务流量使用了该接口。</p>
+<hr>
+<h2 id="12-本例关键事实速查"><a href="#12-本例关键事实速查" class="headerlink" title="12. 本例关键事实速查"></a>12. 本例关键事实速查</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">源 Pod：11.52.2.100</span><br><span class="line">源 vhu：vhuc94a5e9e-74</span><br><span class="line">源 ofport：155</span><br><span class="line">源 local tag：17</span><br><span class="line">源 VTEP：10.224.129.210</span><br><span class="line"></span><br><span class="line">目标 Pod：11.52.1.100</span><br><span class="line">目标 MAC：fa:16:3e:54:b3:7d</span><br><span class="line">目标 vhu：vhu95ff5394-15</span><br><span class="line">目标 ofport：113</span><br><span class="line">目标 local tag：2</span><br><span class="line">目标 VTEP：10.224.128.54</span><br><span class="line"></span><br><span class="line">逻辑网络 UUID：84b80486-627c-4c81-8d92-d5b5f7f7e7ee</span><br><span class="line">VXLAN segmentation_id：1699236</span><br><span class="line">OpenFlow tun_id：0x19eda4</span><br><span class="line">VXLAN 默认 UDP 端口：4789</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="13-网络设备关系可视化工具"><a href="#13-网络设备关系可视化工具" class="headerlink" title="13. 网络设备关系可视化工具"></a>13. 网络设备关系可视化工具</h2><h3 id="13-1-plotnetcfg-的适用范围"><a href="#13-1-plotnetcfg-的适用范围" class="headerlink" title="13.1 plotnetcfg 的适用范围"></a>13.1 plotnetcfg 的适用范围</h3><p>常见用法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plotnetcfg | grep -v <span class="string">&#x27;kube-ipvs0&#x27;</span> | dot -Tpdf &gt; net.pdf</span><br></pre></td></tr></table></figure>
+
+<p><code>plotnetcfg</code> 更适合展示 Linux 内核网络设备，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">物理网卡</span><br><span class="line">bond</span><br><span class="line">Linux bridge</span><br><span class="line">veth pair</span><br><span class="line">network namespace</span><br><span class="line">容器接口</span><br></pre></td></tr></table></figure>
+
+<p>在本环境中出现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Failed to map openvswitch interface br-int</span><br></pre></td></tr></table></figure>
+
+<p>原因通常是当前环境使用了：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">OVS-DPDK</span><br><span class="line">datapath_type=netdev</span><br><span class="line">dpdk0</span><br><span class="line">dpdkvhostuserclient</span><br><span class="line">vhost-user socket</span><br></pre></td></tr></table></figure>
+
+<p><code>br-int</code> 是 OVS 用户态 bridge，不是普通 Linux bridge。<code>plotnetcfg</code> 依赖 Linux 内核网络设备关系，无法完整映射 OVSDB 中的 vhu、DPDK、patch 和 VXLAN 关系，因此不能把这个错误理解为 <code>br-int</code> 不存在或网络故障。</p>
+<h3 id="13-2-OVS-原生拓扑"><a href="#13-2-OVS-原生拓扑" class="headerlink" title="13.2 OVS 原生拓扑"></a>13.2 OVS 原生拓扑</h3><p>OVS 场景优先使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show</span><br></pre></td></tr></table></figure>
+
+<p>它可以查看：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">br-int</span><br><span class="line">  -&gt; vhu*</span><br><span class="line">  -&gt; patch-tun</span><br><span class="line">  -&gt; int-br-ex</span><br><span class="line"></span><br><span class="line">br-tun</span><br><span class="line">  -&gt; patch-int</span><br><span class="line">  -&gt; vxlan-*</span><br><span class="line"></span><br><span class="line">br-ex</span><br><span class="line">  -&gt; dpdk0</span><br><span class="line">  -&gt; phy-br-ex</span><br></pre></td></tr></table></figure>
+
+<p>查看所有 bridge：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl list-br</span><br></pre></td></tr></table></figure>
+
+<p>查看每个 bridge 的端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> br <span class="keyword">in</span> $(ovs-vsctl list-br); <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;========== <span class="variable">$br</span> ==========&quot;</span></span><br><span class="line">    ovs-vsctl list-ports <span class="string">&quot;<span class="variable">$br</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>查看 OVS datapath：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-appctl dpif/show</span><br></pre></td></tr></table></figure>
+
+<p>查看接口的详细状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl --columns=name,<span class="built_in">type</span>,ofport,options,status \</span><br><span class="line">    list Interface</span><br></pre></td></tr></table></figure>
+
+<p>查看所有 OVS Port 的接口列表：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl --columns=name,interfaces list Port</span><br></pre></td></tr></table></figure>
+
+<h3 id="13-3-用-OpenFlow-查看实际转发路径"><a href="#13-3-用-OpenFlow-查看实际转发路径" class="headerlink" title="13.3 用 OpenFlow 查看实际转发路径"></a>13.3 用 OpenFlow 查看实际转发路径</h3><p>设备拓扑只能说明“有哪些设备和连接”，不能说明“某个报文实际走哪条路径”。实际转发要看流表：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun</span><br></pre></td></tr></table></figure>
+
+<p>目标 Pod <code>11.52.1.100</code> 的过滤方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int | \</span><br><span class="line">grep -E <span class="string">&#x27;11\.52\.1\.48|fa:16:3e:54:b3:7d|output:113&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>查看源 Pod <code>11.52.2.100</code> 的源端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int | \</span><br><span class="line">grep <span class="string">&#x27;in_port=155&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>查看 VXLAN 逻辑网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun | \</span><br><span class="line">grep -E <span class="string">&#x27;0x19eda4|dl_vlan=2|dl_vlan=17|tun_dst|vxlan&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>重点关注：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">in_port</span><br><span class="line">dl_vlan</span><br><span class="line">dl_src/dl_dst</span><br><span class="line">nw_src/nw_dst</span><br><span class="line">tun_id</span><br><span class="line">set_field</span><br><span class="line">resubmit</span><br><span class="line">output</span><br><span class="line">n_packets/n_bytes</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>n_packets</code> 和 <code>n_bytes</code> 用于判断某条规则是否实际命中过流量。</p>
+<h3 id="13-4-Linux-侧设备查看"><a href="#13-4-Linux-侧设备查看" class="headerlink" title="13.4 Linux 侧设备查看"></a>13.4 Linux 侧设备查看</h3><p>Linux 内核网络设备使用以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip -d <span class="built_in">link</span> show</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip -br <span class="built_in">link</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bridge <span class="built_in">link</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bridge vlan show</span><br></pre></td></tr></table></figure>
+
+<p>查看 network namespace：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip netns list</span><br></pre></td></tr></table></figure>
+
+<p>进入 namespace：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip netns <span class="built_in">exec</span> &lt;namespace&gt; ip -br addr</span><br><span class="line">ip netns <span class="built_in">exec</span> &lt;namespace&gt; ip route</span><br></pre></td></tr></table></figure>
+
+<p>如果只有容器 PID，没有持久化的 netns 名称：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nsenter -t &lt;PID&gt; -n ip -br addr</span><br><span class="line">nsenter -t &lt;PID&gt; -n ip route</span><br></pre></td></tr></table></figure>
+
+<p>注意：<code>ip</code> 和 <code>bridge</code> 对 OVS-DPDK 的 vhu、dpdk0、用户态 patch 关系展示不完整，应与 <code>ovs-vsctl</code> 结果结合使用。</p>
+<h3 id="13-5-常用拓扑生成方式"><a href="#13-5-常用拓扑生成方式" class="headerlink" title="13.5 常用拓扑生成方式"></a>13.5 常用拓扑生成方式</h3><h4 id="Linux-内核拓扑"><a href="#Linux-内核拓扑" class="headerlink" title="Linux 内核拓扑"></a>Linux 内核拓扑</h4><p>适用于 Linux bridge、veth、namespace：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plotnetcfg | grep -v <span class="string">&#x27;kube-ipvs0&#x27;</span> | dot -Tpdf &gt; net.pdf</span><br></pre></td></tr></table></figure>
+
+<h4 id="OVS-文本拓扑"><a href="#OVS-文本拓扑" class="headerlink" title="OVS 文本拓扑"></a>OVS 文本拓扑</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show &gt; ovs-topology.txt</span><br><span class="line">ovs-appctl dpif/show &gt; ovs-datapath.txt</span><br></pre></td></tr></table></figure>
+
+<h4 id="OVS-与流表组合拓扑"><a href="#OVS-与流表组合拓扑" class="headerlink" title="OVS 与流表组合拓扑"></a>OVS 与流表组合拓扑</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show &gt; ovs-topology.txt</span><br><span class="line">ovs-vsctl --columns=name,<span class="built_in">type</span>,ofport,options,status \</span><br><span class="line">    list Interface &gt; ovs-interfaces.txt</span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int &gt; br-int-flows.txt</span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun &gt; br-tun-flows.txt</span><br></pre></td></tr></table></figure>
+
+<p>然后按下面关系阅读：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show</span><br><span class="line">  确认设备和连接关系</span><br><span class="line"></span><br><span class="line">ovs-vsctl list Interface</span><br><span class="line">  确认 vhu/ofport/VXLAN/VTEP/DPDK 状态</span><br><span class="line"></span><br><span class="line">ovs-ofctl dump-flows br-int</span><br><span class="line">  确认 VM/Pod 报文如何进入和离开 br-int</span><br><span class="line"></span><br><span class="line">ovs-ofctl dump-flows br-tun</span><br><span class="line">  确认 VLAN、VNI、tun_dst 和 VXLAN 输出</span><br></pre></td></tr></table></figure>
+
+<h3 id="13-6-当前环境推荐组合"><a href="#13-6-当前环境推荐组合" class="headerlink" title="13.6 当前环境推荐组合"></a>13.6 当前环境推荐组合</h3><p>不要只依赖 <code>plotnetcfg</code>。建议使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show</span><br><span class="line">ovs-appctl dpif/show</span><br><span class="line">ip -d <span class="built_in">link</span> show</span><br><span class="line">ovs-vsctl --columns=name,<span class="built_in">type</span>,ofport,options,status list Interface</span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-int</span><br><span class="line">ovs-ofctl -O OpenFlow13 dump-flows br-tun</span><br></pre></td></tr></table></figure>
+
+<p>各命令职责：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show</span><br><span class="line">  查看 OVS bridge、Port 和 Interface 拓扑</span><br><span class="line"></span><br><span class="line">ovs-appctl dpif/show</span><br><span class="line">  查看 OVS datapath 和端口</span><br><span class="line"></span><br><span class="line">ip -d link show</span><br><span class="line">  查看 Linux 内核侧网卡、bond、ipvlan、veth</span><br><span class="line"></span><br><span class="line">ovs-vsctl list Interface</span><br><span class="line">  查看 vhu、DPDK、VXLAN 的状态和属性</span><br><span class="line"></span><br><span class="line">ovs-ofctl dump-flows br-int</span><br><span class="line">  查看内部 VM/Pod 端口转发</span><br><span class="line"></span><br><span class="line">ovs-ofctl dump-flows br-tun</span><br><span class="line">  查看跨节点 VLAN/VNI/VXLAN 转发</span><br></pre></td></tr></table></figure>
+
+<p>最终判断原则：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">plotnetcfg：Linux 内核设备拓扑</span><br><span class="line">ovs-vsctl：OVS/DPDK/vhost-user/VXLAN 拓扑</span><br><span class="line">ovs-ofctl：实际 OpenFlow 转发路径</span><br><span class="line">ip/bridge：VM 和 namespace 内部网络</span><br><span class="line">tcpdump：验证实际报文是否出现</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/09/20/SDLC%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1307,94 +1773,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/05/20/ollama%E9%83%A8%E7%BD%B2qwen%E6%A8%A1%E5%9E%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/05/20/ollama%E9%83%A8%E7%BD%B2qwen%E6%A8%A1%E5%9E%8B/" class="post-title-link" itemprop="url">ollama部署qwen模型(cpu)</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-05-20 15:43:14 / 修改时间：15:44:16" itemprop="dateCreated datePublished" datetime="2026-05-20T15:43:14+08:00">2026-05-20</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#下载</span></span><br><span class="line">wget https://gh-proxy.org/https://github.com/ollama/ollama/releases/download/v0.24.0/ollama-linux-amd64.tar.zst</span><br><span class="line">tar -I zstd -xvf ollama-linux-amd64.tar.zst</span><br><span class="line"></span><br><span class="line">ollama -h</span><br><span class="line"><span class="comment">#启动服务</span></span><br><span class="line">OLLAMA_HOST=0.0.0.0:11434 ollama serve</span><br><span class="line"></span><br><span class="line"><span class="comment">#命令行对话</span></span><br><span class="line">ollama run qwen2.5:7b</span><br><span class="line"></span><br><span class="line"><span class="comment">#拉模型</span></span><br><span class="line">ollama pull qwen3.5:9b</span><br></pre></td></tr></table></figure>
-
-<h2 id="api请求"><a href="#api请求" class="headerlink" title="api请求"></a>api请求</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#请求</span></span><br><span class="line">curl http://localhost:11434/api/chat \</span><br><span class="line">  -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">    &quot;model&quot;: &quot;qwen2.5:7b&quot;,</span></span><br><span class="line"><span class="string">    &quot;messages&quot;: [&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello!&quot;&#125;]</span></span><br><span class="line"><span class="string">  &#125;&#x27;</span></span><br><span class="line">  </span><br><span class="line"><span class="comment">#流式输出</span></span><br><span class="line">curl http://localhost:11434/api/generate -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">  &quot;model&quot;: &quot;qwen2.5:7b&quot;,</span></span><br><span class="line"><span class="string">  &quot;prompt&quot;: &quot;为什么草是绿的？&quot;</span></span><br><span class="line"><span class="string">&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#非流式输出</span></span><br><span class="line">curl http://localhost:11434/api/generate -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">  &quot;model&quot;: &quot;qwen2.5:7b&quot;,</span></span><br><span class="line"><span class="string">  &quot;prompt&quot;: &quot;为什么草是绿的？&quot;,</span></span><br><span class="line"><span class="string">  &quot;stream&quot;: false</span></span><br><span class="line"><span class="string">&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#列出运行模型</span></span><br><span class="line">curl -s http://localhost:11434/api/ps | jq</span><br><span class="line">curl -s http://localhost:11434/api/tags | jq</span><br><span class="line"></span><br><span class="line">curl http://localhost:11434/api/show -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">  &quot;name&quot;: &quot;qwen2.5:7b&quot;</span></span><br><span class="line"><span class="string">&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="systemd服务"><a href="#systemd服务" class="headerlink" title="systemd服务"></a>systemd服务</h2><ul>
-<li>vim &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;ollama.service</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Ollama Service</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line"></span><br><span class="line">User=root</span><br><span class="line">Group=root</span><br><span class="line"></span><br><span class="line">WorkingDirectory=/root</span><br><span class="line"></span><br><span class="line"><span class="comment"># 监听地址</span></span><br><span class="line">Environment=<span class="string">&quot;OLLAMA_HOST=0.0.0.0:11434&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型目录</span></span><br><span class="line">Environment=<span class="string">&quot;OLLAMA_MODELS=/root/.ollama/models&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型常驻时间，模型加载到内存/GPU后1小时不卸载</span></span><br><span class="line">Environment=<span class="string">&quot;OLLAMA_KEEP_ALIVE=1h&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 并发推理数</span></span><br><span class="line">Environment=<span class="string">&quot;OLLAMA_NUM_PARALLEL=1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 最大同时加载模型数，最多同时在内存/GPU中保留几个模型</span></span><br><span class="line">Environment=<span class="string">&quot;OLLAMA_MAX_LOADED_MODELS=1&quot;</span></span><br><span class="line"></span><br><span class="line">ExecStart=/usr/local/bin/ollama serve</span><br><span class="line"></span><br><span class="line">Restart=always</span><br><span class="line">RestartSec=3</span><br><span class="line"></span><br><span class="line">LimitNOFILE=65535</span><br><span class="line">LimitNPROC=65535</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
-
-<h3 id="加载systemd"><a href="#加载systemd" class="headerlink" title="加载systemd"></a>加载systemd</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl daemon-reload</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># systemctl restart ollama</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># systemctl show ollama | grep Environment</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># systemctl enable ollama</span></span><br><span class="line">Created symlink /etc/systemd/system/multi-user.target.wants/ollama.service → /etc/systemd/system/ollama.service.</span><br></pre></td></tr></table></figure>
-
-<h3 id="启动服务及验证"><a href="#启动服务及验证" class="headerlink" title="启动服务及验证"></a>启动服务及验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl start ollama</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># systemctl status ollama</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ss -lntp | grep 11434</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://127.0.0.1:11434/api/tags</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># journalctl -u ollama -f</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ollama pull qwen3.5:9b</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># watch -n 1 nvidia-smi</span></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1462,7 +1844,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">220</span>
+          <span class="site-state-item-count">221</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
