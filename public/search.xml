@@ -22751,7 +22751,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
     <title>Pod -&gt; VM -&gt; OVS -&gt; 裸金属网络排查命令手册</title>
     <url>/2026/10/20/Pod-VM-OVS-%E8%A3%B8%E9%87%91%E5%B1%9E%E7%BD%91%E7%BB%9C%E6%8E%92%E6%9F%A5%E5%91%BD%E4%BB%A4%E6%89%8B%E5%86%8C/</url>
     <content><![CDATA[<p>沿着下面的路径定位网络和流量：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Pod network namespace</span><br><span class="line">  -&gt; Pod eth0</span><br><span class="line">  -&gt; VM ipvlan parent</span><br><span class="line">  -&gt; VM ethX</span><br><span class="line">  -&gt; libvirt vhost-user / vhu</span><br><span class="line">  -&gt; OVS br-int</span><br><span class="line">  -&gt; patch-tun / patch-int</span><br><span class="line">  -&gt; OVS br-tun</span><br><span class="line">  -&gt; VXLAN VNI / tun_id</span><br><span class="line">  -&gt; DPDK / PCI 物理网卡</span><br><span class="line">  -&gt; 物理网络 / 远端节点</span><br><span class="line"></span><br><span class="line">VXLAN 分层架构:以源 Pod 11.52.2.100 访问目标 Pod 11.52.1.100 为例：</span><br><span class="line">Pod 11.52.2.100</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">源 VM eth1 / ipvlan</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">源 vhu vhuc94a5e9e-74</span><br><span class="line">  ofport=155</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">源 br-int</span><br><span class="line">  local VLAN tag=17</span><br><span class="line">  |</span><br><span class="line">  | patch-tun &lt;-&gt; patch-int</span><br><span class="line">  v</span><br><span class="line">源 br-tun</span><br><span class="line">  |</span><br><span class="line">  | OpenFlow 设置 tun_id/VNI</span><br><span class="line">  | 设置 tun_dst=目标 VTEP</span><br><span class="line">  v</span><br><span class="line">源 VXLAN Interface</span><br><span class="line">  |</span><br><span class="line">  | 外层 UDP 4789</span><br><span class="line">  | 外层源 IP：10.224.129.210</span><br><span class="line">  | 外层目标 IP：目标 VTEP</span><br><span class="line">  v</span><br><span class="line">物理网络</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">目标裸金属 VTEP</span><br><span class="line">  10.224.128.54</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">目标 br-tun</span><br><span class="line">  |</span><br><span class="line">  | 解封装 VXLAN</span><br><span class="line">  | 根据 tun_id 映射目标逻辑网络</span><br><span class="line">  v</span><br><span class="line">目标 br-int</span><br><span class="line">  local VLAN tag=2</span><br><span class="line">  |</span><br><span class="line">  | 目标 MAC fa:16:3e:54:b3:7d</span><br><span class="line">  | output:113</span><br><span class="line">  v</span><br><span class="line">vhu95ff5394-15</span><br><span class="line">  ofport=113</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">目标 VM hulk14 / ethX</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">Pod 11.52.1.100</span><br></pre></td></tr></table></figure>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Pod network namespace</span><br><span class="line">  -&gt; Pod eth0</span><br><span class="line">  -&gt; VM ipvlan parent</span><br><span class="line">  -&gt; VM ethX</span><br><span class="line">  -&gt; libvirt vhost-user / vhu</span><br><span class="line">  -&gt; OVS br-int</span><br><span class="line">  -&gt; patch-tun / patch-int</span><br><span class="line">  -&gt; OVS br-tun</span><br><span class="line">  -&gt; VXLAN VNI / tun_id</span><br><span class="line">  -&gt; DPDK / PCI 物理网卡</span><br><span class="line">  -&gt; 物理网络 / 远端节点</span><br><span class="line"></span><br><span class="line">VXLAN 分层架构:以源 Pod 11.52.2.100 访问目标 Pod 11.52.1.100 为例：</span><br><span class="line">Pod 11.52.2.100</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">源 VM eth1 / ipvlan</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">源 vhu vhuc94a5e9e-74</span><br><span class="line">  ofport=155</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">源 br-int</span><br><span class="line">  local VLAN tag=17</span><br><span class="line">  |</span><br><span class="line">  | patch-tun &lt;-&gt; patch-int</span><br><span class="line">  v</span><br><span class="line">源 br-tun</span><br><span class="line">  |</span><br><span class="line">  | OpenFlow 设置 tun_id/VNI</span><br><span class="line">  | 设置 tun_dst=目标 VTEP</span><br><span class="line">  v</span><br><span class="line">源 VXLAN Interface</span><br><span class="line">  |</span><br><span class="line">  | 外层 UDP 4789</span><br><span class="line">  | 外层源 IP：10.224.129.210</span><br><span class="line">  | 外层目标 IP：目标 VTEP</span><br><span class="line">  v</span><br><span class="line">物理网络</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">目标裸金属 VTEP</span><br><span class="line">  10.224.128.54</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">目标 br-tun</span><br><span class="line">  |</span><br><span class="line">  | 解封装 VXLAN</span><br><span class="line">  | 根据 tun_id 映射目标逻辑网络</span><br><span class="line">  v</span><br><span class="line">目标 br-int</span><br><span class="line">  local VLAN tag=2</span><br><span class="line">  |</span><br><span class="line">  | 目标 MAC fa:16:3e:54:b3:7d</span><br><span class="line">  | output:113</span><br><span class="line">  v</span><br><span class="line">vhu95ff5394-15</span><br><span class="line">  ofport=113</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">目标 VM hulk14 / ethX</span><br><span class="line">  |</span><br><span class="line">  v</span><br><span class="line">Pod 11.52.1.100</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#整体关联图：br-int、VM 与 Pod</span><br><span class="line">裸金属 openstack085</span><br><span class="line">  |</span><br><span class="line">  +-- OVS br-int</span><br><span class="line">       |</span><br><span class="line">       +-- vhuc94a5e9e-74（ofport 155，local tag 17）</span><br><span class="line">              |</span><br><span class="line">              | vhost-user socket / virtio</span><br><span class="line">              v</span><br><span class="line">       VM p93227v / instance-00015f7a</span><br><span class="line">              |</span><br><span class="line">              +-- eth1（MAC fa:16:3e:6e:b7:32）</span><br><span class="line">                    |</span><br><span class="line">                    +-- Pod ipvlan eth0@if67：11.52.2.100</span><br><span class="line">                    +-- 其他 ipvlan Pod</span><br><span class="line">                    +-- VM ipvlan hulk67：用于 VM 与 Pod 通信</span><br><span class="line"></span><br><span class="line">br-int &lt;-&gt; patch-tun / patch-int &lt;-&gt; br-tun &lt;-&gt; VXLAN</span><br></pre></td></tr></table></figure>
 
 <p>本文重点实例：</p>
 <figure class="highlight text"><table><tr><td class="code"><pre><span class="line">目标 Pod：11.52.1.100</span><br><span class="line">目标 VM：p92333v.hulk.net</span><br><span class="line">目标裸金属：openstack188.cloud.net</span><br><span class="line">libvirt：instance-00014694</span><br><span class="line">目标 Pod namespace PID：367646</span><br><span class="line"></span><br><span class="line">源 Pod：11.52.2.100</span><br><span class="line">源 VM：p93227v.hulk.net</span><br><span class="line">源裸金属：openstack085.cloud.net</span><br></pre></td></tr></table></figure>
@@ -23139,6 +23139,56 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
 <p>最终判断原则：</p>
 <figure class="highlight text"><table><tr><td class="code"><pre><span class="line">plotnetcfg：Linux 内核设备拓扑</span><br><span class="line">ovs-vsctl：OVS/DPDK/vhost-user/VXLAN 拓扑</span><br><span class="line">ovs-ofctl：实际 OpenFlow 转发路径</span><br><span class="line">ip/bridge：VM 和 namespace 内部网络</span><br><span class="line">tcpdump：验证实际报文是否出现</span><br></pre></td></tr></table></figure>
 
+<h2 id="抓包指令"><a href="#抓包指令" class="headerlink" title="抓包指令"></a>抓包指令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">裸金属执行：用 MAC 和 UUID 找到 br-int 端口</span><br><span class="line">docker exec -u root nova_libvirt virsh domiflist instance-00015f7a</span><br><span class="line">ovs-vsctl iface-to-br vhuc94a5e9e-74</span><br><span class="line">ovs-vsctl get Interface vhuc94a5e9e-74 ofport</span><br><span class="line">ovs-vsctl get Interface vhuc94a5e9e-74 external_ids</span><br><span class="line">ovs-vsctl get Port vhuc94a5e9e-74 tag</span><br><span class="line">ovs-vsctl get Port vhuc94a5e9e-74 other_config</span><br><span class="line"></span><br><span class="line">VM执行查看pod网卡：</span><br><span class="line">POD_NAME=&quot;test-loadbalancer-xxx&quot;</span><br><span class="line">crictl --debug=false ps | grep $POD_NAME</span><br><span class="line"></span><br><span class="line">CID=977c9477f0a88</span><br><span class="line">PID=$(crictl --debug=false inspect &quot;$CID&quot; | jq -r &#x27;.info.pid&#x27;)</span><br><span class="line">nsenter -t &quot;$PID&quot; -n -- ip -o link show eth0</span><br><span class="line">nsenter -t &quot;$PID&quot; -n -- ip -4 addr show dev eth0</span><br><span class="line"></span><br><span class="line">#查看vm网卡与pod的关联关系</span><br><span class="line">ip -o link show</span><br><span class="line">ip -d link show hulk67</span><br><span class="line">ip route get 11.52.2.23</span><br><span class="line">ip neigh show 11.52.2.23</span><br><span class="line"></span><br><span class="line">#裸金属抓包</span><br><span class="line">ovs-tcpdump -i vhuc94a5e9e-74 -nne -s0 -tttt -A \</span><br><span class="line">    &#x27;vlan 17 and host 11.52.2.23 and host 11.51.240.47 and tcp port 80&#x27;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数&#x2F;条件</th>
+<th>来源与用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ovs-tcpdump</code></td>
+<td>通过临时 OVS mirror 读取该 vhu 的报文，当前环境已验证可用</td>
+</tr>
+<tr>
+<td><code>-i vhuc94a5e9e-74</code></td>
+<td>从 Pod parent MAC、domiflist、OVS external_ids 和 VM UUID 关联得出</td>
+</tr>
+<tr>
+<td><code>-nne</code></td>
+<td><code>-nn</code> 禁用主机&#x2F;服务名解析，<code>-e</code> 显示 MAC、VLAN 等二层信息</td>
+</tr>
+<tr>
+<td><code>-s0</code></td>
+<td>请求完整抓包长度</td>
+</tr>
+<tr>
+<td><code>-tttt</code></td>
+<td>显示完整日期时间，方便与 VM 抓包、curl 对齐</td>
+</tr>
+<tr>
+<td><code>-A</code></td>
+<td>显示 ASCII 内容，查看明文 HTTP 请求和响应，不负责 TCP 流重组</td>
+</tr>
+<tr>
+<td><code>vlan 17</code></td>
+<td>未过滤输出实测镜像帧带 VLAN 17，兼做 VLAN 筛选和解析偏移调整</td>
+</tr>
+<tr>
+<td><code>host 11.52.2.23</code></td>
+<td>服务端 Pod IP，匹配双向报文</td>
+</tr>
+<tr>
+<td><code>host 11.51.240.47</code></td>
+<td>本次客户端 Pod IP，排除其他客户端</td>
+</tr>
+<tr>
+<td><code>tcp port 80</code></td>
+<td>curl 的 HTTP 目标端口，匹配请求与响应</td>
+</tr>
+</tbody></table>
 ]]></content>
       <tags>
         <tag>network</tag>
