@@ -184,6 +184,79 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/23/bash-profile%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/23/bash-profile%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">bash_profile配置</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-09-23 15:10:53 / 修改时间：15:17:38" itemprop="dateCreated datePublished" datetime="2025-09-23T15:10:53+08:00">2025-09-23</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="bash-profile配置"><a href="#bash-profile配置" class="headerlink" title=".bash_profile配置"></a>.bash_profile配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">############################</span><br><span class="line"># 基础工具增强</span><br><span class="line">############################</span><br><span class="line">alias grep=&#x27;grep --color=auto&#x27;</span><br><span class="line">alias fgrep=&#x27;fgrep --color=auto&#x27;</span><br><span class="line">alias egrep=&#x27;egrep --color=auto&#x27;</span><br><span class="line">alias lzd=&#x27;lazydocker&#x27;   # 轻量级 Docker 管理工具</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># Kubernetes 基础命令</span><br><span class="line">############################</span><br><span class="line">alias k=&#x27;kubecolor&#x27;                         # 彩色 kubectl 输出</span><br><span class="line">alias kn=&#x27;k get nodes&#x27;                      # 查看节点</span><br><span class="line">alias knw=&#x27;k get nodes -o wide&#x27;             # 查看节点详情</span><br><span class="line">alias kp=&#x27;k get pod -o wide&#x27;                # 当前命名空间 Pod</span><br><span class="line">alias kpa=&#x27;k get pod -A -o wide&#x27;            # 所有命名空间 Pod</span><br><span class="line">alias kgn=&#x27;k get ns&#x27;                        # 命名空间</span><br><span class="line">alias kgs=&#x27;k get secret&#x27;                    # Secret</span><br><span class="line">alias ki=&#x27;k get ing&#x27;                        # Ingress</span><br><span class="line">alias kio=&#x27;k get ing -o yaml&#x27;               # Ingress 详细</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># Kubernetes 配置管理</span><br><span class="line">############################</span><br><span class="line">alias kcg=&#x27;k config get-contexts&#x27;           # 查看所有 context</span><br><span class="line">alias kcc=&#x27;k config current-context&#x27;        # 当前 context</span><br><span class="line">alias kcu=&#x27;kubectl config use-context &#x27;     # 切换 context</span><br><span class="line">alias kv=&#x27;k config view&#x27;                    # 查看配置</span><br><span class="line">alias kcn=&#x27;k config view --minify --output &quot;jsonpath=&#123;..namespace&#125;&quot; &#x27;  # 当前 namespace</span><br><span class="line">alias kapi=&#x27;k api-resources --sort-by=name&#x27; # API 资源列表</span><br><span class="line"></span><br><span class="line"># 扩展：krew 插件、kubectl neat 等</span><br><span class="line">alias kk=&#x27;kubectl krew &#x27;                    # krew 插件管理</span><br><span class="line">alias kns=&#x27;kubectl config set-context --current --namespace &#x27;  # 切换 namespace</span><br><span class="line">alias knw=&#x27;k get nodes -o wide&#x27;</span><br><span class="line">alias kn=&#x27;k get nodes&#x27;</span><br><span class="line">alias knyaml=&#x27;k neat -o yaml&#x27;               # 输出格式化 yaml</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># Kubernetes 解释与调试</span><br><span class="line">############################</span><br><span class="line">alias ke=&#x27;kubectl explain &#x27;                 # 解释资源</span><br><span class="line">alias ker=&#x27;kubectl explain --recursive &#x27;    # 递归解释</span><br><span class="line">alias kdr=&#x27;kubectl --dry-run=client -o yaml&#x27; # 生成 yaml 草稿</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># 自定义封装</span><br><span class="line">############################</span><br><span class="line"># 添加 kubeconfig context，简化切换</span><br><span class="line">kcadd() &#123; kubectl kc add -cf /home/shijianpeng/.kube/$1.conf --context-name $1; &#125;</span><br><span class="line">pingt() &#123;</span><br><span class="line">    ping &quot;$@&quot; | ts &#x27;[%Y-%m-%d %H:%M:%S]&#x27;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 常用 kc 扩展</span><br><span class="line">alias kc=&#x27;kubectl kc&#x27;</span><br><span class="line">alias kcl=&#x27;kubectl kc list&#x27;</span><br><span class="line">alias kcs=&#x27;kubectl kc switch&#x27;</span><br><span class="line"></span><br><span class="line">############################</span><br><span class="line"># 集群信息</span><br><span class="line">############################</span><br><span class="line">alias kci=&#x27;k cluster-info&#x27;   # 集群信息</span><br><span class="line"># kubectl version</span><br><span class="line"># kubectl api-resources</span><br><span class="line"># kubectl api-versions</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/23/%E6%B5%81%E9%87%8F%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1576,87 +1649,6 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/09/01/%E9%83%A8%E7%BD%B2kube-prometheus-stack/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/09/01/%E9%83%A8%E7%BD%B2kube-prometheus-stack/" class="post-title-link" itemprop="url">部署kube-prometheus-stack</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2025-09-01 10:05:32 / 修改时间：10:12:16" itemprop="dateCreated datePublished" datetime="2025-09-01T10:05:32+08:00">2025-09-01</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h2><h3 id="1、加载仓库"><a href="#1、加载仓库" class="headerlink" title="1、加载仓库"></a>1、加载仓库</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">helm repo add prometheus-community https://prometheus-community.github.io/helm-charts</span><br><span class="line">helm search repo prometheus-community/kube-prometheus-stack </span><br><span class="line">helm pull prometheus-community/kube-prometheus-stack</span><br></pre></td></tr></table></figure>
-
-<h3 id="2、修改镜像"><a href="#2、修改镜像" class="headerlink" title="2、修改镜像"></a>2、修改镜像</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar zxvf kube-prometheus-stack-77.0.2.tgz</span><br><span class="line">helm template ./kube-prometheus-stack &gt; kube-prometheus-stack.yaml</span><br><span class="line"></span><br><span class="line">#查看当前镜像</span><br><span class="line">cat kube-prometheus-stack.yaml  | grep -w image:</span><br></pre></td></tr></table></figure>
-
-<h3 id="3、替换镜像"><a href="#3、替换镜像" class="headerlink" title="3、替换镜像"></a>3、替换镜像</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">set -euo pipefail</span><br><span class="line"></span><br><span class="line"># 目标私有仓库前缀</span><br><span class="line">HARBOR_REGISTRY=&quot;harborqa.xxx.net/xxx&quot;</span><br><span class="line"></span><br><span class="line"># 待同步的镜像列表</span><br><span class="line">IMAGES=(</span><br><span class="line">  &quot;quay.io/prometheus/node-exporter:v1.9.1&quot;</span><br><span class="line">  &quot;quay.io/kiwigrid/k8s-sidecar:1.30.3&quot;</span><br><span class="line">  &quot;docker.io/grafana/grafana:12.1.0&quot;</span><br><span class="line">  &quot;registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0&quot;</span><br><span class="line">  &quot;quay.io/prometheus-operator/prometheus-operator:v0.85.0&quot;</span><br><span class="line">  &quot;quay.io/prometheus-operator/prometheus-config-reloader:v0.85.0&quot;</span><br><span class="line">  &quot;quay.io/prometheus/alertmanager:v0.28.1&quot;</span><br><span class="line">  &quot;quay.io/prometheus/prometheus:v3.5.0&quot;</span><br><span class="line">  &quot;docker.io/bats/bats:v1.4.1&quot;</span><br><span class="line">  &quot;registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.1&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">for IMAGE in &quot;$&#123;IMAGES[@]&#125;&quot;; do</span><br><span class="line">  echo &quot;&gt;&gt;&gt; 处理镜像: $IMAGE&quot;</span><br><span class="line"></span><br><span class="line">  # 分割 repo 与 tag</span><br><span class="line">  NAME_TAG=&quot;$&#123;IMAGE##*/&#125;&quot;          # e.g. prometheus:v3.5.0</span><br><span class="line">  NAME=&quot;$&#123;NAME_TAG%%:*&#125;&quot;           # e.g. prometheus</span><br><span class="line">  TAG=&quot;$&#123;NAME_TAG##*:&#125;&quot;            # e.g. v3.5.0</span><br><span class="line"></span><br><span class="line">  # 提取仓库路径（去掉前缀 registry）</span><br><span class="line">  REPO_PATH=$(echo &quot;$IMAGE&quot; | cut -d&#x27;/&#x27; -f2- | cut -d&#x27;:&#x27; -f1)</span><br><span class="line"></span><br><span class="line">  # 构造目标镜像</span><br><span class="line">  TARGET=&quot;$&#123;HARBOR_REGISTRY&#125;/$&#123;REPO_PATH&#125;:$&#123;TAG&#125;&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;拉取镜像: $IMAGE&quot;</span><br><span class="line">  docker pull &quot;$IMAGE&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;打标签: $IMAGE -&gt; $TARGET&quot;</span><br><span class="line">  docker tag &quot;$IMAGE&quot; &quot;$TARGET&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;推送到私有仓库: $TARGET&quot;</span><br><span class="line">  docker push &quot;$TARGET&quot;</span><br><span class="line"></span><br><span class="line">  echo &quot;清理本地镜像: $IMAGE&quot;</span><br><span class="line">  docker rmi &quot;$IMAGE&quot; || true</span><br><span class="line">  echo &quot;=== 完成 $IMAGE ===&quot;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-<h3 id="4、修改镜像"><a href="#4、修改镜像" class="headerlink" title="4、修改镜像"></a>4、修改镜像</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed -i.bak \</span><br><span class="line">    -e &#x27;s#quay.io#harborqa.xxx.net/xxx#g&#x27; \</span><br><span class="line">    -e &#x27;s#docker.io#harborqa.xxx.net/xxx#g&#x27; \</span><br><span class="line">    -e &#x27;s#registry.k8s.io#harborqa.xxx.net/xxx#g&#x27; \</span><br><span class="line">    kube-prometheus-stack.yaml</span><br></pre></td></tr></table></figure>
-<h3 id="5、安装部署"><a href="#5、安装部署" class="headerlink" title="5、安装部署"></a>5、安装部署</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">k apply -f kube-prometheus-stack.yaml</span><br></pre></td></tr></table></figure>
-<h3 id="6、访问grafana"><a href="#6、访问grafana" class="headerlink" title="6、访问grafana"></a>6、访问grafana</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#浏览器访问： release-name-grafana-xxx-xxx pod ip ：</span><br><span class="line">#eg: 11.123.243.66:3000</span><br><span class="line">#查看密码</span><br><span class="line">#用户名：admin</span><br><span class="line">kubectl get secret release-name-grafana -n monitoring -o jsonpath=&quot;&#123;.data.admin-password&#125;&quot; | base64 -d</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1728,7 +1720,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-count">222</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1741,7 +1733,7 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

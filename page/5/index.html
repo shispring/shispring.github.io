@@ -184,6 +184,91 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/ip%E7%9A%84%E4%B8%80%E4%BA%9B%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/27/ip%E7%9A%84%E4%B8%80%E4%BA%9B%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4/" class="post-title-link" itemprop="url">Linux网络统计、性能工具/命令</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-27 15:53:50 / 修改时间：16:21:41" itemprop="dateCreated datePublished" datetime="2026-01-27T15:53:50+08:00">2026-01-27</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span></span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>NaN:aN</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="网络统计"><a href="#网络统计" class="headerlink" title="网络统计"></a>网络统计</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">iproute2 用法</span><br><span class="line"># 列出所有 veth 设备</span><br><span class="line">ip -c link show type veth</span><br><span class="line"># 列出所有 tunnel 设备</span><br><span class="line">ip tunnel show</span><br></pre></td></tr></table></figure>
+<h2 id="网络统计工具"><a href="#网络统计工具" class="headerlink" title="网络统计工具"></a>网络统计工具</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">nstat 命令：网络统计工具</span><br><span class="line"># nstat</span><br><span class="line"></span><br><span class="line">ss 命令：用于调查套接字的实用程序</span><br><span class="line"># ss -s</span><br><span class="line"></span><br><span class="line">netstat 命令：显示套接字的经典实用工具</span><br><span class="line"># netstat -i</span><br><span class="line"></span><br><span class="line"># netstat -s</span><br><span class="line"></span><br><span class="line">ip/ifconfig 命令：配置或显示网络接口信息</span><br><span class="line"># ifconfig</span><br><span class="line"></span><br><span class="line"># ifconfig eth0</span><br><span class="line"></span><br><span class="line">要显示网络接口统计信息</span><br><span class="line"># ip -c -s link</span><br><span class="line"></span><br><span class="line">sar 命令：显示网络统计信息</span><br><span class="line"># sar -n DEV 1</span><br><span class="line"></span><br><span class="line">每秒1次，统计三次</span><br><span class="line"># sar -n DEV 1 3</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">使用 dropwatch（Kernel dropped packet monitor） 可以监测内核丢包信息 ，执行以下命令，然后输入 start</span><br><span class="line"># dropwatch -l kas</span><br><span class="line">Initalizing kallsyms db</span><br><span class="line">dropwatch&gt; start    </span><br><span class="line">xxx</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="网络性能测试"><a href="#网络性能测试" class="headerlink" title="网络性能测试"></a>网络性能测试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 使用 iperf3 进行性能测试</span><br><span class="line"># 启动服务端 -s 意思是服务端</span><br><span class="line">iperf3 -s </span><br><span class="line"># 后台进程方式启动服务端，-D 意思是 Daemon 进程启动</span><br><span class="line">iperf3 -s -D</span><br><span class="line"># 在客户端执行 TCP 测试， -c 指的是客户端，-b 目标带宽（一般与网卡带宽相匹配），-n 发送字节数</span><br><span class="line">iperf3 -c 10.10.140.95 -b 10000M -n 10G</span><br><span class="line"># 执行 UDP 测试，-u 使用 UDP 协议，-l 指定数据包大小，这里指定的是 TCP 或 UDP 数据部分的大小为 1400</span><br><span class="line"># 实际发送时的 MAC 帧长会是 1454 ，包括：</span><br><span class="line"># 26 个字节的 MAC 帧头：7 个字节的前导码，1 个字节的帧起始符，6 字节目的 MAC ，6 字节源 MAC ，2 字节帧长度，以及位于帧末尾的 4 字节 CRC 校验和</span><br><span class="line"># 20 字节的 IP 头部</span><br><span class="line"># 8 字节 UDP 头部</span><br><span class="line">iperf3 -u -c 10.10.140.95 -b 10000M -n 10G -l1400</span><br><span class="line"># 由于 iperf3 只显示带宽，可以借助 sar 查看包量</span><br><span class="line"># sar 工具包含在 sysstat 中</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="网络性能调优"><a href="#网络性能调优" class="headerlink" title="网络性能调优"></a>网络性能调优</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"># 1、网卡收发数据处理速度成为瓶颈时， 设置 CPU 亲和性（ irqbalance 的自动负载均衡很多时候不好用） 将中断处理分发到不同的 CPU 上，避免集中在一个 CPU 上</span><br><span class="line"># 找到底层设备</span><br><span class="line">readlink -e /sys/class/net/eth0/</span><br><span class="line">/sys/devices/pci0000:17/0000:17:00.0/0000:18:00.0/0000:19:03.0/0000:1a:00.0/net/eth0</span><br><span class="line"></span><br><span class="line">#2、当缓冲区大小成为瓶颈时，可调整内核参数进行优化</span><br><span class="line"># 该参数决定了，网络设备接收数据包的速率比内核处理这些包的速率快时，允许送到队列的数据包的最大数目。</span><br><span class="line">net.core.netdev_max_backlog = 400000</span><br><span class="line"># 该参数指定了每个套接字所允许的最大缓冲区的大小</span><br><span class="line">net.core.optmem_max = 10000000</span><br><span class="line"># 指定了接收套接字缓冲区大小的缺省值（以字节为单位）</span><br><span class="line">net.core.rmem_default = 16777216</span><br><span class="line"># 指定了接收套接字缓冲区大小的最大值（以字节为单位）</span><br><span class="line">net.core.rmem_max = 16777216</span><br><span class="line"># 表示socket监听的backlog(监听队列)上限</span><br><span class="line">net.core.somaxconn = 100000</span><br><span class="line"># 定义默认的发送窗口大小</span><br><span class="line">net.core.wmem_default = 16777216</span><br><span class="line"># 定义发送窗口的最大大小</span><br><span class="line">net.core.wmem_max = 16777216</span><br><span class="line"># 确定 TCP 栈应该如何反映内存使用；每个值的单位都是内存页（通常是 4KB）。</span><br><span class="line"># 第一个值是内存使用的下限。</span><br><span class="line"># 第二个值是内存压力模式开始对缓冲区使用应用压力的上限。</span><br><span class="line"># 第三个值是内存上限。在这个层次上可以将报文丢弃，从而减少对内存的使用。</span><br><span class="line">net.ipv4.tcp_mem=91650	122203	183300</span><br><span class="line"># 为自动调优定义每个 socket 使用的内存。</span><br><span class="line"># 第一个值是为 socket 的发送缓冲区分配的最少字节数。</span><br><span class="line"># 第二个值是默认值（该值会被 wmem_default 覆盖），缓冲区在系统负载不重的情况下可以增长到这个值。</span><br><span class="line"># 第三个值是发送缓冲区空间的最大字节数（该值会被 wmem_max 覆盖）。</span><br><span class="line">net.ipv4.tcp_wmem=4096 16384 16777216</span><br><span class="line">net.ipv4.tcp_rmem=4096 131072 16777216</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="网络栈的监控"><a href="#网络栈的监控" class="headerlink" title="网络栈的监控"></a>网络栈的监控</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://arthurchiao.art/blog/monitoring-network-stack/">https://arthurchiao.art/blog/monitoring-network-stack/</a></p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.xiayinchang.top/post/cf4d6f51.html">https://www.xiayinchang.top/post/cf4d6f51.html</a></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/27/%E8%B7%AF%E7%94%B1Demo%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1816,228 +1901,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/10/network%E6%8B%93%E6%89%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/01/10/network%E6%8B%93%E6%89%91/" class="post-title-link" itemprop="url">network拓扑</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-01-10 16:37:49" itemprop="dateCreated datePublished" datetime="2026-01-10T16:37:49+08:00">2026-01-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-11-20 11:57:32" itemprop="dateModified" datetime="2026-11-20T11:57:32+08:00">2026-11-20</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一般拓扑"><a href="#一般拓扑" class="headerlink" title="一般拓扑"></a>一般拓扑</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">                ┌────────────┐</span><br><span class="line">                │   Switch   │</span><br><span class="line">                └─────┬──────┘</span><br><span class="line">                      │</span><br><span class="line">                 eth0 ens192</span><br><span class="line">                      │</span><br><span class="line">          ┌───────────┴───────────┐</span><br><span class="line">          │        Linux          │</span><br><span class="line">          └───────────┬───────────┘</span><br><span class="line">                      │</span><br><span class="line">                linux bridge</span><br><span class="line">                  cni0/flannel.1</span><br><span class="line">                      │</span><br><span class="line">      ┌───────────────┼──────────────┐</span><br><span class="line">      │               │              │</span><br><span class="line">   vethxxx        vethyyy       vethzzz</span><br><span class="line">      │               │              │</span><br><span class="line">   Pod-A          Pod-B         Pod-C</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#ovs情况</span><br><span class="line">                Pod-A</span><br><span class="line">                  |</span><br><span class="line">            eth0@if100</span><br><span class="line">                  |</span><br><span class="line">             veth100</span><br><span class="line">                  |</span><br><span class="line">                OVS</span><br><span class="line">             (br-int)</span><br><span class="line">                  |</span><br><span class="line">        ┌─────────┼─────────┐</span><br><span class="line">        │         │         │</span><br><span class="line">      Geneve    VXLAN     eth0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="网络拓扑命令"><a href="#网络拓扑命令" class="headerlink" title="网络拓扑命令"></a>网络拓扑命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"># RHEL/CentOS/Fedora</span><br><span class="line">dnf install -y plotnetcfg graphviz</span><br><span class="line">或者</span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/epel/7/x86_64/Packages/p/plotnetcfg-0.4.1-2.el7.x86_64.rpm</span><br><span class="line"></span><br><span class="line"># 生成SVG（清晰可缩放）</span><br><span class="line">sudo plotnetcfg | dot -Tsvg &gt; net-topo.svg</span><br><span class="line"></span><br><span class="line"># 生成PNG</span><br><span class="line">sudo plotnetcfg | dot -Tpng &gt; net-topo.png</span><br><span class="line"></span><br><span class="line"># 生成PDF</span><br><span class="line">sudo plotnetcfg | dot -Tpdf &gt; net-topo.pdf</span><br><span class="line"></span><br><span class="line"># 过滤</span><br><span class="line">plotnetcfg | grep -v &#x27;kube-ipvs0&#x27; | dot -Tpdf &gt; net.pdf</span><br><span class="line"></span><br><span class="line"># 超大图</span><br><span class="line">sudo plotnetcfg &gt; topo.dot</span><br><span class="line"></span><br><span class="line">sudo dot -Gsplines=true \</span><br><span class="line">    -Grankdir=LR \</span><br><span class="line">    -Tsvg topo.dot \</span><br><span class="line">    -o topo.svg</span><br><span class="line"></span><br><span class="line"># 使用json输出</span><br><span class="line">plotnetcfg -f json &gt; network_config.json</span><br></pre></td></tr></table></figure>
-
-<h2 id="ip命令"><a href="#ip命令" class="headerlink" title="ip命令"></a>ip命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">nmcli device show eth0</span><br><span class="line"></span><br><span class="line"># 列出所有接口（含veth、bridge、loopback）</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 看veth pair配对（关键！）</span><br><span class="line">ip link show | grep -E &quot;veth|peer&quot;</span><br><span class="line"></span><br><span class="line"># 看网桥端口（物理网卡+虚拟网卡接入）</span><br><span class="line">ip bridge show</span><br><span class="line"></span><br><span class="line"># 看网络命名空间（容器/隔离环境）</span><br><span class="line">ip netns list</span><br><span class="line">ip netns exec &lt;ns名&gt; ip link</span><br><span class="line"></span><br><span class="line"># 更详细命令</span><br><span class="line">ip -d link show</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">netstat -rn</span><br></pre></td></tr></table></figure>
-
-<h3 id="常见路由状态汇总表"><a href="#常见路由状态汇总表" class="headerlink" title="常见路由状态汇总表"></a>常见路由状态汇总表</h3><table>
-<thead>
-<tr>
-<th align="left">关键字</th>
-<th align="left">含义</th>
-<th align="left">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><strong>default</strong></td>
-<td align="left">默认路由</td>
-<td align="left">兜底路径，所有匹配不到的流量都走它。</td>
-</tr>
-<tr>
-<td align="left"><strong>via</strong></td>
-<td align="left">网关地址</td>
-<td align="left">下一跳地址。</td>
-</tr>
-<tr>
-<td align="left"><strong>dev</strong></td>
-<td align="left">接口名称</td>
-<td align="left">数据包出口。</td>
-</tr>
-<tr>
-<td align="left"><strong>proto</strong></td>
-<td align="left">协议来源</td>
-<td align="left"><code>kernel</code> 是内核自动配置，<code>static</code> 是你手动添加的。</td>
-</tr>
-<tr>
-<td align="left"><strong>scope</strong></td>
-<td align="left">作用域</td>
-<td align="left"><code>link</code> (本地链路)、<code>host</code> (仅本机)、<code>global</code> (全网)。</td>
-</tr>
-<tr>
-<td align="left"><strong>src</strong></td>
-<td align="left">源地址选择</td>
-<td align="left">发出包时默认采用此 IP 作为源 IP。</td>
-</tr>
-<tr>
-<td align="left"><strong>metric</strong></td>
-<td align="left">优先级</td>
-<td align="left">数字越小越优先（路由开销）。</td>
-</tr>
-<tr>
-<td align="left"><strong>table</strong></td>
-<td align="left">路由表 ID</td>
-<td align="left">指定使用哪张表（通常是 <code>main</code> 或 <code>local</code>）。</td>
-</tr>
-<tr>
-<td align="left"><strong>onlink</strong></td>
-<td align="left">强制直连</td>
-<td align="left">即使网关 IP 不在直连网段，也强制认为是直连。</td>
-</tr>
-<tr>
-<td align="left"><strong>prohibit&#x2F;unreachable</strong></td>
-<td align="left">黑洞路由</td>
-<td align="left">故意丢弃包并告知发送方无法到达。</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th align="left">Scope</th>
-<th align="left">传输方式</th>
-<th align="left">场景</th>
-<th align="left">需要网关 (via) 吗？</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><strong>host</strong></td>
-<td align="left">内核自我消化</td>
-<td align="left">回环地址、本机接口 IP</td>
-<td align="left">绝对不需要</td>
-</tr>
-<tr>
-<td align="left"><strong>link</strong></td>
-<td align="left">二层直接寻址 (ARP)</td>
-<td align="left">同一局域网内的设备</td>
-<td align="left">不需要 (直连)</td>
-</tr>
-<tr>
-<td align="left"><strong>global</strong></td>
-<td align="left">三层路由转发</td>
-<td align="left">跨局域网、互联网</td>
-<td align="left">必须通过网关</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th align="left">类型</th>
-<th align="left">含义</th>
-<th align="left">核心特征</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><strong>直连路由</strong></td>
-<td align="left">目的地就在你的网线上。</td>
-<td align="left">自动生成，不需要下一跳（网关）。</td>
-</tr>
-<tr>
-<td align="left"><strong>主机路由</strong></td>
-<td align="left">目的地是一个具体的单机 IP。</td>
-<td align="left">指向极度精确，优先级高。</td>
-</tr>
-<tr>
-<td align="left"><strong>静态路由</strong></td>
-<td align="left">你手动告诉系统怎么走远方的路。</td>
-<td align="left">人为配置，告知下一跳网关。</td>
-</tr>
-<tr>
-<td align="left"><strong>默认路由</strong></td>
-<td align="left">最后的兜底方案。</td>
-<td align="left">“所有我不知道去哪儿的路，都走这里”。</td>
-</tr>
-</tbody></table>
-<p>系统查路由表遵循一个原则：**最长前缀匹配 (Longest Prefix Match)**。</p>
-<ul>
-<li><strong>谁最细致，谁先赢。</strong></li>
-<li><strong>优先级排序：</strong><ol>
-<li>主机路由 (&#x2F;32)：最精确。</li>
-<li>具体网段路由 (&#x2F;24, &#x2F;22 等)：比较精确。</li>
-<li>默认路由 (&#x2F;0)：最笼统（最后被匹配）。</li>
-</ol>
-</li>
-</ul>
-<hr>
-<h2 id="bridge-utils（传统-brctl，查-Linux-网桥）"><a href="#bridge-utils（传统-brctl，查-Linux-网桥）" class="headerlink" title="bridge-utils（传统 brctl，查 Linux 网桥）"></a>bridge-utils（传统 brctl，查 Linux 网桥）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br><span class="line">brctl show  # 直接显示网桥+所有端口（含eth、veth）</span><br></pre></td></tr></table></figure>
-
-<h2 id="Open-vSwitch（OVS-虚拟交换机）"><a href="#Open-vSwitch（OVS-虚拟交换机）" class="headerlink" title="Open vSwitch（OVS 虚拟交换机）"></a>Open vSwitch（OVS 虚拟交换机）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show  # 显示OVS网桥、端口、veth、vxlan</span><br></pre></td></tr></table></figure>
-
-<h2 id="跨设备拓扑发现（LLDP，查邻接设备）"><a href="#跨设备拓扑发现（LLDP，查邻接设备）" class="headerlink" title="跨设备拓扑发现（LLDP，查邻接设备）"></a>跨设备拓扑发现（LLDP，查邻接设备）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum install -y lldpd</span><br><span class="line">lldpctl</span><br><span class="line">或者</span><br><span class="line">lldpcli show neighbors -f json</span><br></pre></td></tr></table></figure>
-
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">查看 veth：</span><br><span class="line">ip -o link | grep veth</span><br><span class="line"></span><br><span class="line">查看 bridge：</span><br><span class="line">ip -o link | grep bridge</span><br><span class="line"></span><br><span class="line">查看 VXLAN：</span><br><span class="line">ip -d link show | grep vxlan</span><br><span class="line"></span><br><span class="line">查看隧道：</span><br><span class="line">ip tunnel show</span><br><span class="line"></span><br><span class="line">网桥查看</span><br><span class="line">bridge vlan</span><br><span class="line">bridge link</span><br><span class="line">查看 FDB：</span><br><span class="line">bridge fdb show</span><br></pre></td></tr></table></figure>
-
-<h2 id="分层思维"><a href="#分层思维" class="headerlink" title="分层思维"></a>分层思维</h2><ul>
-<li>按 L1 → L2 → L3 → L4 → K8s 一层层往上查<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">L1 物理层</span><br><span class="line"> └── lldpctl</span><br><span class="line"></span><br><span class="line">L2 二层</span><br><span class="line"> ├── bridge</span><br><span class="line"> ├── ovs</span><br><span class="line"> └── fdb</span><br><span class="line"></span><br><span class="line">L3 三层</span><br><span class="line"> ├── ip route</span><br><span class="line"> ├── ip rule</span><br><span class="line"> └── arp/neigh</span><br><span class="line"></span><br><span class="line">L4-L7</span><br><span class="line"> ├── ss</span><br><span class="line"> ├── conntrack</span><br><span class="line"> └── tcpdump</span><br><span class="line"></span><br><span class="line">K8s层</span><br><span class="line"> ├── Pod</span><br><span class="line"> ├── veth</span><br><span class="line"> ├── CNI</span><br><span class="line"> └── Service</span><br></pre></td></tr></table></figure></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2109,7 +1972,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-count">222</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2122,7 +1985,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

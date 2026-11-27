@@ -23207,4 +23207,291 @@ cat /proc/vmstat | egrep &#39;pgfault|pgmajfault|pgscan|pgsteal|nr_dirty|nr_writ
         <tag>network</tag>
       </tags>
   </entry>
+  <entry>
+    <title>DPVS 负载均衡与长连接排查指南</title>
+    <url>/2026/11/27/DPVS-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B8%8E%E9%95%BF%E8%BF%9E%E6%8E%A5%E6%8E%92%E6%9F%A5%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<blockquote>
+<p>适用场景：Kubernetes Pod 作为 Real Server（RS），前置四层 VIP，DPVS 承载 TCP 长连接；本文以 <code>VIP=10.242.11.184:8000</code>、旧 Pod <code>RS=10.243.190.71:8000</code> 为示例。</p>
+<p><strong>重要说明</strong>：DPVS 的命令名称、配置项和下线语义可能因公司封装版本、控制器和数据面实现而不同。本文给出通用原理和排查框架；涉及“RS 下线后保留已有连接”的行为，必须以司内 DPVS 版本、控制器日志和实际连接表为准。</p>
+</blockquote>
+<h2 id="1-结论摘要"><a href="#1-结论摘要" class="headerlink" title="1. 结论摘要"></a>1. 结论摘要</h2><ol>
+<li><strong>RS 下线不等于已有连接一定断开。</strong> 理想的连接排空语义是：RS 不再接收新连接，但已经建立的连接继续由连接表转发，直到连接自然结束或达到 TCP 超时。</li>
+<li>这个能力通常依赖两个条件：<ul>
+<li>控制器执行的是“置零&#x2F;Drain”，而不是立即删除 RS、删除虚拟服务或清理连接表；</li>
+<li>DPVS 数据面在 RS 下线后仍保留已有连接对应的连接状态和转发路径。</li>
+</ul>
+</li>
+<li><strong>fullnat 不是连接保持开关。</strong> FullNAT 主要描述报文的地址转换方式；连接能否保持取决于 RS 下线动作、连接表处理、超时、健康检查和链路设备行为。</li>
+<li>当前问题最应确认：<ul>
+<li>35 秒时控制器究竟执行了 <code>weight=0</code>、<code>drain</code>、<code>inhibit</code>，还是删除 RS；</li>
+<li>DPVS 的已有连接表是否仍存在；</li>
+<li>fullnat 下前端连接和后端连接是否被同时关闭；</li>
+<li>断开是 FIN&#x2F;RST，还是连接状态被清理后重传超时。</li>
+</ul>
+</li>
+</ol>
+<h2 id="2-“下线-RS-后连接保持”到底是什么"><a href="#2-“下线-RS-后连接保持”到底是什么" class="headerlink" title="2. “下线 RS 后连接保持”到底是什么"></a>2. “下线 RS 后连接保持”到底是什么</h2><h3 id="2-1-三种常见下线语义"><a href="#2-1-三种常见下线语义" class="headerlink" title="2.1 三种常见下线语义"></a>2.1 三种常见下线语义</h3><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>新连接</th>
+<th>已有连接</th>
+<th>风险</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>权重置 0</td>
+<td>不再或尽量不再调度到该 RS</td>
+<td>通常保留</td>
+<td>需要确认调度器是否只影响新连接；权重为 0 的精确定义要看实现</td>
+</tr>
+<tr>
+<td>Drain&#x2F;Inhibit</td>
+<td>不接新连接，等待连接自然结束</td>
+<td>保留到结束或超时</td>
+<td>需要配置排空超时、连接上限和兜底强杀</td>
+</tr>
+<tr>
+<td>删除 RS&#x2F;清理连接</td>
+<td>不接新连接</td>
+<td>可能立即断开</td>
+<td>发布快，但不适合长连接</td>
+</tr>
+</tbody></table>
+<p>有些控制器会把“下线”拆成多个阶段，例如：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Pod 开始删除</span><br><span class="line">  -&gt; 延迟 35 秒</span><br><span class="line">  -&gt; LB weight=0 或 RS drain</span><br><span class="line">  -&gt; 等待连接排空</span><br><span class="line">  -&gt; 删除 RS / 清理连接 / 关闭 VIP 后端</span><br></pre></td></tr></table></figure>
+
+<p>也可能是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Pod 开始删除</span><br><span class="line">  -&gt; 延迟 35 秒</span><br><span class="line">  -&gt; 直接删除 RS</span><br></pre></td></tr></table></figure>
+
+<p>这两种行为对长连接完全不同，不能只看“下线 RS”这句描述判断。</p>
+<h3 id="2-2-FullNAT-下的连接模型"><a href="#2-2-FullNAT-下的连接模型" class="headerlink" title="2.2 FullNAT 下的连接模型"></a>2.2 FullNAT 下的连接模型</h3><p>FullNAT 通常对客户端到 VIP、VIP 到 RS 两个方向都做地址转换。逻辑上可以理解为两段连接：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Client:client_port &lt;-&gt; VIP:8000</span><br><span class="line">                         DPVS</span><br><span class="line">                    (连接状态/转换表)</span><br><span class="line">                         |</span><br><span class="line">                         v</span><br><span class="line">              DPVS地址:临时端口 &lt;-&gt; RS:8000</span><br></pre></td></tr></table></figure>
+
+<p>DPVS 通过连接状态把两段流量关联起来。RS 下线后能否继续转发，取决于：</p>
+<ul>
+<li>前端连接状态是否保留；</li>
+<li>后端连接状态是否保留；</li>
+<li>FullNAT 使用的 SNAT 地址&#x2F;端口是否仍有效；</li>
+<li>RS、Pod 网络、节点 conntrack 或中间设备是否接受后续报文；</li>
+<li>控制器是否在下线时主动删除连接表；</li>
+<li>TCP 连接空闲超时、FIN 超时、TIME_WAIT 超时是否足够长。</li>
+</ul>
+<p>因此，“fullnat 支持连接保持”更准确的表述应是：<strong>FullNAT 具备实现连接保持所需的状态转换能力，但实际是否保持由下线流程和数据面策略决定。</strong></p>
+<h2 id="3-常见四层转发模式对比"><a href="#3-常见四层转发模式对比" class="headerlink" title="3. 常见四层转发模式对比"></a>3. 常见四层转发模式对比</h2><p>术语在不同 LB 产品中可能略有差异。下表按 LVS&#x2F;DPVS 常见语义整理。</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>请求方向</th>
+<th>响应方向</th>
+<th>是否需要 RS 配置 VIP</th>
+<th>性能</th>
+<th>长连接排空</th>
+<th>典型限制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NAT&#x2F;FullNAT</td>
+<td>LB 改写目的地址；FullNAT 同时改写源地址</td>
+<td>LB 改写回包</td>
+<td>通常不需要</td>
+<td>中等，需处理双向转换</td>
+<td>能否保持取决于连接表和下线策略</td>
+<td>LB 需要承载双向流量；SNAT 端口、连接表、带宽是瓶颈</td>
+</tr>
+<tr>
+<td>DR（Direct Routing）</td>
+<td>LB 改写二层目的 MAC，IP 基本不变</td>
+<td>RS 直接回客户端</td>
+<td>通常需要 RS loopback 配 VIP，并抑制 ARP</td>
+<td>很高，响应不经过 LB</td>
+<td>RS 下线时需确保连接继续由 RS 回包</td>
+<td>二层网络约束强；跨网段、云网络、Pod 网络常较复杂</td>
+</tr>
+<tr>
+<td>TUN&#x2F;IPIP</td>
+<td>LB 封装 IP 包发给 RS</td>
+<td>RS 直接回客户端</td>
+<td>通常需要配置 VIP</td>
+<td>高，响应不经过 LB</td>
+<td>依赖隧道和 RS 配置</td>
+<td>需要隧道、MTU、路由及协议支持</td>
+</tr>
+<tr>
+<td>FullNAT + 代理&#x2F;网关扩展</td>
+<td>LB 或代理维护更完整会话</td>
+<td>通常经 LB 返回</td>
+<td>一般不需要</td>
+<td>取决于实现</td>
+<td>可做更明确的 drain</td>
+<td>资源消耗更高，连接语义可能不是纯四层</td>
+</tr>
+</tbody></table>
+<h3 id="3-1-FullNAT-NAT"><a href="#3-1-FullNAT-NAT" class="headerlink" title="3.1 FullNAT&#x2F;NAT"></a>3.1 FullNAT&#x2F;NAT</h3><p><strong>优点</strong>：</p>
+<ul>
+<li>RS 不需要感知 VIP，适合 Pod、跨网段和复杂云网络；</li>
+<li>客户端源地址可被转换，回程不要求经过原始网络路径；</li>
+<li>易于统一管理、做连接状态和访问控制。</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>请求和响应都经过 LB，带宽、CPU、内存和连接表压力更高；</li>
+<li>需要重点关注 SNAT 地址池、临时端口耗尽、连接表容量和超时；</li>
+<li>数据面或连接表清理时，已有长连接可能同时受到影响。</li>
+</ul>
+<h3 id="3-2-DR"><a href="#3-2-DR" class="headerlink" title="3.2 DR"></a>3.2 DR</h3><p><strong>优点</strong>：响应直接从 RS 返回，吞吐和时延通常更好，LB 主要承担入方向流量。</p>
+<p><strong>缺点</strong>：RS 必须正确配置 VIP、ARP 抑制和路由；在 Kubernetes、跨三层网络、Overlay 网络中，部署和排障复杂度通常高于 FullNAT。</p>
+<h3 id="3-3-TUN"><a href="#3-3-TUN" class="headerlink" title="3.3 TUN"></a>3.3 TUN</h3><p><strong>优点</strong>：相比 DR 对二层网络要求较低，响应绕过 LB。</p>
+<p><strong>缺点</strong>：需要隧道封装、额外 MTU 规划、RS 路由和内核能力；封装异常时容易出现分片、PMTU 和回程问题。</p>
+<h2 id="4-DPVS-原理"><a href="#4-DPVS-原理" class="headerlink" title="4. DPVS 原理"></a>4. DPVS 原理</h2><p>DPVS（通常指 DPDK-based LVS）把 LVS&#x2F;IPVS 的负载均衡模型与 DPDK 用户态高速收发包结合起来。典型处理路径如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">网卡 RX 队列</span><br><span class="line">    |</span><br><span class="line">    v</span><br><span class="line">DPDK PMD 轮询收包</span><br><span class="line">    |</span><br><span class="line">    v</span><br><span class="line">解析 Ethernet/IP/TCP/UDP</span><br><span class="line">    |</span><br><span class="line">    v</span><br><span class="line">查找 VIP:Port + 五元组对应的连接状态</span><br><span class="line">    |</span><br><span class="line">    +--&gt; 新连接：调度器选择 RS，创建连接表</span><br><span class="line">    |</span><br><span class="line">    +--&gt; 已有连接：复用原 RS 和转换状态</span><br><span class="line">    |</span><br><span class="line">    v</span><br><span class="line">执行 NAT/FullNAT/DR/TUN 等转发处理</span><br><span class="line">    |</span><br><span class="line">    v</span><br><span class="line">写入目标 MAC/IP/端口，放入 TX 队列</span><br><span class="line">    |</span><br><span class="line">    v</span><br><span class="line">网卡发包</span><br></pre></td></tr></table></figure>
+
+<p>关键特点：</p>
+<ul>
+<li>使用 DPDK 用户态 PMD，绕过传统内核网络栈的部分路径；</li>
+<li>连接调度通常只发生在新连接，已有连接依赖连接表保持原后端；</li>
+<li>多核、RSS、队列和连接表设计直接影响性能；</li>
+<li>控制面负责同步 VIP、RS、权重、健康状态和下线动作；</li>
+<li>高可用通常由 Keepalived、VRRP、专有控制器或集群管理系统负责。</li>
+</ul>
+<h2 id="5-推荐的-DPVS-集群架构"><a href="#5-推荐的-DPVS-集群架构" class="headerlink" title="5. 推荐的 DPVS 集群架构"></a>5. 推荐的 DPVS 集群架构</h2><h3 id="5-1-双机-Active-Standby"><a href="#5-1-双机-Active-Standby" class="headerlink" title="5.1 双机 Active&#x2F;Standby"></a>5.1 双机 Active&#x2F;Standby</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">                 +-------------------+</span><br><span class="line">Client --------&gt;| VIP / VRRP         |</span><br><span class="line">                 +---------+---------+</span><br><span class="line">                           |</span><br><span class="line">              +------------+------------+</span><br><span class="line">              |                         |</span><br><span class="line">       +------v------+           +------v------+</span><br><span class="line">       | DPVS-1      |           | DPVS-2      |</span><br><span class="line">       | Active      |&lt;--HA-----&gt;| Standby     |</span><br><span class="line">       +------+------+</span><br><span class="line">              |                         |</span><br><span class="line">              +------------+------------+</span><br><span class="line">                           |</span><br><span class="line">                   RS / Kubernetes Service</span><br></pre></td></tr></table></figure>
+
+<p>特点：实现简单，VIP 同时只在一台设备上提供服务；切换时需要考虑连接状态同步，否则已有连接可能重建或断开。</p>
+<h3 id="5-2-双机-Active-Active-或-ECMP"><a href="#5-2-双机-Active-Active-或-ECMP" class="headerlink" title="5.2 双机 Active&#x2F;Active 或 ECMP"></a>5.2 双机 Active&#x2F;Active 或 ECMP</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">            +----------------+</span><br><span class="line">            | 上游路由/ECMP  |</span><br><span class="line">            +-------+--------+</span><br><span class="line">                    |</span><br><span class="line">      +-------------+-------------+</span><br><span class="line">      |                           |</span><br><span class="line">+-----v-----+               +-----v-----+</span><br><span class="line">| DPVS-A    |               | DPVS-B    |</span><br><span class="line">| Active    |               | Active    |</span><br><span class="line">+-----+-----+               +-----+-----+</span><br><span class="line">      |                           |</span><br><span class="line">      +-------------+-------------+</span><br><span class="line">                    |</span><br><span class="line">            RS / Pod 网络</span><br></pre></td></tr></table></figure>
+
+<p>特点：吞吐和容量更高，但要求上游流量分担、连接一致性、健康检查、配置分发和故障切换设计成熟。FullNAT 场景尤其需要确认同一连接的前后方向始终落到可查到该连接状态的节点，或者使用连接状态同步&#x2F;确定性流量归属。</p>
+<h3 id="5-3-集群必须关注的组件"><a href="#5-3-集群必须关注的组件" class="headerlink" title="5.3 集群必须关注的组件"></a>5.3 集群必须关注的组件</h3><ol>
+<li><strong>数据面节点</strong>：DPVS 进程、DPDK、网卡队列、NUMA、CPU 绑核。</li>
+<li><strong>控制面</strong>：VIP&#x2F;RS 配置下发、权重调整、健康检查、Drain、发布联动。</li>
+<li><strong>高可用</strong>：VRRP&#x2F;Keepalived、BFD、ECMP 或司内 HA 组件。</li>
+<li><strong>状态同步</strong>：连接表同步、配置同步、版本一致性和切换恢复策略。</li>
+<li><strong>观测系统</strong>：连接数、新建连接、转发包、丢包、重传、RST、RS 状态和下线耗时。</li>
+</ol>
+<h2 id="6-DPVS-重点参数与检查项"><a href="#6-DPVS-重点参数与检查项" class="headerlink" title="6. DPVS 重点参数与检查项"></a>6. DPVS 重点参数与检查项</h2><p>以下是排查长连接和 RS 下线问题时优先确认的项目。</p>
+<h3 id="6-1-VIP-RS-与调度"><a href="#6-1-VIP-RS-与调度" class="headerlink" title="6.1 VIP&#x2F;RS 与调度"></a>6.1 VIP&#x2F;RS 与调度</h3><ul>
+<li>VIP、端口、协议是否正确；</li>
+<li>RS 的权重变化是否只影响新连接；</li>
+<li>权重为 0 是否保留已有连接；</li>
+<li>是否存在 <code>inhibit</code>、<code>drain</code>、<code>quiesce</code>、<code>delay</code> 等司内扩展语义；</li>
+<li>健康检查失败是否会立即删除 RS 或清理连接；</li>
+<li>调度算法是 rr、wrr、lc、wlc、sh、dh 还是定制算法；</li>
+<li>发布时是否同时删除了旧 RS、旧虚拟服务或对应的连接表。</li>
+</ul>
+<h3 id="6-2-TCP-连接超时"><a href="#6-2-TCP-连接超时" class="headerlink" title="6.2 TCP 连接超时"></a>6.2 TCP 连接超时</h3><p>至少核对以下几类超时，单位和参数名以当前版本为准：</p>
+<ul>
+<li>TCP established 超时；</li>
+<li>TCP close&#x2F;FIN_WAIT 超时；</li>
+<li>TCP TIME_WAIT 超时；</li>
+<li>SYN&#x2F;SYN-ACK 建连超时；</li>
+<li>UDP 超时（如有 UDP 服务）；</li>
+<li>空闲连接超时；</li>
+<li>RS drain 最大等待时间；</li>
+<li>控制器下线等待时间；</li>
+<li>云网络、节点 conntrack、防火墙和上游设备的空闲超时。</li>
+</ul>
+<p>对长连接而言，最重要的是：<strong>业务心跳间隔必须显著小于链路上最小空闲超时</strong>。否则连接可能看起来“随机断开”。</p>
+<h3 id="6-3-FullNAT-资源"><a href="#6-3-FullNAT-资源" class="headerlink" title="6.3 FullNAT 资源"></a>6.3 FullNAT 资源</h3><ul>
+<li>SNAT 地址池大小；</li>
+<li>每个 SNAT 地址可用临时端口范围；</li>
+<li>单 VIP、单 RS、单 DPVS 节点连接数；</li>
+<li>连接表容量和内存使用；</li>
+<li>端口冲突、端口耗尽、连接创建失败计数；</li>
+<li>FullNAT 地址池是否跨节点一致；</li>
+<li>回程报文是否一定回到正确 DPVS 节点；</li>
+<li>是否存在内核 conntrack 与用户态连接表双重状态不一致。</li>
+</ul>
+<h3 id="6-4-DPDK-网卡-CPU"><a href="#6-4-DPDK-网卡-CPU" class="headerlink" title="6.4 DPDK&#x2F;网卡&#x2F;CPU"></a>6.4 DPDK&#x2F;网卡&#x2F;CPU</h3><ul>
+<li>网卡 RX&#x2F;TX 队列数和 RSS 配置；</li>
+<li>lcore 绑核、NUMA 与网卡所在 NUMA 节点是否匹配；</li>
+<li>RX&#x2F;TX ring、mbuf、内存池是否耗尽；</li>
+<li>丢包、网卡错误、队列溢出和突发流量；</li>
+<li>jumbo frame、MTU、VXLAN&#x2F;隧道封装后的有效 MTU；</li>
+<li>多队列 RSS 是否导致同一连接前后方向分散到不兼容的核或节点；</li>
+<li>DPDK、网卡固件和 DPVS 版本是否匹配。</li>
+</ul>
+<h3 id="6-5-下线与连接排空"><a href="#6-5-下线与连接排空" class="headerlink" title="6.5 下线与连接排空"></a>6.5 下线与连接排空</h3><p>要求运维明确回答以下问题：</p>
+<ol>
+<li>RS 下线动作的 API&#x2F;命令是什么？</li>
+<li>下线后 RS 是否仍出现在连接表中？</li>
+<li>连接表是否会因 RS 删除而被批量清理？</li>
+<li>已建立连接上的数据包是否仍允许转发到 weight&#x3D;0 的 RS？</li>
+<li>Drain 的最大等待时间是多少？超时后是 FIN、RST 还是直接丢包？</li>
+<li>下线时是否同步删除 ARP、路由、NAT 地址或 SNAT 端口映射？</li>
+<li>DPVS 是否把客户端和 RS 侧连接分别记录，并提供关闭原因？</li>
+</ol>
+<h2 id="7-当前场景的验证方案"><a href="#7-当前场景的验证方案" class="headerlink" title="7. 当前场景的验证方案"></a>7. 当前场景的验证方案</h2><h3 id="7-1-建立-VIP-和-Pod-直连对照"><a href="#7-1-建立-VIP-和-Pod-直连对照" class="headerlink" title="7.1 建立 VIP 和 Pod 直连对照"></a>7.1 建立 VIP 和 Pod 直连对照</h3><p>在能够同时访问两个地址的测试机上，各开一个持续发请求的客户端：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 连接 A：经过 VIP</span></span><br><span class="line">python3 -u - 10.242.11.184 &lt;&lt;<span class="string">&#x27;PY&#x27;</span></span><br><span class="line">import http.client, sys, <span class="keyword">time</span></span><br><span class="line">from datetime import datetime</span><br><span class="line"></span><br><span class="line">host = sys.argv[1]</span><br><span class="line">conn = http.client.HTTPConnection(host, 8000, <span class="built_in">timeout</span>=5)</span><br><span class="line">try:</span><br><span class="line">    conn.connect()</span><br><span class="line">    <span class="built_in">print</span>(datetime.now().isoformat(), <span class="string">&quot;connected&quot;</span>, host, conn.sock.getsockname())</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(1, 1000000):</span><br><span class="line">        conn.request(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;/api/v1/health&quot;</span>, headers=&#123;<span class="string">&quot;Connection&quot;</span>: <span class="string">&quot;keep-alive&quot;</span>&#125;)</span><br><span class="line">        r = conn.getresponse()</span><br><span class="line">        body = r.read()</span><br><span class="line">        <span class="built_in">print</span>(datetime.now().isoformat(), i, r.status, len(body), flush=True)</span><br><span class="line">        time.sleep(2)</span><br><span class="line">except Exception as e:</span><br><span class="line">    <span class="built_in">print</span>(datetime.now().isoformat(), <span class="string">&quot;closed&quot;</span>, repr(e), flush=True)</span><br><span class="line">finally:</span><br><span class="line">    conn.close()</span><br><span class="line">PY</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接 B：直连旧 Pod</span></span><br><span class="line">python3 -u - 10.243.190.71 &lt;&lt;<span class="string">&#x27;PY&#x27;</span></span><br><span class="line">import http.client, sys, <span class="keyword">time</span></span><br><span class="line">from datetime import datetime</span><br><span class="line"></span><br><span class="line">host = sys.argv[1]</span><br><span class="line">conn = http.client.HTTPConnection(host, 8000, <span class="built_in">timeout</span>=5)</span><br><span class="line">try:</span><br><span class="line">    conn.connect()</span><br><span class="line">    <span class="built_in">print</span>(datetime.now().isoformat(), <span class="string">&quot;connected&quot;</span>, host, conn.sock.getsockname())</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(1, 1000000):</span><br><span class="line">        conn.request(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;/api/v1/health&quot;</span>, headers=&#123;<span class="string">&quot;Connection&quot;</span>: <span class="string">&quot;keep-alive&quot;</span>&#125;)</span><br><span class="line">        r = conn.getresponse()</span><br><span class="line">        body = r.read()</span><br><span class="line">        <span class="built_in">print</span>(datetime.now().isoformat(), i, r.status, len(body), flush=True)</span><br><span class="line">        time.sleep(2)</span><br><span class="line">except Exception as e:</span><br><span class="line">    <span class="built_in">print</span>(datetime.now().isoformat(), <span class="string">&quot;closed&quot;</span>, repr(e), flush=True)</span><br><span class="line">finally:</span><br><span class="line">    conn.close()</span><br><span class="line">PY</span><br></pre></td></tr></table></figure>
+
+<p>注意：该测试验证的是 HTTP keep-alive。若真实业务是 WebSocket、SSE、gRPC 或自定义 TCP 协议，应使用真实协议建立连接；测试客户端不要自动重连，否则可能误把新 Pod 的连接当作旧连接仍然正常。</p>
+<h3 id="7-2-在旧-Pod-或节点抓包"><a href="#7-2-在旧-Pod-或节点抓包" class="headerlink" title="7.2 在旧 Pod 或节点抓包"></a>7.2 在旧 Pod 或节点抓包</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tcpdump -ni any -tttt -vv \</span><br><span class="line">  <span class="string">&#x27;host 10.243.190.71 and tcp port 8000&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果权限和网络环境允许，建议同时在以下位置抓包：</p>
+<ol>
+<li>客户端侧：观察 VIP 连接收到 FIN、RST，还是只发生重传；</li>
+<li>DPVS 入方向：观察客户端到 VIP 的报文是否仍到达；</li>
+<li>DPVS 出方向：观察 DPVS 到 Pod 的报文是否仍发送；</li>
+<li>Pod 侧：判断 Pod 是否主动发送 FIN&#x2F;RST；</li>
+<li>DPVS 连接表：确认连接是否仍存在以及关闭原因。</li>
+</ol>
+<h3 id="7-3-用时间线判定因果"><a href="#7-3-用时间线判定因果" class="headerlink" title="7.3 用时间线判定因果"></a>7.3 用时间线判定因果</h3><p>至少记录以下时间点，精度建议到毫秒：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">T0  Pod 开始删除 / 开始 preStop</span><br><span class="line">T1  控制器开始下线操作（约 T0+35s）</span><br><span class="line">T2  DPVS 数据面实际应用 weight=0/drain/remove</span><br><span class="line">T3  DPVS 连接表变化</span><br><span class="line">T4  客户端首个 FIN/RST 或首次超时</span><br><span class="line">T5  Pod 侧首个 FIN/RST</span><br><span class="line">T6  Pod 收到 SIGTERM / 进程退出</span><br></pre></td></tr></table></figure>
+
+<p>判定参考：</p>
+<ul>
+<li><code>T4≈T2</code>，Pod 没有先发 FIN&#x2F;RST，且 DPVS 连接表被删除：优先认定为 LB 下线&#x2F;清理导致；</li>
+<li>DPVS 连接表仍在，但 DPVS 到 Pod 不再发包：检查 RS 下线策略、转发表和 FullNAT 后端状态；</li>
+<li>Pod 先发 FIN&#x2F;RST：查 <code>preStop</code>、应用 drain 逻辑和应用日志；</li>
+<li>只有重传、没有 FIN&#x2F;RST，最终超时：查 DPVS 状态清理、网络 ACL、节点转发和丢包；</li>
+<li>VIP 连接断、Pod 直连不断：问题集中在 LB 或 LB 独有路径；</li>
+<li>VIP 与 Pod 直连同时断：优先查应用、Pod 网络、节点或发布流程。</li>
+</ul>
+<h2 id="8-常用维护与排障命令"><a href="#8-常用维护与排障命令" class="headerlink" title="8. 常用维护与排障命令"></a>8. 常用维护与排障命令</h2><blockquote>
+<p>命令可能需要 root 权限；部分 DPVS 发行版把命令放在 <code>/usr/local/bin</code>、<code>/usr/bin</code> 或专用管理容器中。先执行 <code>command -v</code> 和 <code>--help</code>，不要直接假设参数完全兼容。</p>
+</blockquote>
+<h3 id="8-1-IPVS-DPVS-服务与-RS"><a href="#8-1-IPVS-DPVS-服务与-RS" class="headerlink" title="8.1 IPVS&#x2F;DPVS 服务与 RS"></a>8.1 IPVS&#x2F;DPVS 服务与 RS</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">command</span> -v ipvsadm</span><br><span class="line"><span class="built_in">command</span> -v dpip</span><br><span class="line"><span class="built_in">command</span> -v dpvsadm</span><br><span class="line">ipvsadm -Ln --stats --rate</span><br><span class="line">ipvsadm -Ln --stats --rate --exact</span><br><span class="line">ipvsadm -Lc</span><br><span class="line">ipvsadm -Ln --<span class="built_in">timeout</span></span><br><span class="line">ipvsadm --<span class="built_in">help</span></span><br><span class="line">dpip <span class="built_in">link</span> show</span><br><span class="line">dpip addr show</span><br><span class="line">dpip route show</span><br><span class="line">dpvsadm --<span class="built_in">help</span></span><br></pre></td></tr></table></figure>
+
+<p>常见关注字段：VIP:Port、RS 地址、Forwarding 模式、Weight、ActiveConn、InActConn、Packets、Bytes、连接创建失败和丢包统计。</p>
+<p><code>ipvsadm</code> 在某些 DPVS 版本中可用于查看或管理兼容的 IPVS 配置，但不是所有 DPVS 专属能力都一定通过它暴露。若输出为空或与控制器状态不一致，应使用司内 DPVS CLI&#x2F;API 和控制器侧查询结果交叉确认。</p>
+<h3 id="8-2-Linux-网络与连接"><a href="#8-2-Linux-网络与连接" class="headerlink" title="8.2 Linux 网络与连接"></a>8.2 Linux 网络与连接</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip addr</span><br><span class="line">ip route</span><br><span class="line">ip neigh</span><br><span class="line">ss -tanp</span><br><span class="line">ss -tan state established <span class="string">&#x27;( sport = :8000 or dport = :8000 )&#x27;</span></span><br><span class="line">conntrack -L -p tcp --dport 8000</span><br><span class="line">conntrack -S</span><br><span class="line">ethtool -S &lt;网卡名&gt;</span><br><span class="line">ethtool -k &lt;网卡名&gt;</span><br><span class="line">ethtool -l &lt;网卡名&gt;</span><br></pre></td></tr></table></figure>
+
+<p>FullNAT&#x2F;DPDK 数据面可能绕过部分内核统计，因此 <code>ss</code>、<code>conntrack</code> 的结果不一定等于 DPVS 真实连接表；它们适合用于发现节点侧辅助状态和异常，不应作为唯一证据。</p>
+<h3 id="8-3-抓包和连接行为"><a href="#8-3-抓包和连接行为" class="headerlink" title="8.3 抓包和连接行为"></a>8.3 抓包和连接行为</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tcpdump -ni &lt;网卡名&gt; -tttt -vv <span class="string">&#x27;host 10.242.11.184 and tcp port 8000&#x27;</span></span><br><span class="line">tcpdump -ni any -tttt <span class="string">&#x27;host 10.243.190.71 and tcp port 8000&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 TCP 统计、重传和 listen 状态</span></span><br><span class="line">nstat -az | egrep <span class="string">&#x27;Tcp|Ip&#x27;</span></span><br><span class="line">ss -s</span><br></pre></td></tr></table></figure>
+
+<p>若 DPVS 使用独占 DPDK 网卡，Linux <code>tcpdump</code> 可能抓不到数据面报文，此时需要使用 DPVS&#x2F;DPDK 自带抓包、端口镜像、硬件镜像或在客户端&#x2F;RS 侧抓包。</p>
+<h3 id="8-4-进程、日志和资源"><a href="#8-4-进程、日志和资源" class="headerlink" title="8.4 进程、日志和资源"></a>8.4 进程、日志和资源</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps -ef | grep -E <span class="string">&#x27;dpvs|keepalived&#x27;</span> | grep -v grep</span><br><span class="line">systemctl status dpvs</span><br><span class="line">systemctl status keepalived</span><br><span class="line">journalctl -u dpvs --since <span class="string">&#x27;1 hour ago&#x27;</span></span><br><span class="line">journalctl -u keepalived --since <span class="string">&#x27;1 hour ago&#x27;</span></span><br><span class="line">dmesg -T | egrep -i <span class="string">&#x27;drop|error|reset|timeout|oom|nic|mlx|ixgbe|i40e|ice&#x27;</span></span><br><span class="line">top -H -p &lt;DPVS_PID&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-5-Kubernetes-侧联动检查"><a href="#8-5-Kubernetes-侧联动检查" class="headerlink" title="8.5 Kubernetes 侧联动检查"></a>8.5 Kubernetes 侧联动检查</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pod &lt;pod&gt; -o wide</span><br><span class="line">kubectl get pod &lt;pod&gt; -o jsonpath=<span class="string">&#x27;&#123;.metadata.deletionTimestamp&#125;&#123;&quot;\n&quot;&#125;&#x27;</span></span><br><span class="line">kubectl get endpointslice -l kubernetes.io/service-name=&lt;service&gt; -o yaml</span><br><span class="line">kubectl describe pod &lt;pod&gt;</span><br><span class="line">kubectl logs &lt;pod&gt; -c narrate --timestamps</span><br><span class="line">kubectl get events --sort-by=.lastTimestamp</span><br></pre></td></tr></table></figure>
+
+<p>重点看：Pod 的 <code>deletionTimestamp</code>、EndpointSlice 的 <code>ready</code>&#x2F;<code>serving</code>&#x2F;<code>terminating</code>、控制器下发 LB 操作的时间，以及 <code>preStop</code> 脚本开始&#x2F;结束时间。</p>
+<h2 id="9-建议向运维确认的具体问题"><a href="#9-建议向运维确认的具体问题" class="headerlink" title="9. 建议向运维确认的具体问题"></a>9. 建议向运维确认的具体问题</h2><p>可以直接把下面的问题发给 DPVS&#x2F;LB 运维：</p>
+<ol>
+<li>司内所谓的 <strong>fullnet&#x2F;fullnat</strong> 的准确产品名和版本是什么？是否是 FullNAT？</li>
+<li>RS 下线 API 的实际动作是 <code>weight=0</code>、<code>inhibit/drain</code> 还是 <code>delete RS</code>？</li>
+<li>RS 下线后，已有连接是否继续查连接表并转发？是否有官方说明或测试结果？</li>
+<li>“连接保持”配置的准确名称、作用范围和默认值是什么？是 TCP established timeout、drain timeout，还是连接表保留开关？</li>
+<li>连接保持的最大时长是多少？空闲连接和有心跳连接是否不同？</li>
+<li>RS 下线时是否会批量删除连接表？能否查询下线前后的连接数？</li>
+<li>DPVS 是否发送 FIN&#x2F;RST，还是删除映射后让连接超时？</li>
+<li>FullNAT 的 SNAT 地址池、临时端口范围和连接表容量是多少？</li>
+<li>DPVS 集群是否做连接状态同步？主备切换后已有 FullNAT 连接能否继续？</li>
+<li>35 秒是控制器等待时间、配置生效时间，还是数据面开始 drain 的时间？能否提供 T1&#x2F;T2 的日志时间戳？</li>
+</ol>
+<h2 id="10-推荐的发布排空流程"><a href="#10-推荐的发布排空流程" class="headerlink" title="10. 推荐的发布排空流程"></a>10. 推荐的发布排空流程</h2><p>对于有长连接的 Pod，建议把发布流程设计成显式的多阶段流程：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">1. Pod readiness 置为 false，不再接收新业务流量</span><br><span class="line">2. 等待 Service/Endpoint/LB 控制面完成传播</span><br><span class="line">3. LB 对 RS 执行 weight=0 或 drain</span><br><span class="line">4. 确认 DPVS 仍保留已有连接</span><br><span class="line">5. 等待业务连接自然结束，设置明确的最大 drain 时间</span><br><span class="line">6. drain 超时后再按业务策略关闭连接</span><br><span class="line">7. 最后才允许 Pod 退出或强制删除</span><br></pre></td></tr></table></figure>
+
+<p>配套要求：</p>
+<ul>
+<li><code>preStop</code> 中打印开始、下线完成、连接数、退出原因和时间戳；</li>
+<li>应用支持优雅关闭，区分“停止接新连接”和“关闭已有连接”；</li>
+<li>LB 控制器提供可观测的操作 ID 和数据面确认状态；</li>
+<li><code>terminationGracePeriodSeconds</code> 应覆盖“控制面传播 + drain 最大等待 + 应用退出”总时间；</li>
+<li>不要仅凭 <code>preStop</code> 仍在运行，就认为 VIP 到旧 Pod 的连接一定会被保留。</li>
+</ul>
+<h2 id="11-一句话定位原则"><a href="#11-一句话定位原则" class="headerlink" title="11. 一句话定位原则"></a>11. 一句话定位原则</h2><p><strong>先确认 DPVS 的实际下线动作，再确认连接表是否保留，最后用客户端、DPVS、Pod 三点抓包对齐 FIN&#x2F;RST&#x2F;重传时间。</strong> 只要能证明“DPVS 实际摘除或清理连接发生在客户端断开之前，且 Pod 没有主动关闭”，就可以把问题从 Kubernetes 优雅终止进一步收敛到 LB 的下线&#x2F;连接保持实现。</p>
+]]></content>
+      <tags>
+        <tag>lvs</tag>
+      </tags>
+  </entry>
 </search>

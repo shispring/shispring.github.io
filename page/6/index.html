@@ -184,6 +184,228 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/10/network%E6%8B%93%E6%89%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="shispring">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/10/network%E6%8B%93%E6%89%91/" class="post-title-link" itemprop="url">network拓扑</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-01-10 16:37:49" itemprop="dateCreated datePublished" datetime="2026-01-10T16:37:49+08:00">2026-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-11-20 11:57:32" itemprop="dateModified" datetime="2026-11-20T11:57:32+08:00">2026-11-20</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一般拓扑"><a href="#一般拓扑" class="headerlink" title="一般拓扑"></a>一般拓扑</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">                ┌────────────┐</span><br><span class="line">                │   Switch   │</span><br><span class="line">                └─────┬──────┘</span><br><span class="line">                      │</span><br><span class="line">                 eth0 ens192</span><br><span class="line">                      │</span><br><span class="line">          ┌───────────┴───────────┐</span><br><span class="line">          │        Linux          │</span><br><span class="line">          └───────────┬───────────┘</span><br><span class="line">                      │</span><br><span class="line">                linux bridge</span><br><span class="line">                  cni0/flannel.1</span><br><span class="line">                      │</span><br><span class="line">      ┌───────────────┼──────────────┐</span><br><span class="line">      │               │              │</span><br><span class="line">   vethxxx        vethyyy       vethzzz</span><br><span class="line">      │               │              │</span><br><span class="line">   Pod-A          Pod-B         Pod-C</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#ovs情况</span><br><span class="line">                Pod-A</span><br><span class="line">                  |</span><br><span class="line">            eth0@if100</span><br><span class="line">                  |</span><br><span class="line">             veth100</span><br><span class="line">                  |</span><br><span class="line">                OVS</span><br><span class="line">             (br-int)</span><br><span class="line">                  |</span><br><span class="line">        ┌─────────┼─────────┐</span><br><span class="line">        │         │         │</span><br><span class="line">      Geneve    VXLAN     eth0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="网络拓扑命令"><a href="#网络拓扑命令" class="headerlink" title="网络拓扑命令"></a>网络拓扑命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"># RHEL/CentOS/Fedora</span><br><span class="line">dnf install -y plotnetcfg graphviz</span><br><span class="line">或者</span><br><span class="line">rpm -ivh https://mirrors.aliyun.com/epel/7/x86_64/Packages/p/plotnetcfg-0.4.1-2.el7.x86_64.rpm</span><br><span class="line"></span><br><span class="line"># 生成SVG（清晰可缩放）</span><br><span class="line">sudo plotnetcfg | dot -Tsvg &gt; net-topo.svg</span><br><span class="line"></span><br><span class="line"># 生成PNG</span><br><span class="line">sudo plotnetcfg | dot -Tpng &gt; net-topo.png</span><br><span class="line"></span><br><span class="line"># 生成PDF</span><br><span class="line">sudo plotnetcfg | dot -Tpdf &gt; net-topo.pdf</span><br><span class="line"></span><br><span class="line"># 过滤</span><br><span class="line">plotnetcfg | grep -v &#x27;kube-ipvs0&#x27; | dot -Tpdf &gt; net.pdf</span><br><span class="line"></span><br><span class="line"># 超大图</span><br><span class="line">sudo plotnetcfg &gt; topo.dot</span><br><span class="line"></span><br><span class="line">sudo dot -Gsplines=true \</span><br><span class="line">    -Grankdir=LR \</span><br><span class="line">    -Tsvg topo.dot \</span><br><span class="line">    -o topo.svg</span><br><span class="line"></span><br><span class="line"># 使用json输出</span><br><span class="line">plotnetcfg -f json &gt; network_config.json</span><br></pre></td></tr></table></figure>
+
+<h2 id="ip命令"><a href="#ip命令" class="headerlink" title="ip命令"></a>ip命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">nmcli device show eth0</span><br><span class="line"></span><br><span class="line"># 列出所有接口（含veth、bridge、loopback）</span><br><span class="line">ip link show</span><br><span class="line"></span><br><span class="line"># 看veth pair配对（关键！）</span><br><span class="line">ip link show | grep -E &quot;veth|peer&quot;</span><br><span class="line"></span><br><span class="line"># 看网桥端口（物理网卡+虚拟网卡接入）</span><br><span class="line">ip bridge show</span><br><span class="line"></span><br><span class="line"># 看网络命名空间（容器/隔离环境）</span><br><span class="line">ip netns list</span><br><span class="line">ip netns exec &lt;ns名&gt; ip link</span><br><span class="line"></span><br><span class="line"># 更详细命令</span><br><span class="line">ip -d link show</span><br><span class="line"></span><br><span class="line">#路由</span><br><span class="line">netstat -rn</span><br></pre></td></tr></table></figure>
+
+<h3 id="常见路由状态汇总表"><a href="#常见路由状态汇总表" class="headerlink" title="常见路由状态汇总表"></a>常见路由状态汇总表</h3><table>
+<thead>
+<tr>
+<th align="left">关键字</th>
+<th align="left">含义</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>default</strong></td>
+<td align="left">默认路由</td>
+<td align="left">兜底路径，所有匹配不到的流量都走它。</td>
+</tr>
+<tr>
+<td align="left"><strong>via</strong></td>
+<td align="left">网关地址</td>
+<td align="left">下一跳地址。</td>
+</tr>
+<tr>
+<td align="left"><strong>dev</strong></td>
+<td align="left">接口名称</td>
+<td align="left">数据包出口。</td>
+</tr>
+<tr>
+<td align="left"><strong>proto</strong></td>
+<td align="left">协议来源</td>
+<td align="left"><code>kernel</code> 是内核自动配置，<code>static</code> 是你手动添加的。</td>
+</tr>
+<tr>
+<td align="left"><strong>scope</strong></td>
+<td align="left">作用域</td>
+<td align="left"><code>link</code> (本地链路)、<code>host</code> (仅本机)、<code>global</code> (全网)。</td>
+</tr>
+<tr>
+<td align="left"><strong>src</strong></td>
+<td align="left">源地址选择</td>
+<td align="left">发出包时默认采用此 IP 作为源 IP。</td>
+</tr>
+<tr>
+<td align="left"><strong>metric</strong></td>
+<td align="left">优先级</td>
+<td align="left">数字越小越优先（路由开销）。</td>
+</tr>
+<tr>
+<td align="left"><strong>table</strong></td>
+<td align="left">路由表 ID</td>
+<td align="left">指定使用哪张表（通常是 <code>main</code> 或 <code>local</code>）。</td>
+</tr>
+<tr>
+<td align="left"><strong>onlink</strong></td>
+<td align="left">强制直连</td>
+<td align="left">即使网关 IP 不在直连网段，也强制认为是直连。</td>
+</tr>
+<tr>
+<td align="left"><strong>prohibit&#x2F;unreachable</strong></td>
+<td align="left">黑洞路由</td>
+<td align="left">故意丢弃包并告知发送方无法到达。</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="left">Scope</th>
+<th align="left">传输方式</th>
+<th align="left">场景</th>
+<th align="left">需要网关 (via) 吗？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>host</strong></td>
+<td align="left">内核自我消化</td>
+<td align="left">回环地址、本机接口 IP</td>
+<td align="left">绝对不需要</td>
+</tr>
+<tr>
+<td align="left"><strong>link</strong></td>
+<td align="left">二层直接寻址 (ARP)</td>
+<td align="left">同一局域网内的设备</td>
+<td align="left">不需要 (直连)</td>
+</tr>
+<tr>
+<td align="left"><strong>global</strong></td>
+<td align="left">三层路由转发</td>
+<td align="left">跨局域网、互联网</td>
+<td align="left">必须通过网关</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="left">类型</th>
+<th align="left">含义</th>
+<th align="left">核心特征</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>直连路由</strong></td>
+<td align="left">目的地就在你的网线上。</td>
+<td align="left">自动生成，不需要下一跳（网关）。</td>
+</tr>
+<tr>
+<td align="left"><strong>主机路由</strong></td>
+<td align="left">目的地是一个具体的单机 IP。</td>
+<td align="left">指向极度精确，优先级高。</td>
+</tr>
+<tr>
+<td align="left"><strong>静态路由</strong></td>
+<td align="left">你手动告诉系统怎么走远方的路。</td>
+<td align="left">人为配置，告知下一跳网关。</td>
+</tr>
+<tr>
+<td align="left"><strong>默认路由</strong></td>
+<td align="left">最后的兜底方案。</td>
+<td align="left">“所有我不知道去哪儿的路，都走这里”。</td>
+</tr>
+</tbody></table>
+<p>系统查路由表遵循一个原则：**最长前缀匹配 (Longest Prefix Match)**。</p>
+<ul>
+<li><strong>谁最细致，谁先赢。</strong></li>
+<li><strong>优先级排序：</strong><ol>
+<li>主机路由 (&#x2F;32)：最精确。</li>
+<li>具体网段路由 (&#x2F;24, &#x2F;22 等)：比较精确。</li>
+<li>默认路由 (&#x2F;0)：最笼统（最后被匹配）。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h2 id="bridge-utils（传统-brctl，查-Linux-网桥）"><a href="#bridge-utils（传统-brctl，查-Linux-网桥）" class="headerlink" title="bridge-utils（传统 brctl，查 Linux 网桥）"></a>bridge-utils（传统 brctl，查 Linux 网桥）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y bridge-utils</span><br><span class="line">brctl show  # 直接显示网桥+所有端口（含eth、veth）</span><br></pre></td></tr></table></figure>
+
+<h2 id="Open-vSwitch（OVS-虚拟交换机）"><a href="#Open-vSwitch（OVS-虚拟交换机）" class="headerlink" title="Open vSwitch（OVS 虚拟交换机）"></a>Open vSwitch（OVS 虚拟交换机）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl show  # 显示OVS网桥、端口、veth、vxlan</span><br></pre></td></tr></table></figure>
+
+<h2 id="跨设备拓扑发现（LLDP，查邻接设备）"><a href="#跨设备拓扑发现（LLDP，查邻接设备）" class="headerlink" title="跨设备拓扑发现（LLDP，查邻接设备）"></a>跨设备拓扑发现（LLDP，查邻接设备）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum install -y lldpd</span><br><span class="line">lldpctl</span><br><span class="line">或者</span><br><span class="line">lldpcli show neighbors -f json</span><br></pre></td></tr></table></figure>
+
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">查看 veth：</span><br><span class="line">ip -o link | grep veth</span><br><span class="line"></span><br><span class="line">查看 bridge：</span><br><span class="line">ip -o link | grep bridge</span><br><span class="line"></span><br><span class="line">查看 VXLAN：</span><br><span class="line">ip -d link show | grep vxlan</span><br><span class="line"></span><br><span class="line">查看隧道：</span><br><span class="line">ip tunnel show</span><br><span class="line"></span><br><span class="line">网桥查看</span><br><span class="line">bridge vlan</span><br><span class="line">bridge link</span><br><span class="line">查看 FDB：</span><br><span class="line">bridge fdb show</span><br></pre></td></tr></table></figure>
+
+<h2 id="分层思维"><a href="#分层思维" class="headerlink" title="分层思维"></a>分层思维</h2><ul>
+<li>按 L1 → L2 → L3 → L4 → K8s 一层层往上查<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">L1 物理层</span><br><span class="line"> └── lldpctl</span><br><span class="line"></span><br><span class="line">L2 二层</span><br><span class="line"> ├── bridge</span><br><span class="line"> ├── ovs</span><br><span class="line"> └── fdb</span><br><span class="line"></span><br><span class="line">L3 三层</span><br><span class="line"> ├── ip route</span><br><span class="line"> ├── ip rule</span><br><span class="line"> └── arp/neigh</span><br><span class="line"></span><br><span class="line">L4-L7</span><br><span class="line"> ├── ss</span><br><span class="line"> ├── conntrack</span><br><span class="line"> └── tcpdump</span><br><span class="line"></span><br><span class="line">K8s层</span><br><span class="line"> ├── Pod</span><br><span class="line"> ├── veth</span><br><span class="line"> ├── CNI</span><br><span class="line"> └── Service</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2026/01/09/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6chrt/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2289,262 +2511,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://shispring.github.io/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="shispring">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/17/terminationGracePeriodSeconds%E4%B8%8EdeletionGracePeriodSeconds/" class="post-title-link" itemprop="url">terminationGracePeriodSeconds与deletionGracePeriodSeconds</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2025-11-17 17:58:16" itemprop="dateCreated datePublished" datetime="2025-11-17T17:58:16+08:00">2025-11-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-11-19 15:12:59" itemprop="dateModified" datetime="2025-11-19T15:12:59+08:00">2025-11-19</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>NaN:aN</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在Kubernetes环境中，当Pod被删除时，kubelet会发送SIGTERM信号给容器进程，启动优雅停止过程。如果预设的grace期限内进程未结束，则发送SIGKILL强制终止。Pod的终止流程包括从service endpoint移除、执行preStopHook、发送SIGTERM、等待进程结束等步骤。为了实现优雅退出，应用需捕获并处理SIGTERM信号，可能需要配合设置preStopHook和terminationGracePeriodSeconds。</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h1 id="️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）"><a href="#️⃣-1-terminationGracePeriodSeconds-——-Pod-spec-字段（用户配置）" class="headerlink" title="#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）"></a>#️⃣ 1. terminationGracePeriodSeconds —— Pod spec 字段（用户配置）</h1><h3 id="✔-所在位置"><a href="#✔-所在位置" class="headerlink" title="✔ 所在位置"></a>✔ 所在位置</h3><p>Pod Spec 字段：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="✔-意义"><a href="#✔-意义" class="headerlink" title="✔ 意义"></a>✔ 意义</h3><p><strong>“容器终止前允许它优雅退出的时间”</strong><br>即：K8s 要删除 Pod 时，不是立刻强制杀掉容器，而是：</p>
-<ol>
-<li>kubelet 先向容器发送 <strong>SIGTERM</strong></li>
-<li>等待 <code>terminationGracePeriodSeconds</code> 秒</li>
-<li>超时后如果容器仍未退出 → 再发送 <strong>SIGKILL</strong></li>
-</ol>
-<h3 id="✔-默认值"><a href="#✔-默认值" class="headerlink" title="✔ 默认值"></a>✔ 默认值</h3><p>30 秒。</p>
-<h3 id="✔-被哪些机制使用？"><a href="#✔-被哪些机制使用？" class="headerlink" title="✔ 被哪些机制使用？"></a>✔ 被哪些机制使用？</h3><ul>
-<li>Pod eviction（驱逐）</li>
-<li>Deployment 滚动升级</li>
-<li>手动删除 Pod</li>
-<li>节点失联时 controller manager 删除 orphaned pods</li>
-</ul>
-<p>这些都会触发 graceful termination。</p>
-<hr>
-<h1 id="️⃣-2-deletionGracePeriodSeconds-——-Kubernetes-API（运行时动态产生）"><a href="#️⃣-2-deletionGracePeriodSeconds-——-Kubernetes-API（运行时动态产生）" class="headerlink" title="#️⃣ 2. deletionGracePeriodSeconds —— Kubernetes API（运行时动态产生）"></a>#️⃣ 2. deletionGracePeriodSeconds —— Kubernetes API（运行时动态产生）</h1><h3 id="✔-所在位置-1"><a href="#✔-所在位置-1" class="headerlink" title="✔ 所在位置"></a>✔ 所在位置</h3><p><strong>不在 Pod Spec 内</strong>，属于 metadata 的运行时字段：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionTimestamp:</span> <span class="string">&quot;2024-11-14T01:02:03Z&quot;</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
-
-<p>➡ <strong>API Server 写入的字段，代表当前删除操作所使用的宽限期。</strong></p>
-<h3 id="✔-来自哪里？"><a href="#✔-来自哪里？" class="headerlink" title="✔ 来自哪里？"></a>✔ 来自哪里？</h3><p>来源于：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">terminationGracePeriodSeconds</span><br></pre></td></tr></table></figure>
-
-<p>或者用户通过：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod podA --grace-period=10</span><br></pre></td></tr></table></figure>
-
-<p>覆盖默认值。</p>
-<h3 id="✔-工作方式（Controller-Kubelet）"><a href="#✔-工作方式（Controller-Kubelet）" class="headerlink" title="✔ 工作方式（Controller &amp; Kubelet）"></a>✔ 工作方式（Controller &amp; Kubelet）</h3><p>当你删除 Pod：</p>
-<ol>
-<li><p>API Server 设置：</p>
-<ul>
-<li><code>deletionTimestamp</code> &#x3D; 当前时间</li>
-<li><code>deletionGracePeriodSeconds</code> &#x3D; 本次删除使用的宽限秒数</li>
-</ul>
-</li>
-<li><p>kubelet 根据这个值（而不是 Spec 里的 terminationGracePeriodSeconds）控制真正的 SIGTERM → SIGKILL 过程。</p>
-</li>
-</ol>
-<p>因此：</p>
-<blockquote>
-<p><strong>deletionGracePeriodSeconds 是“实际生效”的宽限期。</strong><br><strong>terminationGracePeriodSeconds 是“默认配置”。</strong></p>
-</blockquote>
-<hr>
-<h1 id="️⃣-3-二者关系总结"><a href="#️⃣-3-二者关系总结" class="headerlink" title="#️⃣ 3. 二者关系总结"></a>#️⃣ 3. 二者关系总结</h1><table>
-<thead>
-<tr>
-<th>项目</th>
-<th>terminationGracePeriodSeconds</th>
-<th>deletionGracePeriodSeconds</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>类型</td>
-<td>Pod Spec 固定字段</td>
-<td>Pod metadata 运行时字段</td>
-</tr>
-<tr>
-<td>谁设置的？</td>
-<td>用户写在 YAML 中</td>
-<td>API Server 删除 Pod 时自动写入</td>
-</tr>
-<tr>
-<td>何时存在？</td>
-<td>Pod 一出生就有</td>
-<td>只有 Pod 被删除时才出现</td>
-</tr>
-<tr>
-<td>默认值</td>
-<td>30 秒</td>
-<td>等于 terminationGracePeriodSeconds</td>
-</tr>
-<tr>
-<td>可以覆盖？</td>
-<td>可以（spec 设置）</td>
-<td>可被 <code>kubectl delete --grace-period=X</code> 覆盖</td>
-</tr>
-<tr>
-<td>实际生效？</td>
-<td>❌（只是默认值）</td>
-<td>✅（真正决定 kubelet 等待时间）</td>
-</tr>
-</tbody></table>
-<hr>
-<h1 id="️⃣-4-为什么-Kubernetes-需要两个字段？"><a href="#️⃣-4-为什么-Kubernetes-需要两个字段？" class="headerlink" title="#️⃣ 4. 为什么 Kubernetes 需要两个字段？"></a>#️⃣ 4. 为什么 Kubernetes 需要两个字段？</h1><p>原因如下：</p>
-<h2 id="✦-①-Pod-Spec-需要一个默认优雅退出时间"><a href="#✦-①-Pod-Spec-需要一个默认优雅退出时间" class="headerlink" title="✦ ① Pod Spec 需要一个默认优雅退出时间"></a>✦ ① Pod Spec 需要一个默认优雅退出时间</h2><p>应用有不同的退出需求，如：</p>
-<ul>
-<li>Web 服务器需要 10s 关闭连接</li>
-<li>数据库需要 60s flush 数据</li>
-<li>Stream 服务需要完成正在发送的数据包</li>
-</ul>
-<p>于是 <code>terminationGracePeriodSeconds</code> 用来为 Pod <strong>设定统一默认退出策略</strong>。</p>
-<hr>
-<h2 id="✦-②-删除操作可能需要临时修改退出宽限期"><a href="#✦-②-删除操作可能需要临时修改退出宽限期" class="headerlink" title="✦ ② 删除操作可能需要临时修改退出宽限期"></a>✦ ② 删除操作可能需要临时修改退出宽限期</h2><p>例如：</p>
-<h3 id="✔-强制删除"><a href="#✔-强制删除" class="headerlink" title="✔ 强制删除"></a>✔ 强制删除</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod A --grace-period=0 --force</span><br></pre></td></tr></table></figure>
-
-<p>这时：</p>
-<ul>
-<li><strong>不会修改 pod.spec.terminationGracePeriodSeconds</strong></li>
-<li>但 <strong>metadata.deletionGracePeriodSeconds &#x3D; 0</strong></li>
-</ul>
-<p>kubelet 看到 0 → 立即 SIGKILL。</p>
-<hr>
-<h2 id="✦-③-deletionGracePeriodSeconds-表示-Pod-正在-termination-状态"><a href="#✦-③-deletionGracePeriodSeconds-表示-Pod-正在-termination-状态" class="headerlink" title="✦ ③ deletionGracePeriodSeconds 表示 Pod 正在 termination 状态"></a>✦ ③ deletionGracePeriodSeconds 表示 Pod 正在 termination 状态</h2><p>带有：</p>
-<ul>
-<li>deletionTimestamp</li>
-<li>deletionGracePeriodSeconds</li>
-</ul>
-<p>API Server 认为 Pod 处于 “Terminating”，controller manager 和 kubelet由此处理清理流程。</p>
-<hr>
-<h1 id="️⃣-5-结合例子理解（最清晰）"><a href="#️⃣-5-结合例子理解（最清晰）" class="headerlink" title="#️⃣ 5. 结合例子理解（最清晰）"></a>#️⃣ 5. 结合例子理解（最清晰）</h1><h3 id="Pod-YAML（用户写的）："><a href="#Pod-YAML（用户写的）：" class="headerlink" title="Pod YAML（用户写的）："></a>Pod YAML（用户写的）：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="删除命令："><a href="#删除命令：" class="headerlink" title="删除命令："></a>删除命令：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod mypod</span><br></pre></td></tr></table></figure>
-
-<h3 id="Pod-在-API-Server-会变成："><a href="#Pod-在-API-Server-会变成：" class="headerlink" title="Pod 在 API Server 会变成："></a>Pod 在 API Server 会变成：</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionTimestamp:</span> <span class="string">&quot;2025-11-17T08:00:00Z&quot;</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
-
-<p>说明：</p>
-<ul>
-<li>kubelet 会等待 30 秒后强杀</li>
-</ul>
-<hr>
-<h3 id="覆盖默认值："><a href="#覆盖默认值：" class="headerlink" title="覆盖默认值："></a>覆盖默认值：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete pod mypod --grace-period=5</span><br></pre></td></tr></table></figure>
-
-<p>API Server 变成：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">deletionGracePeriodSeconds:</span> <span class="number">5</span></span><br></pre></td></tr></table></figure>
-
-<p>此时 kubelet 的实际宽限期是 5 秒，而不是 Spec 中的 30 秒。</p>
-<hr>
-<h1 id="️⃣-6-哪些场景必须关注这两个值？"><a href="#️⃣-6-哪些场景必须关注这两个值？" class="headerlink" title="#️⃣ 6. 哪些场景必须关注这两个值？"></a>#️⃣ 6. 哪些场景必须关注这两个值？</h1><h3 id="✔-滚动升级慢"><a href="#✔-滚动升级慢" class="headerlink" title="✔ 滚动升级慢"></a>✔ 滚动升级慢</h3><p>容器退出慢 → 需要增大 terminationGracePeriodSeconds。</p>
-<h3 id="✔-Pod-一直处于-Terminating"><a href="#✔-Pod-一直处于-Terminating" class="headerlink" title="✔ Pod 一直处于 Terminating"></a>✔ Pod 一直处于 Terminating</h3><p>检查 deletionGracePeriodSeconds 表示实际等待多久。</p>
-<h3 id="✔-强制删除-Pod-时需要明确-grace-period-0-的行为"><a href="#✔-强制删除-Pod-时需要明确-grace-period-0-的行为" class="headerlink" title="✔ 强制删除 Pod 时需要明确 --grace-period=0 的行为"></a>✔ 强制删除 Pod 时需要明确 <code>--grace-period=0</code> 的行为</h3><p>它不会改 spec，但会影响 metadata 的实际值。</p>
-<h3 id="✔-Stateful-workloads（DB，消息队列）需要更长的宽限期"><a href="#✔-Stateful-workloads（DB，消息队列）需要更长的宽限期" class="headerlink" title="✔ Stateful workloads（DB，消息队列）需要更长的宽限期"></a>✔ Stateful workloads（DB，消息队列）需要更长的宽限期</h3><p>否则容易数据损坏或主从 failover。</p>
-<hr>
-<h1 id="⭐-最后一段总结（可直接加入知识库）"><a href="#⭐-最后一段总结（可直接加入知识库）" class="headerlink" title="⭐ 最后一段总结（可直接加入知识库）"></a>⭐ 最后一段总结（可直接加入知识库）</h1><ul>
-<li><p><code>terminationGracePeriodSeconds</code> &#x3D; Pod 的 <strong>默认优雅退出时间</strong>，用户定义。</p>
-</li>
-<li><p><code>deletionGracePeriodSeconds</code> &#x3D; Pod <strong>被删除时真正采用的宽限期</strong>，由 API Server 设置，可被强制覆盖。</p>
-</li>
-<li><p>二者共同决定了 Pod 的生命周期：</p>
-<ul>
-<li>Pod 配置退出策略（spec）</li>
-<li>具体删除动作由 API server 在 metadata 记录（metadata）</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h1 id="⭐-terminationGracePeriodSeconds-设计核心原则（总结）"><a href="#⭐-terminationGracePeriodSeconds-设计核心原则（总结）" class="headerlink" title="⭐ terminationGracePeriodSeconds 设计核心原则（总结）"></a>⭐ terminationGracePeriodSeconds 设计核心原则（总结）</h1><table>
-<thead>
-<tr>
-<th>原则</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1. 与业务退出耗时相匹配</td>
-<td>不够会被 SIGKILL</td>
-</tr>
-<tr>
-<td>2. 大于 preStop 脚本执行时间</td>
-<td>防止脚本被中断</td>
-</tr>
-<tr>
-<td>3. 大于 LB 连接迁移耗时</td>
-<td>防止客户端访问异常</td>
-</tr>
-<tr>
-<td>4. 必须进行业务侧 graceful shutdown</td>
-<td>否则延长时间也没用</td>
-</tr>
-<tr>
-<td>5. 对长任务必须设计 checkpoint</td>
-<td>不然永远无法优雅终止</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2616,7 +2582,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-count">222</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2629,7 +2595,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
